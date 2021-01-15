@@ -19,7 +19,7 @@ export default function(pluginManager: PluginManager) {
         treeWidth: 100,
         scrollTop: 0,
         alignScrollLeft: 0,
-        data: types.maybe(types.string),
+        data: types.frozen(),
       })
       .volatile(() => ({
         error: undefined as Error | undefined,

@@ -1,4 +1,6 @@
 import PluginManager from "@jbrowse/core/PluginManager";
+import dataset1 from "./dataset1.js";
+
 export default function(pluginManager: PluginManager) {
   const { jbrequire } = pluginManager;
   const React = pluginManager.lib["react"];
@@ -17,6 +19,9 @@ export default function(pluginManager: PluginManager) {
     importFormEntry: {
       minWidth: 180,
     },
+    padding: {
+      padding: theme.spacing(4),
+    },
   }));
 
   const ImportForm = observer(({ model }: { model: any }) => {
@@ -24,14 +29,13 @@ export default function(pluginManager: PluginManager) {
     const [location, setLocation] = useState();
 
     function onOpenClick() {
-      console.log(location);
       model.setDataset(location);
     }
 
     return (
       <Container className={classes.importFormContainer}>
-        <Grid container spacing={1} justify="center" alignItems="center">
-          <Grid item>
+        <Grid container justify="center" alignItems="center">
+          <Grid item className={classes.padding}>
             <Typography>Specify a .stockholm file to open</Typography>
             <FileSelector
               name="Import stockholm file"
@@ -41,13 +45,31 @@ export default function(pluginManager: PluginManager) {
               localFileAllowed
             />
           </Grid>
-          <Grid item>
-            <Link onClick={() => model.setDataset()}>
-              Example: SARS-CoV2 Spike Protein
-            </Link>
-            <Link onClick={() => model.setDataset()}>Example: Corona</Link>
+          <Grid item className={classes.padding}>
+            <div>
+              <Link
+                href="#"
+                onClick={event => {
+                  event.preventDefault();
+                  model.setData(dataset1);
+                }}
+              >
+                Example: SARS-CoV2 Spike Protein
+              </Link>
+            </div>
+            <div>
+              <Link
+                href="#"
+                onClick={event => {
+                  event.preventDefault();
+                  model.setDataset();
+                }}
+              >
+                Example: Corona
+              </Link>
+            </div>
           </Grid>
-          <Grid item>
+          <Grid item className={classes.padding}>
             <Button onClick={onOpenClick} variant="contained" color="primary">
               Open
             </Button>

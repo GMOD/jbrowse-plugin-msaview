@@ -92,7 +92,6 @@ export default function(pluginManager) {
       // state (we will select a dataset in componentDidMount())
       this.state = {
         config,
-        datasets: this.props.datasets || [],
         computedTreeConfig,
         computedFontConfig,
       };
@@ -100,14 +99,6 @@ export default function(pluginManager) {
       this.divRef = React.createRef();
       this.inputRef = React.createRef();
       this.msaRef = React.createRef();
-
-      window.onpopstate = event => {
-        if (event && event.state && event.state.data) {
-          this.setDataset(event.state.data);
-        } else {
-          window.location.reload();
-        }
-      };
     }
 
     handleDragEnter(evt) {
@@ -147,202 +138,202 @@ export default function(pluginManager) {
       });
     }
 
-    addDatasets(text, autoselect) {
-      const newAlignmentName = n =>
-        `Alignment ${this.state.datasets.length + (n || 0) + 1}`;
-      let { datasets } = this.state;
-      if (this.sniffStockholmRegex.test(text)) {
-        const stocks = Stockholm.parseAll(text);
-        datasets = datasets.concat(
-          stocks.map((stockholmjs, n) => {
-            let name;
-            ["DE", "ID", "AC"].forEach(tag => {
-              if (!name && stockholmjs.gf[tag] && stockholmjs.gf[tag].length) {
-                name = stockholmjs.gf[tag][0];
-              }
-            });
-            name = name || newAlignmentName(n);
-            const id = ["AC", "ID"].reduce(
-              (id, tag) =>
-                id || (stockholmjs.gf[tag] && stockholmjs.gf[tag][0]),
-              undefined,
-            );
-            return { stockholmjs, name, id };
-          }),
-        );
-      } else {
-        try {
-          const json = JSON.parse(text);
-          if (Array.isArray(json)) {
-            datasets = datasets.concat(json);
-          } else {
-            datasets.push(json);
-          }
-        } catch (e) {
-          datasets.push({ auto: text, name: newAlignmentName() });
-        }
-      }
-      if (datasets.length > this.state.datasets.length) {
-        const firstDataset = datasets[this.state.datasets.length];
-        if (autoselect) {
-          this.setDataset(firstDataset, { datasets });
-        } else {
-          this.setState({ datasets });
-        }
-        if (this.msaRef.current) {
-          this.msaRef.current.resetView();
-        }
-      }
-    }
+    //     addDatasets(text, autoselect) {
+    //       const newAlignmentName = n =>
+    //         `Alignment ${this.state.datasets.length + (n || 0) + 1}`;
+    //       let { datasets } = this.state;
+    //       if (this.sniffStockholmRegex.test(text)) {
+    //         const stocks = Stockholm.parseAll(text);
+    //         datasets = datasets.concat(
+    //           stocks.map((stockholmjs, n) => {
+    //             let name;
+    //             ["DE", "ID", "AC"].forEach(tag => {
+    //               if (!name && stockholmjs.gf[tag] && stockholmjs.gf[tag].length) {
+    //                 name = stockholmjs.gf[tag][0];
+    //               }
+    //             });
+    //             name = name || newAlignmentName(n);
+    //             const id = ["AC", "ID"].reduce(
+    //               (id, tag) =>
+    //                 id || (stockholmjs.gf[tag] && stockholmjs.gf[tag][0]),
+    //               undefined,
+    //             );
+    //             return { stockholmjs, name, id };
+    //           }),
+    //         );
+    //       } else {
+    //         try {
+    //           const json = JSON.parse(text);
+    //           if (Array.isArray(json)) {
+    //             datasets = datasets.concat(json);
+    //           } else {
+    //             datasets.push(json);
+    //           }
+    //         } catch (e) {
+    //           datasets.push({ auto: text, name: newAlignmentName() });
+    //         }
+    //       }
+    //       if (datasets.length > this.state.datasets.length) {
+    //         const firstDataset = datasets[this.state.datasets.length];
+    //         if (autoselect) {
+    //           this.setDataset(firstDataset, { datasets });
+    //         } else {
+    //           this.setState({ datasets });
+    //         }
+    //         if (this.msaRef.current) {
+    //           this.msaRef.current.resetView();
+    //         }
+    //       }
+    //     }
 
-    setDataset(data, extra) {
-      const datasetID = (this.datasetsLoaded = (this.datasetsLoaded || 0) + 1);
-      this.indexData(data).then(dataWithIndices =>
-        this.setState({
-          datasetID,
-          reconstructingAncestors: false,
-          ...dataWithIndices,
-          ...(extra || {}),
-        }),
-      );
-    }
+    // setDataset(data, extra) {
+    //   const datasetID = (this.datasetsLoaded = (this.datasetsLoaded || 0) + 1);
+    //   this.indexData(data).then(dataWithIndices =>
+    //     this.setState({
+    //       datasetID,
+    //       reconstructingAncestors: false,
+    //       ...dataWithIndices,
+    //       ...(extra || {}),
+    //     }),
+    //   );
+    // }
 
     async indexData(suppliedData, suppliedConfig) {
-      const config = suppliedConfig || this.state.config;
-      const data = await this.getData(
-        config.cacheData ? suppliedData : { ...suppliedData },
-        config,
-      );
+      const data = this.props.model.data;
       const treeIndex = this.buildTreeIndex(data);
       const alignIndex = this.buildAlignmentIndex(data);
       return { data, treeIndex, alignIndex };
     }
 
-    // regexes
+    /* PFAM format for embedding PDB IDs in Stockholm files */
     get pdbRegex() {
       return /PDB; +(\S+) +(\S); ([0-9]+)-([0-9]+)/;
-    } /* PFAM format for embedding PDB IDs in Stockholm files */
+    }
 
+    /* Pfam format for embedding coordinates in names (ugh) */
     get nameEncodedCoordRegex() {
       return /\/([0-9]+)-([0-9]+)$/;
-    } /* Pfam format for embedding coordinates in names (ugh) */
+    }
 
+    /* regex for sniffing Stockholm format */
     get sniffStockholmRegex() {
       return /^# STOCKHOLM/;
-    } /* regex for sniffing Stockholm format */
+    }
 
+    /* regex for sniffing FASTA format */
     get sniffFastaRegex() {
       return /^>/;
-    } /* regex for sniffing FASTA format */
+    }
 
     // method to get data & build tree if necessary
-    async getData(data, config) {
-      if (data.url) {
-        await Promise.all(
-          Object.keys(data.url)
-            .filter(key => !data[key])
-            .map(async key => {
-              const url = this.makeURL(data.url[key]);
-              const res = await fetch(url);
-              if (res.ok) {
-                data[key] = await res.text();
-              } else {
-                throw new Error(`HTTP ${res.status} ${res.statusText} ${url}`);
-              }
-            }),
-        );
-      }
-      if (data.json) {
-        Object.assign(
-          data,
-          typeof data.json === "string" ? JSON.parse(data.json) : data.json,
-        );
-      }
-      if (data.auto) {
-        if (this.sniffStockholmRegex.test(data.auto)) {
-          data.stockholm = data.auto;
-        } else if (this.sniffFastaRegex.test(data.auto)) {
-          data.fasta = data.auto;
-        } else {
-          try {
-            Object.assign(data, JSON.parse(data.auto));
-          } catch (e) {
-            // do nothing if JSON didn't parse
-          }
-        }
-      }
-      if (!(data.branches && data.rowData)) {
-        if (data.stockholm) {
-          // was a Stockholm-format alignment specified?
-          this.unpackStockholm(data, config, data.stockholm);
-        } else if (data.stockholmjs) {
-          // was a StockholmJS object specified?
-          this.unpackStockholmJS(data, config, data.stockholmjs);
-        } else if (data.fasta) {
-          // was a FASTA-format alignment specified?
-          data.rowData = this.parseFasta(data.fasta);
-        } else {
-          throw new Error("no sequence data");
-        }
-        // If a Newick-format tree was specified somehow (as a separate data item, or in the Stockholm alignment) then parse it
-        if (data.newick || data.newickjs) {
-          const NewickParser = new Newick();
-          const newickTree = (data.newickjs =
-            data.newickjs || NewickParser.parse(data.newick));
-          let nodes = 0;
-          const getName = obj => (obj.name = obj.name || `node${++nodes}`);
-          data.branches = [];
-          const traverse = parent => {
-            // auto-name internal nodes
-            if (parent.branchset) {
-              parent.branchset.forEach(child => {
-                data.branches.push([
-                  getName(parent),
-                  getName(child),
-                  Math.max(child.length, 0),
-                ]);
-                traverse(child);
-              });
-            }
-          };
-          traverse(newickTree);
-          data.root = getName(newickTree);
-        } else {
-          // no Newick tree was specified, so build a quick-and-dirty distance matrix with Jukes-Cantor, and get a tree by neighbor-joining
-          const taxa = Object.keys(data.rowData).sort();
-          const seqs = taxa.map(taxon => data.rowData[taxon]);
-          console.warn(`Estimating phylogenetic tree (${taxa.length} taxa)...`);
-          const distMatrix = JukesCantor.calcFiniteDistanceMatrix(seqs);
-          const rnj = new RapidNeighborJoining.RapidNeighborJoining(
-            distMatrix,
-            taxa.map(name => ({ name })),
-          );
-          rnj.run();
-          const tree = rnj.getAsObject();
-          let nodes = 0;
-          const getName = obj => {
-            obj.taxon = obj.taxon || { name: `node${++nodes}` };
-            return obj.taxon.name;
-          };
-          data.branches = [];
-          const traverse = parent => {
-            // auto-name internal nodes
-            parent.children.forEach(child => {
-              data.branches.push([
-                getName(parent),
-                getName(child),
-                Math.max(child.length, 0),
-              ]);
-              traverse(child);
-            });
-          };
-          traverse(tree);
-          data.root = getName(tree);
-        }
-      }
-      this.guessSeqCoords(data); // this is an idempotent method; if data came from a Stockholm file, it's already been called (in order to filter out irrelevant structures)
-      return data;
-    }
+    // async getData(data, config) {
+    //   console.log({ data });
+    //   if (data.url) {
+    //     await Promise.all(
+    //       Object.keys(data.url)
+    //         .filter(key => !data[key])
+    //         .map(async key => {
+    //           const url = this.makeURL(data.url[key]);
+    //           const res = await fetch(url);
+    //           if (res.ok) {
+    //             data[key] = await res.text();
+    //           } else {
+    //             throw new Error(`HTTP ${res.status} ${res.statusText} ${url}`);
+    //           }
+    //         }),
+    //     );
+    //   }
+    //   if (data.json) {
+    //     Object.assign(
+    //       data,
+    //       typeof data.json === "string" ? JSON.parse(data.json) : data.json,
+    //     );
+    //   }
+    //   if (data.auto) {
+    //     if (this.sniffStockholmRegex.test(data.auto)) {
+    //       data.stockholm = data.auto;
+    //     } else if (this.sniffFastaRegex.test(data.auto)) {
+    //       data.fasta = data.auto;
+    //     } else {
+    //       try {
+    //         Object.assign(data, JSON.parse(data.auto));
+    //       } catch (e) {
+    //         // do nothing if JSON didn't parse
+    //       }
+    //     }
+    //   }
+    //   if (!(data.branches && data.rowData)) {
+    //     if (data.stockholm) {
+    //       // was a Stockholm-format alignment specified?
+    //       this.unpackStockholm(data, config, data.stockholm);
+    //     } else if (data.stockholmjs) {
+    //       // was a StockholmJS object specified?
+    //       this.unpackStockholmJS(data, config, data.stockholmjs);
+    //     } else if (data.fasta) {
+    //       // was a FASTA-format alignment specified?
+    //       data.rowData = this.parseFasta(data.fasta);
+    //     } else {
+    //       throw new Error("no sequence data");
+    //     }
+    //     // If a Newick-format tree was specified somehow (as a separate data item, or in the Stockholm alignment) then parse it
+    //     if (data.newick || data.newickjs) {
+    //       const NewickParser = new Newick();
+    //       const newickTree = (data.newickjs =
+    //         data.newickjs || NewickParser.parse(data.newick));
+    //       let nodes = 0;
+    //       const getName = obj => (obj.name = obj.name || `node${++nodes}`);
+    //       data.branches = [];
+    //       const traverse = parent => {
+    //         // auto-name internal nodes
+    //         if (parent.branchset) {
+    //           parent.branchset.forEach(child => {
+    //             data.branches.push([
+    //               getName(parent),
+    //               getName(child),
+    //               Math.max(child.length, 0),
+    //             ]);
+    //             traverse(child);
+    //           });
+    //         }
+    //       };
+    //       traverse(newickTree);
+    //       data.root = getName(newickTree);
+    //     } else {
+    //       // no Newick tree was specified, so build a quick-and-dirty distance matrix with Jukes-Cantor, and get a tree by neighbor-joining
+    //       const taxa = Object.keys(data.rowData).sort();
+    //       const seqs = taxa.map(taxon => data.rowData[taxon]);
+    //       console.warn(`Estimating phylogenetic tree (${taxa.length} taxa)...`);
+    //       const distMatrix = JukesCantor.calcFiniteDistanceMatrix(seqs);
+    //       const rnj = new RapidNeighborJoining.RapidNeighborJoining(
+    //         distMatrix,
+    //         taxa.map(name => ({ name })),
+    //       );
+    //       rnj.run();
+    //       const tree = rnj.getAsObject();
+    //       let nodes = 0;
+    //       const getName = obj => {
+    //         obj.taxon = obj.taxon || { name: `node${++nodes}` };
+    //         return obj.taxon.name;
+    //       };
+    //       data.branches = [];
+    //       const traverse = parent => {
+    //         // auto-name internal nodes
+    //         parent.children.forEach(child => {
+    //           data.branches.push([
+    //             getName(parent),
+    //             getName(child),
+    //             Math.max(child.length, 0),
+    //           ]);
+    //           traverse(child);
+    //         });
+    //       };
+    //       traverse(tree);
+    //       data.root = getName(tree);
+    //     }
+    //   }
+    //   this.guessSeqCoords(data); // this is an idempotent method; if data came from a Stockholm file, it's already been called (in order to filter out irrelevant structures)
+    //   return data;
+    // }
 
     // Attempt to figure out start coords relative to database sequences by parsing the sequence names
     // This allows us to align to partial structures
@@ -449,7 +440,6 @@ export default function(pluginManager) {
         this.handleDrop.bind(this),
         false,
       );
-      this.initDataset();
     }
 
     componentWillUnmount() {
@@ -469,31 +459,9 @@ export default function(pluginManager) {
       );
     }
 
-    componentDidUpdate() {
-      this.reconstructMissingNodes();
-    }
-
-    // initDataset is called once, from componentDidMount
-    async initDataset() {
-      if (this.props.stockholm) {
-        this.addDatasets(this.props.stockholm, false);
-      }
-      if (this.props.dataurl) {
-        await fetch(this.makeURL(this.props.dataurl)).then(async res => {
-          if (res.ok) {
-            this.addDatasets(await res.text(), false);
-          }
-        });
-      }
-      this.nDatasetsInitial = this.state.datasets && this.state.datasets.length;
-      if (this.props.data || this.state.datasets.length) {
-        this.setDataset(this.props.data || this.getInitialDataset());
-      }
-    }
-
-    getInitialDataset() {
-      return this.state.datasets[0];
-    }
+    // componentDidUpdate() {
+    //   this.reconstructMissingNodes();
+    // }
 
     get nAlignQueryParam() {
       return "alignnum";
@@ -504,29 +472,29 @@ export default function(pluginManager) {
     }
 
     // check if any nodes are missing; if so, do ancestral sequence reconstruction
-    reconstructMissingNodes() {
-      const { data } = this.state;
-      let promise;
-      if (data) {
-        const { branches } = data;
-        const rowData = { ...data.rowData };
-        const missingAncestors = data.branches.filter(
-          b => typeof rowData[b[0]] === "undefined",
-        ).length;
-        if (missingAncestors && !this.state.reconstructingAncestors) {
-          this.setState({ reconstructingAncestors: true });
+    // reconstructMissingNodes() {
+    //   const { data } = this.props.model;
+    //   let promise;
+    //   if (data) {
+    //     const { branches } = data;
+    //     const rowData = { ...data.rowData };
+    //     const missingAncestors = data.branches.filter(
+    //       b => typeof rowData[b[0]] === "undefined",
+    //     ).length;
+    //     if (missingAncestors && !this.state.reconstructingAncestors) {
+    //       this.setState({ reconstructingAncestors: true });
 
-          promise = getAncestralReconstruction({ branches, rowData }).then(
-            result => {
-              this.incorporateAncestralReconstruction(result.ancestralRowData);
-            },
-          );
-        }
-      } else {
-        promise = Promise.resolve();
-      }
-      return promise;
-    }
+    //       promise = getAncestralReconstruction({ branches, rowData }).then(
+    //         result => {
+    //           this.incorporateAncestralReconstruction(result.ancestralRowData);
+    //         },
+    //       );
+    //     }
+    //   } else {
+    //     promise = Promise.resolve();
+    //   }
+    //   return promise;
+    // }
 
     fn2workerURL(fn) {
       const blob = new Blob([`(${fn.toString()})()`], {
@@ -535,12 +503,12 @@ export default function(pluginManager) {
       return URL.createObjectURL(blob);
     }
 
-    incorporateAncestralReconstruction(ancestralRowData) {
-      const { data } = this.state;
-      const rowData = { ...data.rowData, ...ancestralRowData };
-      Object.assign(data, { rowData });
-      this.setDataset(data); // rebuilds indices
-    }
+    // incorporateAncestralReconstruction(ancestralRowData) {
+    //   const { data } = this.props.model;
+    //   const rowData = { ...data.rowData, ...ancestralRowData };
+    //   Object.assign(data, { rowData });
+    //   this.setDataset(data); // rebuilds indices
+    // }
 
     defaultColorScheme() {
       return "maeditor";
