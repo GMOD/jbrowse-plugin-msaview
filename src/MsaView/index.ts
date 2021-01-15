@@ -1,5 +1,5 @@
 import modelFactory from "./model";
-import ReactComponentFactory from "./components/MsaView";
+import ReactComponentFactory from "./components/MSAView";
 import PluginManager from "@jbrowse/core/PluginManager";
 
 export default ({ jbrequire, load }: PluginManager) => {

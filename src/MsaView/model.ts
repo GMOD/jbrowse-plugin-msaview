@@ -4,6 +4,7 @@ export default function(pluginManager: PluginManager) {
   const { jbrequire } = pluginManager;
   const { types } = pluginManager.lib["mobx-state-tree"];
   const { ElementId } = jbrequire("@jbrowse/core/util/types/mst");
+  const { openLocation } = jbrequire("@jbrowse/core/util/io");
   const { BaseViewModel } = pluginManager.lib[
     "@jbrowse/core/pluggableElementTypes/models"
   ];
@@ -18,6 +19,7 @@ export default function(pluginManager: PluginManager) {
         treeWidth: 100,
         scrollTop: 0,
         alignScrollLeft: 0,
+        data: types.maybe(types.string),
       })
       .volatile(() => ({
         error: undefined as Error | undefined,
@@ -27,6 +29,14 @@ export default function(pluginManager: PluginManager) {
         hoverColumn: null,
       }))
       .actions((self: any) => ({
+        async setDataset(obj: any) {
+          const ret = await openLocation(obj).readFile("utf8");
+          self.setData(ret);
+        },
+
+        setData(str: string) {
+          self.data = str;
+        },
         setScroll(left: number, top: number) {
           self.alignScrollLeft = left;
           self.scrollTop = top;

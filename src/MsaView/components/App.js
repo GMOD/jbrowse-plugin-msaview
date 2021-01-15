@@ -736,28 +736,9 @@ export default function(pluginManager) {
     }
 
     render() {
-      const { classes, model } = this.props;
+      const { model } = this.props;
       return (
         <div className="App" ref={this.divRef}>
-          <div className={classes.appBar}>
-            <input
-              type="file"
-              ref={this.inputRef}
-              onChange={this.handleSelectFile.bind(this)}
-              style={{ display: "none" }}
-            />
-
-            <div className={classes.appBarLink}>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/ihh/abrowse"
-              >
-                GitHub
-              </a>
-            </div>
-          </div>
-
           {this.state.data && (
             <MSA
               ref={this.msaRef}

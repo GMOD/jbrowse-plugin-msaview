@@ -1,4 +1,5 @@
 import App from "./App";
+import ImportForm from "./ImportForm";
 const opts = {
   datasets: [
     {
@@ -186,12 +187,16 @@ export default (pluginManager: any) => {
   const { observer } = jbrequire("mobx-react");
   const React = jbrequire("react");
   const AppComponent = jbrequire(App);
+  const ImportFormComponent = jbrequire(ImportForm);
 
   return observer(({ model }: { model: any }) => {
-    const { initialized } = model;
+    const { data, initialized } = model;
 
     if (!initialized) {
       return null;
+    }
+    if (!data) {
+      return <ImportFormComponent model={model} />;
     }
 
     return <AppComponent {...opts} model={model} />;
