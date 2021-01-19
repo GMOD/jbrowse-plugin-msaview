@@ -3,6 +3,7 @@ import MSATreeFactory from "./MSATree";
 import MSAAlignNamesFactory from "./MSAAlignNames";
 import MSAAlignRowsFactory from "./MSAAlignRows";
 import MSAStructPanelFactory from "./MSAStructPanel";
+import { isGapChar } from "../util";
 
 const styles = {
   MSA: {
@@ -107,7 +108,7 @@ export default function(pluginManager) {
         .forEach(node => {
           if (rowDataAsArray[node]) {
             rowDataAsArray[node].forEach((c, col) => {
-              if (!this.props.isGapChar(c)) {
+              if (!isGapChar(c)) {
                 columnVisible[col] = true;
               }
             });
@@ -301,7 +302,6 @@ export default function(pluginManager) {
               computedFontConfig={this.props.computedFontConfig}
               treeIndex={this.props.treeIndex}
               alignIndex={this.props.alignIndex}
-              isGapChar={this.props.isGapChar}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
               setClientSize={this.setAlignmentClientSize.bind(this)}

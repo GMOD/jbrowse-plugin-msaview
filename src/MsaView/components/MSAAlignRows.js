@@ -1,5 +1,7 @@
 /* eslint-disable react/prop-types,react/sort-comp */
 import MSAAlignCanvasFactory from "./MSAAlignCanvas";
+import { isGapChar } from "../util";
+
 const styles = {
   alignmentRows: {
     position: "relative",
@@ -135,8 +137,7 @@ export default function(pluginManager) {
       const seqPos = colToSeqPos && colToSeqPos[column];
       const seq = rowData[node];
       const c = seq && seq[column];
-      const isGap = this.props.isGapChar(c);
-      return { row, column, node, seqPos, c, isGap };
+      return { row, column, node, seqPos, c, isGap: isGapChar };
     }
 
     render() {
