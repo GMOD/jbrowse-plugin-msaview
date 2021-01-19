@@ -1,6 +1,8 @@
 import App from "./App";
 import ImportForm from "./ImportForm";
+import PluginManager from "@jbrowse/core/PluginManager";
 import dataset1 from "./dataset1";
+
 const opts = {
   datasets: [
     dataset1,
@@ -9,7 +11,6 @@ const opts = {
       url: { stockholm: "%PUBLIC_URL%/PF01601_full.txt" },
     },
   ],
-  //  dataurl: '%PUBLIC_URL%/PF01601_full.txt',
   config: {
     containerHeight: "1000px",
     handler: {
@@ -24,7 +25,7 @@ const opts = {
   },
 };
 
-export default (pluginManager: any) => {
+export default (pluginManager: PluginManager) => {
   const { jbrequire } = pluginManager;
   const { observer } = jbrequire("mobx-react");
   const React = jbrequire("react");
@@ -37,6 +38,7 @@ export default (pluginManager: any) => {
     if (!initialized) {
       return null;
     }
+
     if (!data) {
       return <ImportFormComponent model={model} />;
     }

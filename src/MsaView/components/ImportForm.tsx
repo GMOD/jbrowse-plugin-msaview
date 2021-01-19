@@ -49,8 +49,7 @@ export default function(pluginManager: PluginManager) {
             <div>
               <Link
                 href="#"
-                onClick={event => {
-                  event.preventDefault();
+                onClick={() => {
                   model.setData(dataset1);
                 }}
               >
@@ -60,8 +59,7 @@ export default function(pluginManager: PluginManager) {
             <div>
               <Link
                 href="#"
-                onClick={event => {
-                  event.preventDefault();
+                onClick={() => {
                   model.setDataset();
                 }}
               >

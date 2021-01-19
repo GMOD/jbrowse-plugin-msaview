@@ -30,6 +30,7 @@ export default function(pluginManager: PluginManager) {
       }))
       .actions((self: any) => ({
         async setDataset(obj: any) {
+          console.log({ obj });
           const ret = await openLocation(obj).readFile("utf8");
           self.setData(ret);
         },
