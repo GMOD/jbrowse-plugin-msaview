@@ -35,6 +35,8 @@ export default (pluginManager: PluginManager) => {
   return observer(({ model }: { model: any }) => {
     const { data, initialized } = model;
 
+    console.log({ data, initialized });
+
     if (!initialized) {
       return null;
     }

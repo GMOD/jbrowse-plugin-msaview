@@ -1,4 +1,5 @@
 import PluginManager from "@jbrowse/core/PluginManager";
+import { indexData } from "./util";
 
 export default function(pluginManager: PluginManager) {
   const { jbrequire } = pluginManager;
@@ -19,7 +20,7 @@ export default function(pluginManager: PluginManager) {
         treeWidth: 100,
         scrollTop: 0,
         alignScrollLeft: 0,
-        data: types.frozen(),
+        mydata: types.frozen(),
       })
       .volatile(() => ({
         error: undefined as Error | undefined,
@@ -36,7 +37,7 @@ export default function(pluginManager: PluginManager) {
         },
 
         setData(str: string) {
-          self.data = str;
+          self.mydata = str;
         },
         setScroll(left: number, top: number) {
           self.alignScrollLeft = left;
@@ -62,6 +63,10 @@ export default function(pluginManager: PluginManager) {
         },
         get menuItems() {
           return [];
+        },
+
+        get data() {
+          return indexData(self.mydata);
         },
       })),
   );
