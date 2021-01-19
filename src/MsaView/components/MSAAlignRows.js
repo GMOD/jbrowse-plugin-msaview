@@ -104,14 +104,8 @@ export default function(pluginManager) {
     }
 
     resolveAlignCoords(evt) {
-      const {
-        treeIndex,
-        alignIndex,
-        treeLayout,
-        alignLayout,
-        data,
-      } = this.props;
-      const { rowData } = data;
+      const { treeLayout, alignLayout, data } = this.props;
+      const { treeIndex, alignIndex, rowData } = data;
       const x = parseInt(evt.nativeEvent.offsetX);
       const y = parseInt(evt.nativeEvent.offsetY);
       let row;

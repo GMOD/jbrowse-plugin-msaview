@@ -1,8 +1,6 @@
 /* eslint-disable react/prop-types,react/sort-comp */
 
-// import JukesCantor from "jukes-cantor";
-// import RapidNeighborJoining from "neighbor-joining";
-// import { getAncestralReconstruction } from "./reconstruction";
+import { getAncestralReconstruction } from "./reconstruction";
 import colorSchemes from "./colorSchemes";
 import MSAFactory from "./MSA";
 
@@ -103,7 +101,7 @@ export default function(pluginManager) {
 
     //todo
     componentDidUpdate() {
-      // this.reconstructMissingNodes();
+      this.reconstructMissingNodes();
     }
 
     get nAlignQueryParam() {
@@ -115,29 +113,29 @@ export default function(pluginManager) {
     }
 
     // check if any nodes are missing; if so, do ancestral sequence reconstruction
-    // reconstructMissingNodes() {
-    //   const { data } = this.props.model;
-    //   let promise;
-    //   if (data) {
-    //     const { branches } = data;
-    //     const rowData = { ...data.rowData };
-    //     const missingAncestors = data.branches.filter(
-    //       b => typeof rowData[b[0]] === "undefined",
-    //     ).length;
-    //     if (missingAncestors && !this.state.reconstructingAncestors) {
-    //       this.setState({ reconstructingAncestors: true });
+    reconstructMissingNodes() {
+      const { data } = this.props.model;
+      let promise;
+      if (data) {
+        const { branches } = data;
+        const rowData = { ...data.rowData };
+        const missingAncestors = data.branches.filter(
+          b => typeof rowData[b[0]] === "undefined",
+        ).length;
+        if (missingAncestors && !this.state.reconstructingAncestors) {
+          this.setState({ reconstructingAncestors: true });
 
-    //       promise = getAncestralReconstruction({ branches, rowData }).then(
-    //         result => {
-    //           this.incorporateAncestralReconstruction(result.ancestralRowData);
-    //         },
-    //       );
-    //     }
-    //   } else {
-    //     promise = Promise.resolve();
-    //   }
-    //   return promise;
-    // }
+          promise = getAncestralReconstruction({ branches, rowData }).then(
+            result => {
+              this.incorporateAncestralReconstruction(result.ancestralRowData);
+            },
+          );
+        }
+      } else {
+        promise = Promise.resolve();
+      }
+      return promise;
+    }
 
     fn2workerURL(fn) {
       const blob = new Blob([`(${fn.toString()})()`], {
@@ -146,12 +144,12 @@ export default function(pluginManager) {
       return URL.createObjectURL(blob);
     }
 
-    // incorporateAncestralReconstruction(ancestralRowData) {
-    //   const { data } = this.props.model;
-    //   const rowData = { ...data.rowData, ...ancestralRowData };
-    //   Object.assign(data, { rowData });
-    //   this.setDataset(data); // rebuilds indices
-    // }
+    incorporateAncestralReconstruction(ancestralRowData) {
+      const { data } = this.props.model;
+      const rowData = { ...data.rowData, ...ancestralRowData };
+      Object.assign(data, { rowData });
+      this.setDataset(data); // rebuilds indices
+    }
 
     defaultColorScheme() {
       return "maeditor";
