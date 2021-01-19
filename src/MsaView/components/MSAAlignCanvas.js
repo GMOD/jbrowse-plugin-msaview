@@ -86,15 +86,8 @@ export default function(pluginManager) {
       const alignCanvas = this.canvasRef.current;
       const ctx = alignCanvas.getContext("2d");
       const { top, left, bottom, right } = this.getDimensions();
-      const {
-        computedFontConfig,
-        treeLayout,
-        alignLayout,
-        treeIndex,
-        alignIndex,
-        data,
-      } = this.props;
-      const { rowData } = data;
+      const { computedFontConfig, treeLayout, alignLayout, data } = this.props;
+      const { treeIndex, alignIndex, rowData } = data;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
       ctx.clearRect(0, 0, alignCanvas.width, alignCanvas.height);

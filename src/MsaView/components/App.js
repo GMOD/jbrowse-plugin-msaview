@@ -1,14 +1,11 @@
 /* eslint-disable react/prop-types,react/sort-comp */
 
-import Stockholm from "stockholm-js";
-import NewickModule from "newick";
-import JukesCantor from "jukes-cantor";
-import RapidNeighborJoining from "neighbor-joining";
-import { getAncestralReconstruction } from "./reconstruction";
+// import JukesCantor from "jukes-cantor";
+// import RapidNeighborJoining from "neighbor-joining";
+// import { getAncestralReconstruction } from "./reconstruction";
 import colorSchemes from "./colorSchemes";
 import MSAFactory from "./MSA";
 
-const { Newick } = NewickModule;
 const styles = {
   appBar: {
     display: "flex",
@@ -100,16 +97,6 @@ export default function(pluginManager) {
       this.msaRef = React.createRef();
     }
 
-    /* regex for sniffing Stockholm format */
-    get sniffStockholmRegex() {
-      return /^# STOCKHOLM/;
-    }
-
-    /* regex for sniffing FASTA format */
-    get sniffFastaRegex() {
-      return /^>/;
-    }
-
     makeURL(url) {
       return url.replace("%PUBLIC_URL%", process.env.PUBLIC_URL);
     }
@@ -191,36 +178,16 @@ export default function(pluginManager) {
       };
     }
 
-    // method to parse FASTA (simple enough to build in here)
-    parseFasta(fasta) {
-      const seq = {};
-      let name;
-      const re = /^>(\S+)/;
-      fasta.split("\n").forEach(line => {
-        const match = re.exec(line);
-        if (match) {
-          seq[(name = match[1])] = "";
-        } else if (name) {
-          seq[name] = seq[name] + line.replace(/[ \t]/g, "");
-        }
-      });
-      return seq;
-    }
-
     render() {
       const { model } = this.props;
       const { data } = model;
-      const { alignIndex, treeIndex } = data;
 
-      console.log({ data, treeIndex });
       return (
         <MSA
           ref={this.msaRef}
           data={data}
           config={this.state.config}
           view={this.state.view}
-          treeIndex={treeIndex}
-          alignIndex={alignIndex}
           computedTreeConfig={this.state.computedTreeConfig}
           computedFontConfig={this.state.computedFontConfig}
           model={model}

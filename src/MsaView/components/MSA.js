@@ -82,7 +82,8 @@ export default function(pluginManager) {
     // get tree collapsed/open state
     getComputedView(view) {
       view = view || this.state.view;
-      const { treeIndex, alignIndex } = this.props;
+      const { data } = this.props;
+      const { treeIndex, alignIndex } = data;
       const { collapsed, forceDisplayNode } = view;
       const { rowDataAsArray } = alignIndex;
       const ancestorCollapsed = {};
@@ -124,7 +125,8 @@ export default function(pluginManager) {
 
     // layout tree
     layoutTree(computedView) {
-      const { computedTreeConfig, treeIndex } = this.props;
+      const { computedTreeConfig, data } = this.props;
+      const { treeIndex } = data;
       const { nodeVisible, nodeScale } = computedView;
       const {
         genericRowHeight,
@@ -174,7 +176,8 @@ export default function(pluginManager) {
 
     // get metrics and other info about alignment font/chars, and do layout
     layoutAlignment(computedView) {
-      const { alignIndex, computedFontConfig } = this.props;
+      const { data, computedFontConfig } = this.props;
+      const { alignIndex } = data;
       const { genericRowHeight, charFont } = computedFontConfig;
       const alignChars = alignIndex.chars;
       let charWidth = 0;
@@ -272,8 +275,8 @@ export default function(pluginManager) {
           >
             <MSATree
               config={this.props.config}
+              data={this.props.data}
               computedTreeConfig={this.props.computedTreeConfig}
-              treeIndex={this.props.treeIndex}
               treeLayout={treeLayout}
               computedView={computedView}
               scrollTop={this.state.scrollTop}
@@ -285,8 +288,6 @@ export default function(pluginManager) {
               view={this.state.view}
               config={this.props.config}
               computedFontConfig={this.props.computedFontConfig}
-              treeIndex={this.props.treeIndex}
-              alignIndex={this.props.alignIndex}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
               computedView={computedView}
@@ -300,8 +301,6 @@ export default function(pluginManager) {
               view={this.state.view}
               config={this.props.config}
               computedFontConfig={this.props.computedFontConfig}
-              treeIndex={this.props.treeIndex}
-              alignIndex={this.props.alignIndex}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
               setClientSize={this.setAlignmentClientSize.bind(this)}
@@ -430,7 +429,8 @@ export default function(pluginManager) {
 
       // First compute the current alignment layout (i.e. the initial state
       // before the expand/collapse)
-      const { treeIndex, alignIndex } = this.props;
+      const { data } = this.props;
+      const { alignIndex, treeIndex } = data;
       const computedView = this.getComputedView();
       const {
         collapsed,
@@ -655,7 +655,7 @@ export default function(pluginManager) {
 
     handleMouseoverStructureResidue(structure, chain, pdbSeqPos) {
       this.setMouseoverTimer(() => {
-        const seqPosToCol = this.props.alignIndex.seqPosToAlignCol[
+        const seqPosToCol = this.props.data.alignIndex.seqPosToAlignCol[
           structure.node
         ];
         const chainInfo = structure.structureInfo.chains.find(

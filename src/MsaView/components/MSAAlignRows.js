@@ -166,8 +166,6 @@ export default function(pluginManager) {
           <MSAAlignCanvas
             ref={this.alignCanvasRef}
             data={data}
-            treeIndex={treeIndex}
-            alignIndex={alignIndex}
             treeLayout={treeLayout}
             alignLayout={alignLayout}
             computedFontConfig={computedFontConfig}

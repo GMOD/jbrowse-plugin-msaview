@@ -1,16 +1,43 @@
 import Stockholm from "stockholm-js";
 
+import NewickModule from "newick";
+import JukesCantor from "jukes-cantor";
+import RapidNeighborJoining from "neighbor-joining";
+const { Newick } = NewickModule;
+
 /* PFAM format for embedding PDB IDs in Stockholm files */
 const pdbRegex = /PDB; +(\S+) +(\S); ([0-9]+)-([0-9]+)/;
 
 /* Pfam format for embedding coordinates in names (ugh) */
 const nameEncodedCoordRegex = /\/([0-9]+)-([0-9]+)$/;
 
-export function indexData(data) {
-  console.log({ data });
+/* regex for sniffing Stockholm format */
+const sniffStockholmRegex = /^# STOCKHOLM/;
+
+/* regex for sniffing FASTA format */
+const sniffFastaRegex = /^>/;
+
+export function indexData(d) {
+  const data = getData(d);
   const treeIndex = buildTreeIndex(data);
   const alignIndex = buildAlignmentIndex(data);
-  return { data, treeIndex, alignIndex };
+  return { ...data, treeIndex, alignIndex };
+}
+
+// method to parse FASTA (simple enough to build in here)
+function parseFasta(fasta) {
+  const seq = {};
+  let name;
+  const re = /^>(\S+)/;
+  fasta.split("\n").forEach(line => {
+    const match = re.exec(line);
+    if (match) {
+      seq[(name = match[1])] = "";
+    } else if (name) {
+      seq[name] = seq[name] + line.replace(/[ \t]/g, "");
+    }
+  });
+  return seq;
 }
 
 function getRowAsArray(row) {
@@ -160,10 +187,11 @@ function unpackStockholm(data, config, stockholm) {
   unpackStockholmJS(data, config, stockjs);
 }
 
-function unpackStockholmJS(data, config, stock) {
+function unpackStockholmJS(d, config, stock) {
+  const data = { ...d };
   const structure = (data.structure = data.structure || {});
   data.rowData = stock.seqdata;
-  guessSeqCoords(data);
+  // guessSeqCoords(data);
   if (stock.gf.NH && !data.newick) {
     // did the Stockholm alignment include a tree?
     data.newick = stock.gf.NH.join("");
@@ -214,10 +242,12 @@ function unpackStockholmJS(data, config, stock) {
   }
 }
 
-// Attempt to figure out start coords relative to database sequences by parsing the sequence names
-// This allows us to align to partial structures
-// This is pretty hacky; the user can alternatively pass these in through the data.seqCoords field
-function guessSeqCoords(data) {
+// Attempt to figure out start coords relative to database sequences by parsing
+// the sequence names. This allows us to align to partial structures. This is
+// pretty hacky; the user can alternatively pass these in through the
+// data.seqCoords field
+function guessSeqCoords(d) {
+  const data = { ...d };
   if (!data.seqCoords) {
     data.seqCoords = {};
   }
@@ -234,43 +264,25 @@ function guessSeqCoords(data) {
         }
       }
     }
+    // if we can't guess the start coord, just assume it's the full-length
+    // sequence
     if (!data.seqCoords[name]) {
       data.seqCoords[name] = { startPos: 1, endPos: len };
-    } // if we can't guess the start coord, just assume it's the full-length sequence
+    }
   });
+  return data;
 }
 
 function countNonGapChars(seq) {
   return getRowAsArray(seq).filter(c => !isGapChar(c)).length;
 }
 
-async function getData(data, config) {
-  console.log({ data });
-  // if (data.url) {
-  //   await Promise.all(
-  //     Object.keys(data.url)
-  //       .filter(key => !data[key])
-  //       .map(async key => {
-  //         const url = this.makeURL(data.url[key]);
-  //         const res = await fetch(url);
-  //         if (res.ok) {
-  //           data[key] = await res.text();
-  //         } else {
-  //           throw new Error(`HTTP ${res.status} ${res.statusText} ${url}`);
-  //         }
-  //       }),
-  //   );
-  // }
-  // if (data.json) {
-  //   Object.assign(
-  //     data,
-  //     typeof data.json === "string" ? JSON.parse(data.json) : data.json,
-  //   );
-  // }
+function getData(d, config) {
+  let data = { ...d };
   if (data.auto) {
-    if (this.sniffStockholmRegex.test(data.auto)) {
+    if (sniffStockholmRegex.test(data.auto)) {
       data.stockholm = data.auto;
-    } else if (this.sniffFastaRegex.test(data.auto)) {
+    } else if (sniffFastaRegex.test(data.auto)) {
       data.fasta = data.auto;
     } else {
       try {
@@ -280,20 +292,30 @@ async function getData(data, config) {
       }
     }
   }
+
   if (!(data.branches && data.rowData)) {
+    // was a Stockholm-format alignment specified?
     if (data.stockholm) {
-      // was a Stockholm-format alignment specified?
-      this.unpackStockholm(data, config, data.stockholm);
-    } else if (data.stockholmjs) {
-      // was a StockholmJS object specified?
-      this.unpackStockholmJS(data, config, data.stockholmjs);
-    } else if (data.fasta) {
-      // was a FASTA-format alignment specified?
-      data.rowData = this.parseFasta(data.fasta);
-    } else {
+      data = unpackStockholm(data, config, data.stockholm);
+    }
+
+    // was a StockholmJS object specified?
+    else if (data.stockholmjs) {
+      data = unpackStockholmJS(data, config, data.stockholmjs);
+    }
+
+    // was a FASTA-format alignment specified?
+    else if (data.fasta) {
+      data.rowData = parseFasta(data.fasta);
+    }
+
+    // throw
+    else {
       throw new Error("no sequence data");
     }
-    // If a Newick-format tree was specified somehow (as a separate data item, or in the Stockholm alignment) then parse it
+
+    // If a Newick-format tree was specified somehow (as a separate data item,
+    // or in the Stockholm alignment) then parse it
     if (data.newick || data.newickjs) {
       const NewickParser = new Newick();
       const newickTree = (data.newickjs =
@@ -317,10 +339,11 @@ async function getData(data, config) {
       traverse(newickTree);
       data.root = getName(newickTree);
     } else {
-      // no Newick tree was specified, so build a quick-and-dirty distance matrix with Jukes-Cantor, and get a tree by neighbor-joining
+      // no Newick tree was specified, so build a quick-and-dirty distance
+      // matrix with Jukes-Cantor, and get a tree by neighbor-joining
       const taxa = Object.keys(data.rowData).sort();
       const seqs = taxa.map(taxon => data.rowData[taxon]);
-      console.warn(`Estimating phylogenetic tree (${taxa.length} taxa)...`);
+      console.log(`Estimating phylogenetic tree (${taxa.length} taxa)...`);
       const distMatrix = JukesCantor.calcFiniteDistanceMatrix(seqs);
       const rnj = new RapidNeighborJoining.RapidNeighborJoining(
         distMatrix,
@@ -349,6 +372,8 @@ async function getData(data, config) {
       data.root = getName(tree);
     }
   }
-  this.guessSeqCoords(data); // this is an idempotent method; if data came from a Stockholm file, it's already been called (in order to filter out irrelevant structures)
-  return data;
+
+  // this is an idempotent method; if data came from a Stockholm file, it's
+  // already been called (in order to filter out irrelevant structures)
+  return guessSeqCoords(data);
 }

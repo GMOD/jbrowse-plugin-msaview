@@ -63,12 +63,8 @@ export default function(pluginManager) {
     }
 
     renderTree() {
-      const {
-        treeIndex,
-        treeLayout,
-        computedView,
-        computedTreeConfig,
-      } = this.props;
+      const { treeLayout, data, computedView, computedTreeConfig } = this.props;
+      const { treeIndex } = data;
       const {
         collapsed,
         ancestorCollapsed,

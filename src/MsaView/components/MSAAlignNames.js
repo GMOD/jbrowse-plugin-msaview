@@ -35,14 +35,14 @@ export default function(pluginManager) {
   class MSAAlignNames extends React.Component {
     render() {
       const {
-        data: { structure = {} },
+        data,
         computedFontConfig,
-        treeIndex,
         config,
         computedView,
         treeLayout,
         classes,
       } = this.props;
+      const { treeIndex, structure = {} } = data;
       const { nameDivWidth } = config;
       const { nameFontName, nameFontSize } = computedFontConfig;
 
