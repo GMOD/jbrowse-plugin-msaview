@@ -63,7 +63,13 @@ export default function(pluginManager) {
     }
 
     renderTree() {
-      const { treeLayout, data, computedView, computedTreeConfig } = this.props;
+      const {
+        treeLayout,
+        model,
+        computedView,
+        computedTreeConfig,
+      } = this.props;
+      const { data } = model;
       const { treeIndex } = data;
       const {
         collapsed,
@@ -161,9 +167,10 @@ export default function(pluginManager) {
       const {
         computedTreeConfig: { treeWidth },
         treeLayout: { treeHeight },
-        scrollTop,
         classes,
+        model,
       } = this.props;
+      const { scrollTop } = model;
       return (
         <div className={classes.tree} style={{ minWidth: treeWidth }}>
           <canvas

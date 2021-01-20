@@ -104,8 +104,8 @@ export default function(pluginManager) {
     }
 
     resolveAlignCoords(evt) {
-      const { treeLayout, alignLayout, data } = this.props;
-      const { treeIndex, alignIndex, rowData } = data;
+      const { treeLayout, alignLayout, model } = this.props;
+      const { treeIndex, alignIndex, rowData } = model.data;
       const x = parseInt(evt.nativeEvent.offsetX);
       const y = parseInt(evt.nativeEvent.offsetY);
       let row;
@@ -138,15 +138,15 @@ export default function(pluginManager) {
       const {
         treeLayout,
         alignLayout,
-        data,
+        model,
         computedFontConfig,
         scrollLeft,
         scrollTop,
-        hoverColumn,
         classes,
       } = this.props;
       const { treeHeight } = treeLayout;
       const { alignWidth } = alignLayout;
+      const { hoverColumn } = model;
 
       return (
         <div
@@ -157,7 +157,7 @@ export default function(pluginManager) {
         >
           <MSAAlignCanvas
             ref={this.alignCanvasRef}
-            data={data}
+            model={model}
             treeLayout={treeLayout}
             alignLayout={alignLayout}
             computedFontConfig={computedFontConfig}
@@ -165,7 +165,7 @@ export default function(pluginManager) {
             scrollTop={scrollTop}
           />
 
-          {this.props.hoverColumn !== null ? (
+          {hoverColumn !== null ? (
             <div
               className={classes.alignmentColumnCursor}
               style={{

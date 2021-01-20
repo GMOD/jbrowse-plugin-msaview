@@ -35,13 +35,14 @@ export default function(pluginManager) {
   class MSAAlignNames extends React.Component {
     render() {
       const {
-        data,
+        model,
         computedFontConfig,
         config,
         computedView,
         treeLayout,
         classes,
       } = this.props;
+      const { scrollTop, data, view } = model;
       const { treeIndex, structure = {} } = data;
       const { nameDivWidth } = config;
       const { nameFontName, nameFontSize } = computedFontConfig;
@@ -59,14 +60,14 @@ export default function(pluginManager) {
         >
           <div
             className={classes.alignmentNamesContent}
-            style={{ top: -this.props.scrollTop }}
+            style={{ top: -scrollTop }}
           >
             {treeIndex.nodes
               .filter(node => computedView.nodeVisible[node])
               .map((node, row) => {
-                const style = { height: `${nodeHeight[node]}px` };
-                const scale = this.props.view.nodeScale[node];
-                if (typeof scale !== "undefined" && scale !== 1) {
+                const style = { height: nodeHeight[node] };
+                const scale = view.nodeScale[node];
+                if (scale !== undefined && scale !== 1) {
                   style.transform = `scale(1,${scale})`;
                   style.opacity = scale;
                 }

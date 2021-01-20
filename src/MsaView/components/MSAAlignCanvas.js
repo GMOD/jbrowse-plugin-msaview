@@ -45,19 +45,21 @@ export default function(pluginManager) {
     }
 
     getDimensions() {
-      const { scrollLeft, scrollTop } = this.props;
+      const { model, treeLayout, alignLayout } = this.props;
+      const { alignScrollLeft: scrollLeft, scrollTop } = model;
       const { clientWidth, clientHeight } = this.state;
       const offscreenRatio = this.getOffscreenRatio();
       const offscreenWidth = offscreenRatio * clientWidth;
       const offscreenHeight = offscreenRatio * clientHeight;
       const top = Math.max(0, scrollTop - offscreenHeight);
       const left = Math.max(0, scrollLeft - offscreenWidth);
+
       const bottom = Math.min(
-        this.props.treeLayout.treeHeight,
+        treeLayout.treeHeight,
         scrollTop + clientHeight + offscreenHeight,
       );
       const right = Math.min(
-        this.props.alignLayout.alignWidth,
+        alignLayout.alignWidth,
         scrollLeft + clientWidth + offscreenWidth,
       );
       const width = right - left;
@@ -86,8 +88,8 @@ export default function(pluginManager) {
       const alignCanvas = this.canvasRef.current;
       const ctx = alignCanvas.getContext("2d");
       const { top, left, bottom, right } = this.getDimensions();
-      const { computedFontConfig, treeLayout, alignLayout, data } = this.props;
-      const { treeIndex, alignIndex, rowData } = data;
+      const { computedFontConfig, treeLayout, alignLayout, model } = this.props;
+      const { treeIndex, alignIndex, rowData } = model.data;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
       ctx.clearRect(0, 0, alignCanvas.width, alignCanvas.height);

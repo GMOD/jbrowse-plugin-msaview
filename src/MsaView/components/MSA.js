@@ -35,28 +35,9 @@ export default function(pluginManager) {
     constructor(props) {
       super(props);
 
-      const view = Object.assign(this.initialView(), props.view || {});
-
-      this.state = {
-        view,
-      };
-
       this.rowsRef = React.createRef();
       this.msaRef = React.createRef();
       this.structRef = React.createRef();
-    }
-
-    // config/defaults
-    initialView() {
-      return {
-        collapsed: {}, // true if an internal node has been collapsed by the user
-        forceDisplayNode: {}, // force a node to be displayed even if it's flagged as collapsed. Used by animation code
-        nodeScale: {}, // height scaling factor for tree nodes / alignment rows. From 0 to 1 (undefined implies 1)
-        columnScale: {}, // height scaling factor for alignment columns. From 0 to 1 (undefined implies 1)
-        disableTreeEvents: false,
-        animating: false,
-        structure: { openStructures: [] },
-      };
     }
 
     collapseAnimationFrames() {
@@ -75,58 +56,10 @@ export default function(pluginManager) {
       return 100;
     }
 
-    resetView() {
-      this.setState({ view: this.initialView() });
-    }
-
-    // get tree collapsed/open state
-    getComputedView(view) {
-      view = view || this.state.view;
-      const { data } = this.props;
-      const { treeIndex, alignIndex } = data;
-      const { collapsed, forceDisplayNode } = view;
-      const { rowDataAsArray } = alignIndex;
-      const ancestorCollapsed = {};
-      const nodeVisible = {};
-      const setCollapsedState = (node, parent) => {
-        ancestorCollapsed[node] =
-          ancestorCollapsed[parent] || collapsed[parent];
-        const kids = treeIndex.children[node];
-        if (kids) {
-          kids.forEach(child => setCollapsedState(child, node));
-        }
-      };
-      setCollapsedState(treeIndex.root);
-      treeIndex.nodes.forEach(
-        node =>
-          (nodeVisible[node] =
-            !ancestorCollapsed[node] &&
-            (treeIndex.children[node].length === 0 || forceDisplayNode[node])),
-      );
-      const columnVisible = new Array(alignIndex.columns).fill(false);
-      treeIndex.nodes
-        .filter(node => nodeVisible[node])
-        .forEach(node => {
-          if (rowDataAsArray[node]) {
-            rowDataAsArray[node].forEach((c, col) => {
-              if (!isGapChar(c)) {
-                columnVisible[col] = true;
-              }
-            });
-          }
-        });
-      return {
-        ancestorCollapsed,
-        nodeVisible,
-        columnVisible,
-        ...view,
-      };
-    }
-
     // layout tree
     layoutTree(computedView) {
-      const { computedTreeConfig, data } = this.props;
-      const { treeIndex } = data;
+      const { computedTreeConfig, model } = this.props;
+      const { treeIndex } = model.data;
       const { nodeVisible, nodeScale } = computedView;
       const {
         genericRowHeight,
@@ -140,14 +73,17 @@ export default function(pluginManager) {
       const nodeHeight = {};
       const rowHeight = [];
       let treeHeight = 0;
-      // PERFORMANCE NOTE: the following is an O(N) scan in the number of tree nodes N, performed in every animation frame
-      // The purpose is to figure out the visibility and (if visible) scaled height of every row, for collapse/open transitions.
-      // This is then used (by MSATree) to determine which nodes are in the visible region, and should be drawn.
-      // In principle this could be optimized by taking hints from the view: we could start from a node that we know is in the visible region,
-      // and explore outwards from there.
+
+      // PERFORMANCE NOTE: the following is an O(N) scan in the number of tree
+      // nodes N, performed in every animation frame The purpose is to figure
+      // out the visibility and (if visible) scaled height of every row, for
+      // collapse/open transitions.  This is then used (by MSATree) to
+      // determine which nodes are in the visible region, and should be drawn.
+      // In principle this could be optimized by taking hints from the view: we
+      // could start from a node that we know is in the visible region, and
+      // explore outwards from there.
       const rowY = treeIndex.nodes.map(node => {
-        const scale =
-          typeof nodeScale[node] !== "undefined" ? nodeScale[node] : 1;
+        const scale = nodeScale[node] !== undefined ? nodeScale[node] : 1;
         const rh = scale * (nodeVisible[node] ? genericRowHeight : 0);
         const y = treeHeight;
         nx[node] =
@@ -176,8 +112,8 @@ export default function(pluginManager) {
 
     // get metrics and other info about alignment font/chars, and do layout
     layoutAlignment(computedView) {
-      const { data, computedFontConfig } = this.props;
-      const { alignIndex } = data;
+      const { model, computedFontConfig } = this.props;
+      const { alignIndex } = model.data;
       const { genericRowHeight, charFont } = computedFontConfig;
       const alignChars = alignIndex.chars;
       let charWidth = 0;
@@ -198,9 +134,11 @@ export default function(pluginManager) {
       const colX = [];
       const colWidth = [];
       const computedColScale = [];
-      // PERFORMANCE NOTE: the following is an O(L) scan in the number of alignment columns L, performed in every animation frame
-      // As with the O(N) scan in layoutTree(), this could be optimized by taking hints from the view,
-      // i.e. starting from a column that is known to be in the visible region, and exploring outwards from there.
+      // PERFORMANCE NOTE: the following is an O(L) scan in the number of
+      // alignment columns L, performed in every animation frame As with the
+      // O(N) scan in layoutTree(), this could be optimized by taking hints
+      // from the view, i.e. starting from a column that is known to be in the
+      // visible region, and exploring outwards from there.
       for (let col = 0; col < alignIndex.columns; ++col) {
         colX.push(nextColX);
         if (computedView.columnVisible[col]) {
@@ -247,17 +185,16 @@ export default function(pluginManager) {
     }
 
     render() {
-      const computedView = this.getComputedView();
-      const treeLayout = this.layoutTree(computedView);
-      const alignLayout = this.layoutAlignment(computedView);
       const {
         config,
-        data,
         computedFontConfig,
         computedTreeConfig,
         classes,
         model,
       } = this.props;
+      const computedView = model.getComputedView();
+      const treeLayout = this.layoutTree(computedView);
+      const alignLayout = this.layoutAlignment(computedView);
 
       // record the dimensions for drag handling
       this.treeHeight = treeLayout.treeHeight;
@@ -282,31 +219,26 @@ export default function(pluginManager) {
           >
             <MSATree
               config={config}
-              data={data}
+              model={model}
               computedTreeConfig={computedTreeConfig}
               treeLayout={treeLayout}
               computedView={computedView}
-              scrollTop={this.state.scrollTop}
               handleNodeClick={this.handleNodeClick.bind(this)}
             />
 
             <MSAAlignNames
-              data={data}
-              view={this.state.view}
+              model={model}
               config={config}
               computedFontConfig={computedFontConfig}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
               computedView={computedView}
-              scrollTop={this.state.scrollTop}
-              handleNameClick={this.handleNameClick.bind(this)}
             />
 
             <MSAAlignRows
               ref={this.rowsRef}
-              data={data}
+              model={model}
               config={config}
-              view={this.state.view}
               computedFontConfig={computedFontConfig}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
@@ -319,25 +251,8 @@ export default function(pluginManager) {
               )}
               handleAlignCharMouseOut={this.handleAlignCharMouseOut.bind(this)}
               handleMouseLeave={() => this.delayedSetHoverColumn(null)}
-              scrollLeft={model.alignScrollLeft}
-              scrollTop={model.scrollTop}
-              hoverColumn={model.hoverColumn}
             />
           </div>
-
-          <MSAStructPanel
-            ref={this.structRef}
-            initConfig={this.props.config.structure}
-            seqCoords={this.props.data.seqCoords}
-            alignIndex={this.props.alignIndex}
-            structures={this.state.view.structure.openStructures}
-            updateStructure={this.updateStructure.bind(this)}
-            handleCloseStructure={this.handleCloseStructure.bind(this)}
-            handleMouseoverResidue={this.handleMouseoverStructureResidue.bind(
-              this,
-            )}
-            setTimer={this.setTimer.bind(this)}
-          />
         </div>
       );
     }
@@ -371,41 +286,43 @@ export default function(pluginManager) {
       this.alignmentClientHeight = h;
     }
 
-    handleNameClick(node) {
-      const { structure } = this.props.data;
-      this.nStructs = (this.nStructs || 0) + 1;
-      let info = structure[node];
-      if (Array.isArray(info) && info.length === 1) {
-        info = info[0];
-      }
-      const newStructure = {
-        node,
-        structureInfo: info,
-        startPos: this.props.data.seqCoords[node].startPos,
-        mouseoverLabel: [],
-        trueAtomColor: {},
-        key: this.nStructs,
-      };
-      const { view } = this.state;
-      view.structure.openStructures.push(newStructure);
-      this.setState({ view });
-    }
+    //TODO structure view
+    // handleNameClick(node) {
+    //   const { model } = this.props;
+    //   const { data, view } = model;
+    //   const { structure } = data;
+    //   this.nStructs = (this.nStructs || 0) + 1;
+    //   let info = structure[node];
+    //   if (Array.isArray(info) && info.length === 1) {
+    //     info = info[0];
+    //   }
+    //   const newStructure = {
+    //     node,
+    //     structureInfo: info,
+    //     startPos: this.props.data.seqCoords[node].startPos,
+    //     mouseoverLabel: [],
+    //     trueAtomColor: {},
+    //     key: this.nStructs,
+    //   };
+    //   view.structure.openStructures.push(newStructure);
+    //   model.setView(view);
+    // }
 
-    updateStructure(structure, newStructure) {
-      const { view } = this.state;
-      view.structure.openStructures = view.structure.openStructures.map(s =>
-        s === structure ? Object.assign(s, newStructure) : s,
-      );
-      this.setState({ view });
-    }
+    // updateStructure(structure, newStructure) {
+    //   const { view } = this.state;
+    //   view.structure.openStructures = view.structure.openStructures.map(s =>
+    //     s === structure ? Object.assign(s, newStructure) : s,
+    //   );
+    //   this.setState({ view });
+    // }
 
-    handleCloseStructure(structure) {
-      const { view } = this.state;
-      view.structure.openStructures = view.structure.openStructures.filter(
-        s => s !== structure,
-      );
-      this.setState({ view });
-    }
+    // handleCloseStructure(structure) {
+    //   const { view } = this.state;
+    //   view.structure.openStructures = view.structure.openStructures.filter(
+    //     s => s !== structure,
+    //   );
+    //   this.setState({ view });
+    // }
 
     // This function updates internal state when a node is opened/collapsed &
     // schedules the animation PERFORMANCE NOTE: at the moment, the layout is
@@ -421,24 +338,26 @@ export default function(pluginManager) {
         return;
       }
 
-      // HACK/CODE STINK: Currently there are some slightly hacky things about
-      // this animation.  The "forceDisplayNode" and "collapsed" objects have the
+      // HACK: Currently there are some slightly hacky things about this
+      // animation.  The "forceDisplayNode" and "collapsed" objects have the
       // following combined effect (for internal nodes): If collapsed[node] is
       // truthy, then the alignment row for that node will be rendered.  If
-      // collapsed[node]===undefined and forceDisplayNode[node]===true, then the
-      // node's open->collapse transition is being animated, and the node handle
-      // will be rendered as collapsed.  If collapsed[node] is falsey and
-      // forceDisplayNode[node] is falsey, then the node handle will be rendered
-      // as collapsed.  This might be better handled by replacing the two objects
-      // with a single combined state (OPEN, COLLAPSED, COLLAPSING, OPENING) Part
-      // of the implementation goal has been to keep the object sparse so that
-      // the default state is OPEN and the objects can start off being empty.
+      // collapsed[node]===undefined and forceDisplayNode[node]===true, then
+      // the node's open->collapse transition is being animated, and the node
+      // handle will be rendered as collapsed.  If collapsed[node] is falsey
+      // and forceDisplayNode[node] is falsey, then the node handle will be
+      // rendered as collapsed.  This might be better handled by replacing the
+      // two objects with a single combined state (OPEN, COLLAPSED, COLLAPSING,
+      // OPENING) Part of the implementation goal has been to keep the object
+      // sparse so that the default state is OPEN and the objects can start off
+      // being empty.
 
       // First compute the current alignment layout (i.e. the initial state
       // before the expand/collapse)
-      const { data } = this.props;
+      const { model } = this.props;
+      const { data, alignScrollLeft: left, scrollTop } = model;
       const { alignIndex, treeIndex } = data;
-      const computedView = this.getComputedView();
+      const computedView = model.getComputedView();
       const {
         collapsed,
         nodeScale,
@@ -448,7 +367,6 @@ export default function(pluginManager) {
       } = computedView;
 
       const alignLayout = this.layoutAlignment(computedView);
-      const left = this.props.model.alignScrollLeft;
       const right = left + this.alignmentClientWidth;
 
       const collapseAnimationFrames = this.collapseAnimationFrames();
@@ -465,14 +383,17 @@ export default function(pluginManager) {
       const wasCollapsed = collapsed[node];
       const finalCollapsed = { ...collapsed };
       if (wasCollapsed) {
-        collapsed[node] = false; // when collapsed[node]=false (vs undefined), it's rendered by renderTree() as a collapsed node, but its descendants are still visible. A bit of a hack...
+        // when collapsed[node]=false (vs undefined), it's rendered by
+        // renderTree() as a collapsed node, but its descendants are still
+        // visible. A bit of a hack...
+        collapsed[node] = false;
         delete finalCollapsed[node];
       } else {
         finalCollapsed[node] = true;
       }
       const finalForceDisplayNode = { ...forceDisplayNode };
       finalForceDisplayNode[node] = !wasCollapsed;
-      const finalComputedView = this.getComputedView({
+      const finalComputedView = model.getComputedView({
         collapsed: finalCollapsed,
         forceDisplayNode: finalForceDisplayNode,
       });
@@ -498,16 +419,14 @@ export default function(pluginManager) {
         }
       }
       // Compute the current centroid of the visible-before-and-after columns
-      // Throughout the animation, we keep computing this and dynamically adjust alignScrollLeft so that it stays at the centroid of the current view
-      // This ensures that the currently visible alignment region does not shift out of view because columns way offscreen to the left have disappeared or appeared.
+      // Throughout the animation, we keep computing this and dynamically
+      // adjust alignScrollLeft so that it stays at the centroid of the current
+      // view This ensures that the currently visible alignment region does not
+      // shift out of view because columns way offscreen to the left have
+      // disappeared or appeared.
       const centroidMinusScroll =
-        this.centroidOfColumns(persistingVisibleColumns, alignLayout) -
-        this.props.model.alignScrollLeft;
+        this.centroidOfColumns(persistingVisibleColumns, alignLayout) - left;
 
-      let lastFrameTime = Date.now();
-      const expectedTimeBetweenFrames =
-        this.collapseAnimationDuration() / collapseAnimationFrames;
-      // drawAnimationFrame is the closure used for the animation transition
       const drawAnimationFrame = () => {
         let disableTreeEvents;
         let animating;
@@ -525,7 +444,7 @@ export default function(pluginManager) {
           newlyHiddenColumns.forEach(col => (columnScale[col] = scale));
           newlyVisibleColumns.forEach(col => (columnScale[col] = 1 - scale));
           forceDisplayNode[node] = true;
-          disableTreeEvents = true; // disable further tree events while the animated transition is ongoing
+          disableTreeEvents = true;
           animating = true;
         } else {
           treeIndex.descendants[node].forEach(desc => {
@@ -539,7 +458,7 @@ export default function(pluginManager) {
           disableTreeEvents = false;
           animating = false;
         }
-        const view = {
+        const computedView = model.getComputedView({
           ...this.state.view,
           collapsed: newCollapsed,
           forceDisplayNode,
@@ -547,61 +466,39 @@ export default function(pluginManager) {
           columnScale,
           disableTreeEvents,
           animating,
-        };
-        const computedView = this.getComputedView(view);
+        });
         const alignLayout = this.layoutAlignment(computedView);
         const alignScrollLeft = this.boundAlignScrollLeft(
           this.centroidOfColumns(persistingVisibleColumns, alignLayout) -
             centroidMinusScroll,
         );
         window.requestAnimationFrame(() => {
-          this.props.model.setScroll(
-            alignScrollLeft,
-            this.props.model.scrollTop,
-          );
-          this.setState({ view });
-
-          if (framesLeft) {
-            // Note the use of collapseAnimationMaxFrameSkip to guarantee that the user sees at least one frame of the animation transition
-            const currentTime = Date.now();
-            const timeSinceLastFrame = currentTime - lastFrameTime;
-            const timeToNextFrame = Math.max(
-              0,
-              expectedTimeBetweenFrames - timeSinceLastFrame,
-            );
-            const frameSkip = Math.min(
-              this.collapseAnimationMaxFrameSkip(),
-              Math.ceil(timeSinceLastFrame / expectedTimeBetweenFrames),
-            );
-            framesLeft = Math.max(0, framesLeft - frameSkip);
-            lastFrameTime = currentTime;
-            setTimeout(drawAnimationFrame, timeToNextFrame);
-          }
+          model.setScroll(alignScrollLeft, scrollTop);
         });
       };
 
       drawAnimationFrame(collapseAnimationFrames);
     }
 
-    handleAlignmentScroll(alignScrollLeft, scrollTop) {
-      if (
-        alignScrollLeft !== this.props.model.alignScrollLeft ||
-        scrollTop !== this.props.model.scrollTop
-      ) {
-        this.props.model.setScroll(alignScrollLeft, scrollTop);
+    handleAlignmentScroll(left, top) {
+      const { model } = this.props;
+      const { alignScrollLeft, scrollTop } = model;
+      if (alignScrollLeft !== left || scrollTop !== top) {
+        model.setScroll(left, top);
       }
     }
 
     handleMouseWheel(evt) {
-      // nonzero deltaMode is Firefox, means deltaY is in lines instead of pixels
-      // can be corrected for e.g.
-      // https://stackoverflow.com/questions/20110224/what-is-the-height-of-a-line-in-a-wheel-event-deltamode-dom-delta-line
+      // nonzero deltaMode is Firefox, means deltaY is in lines instead of
+      // pixels can be corrected for
+      // https://stackoverflow.com/questions/20110224/
+      const { model, config } = this.props;
       if (evt.deltaY !== 0) {
         const deltaY =
-          evt.deltaY * (evt.deltaMode ? this.props.config.genericRowHeight : 1);
+          evt.deltaY * (evt.deltaMode ? config.genericRowHeight : 1);
         evt.preventDefault();
         this.requestAnimationFrame(() => {
-          this.props.model.setScroll(
+          model.setScroll(
             this.incAlignScrollLeft(evt.deltaX),
             this.incScrollTop(deltaY),
           );
@@ -652,12 +549,15 @@ export default function(pluginManager) {
     }
 
     setHoverColumn(column) {
-      this.props.model.setHoverColumn(column);
-      if (column === null) {
-        this.structRef.current.removeLabelFromStructuresOnMouseout();
-      } else {
-        this.structRef.current.addLabelToStructuresOnMouseover(column);
-      }
+      const { model } = this.props;
+      model.setHoverColumn(column);
+
+      // TODO
+      // if (column === null) {
+      //   this.structRef.current.removeLabelFromStructuresOnMouseout();
+      // } else {
+      //   this.structRef.current.addLabelToStructuresOnMouseover(column);
+      // }
     }
 
     handleMouseoverStructureResidue(structure, chain, pdbSeqPos) {

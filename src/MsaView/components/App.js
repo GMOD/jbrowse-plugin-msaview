@@ -178,17 +178,13 @@ export default function(pluginManager) {
 
     render() {
       const { model } = this.props;
-      const { data } = model;
-
       return (
         <MSA
+          model={model}
           ref={this.msaRef}
-          data={data}
           config={this.state.config}
-          view={this.state.view}
           computedTreeConfig={this.state.computedTreeConfig}
           computedFontConfig={this.state.computedFontConfig}
-          model={model}
         />
       );
     }
