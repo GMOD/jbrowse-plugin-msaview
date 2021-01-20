@@ -250,7 +250,14 @@ export default function(pluginManager) {
       const computedView = this.getComputedView();
       const treeLayout = this.layoutTree(computedView);
       const alignLayout = this.layoutAlignment(computedView);
-      const { classes, model } = this.props;
+      const {
+        config,
+        data,
+        computedFontConfig,
+        computedTreeConfig,
+        classes,
+        model,
+      } = this.props;
 
       // record the dimensions for drag handling
       this.treeHeight = treeLayout.treeHeight;
@@ -274,9 +281,9 @@ export default function(pluginManager) {
             }}
           >
             <MSATree
-              config={this.props.config}
-              data={this.props.data}
-              computedTreeConfig={this.props.computedTreeConfig}
+              config={config}
+              data={data}
+              computedTreeConfig={computedTreeConfig}
               treeLayout={treeLayout}
               computedView={computedView}
               scrollTop={this.state.scrollTop}
@@ -284,10 +291,10 @@ export default function(pluginManager) {
             />
 
             <MSAAlignNames
-              data={this.props.data}
+              data={data}
               view={this.state.view}
-              config={this.props.config}
-              computedFontConfig={this.props.computedFontConfig}
+              config={config}
+              computedFontConfig={computedFontConfig}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
               computedView={computedView}
@@ -297,10 +304,10 @@ export default function(pluginManager) {
 
             <MSAAlignRows
               ref={this.rowsRef}
-              data={this.props.data}
+              data={data}
+              config={config}
               view={this.state.view}
-              config={this.props.config}
-              computedFontConfig={this.props.computedFontConfig}
+              computedFontConfig={computedFontConfig}
               treeLayout={treeLayout}
               alignLayout={alignLayout}
               setClientSize={this.setAlignmentClientSize.bind(this)}

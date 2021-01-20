@@ -117,10 +117,9 @@ export default function(pluginManager) {
       const { data } = this.props.model;
       let promise;
       if (data) {
-        const { branches } = data;
-        const rowData = { ...data.rowData };
+        const { branches, rowData } = data;
         const missingAncestors = data.branches.filter(
-          b => typeof rowData[b[0]] === "undefined",
+          b => rowData[b[0]] !== undefined,
         ).length;
         if (missingAncestors && !this.state.reconstructingAncestors) {
           this.setState({ reconstructingAncestors: true });
@@ -146,9 +145,10 @@ export default function(pluginManager) {
 
     incorporateAncestralReconstruction(ancestralRowData) {
       const { data } = this.props.model;
-      const rowData = { ...data.rowData, ...ancestralRowData };
-      Object.assign(data, { rowData });
-      this.setDataset(data); // rebuilds indices
+      data.setData({
+        ...data,
+        rowData: { ...data.rowData, ...ancestralRowData },
+      });
     }
 
     defaultColorScheme() {

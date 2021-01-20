@@ -139,8 +139,6 @@ export default function(pluginManager) {
         treeLayout,
         alignLayout,
         data,
-        alignIndex,
-        treeIndex,
         computedFontConfig,
         scrollLeft,
         scrollTop,
