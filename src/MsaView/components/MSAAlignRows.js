@@ -159,8 +159,6 @@ export default function(pluginManager) {
       const { treeHeight } = treeLayout;
       const { alignWidth } = alignLayout;
 
-      console.log({ hoverColumn });
-
       return (
         <div
           className={classes.alignmentRows}
