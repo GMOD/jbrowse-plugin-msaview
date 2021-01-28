@@ -39,9 +39,11 @@ export default function(pluginManager) {
       return color[c.toUpperCase()] || color.default || "black";
     }
 
-    // offscreenRatio = the proportion of the rendered view that is invisible, on each side. Total rendered area = visible area * (1 + 2 * offscreenRatio)^2
+    // offscreenRatio = the proportion of the rendered view that is invisible,
+    // on each side. Total rendered area = visible area * (1 + 2 *
+    // offscreenRatio)^2
     getOffscreenRatio() {
-      return 1;
+      return 0;
     }
 
     getDimensions() {
@@ -113,8 +115,12 @@ export default function(pluginManager) {
         }
         lastRow = row;
       }
-      let colX = 0;
-      for (let col = 0; col < alignIndex.columns && colX < right; ++col) {
+
+      for (
+        let col = 0, colX = 0;
+        col < alignIndex.columns && colX < right;
+        ++col
+      ) {
         const xScale = alignLayout.computedColScale[col];
         colX = alignLayout.colX[col];
         const width = alignLayout.colWidth[col];
@@ -128,16 +134,12 @@ export default function(pluginManager) {
               ctx.globalAlpha = Math.min(xScale, yScale);
               const c = seq[col];
               if (typeof c === "string") {
-                ctx.setTransform(
-                  xScale,
-                  0,
-                  0,
-                  yScale,
-                  colX - left,
-                  rowY + height - top,
-                );
                 ctx.fillStyle = this.getColor(c);
-                ctx.fillText(c, 0, 0);
+
+                if (xScale !== 1 || yScale !== 1) {
+                  ctx.setTransform(xScale, 0, 0, yScale, 0, 0);
+                }
+                ctx.fillText(c, colX - left, rowY + height - top);
               } else {
                 let psum = 0;
                 for (let i = 0; i < c.length; i++) {

@@ -153,8 +153,7 @@ export default function(pluginManager) {
       // could start from a node that we know is in the visible region, and
       // explore outwards from there.
       const rowY = treeIndex.nodes.map(node => {
-        const scale =
-          typeof nodeScale[node] !== "undefined" ? nodeScale[node] : 1;
+        const scale = nodeScale[node] !== undefined ? nodeScale[node] : 1;
         const rh = scale * (nodeVisible[node] ? genericRowHeight : 0);
         const y = treeHeight;
         nx[node] =
