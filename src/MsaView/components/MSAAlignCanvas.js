@@ -1,105 +1,85 @@
 /* eslint-disable react/prop-types,react/sort-comp */
 
-const styles = {
-  alignmentCanvas: {
-    position: "absolute",
-    overflow: "hidden",
-    pointerEvents: "none",
-  },
-};
-
+function getDimensions({
+  width,
+  height,
+  scrollTop,
+  scrollLeft,
+  treeHeight,
+  alignWidth,
+}) {
+  const top = Math.max(0, scrollTop);
+  const left = Math.max(0, scrollLeft);
+  const bottom = Math.min(treeHeight, scrollTop + height);
+  const right = Math.min(alignWidth, scrollLeft + width);
+  return {
+    top,
+    left,
+    bottom,
+    right,
+    width: right - left,
+    height: bottom - top,
+  };
+}
 export default function(pluginManager) {
   const { jbrequire } = pluginManager;
   const React = jbrequire("react");
-  const { withStyles } = jbrequire("@material-ui/core/styles");
+  const { useEffect, useRef } = React;
+  const { observer } = jbrequire("mobx-react");
+  const { makeStyles } = jbrequire("@material-ui/core/styles");
+  const useStyles = makeStyles({
+    alignmentCanvas: {
+      position: "absolute",
+      overflow: "hidden",
+      pointerEvents: "none",
+    },
+  });
 
-  class MSAAlignCanvas extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = { clientWidth: 0, clientHeight: 0 };
-      this.canvasRef = React.createRef();
-    }
-
-    render() {
-      const { top, left, width, height } = this.getDimensions();
-      const { classes } = this.props;
-      return (
-        <canvas
-          ref={this.canvasRef}
-          className={classes.alignmentCanvas}
-          width={width}
-          height={height}
-          style={{ top, left }}
-        />
-      );
-    }
-
-    getColor(c) {
-      const { color } = this.props.computedFontConfig;
+  function MSAAlignCanvas(props) {
+    const canvasRef = useRef();
+    const classes = useStyles();
+    const {
+      scrollLeft,
+      scrollTop,
+      computedFontConfig,
+      alignLayout: { alignWidth },
+      treeLayout,
+      alignLayout,
+      treeIndex,
+      alignIndex,
+      data,
+      clientWidth,
+      clientHeight,
+    } = props;
+    const { treeHeight } = treeLayout;
+    function getColor(c) {
+      const { color } = computedFontConfig;
       return color[c.toUpperCase()] || color.default || "black";
     }
 
-    // offscreenRatio = the proportion of the rendered view that is invisible,
-    // on each side. Total rendered area = visible area * (1 + 2 *
-    // offscreenRatio)^2
-    getOffscreenRatio() {
-      return 0;
-    }
-
-    getDimensions() {
-      const { scrollLeft, scrollTop } = this.props;
-      const { clientWidth, clientHeight } = this.state;
-      const offscreenRatio = this.getOffscreenRatio();
-      const offscreenWidth = offscreenRatio * clientWidth;
-      const offscreenHeight = offscreenRatio * clientHeight;
-      const top = Math.max(0, scrollTop - offscreenHeight);
-      const left = Math.max(0, scrollLeft - offscreenWidth);
-      const bottom = Math.min(
-        this.props.treeLayout.treeHeight,
-        scrollTop + clientHeight + offscreenHeight,
-      );
-      const right = Math.min(
-        this.props.alignLayout.alignWidth,
-        scrollLeft + clientWidth + offscreenWidth,
-      );
-      const width = right - left;
-      const height = bottom - top;
-      return { top, left, bottom, right, width, height };
-    }
-
-    setClientSize(clientWidth, clientHeight) {
-      if (
-        clientWidth !== this.state.clientWidth ||
-        clientHeight !== this.state.clientHeight
-      ) {
-        this.setState({ clientWidth, clientHeight });
+    useEffect(() => {
+      const alignCanvas = canvasRef.current;
+      if (!canvasRef.current) {
+        return;
       }
-    }
 
-    componentDidMount() {
-      this.renderVisibleRegion();
-    }
-
-    componentDidUpdate() {
-      this.renderVisibleRegion();
-    }
-
-    renderVisibleRegion() {
-      const alignCanvas = this.canvasRef.current;
       const ctx = alignCanvas.getContext("2d");
-      const { top, left, bottom, right } = this.getDimensions();
-      const {
-        computedFontConfig,
-        treeLayout,
-        alignLayout,
-        treeIndex,
-        alignIndex,
-        data,
-      } = this.props;
+      if (!ctx) {
+        return;
+      }
+
+      const { top, left, bottom, right } = getDimensions({
+        width: clientWidth,
+        height: clientHeight,
+        scrollTop,
+        scrollLeft,
+        treeHeight,
+        alignWidth,
+      });
       const { rowData } = data;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
-      ctx.clearRect(0, 0, alignCanvas.width, alignCanvas.height);
+      ctx.clearRect(0, 0, clientWidth, clientHeight);
       ctx.font = computedFontConfig.charFont;
       let firstRow = 0;
       let lastRow;
@@ -134,7 +114,7 @@ export default function(pluginManager) {
               ctx.globalAlpha = Math.min(xScale, yScale);
               const c = seq[col];
               if (typeof c === "string") {
-                ctx.fillStyle = this.getColor(c);
+                ctx.fillStyle = getColor(c);
 
                 if (xScale !== 1 || yScale !== 1) {
                   ctx.setTransform(xScale, 0, 0, yScale, 0, 0);
@@ -154,7 +134,7 @@ export default function(pluginManager) {
                     colX - left,
                     rowY + height * (1 - psum) - top,
                   );
-                  ctx.fillStyle = this.getColor(ci);
+                  ctx.fillStyle = getColor(ci);
                   ctx.fillText(ci, 0, 0);
                   psum += p;
                 }
@@ -163,8 +143,32 @@ export default function(pluginManager) {
           }
         }
       }
-    }
+    }, [scrollLeft, clientWidth, clientHeight]);
+
+    const { top, left } = getDimensions({
+      width: clientWidth,
+      height: clientHeight,
+      scrollTop,
+      scrollLeft,
+      alignWidth,
+      treeHeight,
+    });
+    return (
+      <canvas
+        classes={classes.alignmentCanvas}
+        ref={canvasRef}
+        width={clientWidth}
+        height={clientHeight}
+        style={{
+          position: "absolute",
+          top,
+          left,
+          width: "100%",
+          height: "100%",
+        }}
+      />
+    );
   }
 
-  return withStyles(styles)(MSAAlignCanvas);
+  return observer(MSAAlignCanvas);
 }

@@ -36,12 +36,12 @@ export default function(pluginManager) {
     constructor(props) {
       super(props);
       this.rowsDivRef = React.createRef();
-      this.alignCanvasRef = React.createRef();
+      this.state = {};
     }
 
     componentDidUpdate() {
       this.setScrollPos();
-      this.setClientSize();
+      // this.setClientSize();
     }
 
     componentDidMount() {
@@ -59,10 +59,10 @@ export default function(pluginManager) {
         this.rowsDivRef.current.clientWidth,
         this.rowsDivRef.current.clientHeight,
       );
-      this.alignCanvasRef.current.setClientSize(
-        this.rowsDivRef.current.clientWidth,
-        this.rowsDivRef.current.clientHeight,
-      );
+      this.setState({
+        clientWidth: this.rowsDivRef.current.clientWidth,
+        clientHeight: this.rowsDivRef.current.clientHeight,
+      });
     }
 
     setScrollPos(opts) {
@@ -166,7 +166,6 @@ export default function(pluginManager) {
           onScroll={this.handleScroll.bind(this)}
         >
           <MSAAlignCanvas
-            ref={this.alignCanvasRef}
             data={data}
             treeIndex={treeIndex}
             alignIndex={alignIndex}
@@ -175,6 +174,8 @@ export default function(pluginManager) {
             computedFontConfig={computedFontConfig}
             scrollLeft={scrollLeft}
             scrollTop={scrollTop}
+            clientWidth={this.state.clientWidth}
+            clientHeight={this.state.clientHeight}
           />
 
           {hoverColumn !== null ? (
