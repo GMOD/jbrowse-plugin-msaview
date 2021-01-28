@@ -111,15 +111,18 @@ export default function(pluginManager) {
             const height = treeLayout.rowHeight[row];
             const seq = rowData[treeIndex.nodes[row]];
             if (height && seq) {
-              ctx.globalAlpha = Math.min(xScale, yScale);
               const c = seq[col];
               if (typeof c === "string") {
                 ctx.fillStyle = getColor(c);
-
-                if (xScale !== 1 || yScale !== 1) {
-                  ctx.setTransform(xScale, 0, 0, yScale, 0, 0);
-                }
-                ctx.fillText(c, colX - left, rowY + height - top);
+                ctx.setTransform(
+                  xScale,
+                  0,
+                  0,
+                  yScale,
+                  colX - left,
+                  rowY + height - top,
+                );
+                ctx.fillText(c, 0, 0);
               } else {
                 let psum = 0;
                 for (let i = 0; i < c.length; i++) {
@@ -143,7 +146,7 @@ export default function(pluginManager) {
           }
         }
       }
-    }, [scrollLeft, clientWidth, clientHeight]);
+    }, [scrollLeft, clientWidth, clientHeight, treeLayout.computedRowScale]);
 
     const { top, left } = getDimensions({
       width: clientWidth,
@@ -163,8 +166,6 @@ export default function(pluginManager) {
           position: "absolute",
           top,
           left,
-          width: "100%",
-          height: "100%",
         }}
       />
     );
