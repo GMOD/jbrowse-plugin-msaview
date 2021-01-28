@@ -621,6 +621,7 @@ export default function(pluginManager) {
     }
 
     handleAlignCharMouseOver(coords) {
+      console.log({ coords });
       if (!this.panning && !this.scrolling) {
         this.delayedSetHoverColumn(coords.column);
         //      console.warn('mouseover',coords)

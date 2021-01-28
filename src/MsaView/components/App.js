@@ -44,7 +44,6 @@ export default function(pluginManager) {
       super(props);
       const { config: propConfig = {} } = props;
 
-      console.log({ propConfig });
       const config = {
         ...this.defaultConfig(),
         ...propConfig,

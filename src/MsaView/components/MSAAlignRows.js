@@ -77,6 +77,7 @@ export default function(pluginManager) {
 
     handleMouseMove(evt) {
       const coords = this.resolveAlignCoords(evt);
+
       if (
         !this.lastCoords ||
         coords.row !== this.lastCoords.row ||
@@ -158,10 +159,16 @@ export default function(pluginManager) {
       const { treeHeight } = treeLayout;
       const { alignWidth } = alignLayout;
 
+      console.log({ hoverColumn });
+
       return (
         <div
           className={classes.alignmentRows}
           ref={this.rowsDivRef}
+          style={{
+            width: alignWidth,
+            height: treeHeight,
+          }}
           onClick={this.handleClick.bind(this)}
           onScroll={this.handleScroll.bind(this)}
         >
@@ -192,7 +199,14 @@ export default function(pluginManager) {
 
           <div
             className={classes.alignmentRowsBack}
-            style={{ width: alignWidth, height: treeHeight }}
+            style={{
+              width: alignWidth,
+              height: treeHeight,
+              zIndex: 1000,
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
             onMouseMove={this.handleMouseMove.bind(this)}
             onMouseLeave={this.handleMouseLeave.bind(this)}
             onMouseDown={this.handleMouseDown.bind(this)}
