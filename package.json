@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@material-ui/icons": "^4.11.2",
-    "react-msaview": "^1.0.14"
+    "react-msaview": "^1.0.15"
   },
   "peerDependencies": {
     "@jbrowse/core": "^1.0.4"
