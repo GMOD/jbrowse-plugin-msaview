@@ -21,9 +21,6 @@
     "browse-install": "cd .jbrowse && rm -rf * && jbrowse create .",
     "browse": "cd .jbrowse && cp ../jbrowse_config.json . && mv jbrowse_config.json config.json && npx serve .",
     "test": "tsdx test",
-    "test:cy": "cypress run --headless --browser chrome",
-    "e2e": "start-test start 9000 browse 5000 test:cy",
-    "cypress": "cypress open",
     "lint": "tsdx lint",
     "prepublishOnly": "npm test",
     "prepare": "npm run build",
@@ -37,11 +34,6 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "all"
-  },
-  "jest": {
-    "testPathIgnorePatterns": [
-      "<rootDir>/cypress/"
-    ]
   },
   "dependencies": {
     "@material-ui/icons": "^4.11.2",
