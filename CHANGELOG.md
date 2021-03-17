@@ -1,4 +1,8 @@
-# v1.0.3
+# v1.0.14
+
+- Fix session link loading from distconfig.json
+
+# v1.0.13
 
 - Factor out code into the react-msaview package on NPM, and make the plugin more of a wrapper around this module
 
