@@ -1,5 +1,5 @@
 {
-  "version": "1.0.13",
+  "version": "1.0.14",
   "name": "jbrowse-plugin-msaview",
   "keywords": [
     "jbrowse",
@@ -17,7 +17,6 @@
     "clean": "rimraf dist",
     "start": "tsdx watch --verbose --noClean --format umd --name JBrowsePluginMsaView --onFirstSuccess \"serve --cors --listen 9000 .\"",
     "prebuild": "npm run clean",
-    "build": "tsdx build --format cjs,esm,umd --name JBrowsePluginMsaView",
     "build": "tsdx build --format cjs,esm,umd --name JBrowsePluginMsaView && cp distconfig.json dist/config.json",
     "browse-install": "cd .jbrowse && rm -rf * && jbrowse create .",
     "browse": "cd .jbrowse && cp ../jbrowse_config.json . && mv jbrowse_config.json config.json && npx serve .",
