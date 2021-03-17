@@ -1,4 +1,6 @@
-- Fix nodes with the same score being collapsed together (#21)
+# v1.0.3
+
+- Factor out code into the react-msaview package on NPM, and make the plugin more of a wrapper around this module
 
 # v1.0.12
 
