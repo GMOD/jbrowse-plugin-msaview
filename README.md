@@ -1,4 +1,3 @@
-![Push](https://github.com/GMOD/jbrowse-plugin-msaview/workflows/Push/badge.svg)
 
 # jbrowse-plugin-msaview
 
@@ -9,7 +8,7 @@
 
 ## Demo
 
-https://s3.amazonaws.com/jbrowse.org/code/jb2/master/index.html?config=https://unpkg.com/jbrowse-plugin-msaview/dist/config.json&session=share-BVmmEYAoAv&password=SuQaN
+https://s3.amazonaws.com/jbrowse.org/code/jb2/main/index.html?config=https://unpkg.com/jbrowse-plugin-msaview/dist/config.json&session=share-BVmmEYAoAv&password=SuQaN
 
 ## Features
 
