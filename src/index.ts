@@ -24,7 +24,7 @@ export default class MsaViewPlugin extends Plugin {
 
   configure(pluginManager: PluginManager) {
     if (isAbstractMenuManager(pluginManager.rootModel)) {
-      pluginManager.rootModel.appendToSubMenu(['File', 'Add'], {
+      pluginManager.rootModel.appendToSubMenu(['Add'], {
         label: 'Multiple sequence alignment view',
         icon: GridOn,
         onClick: (session: AbstractSessionModel) => {
