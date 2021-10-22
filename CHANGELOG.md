@@ -1,3 +1,7 @@
+# v1.0.15
+
+- Change to add to 'Add' top level menu
+
 # v1.0.14
 
 - Fix session link loading from distconfig.json
