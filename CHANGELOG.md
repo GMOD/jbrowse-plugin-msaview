@@ -1,3 +1,7 @@
+# v1.0.16
+
+- Update to latest react-msaview
+
 # v1.0.15
 
 - Change to add to 'Add' top level menu
