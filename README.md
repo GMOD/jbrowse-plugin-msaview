@@ -8,11 +8,11 @@ See the docs for the react-msaview for more info https://github.com/GMOD/react-m
 
 ![](img/1.png)
 
-MSAView plugin running in v1.5.0 of JBrowse web
+MSAView plugin running in JBrowse 2
 
 ## Demo
 
-https://s3.amazonaws.com/jbrowse.org/code/jb2/main/index.html?config=https://unpkg.com/jbrowse-plugin-msaview/dist/config.json&session=share-BVmmEYAoAv&password=SuQaN
+https://jbrowse.org/code/jb2/main/index.html?config=https://unpkg.com/jbrowse-plugin-msaview/dist/config.json&session=share-BVmmEYAoAv&password=SuQaN
 
 ## Features
 
