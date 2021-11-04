@@ -6517,10 +6517,10 @@ react-measure@^2.3.0:
     prop-types "^15.6.2"
     resize-observer-polyfill "^1.5.0"
 
-react-msaview@^1.2.10:
-  version "1.2.10"
-  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-1.2.10.tgz#16d50489e744d50efe5867e9c8340cee24eced18"
-  integrity sha512-m86lru9OXu1y7JmBOiFX7feDGvmbv+QemD+MI2MMG+x8HlevvMjWK1vEcVIhX9NUqhD6k6VziRFkrPI8w0JsdA==
+react-msaview@^1.2.11:
+  version "1.2.11"
+  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-1.2.11.tgz#55663c84488d133234d0635a707fafae18dceded"
+  integrity sha512-/t7dlw/8PdQqg/RrclrBbwX1UJoCo1Z6x7v02JC33bbY1eT22gee7HOHmRfvt2jgb6dp1G8Bm1ZbLtlsgxwxNw==
   dependencies:
     clustal-js "^1.0.3"
     color "^3.1.3"

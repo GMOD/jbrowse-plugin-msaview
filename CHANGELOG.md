@@ -1,3 +1,7 @@
+# v1.0.17
+
+- Avoid Link redirection at react-msaview importform
+
 # v1.0.16
 
 - Update to latest react-msaview
