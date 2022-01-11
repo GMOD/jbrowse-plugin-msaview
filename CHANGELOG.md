@@ -1,3 +1,7 @@
+# v1.0.18
+
+- Fix clicking on node labels
+
 # v1.0.17
 
 - Avoid Link redirection at react-msaview importform
