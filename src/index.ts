@@ -1,22 +1,23 @@
 import Plugin from '@jbrowse/core/Plugin'
 import PluginManager from '@jbrowse/core/PluginManager'
-import { version } from '../package.json'
 import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
 import * as MSA from 'react-msaview'
 import ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
-import GridOn from '@material-ui/icons/GridOn'
+import GridOn from '@mui/icons-material/GridOn'
+
+// locals
+import { version } from '../package.json'
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'
   version = version
 
   install(pluginManager: PluginManager) {
-    console.log({ MSA })
     pluginManager.addViewType(
       () =>
         new ViewType({
           name: 'MsaView',
-          //@ts-ignore
+          //@ts-expect-error
           stateModel: MSA.MSAModel,
           ReactComponent: MSA.MSAView,
         }),
