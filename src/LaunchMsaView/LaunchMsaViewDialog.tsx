@@ -28,7 +28,7 @@ export default function LaunchProteinViewDialog({
   return (
     <Dialog
       maxWidth="xl"
-      title="Launch protein view"
+      title="Launch MSA view"
       onClose={() => handleClose()}
       open
     >

@@ -46,5 +46,40 @@
         }
       }
     }
+  ],
+  "tracks": [
+    {
+      "type": "FeatureTrack",
+      "trackId": "gencode.v36.annotation.sort.gff3",
+      "name": "Gencode v36",
+      "category": ["Annotation"],
+      "assemblyNames": ["hg38"],
+      "adapter": {
+        "type": "Gff3TabixAdapter",
+        "gffGzLocation": {
+          "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/gencode/gencode.v36.annotation.sort.gff3.gz",
+          "locationType": "UriLocation"
+        },
+        "index": {
+          "location": {
+            "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/gencode/gencode.v36.annotation.sort.gff3.gz.tbi",
+            "locationType": "UriLocation"
+          },
+          "indexType": "TBI"
+        }
+      },
+      "displays": [
+        {
+          "type": "LinearBasicDisplay",
+          "displayId": "gencode_nclist_v36_hg38_linear",
+          "renderer": {
+            "type": "SvgFeatureRenderer",
+            "labels": {
+              "description": "jexl:get(feature,'gene_name')"
+            }
+          }
+        }
+      ]
+    }
   ]
 }
