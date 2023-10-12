@@ -9,6 +9,7 @@ import {
 } from '@mui/material'
 import { Feature, getSession } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
+import { ungzip } from 'pako'
 
 // locals
 
@@ -74,7 +75,6 @@ export default function LaunchProteinViewDialog({
   const options = getTranscriptFeatures(feature)
 
   const [userSelection, setUserSelection] = useState(getId(options[0]))
-  console.log({ options })
   return (
     <Dialog
       maxWidth="xl"
@@ -108,17 +108,21 @@ export default function LaunchProteinViewDialog({
             ;(async () => {
               try {
                 const res = await fetch(
-                  `https://jbrowse.org/demos/msaview/knownCanonical/${userSelection}.json`,
+                  `https://jbrowse.org/demos/msaview/knownCanonical/${userSelection}.mfa.gz`,
                 )
                 if (!res.ok) {
                   throw new Error(
                     `HTTP ${res.status} fetching ${await res.text()}`,
                   )
                 }
-                const data = await res.json()
-                console.log({ data })
+                const data = await res.arrayBuffer()
+                const d = new TextDecoder().decode(ungzip(data))
                 session.addView('MsaView', {
                   type: 'MsaView',
+                  data: {
+                    msa: d,
+                    tree: '',
+                  },
                 })
                 handleClose()
               } catch (e) {

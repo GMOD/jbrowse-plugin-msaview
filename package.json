@@ -46,6 +46,8 @@
     "name": "MsaView"
   },
   "dependencies": {
+    "@types/pako": "^2.0.1",
+    "pako": "^2.1.0",
     "react-msaview": "^2.0.0",
     "regenerator-runtime": "^0.14.0",
     "tslib": "^2.3.1"
