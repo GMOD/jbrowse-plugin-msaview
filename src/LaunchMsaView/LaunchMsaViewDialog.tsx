@@ -90,14 +90,26 @@ export default function LaunchProteinViewDialog({
           label="Choose isoform"
           select
         >
-          {options.map((val, idx) => {
-            const d = getId(val)
-            return (
-              <MenuItem value={d} key={val.id() + '-' + idx}>
-                {d} {set.has(d) ? ' (has data)' : ''}
-              </MenuItem>
-            )
-          })}
+          {options
+            .filter(val => set.has(getId(val)))
+            .map((val, idx) => {
+              const d = getId(val)
+              return (
+                <MenuItem value={d} key={val.id() + '-' + idx}>
+                  {d} {set.has(d) ? ' (has data)' : ''}
+                </MenuItem>
+              )
+            })}
+          {options
+            .filter(val => !set.has(getId(val)))
+            .map((val, idx) => {
+              const d = getId(val)
+              return (
+                <MenuItem value={d} key={val.id() + '-' + idx}>
+                  {d} {set.has(d) ? ' (no data)' : ''}
+                </MenuItem>
+              )
+            })}
         </TextField>
       </DialogContent>
       <DialogActions>
