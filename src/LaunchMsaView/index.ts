@@ -29,9 +29,14 @@ function extendStateModel(stateModel: IAnyModelType) {
                   label: 'Launch MSA view',
                   icon: AddIcon,
                   onClick: () => {
-                    getSession(track).queueDialog(handleClose => [
+                    const session = getSession(track)
+                    session.queueDialog(handleClose => [
                       LaunchMsaViewDialog,
-                      { model: track, handleClose, feature },
+                      {
+                        model: track,
+                        handleClose,
+                        feature,
+                      },
                     ])
                   },
                 },

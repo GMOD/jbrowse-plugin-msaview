@@ -6,6 +6,7 @@ import {
   DialogContent,
   MenuItem,
   TextField,
+  Typography,
 } from '@mui/material'
 import { Feature, getSession } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
@@ -83,11 +84,20 @@ export default function LaunchProteinViewDialog({
       open
     >
       <DialogContent className={classes.dialogContent}>
+        <Typography>
+          The source data for these multiple sequence alignments is
+          https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/knownCanonical.multiz100way.protAA.fa.gz
+          (
+          <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
+            from here
+          </a>
+          )
+        </Typography>
         {error ? <ErrorMessage error={error} /> : null}
         <TextField
           value={userSelection}
           onChange={event => setUserSelection(event.target.value)}
-          label="Choose isoform"
+          label="Choose isoform to view multiple sequence alignment for"
           select
         >
           {options
