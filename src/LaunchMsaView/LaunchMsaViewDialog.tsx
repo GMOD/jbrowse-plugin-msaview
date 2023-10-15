@@ -57,7 +57,14 @@ export default function LaunchProteinViewDialog({
   const set = new Set(geneNameList)
   const options = getTranscriptFeatures(feature)
   const ret = options.find(val => set.has(getId(val)))
-  const [userSelection, setUserSelection] = useState(getId(ret ?? options[0]))
+  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const viewTitle = [
+    feature.get('gene_name'),
+    feature.get('name') || feature.get('id'),
+  ]
+    .filter(f => !!f)
+    .join(' ')
+
   return (
     <Dialog
       maxWidth="xl"
@@ -111,7 +118,7 @@ export default function LaunchProteinViewDialog({
           onClick={() => {
             ;(async () => {
               try {
-                launchView({ userSelection, session })
+                launchView({ userSelection, session, viewTitle })
                 handleClose()
               } catch (e) {
                 console.error(e)

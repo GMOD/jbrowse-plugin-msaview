@@ -4,9 +4,11 @@ import { ungzip } from 'pako'
 export async function launchView({
   userSelection,
   session,
+  viewTitle,
 }: {
   session: AbstractSessionModel
   userSelection: string
+  viewTitle: string
 }) {
   const res = await fetch(
     `https://jbrowse.org/demos/msaview/knownCanonical/${userSelection}.mfa.gz`,
@@ -18,6 +20,7 @@ export async function launchView({
   const d = new TextDecoder().decode(ungzip(data))
   session.addView('MsaView', {
     type: 'MsaView',
+    displayName: viewTitle,
     treeAreaWidth: 200,
     treeWidth: 100,
     drawNodeBubbles: false,
