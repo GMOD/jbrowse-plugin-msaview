@@ -1,5 +1,5 @@
 const fs = require('fs')
-const r = fs.readFileSync('test2.tsv', 'utf8')
+const r = fs.readFileSync('species.tsv', 'utf8')
 console.log(
   JSON.stringify(
     Object.fromEntries(

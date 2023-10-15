@@ -56,12 +56,12 @@
       "adapter": {
         "type": "Gff3TabixAdapter",
         "gffGzLocation": {
-          "uri": "gencode.v44.annotation.sorted.gff3.gz",
+          "uri": "https://jbrowse.org/demos/app/gencode.v44.annotation.sorted.gff3.gz",
           "locationType": "UriLocation"
         },
         "index": {
           "location": {
-            "uri": "gencode.v44.annotation.sorted.gff3.gz.tbi",
+            "uri": "https://jbrowse.org/demos/app/gencode.v44.annotation.sorted.gff3.gz.tbi",
             "locationType": "UriLocation"
           },
           "indexType": "TBI"
@@ -92,12 +92,12 @@
       "adapter": {
         "type": "VcfTabixAdapter",
         "vcfGzLocation": {
-          "uri": "clinvar.vcf.gz",
+          "uri": "https://jbrowse.org/demos/app/clinvar.vcf.gz",
           "locationType": "UriLocation"
         },
         "index": {
           "location": {
-            "uri": "clinvar.vcf.gz.tbi",
+            "uri": "https://jbrowse.org/demos/app/clinvar.vcf.gz.tbi",
             "locationType": "UriLocation"
           },
           "indexType": "TBI"
@@ -126,12 +126,12 @@
       "adapter": {
         "type": "BedTabixAdapter",
         "bedGzLocation": {
-          "uri": "cosmic.bed.gz",
+          "uri": "https://jbrowse.org/demos/app/cosmic.bed.gz",
           "locationType": "UriLocation"
         },
         "index": {
           "location": {
-            "uri": "cosmic.bed.gz.tbi",
+            "uri": "https://jbrowse.org/demos/app/cosmic.bed.gz.tbi",
             "locationType": "UriLocation"
           },
           "indexType": "TBI"
@@ -159,19 +159,18 @@
       "type": "TrixTextSearchAdapter",
       "textSearchAdapterId": "hg38-index",
       "ixFilePath": {
-        "uri": "trix/hg38.ix",
+        "uri": "https://jbrowse.org/demos/app/trix/hg38.ix",
         "locationType": "UriLocation"
       },
       "ixxFilePath": {
-        "uri": "trix/hg38.ixx",
+        "uri": "https://jbrowse.org/demos/app/trix/hg38.ixx",
         "locationType": "UriLocation"
       },
       "metaFilePath": {
-        "uri": "trix/hg38_meta.json",
+        "uri": "https://jbrowse.org/demos/app/trix/hg38_meta.json",
         "locationType": "UriLocation"
       },
       "assemblyNames": ["hg38"]
     }
   ]
 }
-
