@@ -50,24 +50,24 @@
   "tracks": [
     {
       "type": "FeatureTrack",
-      "trackId": "gencode.v36.annotation.sort.gff3",
-      "name": "Gencode v36",
+      "trackId": "gencode.v44.annotation.sorted.gff3",
+      "name": "gencode.v44.annotation.sorted.gff3",
       "category": ["Annotation"],
-      "assemblyNames": ["hg38"],
       "adapter": {
         "type": "Gff3TabixAdapter",
         "gffGzLocation": {
-          "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/gencode/gencode.v36.annotation.sort.gff3.gz",
+          "uri": "gencode.v44.annotation.sorted.gff3.gz",
           "locationType": "UriLocation"
         },
         "index": {
           "location": {
-            "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/gencode/gencode.v36.annotation.sort.gff3.gz.tbi",
+            "uri": "gencode.v44.annotation.sorted.gff3.gz.tbi",
             "locationType": "UriLocation"
           },
           "indexType": "TBI"
         }
       },
+      "assemblyNames": ["hg38"],
       "displays": [
         {
           "type": "LinearBasicDisplay",
@@ -75,11 +75,31 @@
           "renderer": {
             "type": "SvgFeatureRenderer",
             "labels": {
-              "description": "jexl:get(feature,'gene_name')"
+              "name": "jexl:get(feature,'gene_name')"
             }
           }
         }
       ]
     }
+  ],
+  "aggregateTextSearchAdapters": [
+    {
+      "type": "TrixTextSearchAdapter",
+      "textSearchAdapterId": "hg38-index",
+      "ixFilePath": {
+        "uri": "trix/hg38.ix",
+        "locationType": "UriLocation"
+      },
+      "ixxFilePath": {
+        "uri": "trix/hg38.ixx",
+        "locationType": "UriLocation"
+      },
+      "metaFilePath": {
+        "uri": "trix/hg38_meta.json",
+        "locationType": "UriLocation"
+      },
+      "assemblyNames": ["hg38"]
+    }
   ]
 }
+

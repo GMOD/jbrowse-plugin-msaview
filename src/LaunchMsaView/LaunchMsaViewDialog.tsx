@@ -33,6 +33,12 @@ export function getTranscriptFeatures(feature: Feature) {
 function getId(val?: Feature) {
   return val !== undefined ? val.get('name') || val.get('id') : ''
 }
+
+function getDisplayName(val?: Feature) {
+  return val !== undefined
+    ? [val.get('name'), val.get('id')].filter(f => !!f).join(' ')
+    : ''
+}
 export default function LaunchProteinViewDialog({
   handleClose,
   feature,
@@ -46,7 +52,7 @@ export default function LaunchProteinViewDialog({
   const { classes } = useStyles()
   const session = getSession(model)
   const [error, setError] = useState<unknown>()
-  const [data, setData] = useState<string[]>()
+  const [geneNameList, setGeneNameList] = useState<string[]>()
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
@@ -60,22 +66,27 @@ export default function LaunchProteinViewDialog({
           )
         }
         const result = await res.text()
-        setData(
-          result
-            .split('\n')
-            .map(f => f.trim())
-            .filter(f => !!f),
-        )
+        const data = result
+          .split('\n')
+          .map(f => f.trim())
+          .filter(f => !!f)
+        setGeneNameList(data)
+        const set = new Set(data)
+        const options = getTranscriptFeatures(feature)
+        const ret = options.find(val => set.has(getId(val)))
+        if (ret) {
+          setUserSelection(getId(ret))
+        }
       } catch (e) {
         console.error(e)
         setError(e)
       }
     })()
-  }, [])
-  const set = new Set(data)
+  }, [feature])
+  const set = new Set(geneNameList)
   const options = getTranscriptFeatures(feature)
-
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const ret = options.find(val => set.has(getId(val)))
+  const [userSelection, setUserSelection] = useState(getId(ret ?? options[0]))
   return (
     <Dialog
       maxWidth="xl"
@@ -85,38 +96,38 @@ export default function LaunchProteinViewDialog({
     >
       <DialogContent className={classes.dialogContent}>
         <Typography>
-          The source data for these multiple sequence alignments is
-          https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/knownCanonical.multiz100way.protAA.fa.gz
-          (
+          The source data for these multiple sequence alignments is from{' '}
           <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
-            from here
+            knownCanonical.multiz100way.protAA.fa.gz
           </a>
-          )
         </Typography>
         {error ? <ErrorMessage error={error} /> : null}
+        {geneNameList && !ret ? (
+          <div style={{ color: 'red' }}>No MSA data for this gene found</div>
+        ) : null}
         <TextField
           value={userSelection}
           onChange={event => setUserSelection(event.target.value)}
-          label="Choose isoform to view multiple sequence alignment for"
+          label="Choose isoform to view MSA for"
           select
         >
           {options
             .filter(val => set.has(getId(val)))
             .map((val, idx) => {
-              const d = getId(val)
+              const d = getDisplayName(val)
               return (
                 <MenuItem value={d} key={val.id() + '-' + idx}>
-                  {d} {set.has(d) ? ' (has data)' : ''}
+                  {d} (has data)
                 </MenuItem>
               )
             })}
           {options
             .filter(val => !set.has(getId(val)))
             .map((val, idx) => {
-              const d = getId(val)
+              const d = getDisplayName(val)
               return (
-                <MenuItem value={d} key={val.id() + '-' + idx}>
-                  {d} {set.has(d) ? ' (no data)' : ''}
+                <MenuItem value={d} key={val.id() + '-' + idx} disabled>
+                  {d}
                 </MenuItem>
               )
             })}
