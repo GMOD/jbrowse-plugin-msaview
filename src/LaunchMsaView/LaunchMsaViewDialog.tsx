@@ -10,9 +10,11 @@ import {
 } from '@mui/material'
 import { Feature, getSession } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
-import { ungzip } from 'pako'
 
 // locals
+import { getDisplayName, getId, getTranscriptFeatures } from './util'
+import { fetchGeneList } from './fetchGeneList'
+import { launchView } from './launchViewSubmit'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -20,25 +22,6 @@ const useStyles = makeStyles()({
   },
 })
 
-export function getTranscriptFeatures(feature: Feature) {
-  // check if we are looking at a 'two-level' or 'three-level' feature by
-  // finding exon/CDS subfeatures. we want to select from transcript names
-  const subfeatures = feature.get('subfeatures') ?? []
-  return subfeatures.some(
-    f => f.get('type') === 'CDS' || f.get('type') === 'exon',
-  )
-    ? [feature]
-    : subfeatures
-}
-function getId(val?: Feature) {
-  return val !== undefined ? val.get('name') || val.get('id') : ''
-}
-
-function getDisplayName(val?: Feature) {
-  return val !== undefined
-    ? [val.get('name'), val.get('id')].filter(f => !!f).join(' ')
-    : ''
-}
 export default function LaunchProteinViewDialog({
   handleClose,
   feature,
@@ -57,19 +40,7 @@ export default function LaunchProteinViewDialog({
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
-        const res = await fetch(
-          'https://jbrowse.org/demos/msaview/knownCanonical/list.txt',
-        )
-        if (!res.ok) {
-          throw new Error(
-            `HTTP ${res.status} fetching list ${await res.text()}`,
-          )
-        }
-        const result = await res.text()
-        const data = result
-          .split('\n')
-          .map(f => f.trim())
-          .filter(f => !!f)
+        const data = await fetchGeneList()
         setGeneNameList(data)
         const set = new Set(data)
         const options = getTranscriptFeatures(feature)
@@ -113,20 +84,20 @@ export default function LaunchProteinViewDialog({
         >
           {options
             .filter(val => set.has(getId(val)))
-            .map((val, idx) => {
+            .map(val => {
               const d = getDisplayName(val)
               return (
-                <MenuItem value={d} key={val.id() + '-' + idx}>
+                <MenuItem value={getId(val)} key={val.id()}>
                   {d} (has data)
                 </MenuItem>
               )
             })}
           {options
             .filter(val => !set.has(getId(val)))
-            .map((val, idx) => {
+            .map(val => {
               const d = getDisplayName(val)
               return (
-                <MenuItem value={d} key={val.id() + '-' + idx} disabled>
+                <MenuItem value={getId(val)} key={val.id()} disabled>
                   {d}
                 </MenuItem>
               )
@@ -140,33 +111,7 @@ export default function LaunchProteinViewDialog({
           onClick={() => {
             ;(async () => {
               try {
-                const res = await fetch(
-                  `https://jbrowse.org/demos/msaview/knownCanonical/${userSelection}.mfa.gz`,
-                )
-                if (!res.ok) {
-                  throw new Error(
-                    `HTTP ${res.status} fetching ${await res.text()}`,
-                  )
-                }
-                const data = await res.arrayBuffer()
-                const d = new TextDecoder().decode(ungzip(data))
-                session.addView('MsaView', {
-                  type: 'MsaView',
-                  treeAreaWidth: 200,
-                  treeWidth: 100,
-                  drawNodeBubbles: false,
-                  labelsAlignRight: true,
-                  showBranchLen: false,
-                  colWidth: 10,
-                  rowHeight: 12,
-                  colorSchemeName: 'percent_identity_dynamic',
-                  treeFilehandle: {
-                    uri: 'https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/hg38.100way.nh',
-                  },
-                  data: {
-                    msa: d,
-                  },
-                })
+                launchView({ userSelection, session })
                 handleClose()
               } catch (e) {
                 console.error(e)
