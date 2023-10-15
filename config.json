@@ -51,7 +51,7 @@
     {
       "type": "FeatureTrack",
       "trackId": "gencode.v44.annotation.sorted.gff3",
-      "name": "gencode.v44.annotation.sorted.gff3",
+      "name": "GENCODE v44",
       "category": ["Annotation"],
       "adapter": {
         "type": "Gff3TabixAdapter",
@@ -80,6 +80,78 @@
           }
         }
       ]
+    },
+    {
+      "type": "VariantTrack",
+      "trackId": "clinvar.vcf",
+      "name": "ClinVar",
+      "category": ["Variants"],
+      "metadata": {
+        "source": "From ClinVar FTP, downloaded Oct 15 2023"
+      },
+      "adapter": {
+        "type": "VcfTabixAdapter",
+        "vcfGzLocation": {
+          "uri": "clinvar.vcf.gz",
+          "locationType": "UriLocation"
+        },
+        "index": {
+          "location": {
+            "uri": "clinvar.vcf.gz.tbi",
+            "locationType": "UriLocation"
+          },
+          "indexType": "TBI"
+        }
+      },
+      "assemblyNames": ["hg38"],
+      "displays": [
+        {
+          "type": "LinearVariantDisplay",
+          "displayId": "clinvar_ncbi-LinearVariantDisplay",
+          "renderer": {
+            "type": "SvgFeatureRenderer",
+            "color1": "jexl:get(feature,'INFO').CLNSIG=='Benign'?'blue':get(feature,'INFO').CLNSIG=='Likely_benign'?'deepskyblue':get(feature,'INFO').CLNSIG=='Uncertain_significance'?'gray':get(feature,'INFO').CLNSIG=='Pathogenic'?'red':get(feature,'INFO').CLNSIG=='Likely_pathogenic'?'orange':get(feature,'INFO').CLNSIG=='Conflicting_interpretations_of_pathogenicity'?'brown':'purple'"
+          }
+        }
+      ]
+    },
+    {
+      "type": "FeatureTrack",
+      "trackId": "cosmic.bed",
+      "name": "COSMIC variants",
+      "category": ["Variants"],
+      "metadata": {
+        "source": "From UCSC table browser export, downloaded Oct 15 2023"
+      },
+      "adapter": {
+        "type": "BedTabixAdapter",
+        "bedGzLocation": {
+          "uri": "cosmic.bed.gz",
+          "locationType": "UriLocation"
+        },
+        "index": {
+          "location": {
+            "uri": "cosmic.bed.gz.tbi",
+            "locationType": "UriLocation"
+          },
+          "indexType": "TBI"
+        }
+      },
+      "assemblyNames": ["hg38"]
+    },
+    {
+      "type": "QuantitativeTrack",
+      "trackId": "hg38.phyloP100way",
+      "name": "hg38.phyloP100way",
+      "category": ["Conservation"],
+      "adapter": {
+        "type": "BigWigAdapter",
+        "bigWigLocation": {
+          "uri": "http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw",
+          "locationType": "UriLocation"
+        }
+      },
+      "assemblyNames": ["hg38"]
     }
   ],
   "aggregateTextSearchAdapters": [
