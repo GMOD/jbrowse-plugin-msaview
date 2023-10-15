@@ -13,7 +13,8 @@ type LGV = LinearGenomeViewModel
 const useStyles = makeStyles()({
   highlight: {
     height: '100%',
-    background: 'rgba(255, 255, 0, 0.3)',
+    background: 'rgba(255,255,0,0.3)',
+    border: '1px solid rgba(50,50,0,0.3)',
     position: 'absolute',
     textAlign: 'center',
     overflow: 'hidden',
@@ -36,7 +37,7 @@ const Highlight = observer(function Highlight({ model }: { model: LGV }) {
         const s = model.bpToPx({ refName, coord: r.start })
         const e = model.bpToPx({ refName, coord: r.end })
         if (s && e) {
-          const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 3)
+          const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
           const left = Math.min(s.offsetPx, e.offsetPx) - model.offsetPx
           return (
             <div
