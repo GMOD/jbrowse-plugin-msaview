@@ -38,7 +38,7 @@ export async function launchView({
       uri: 'https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/hg38.100way.nh',
     },
     treeMetadataFilehandle: {
-      uri: 'https://jbrowse.org/demos/app/species.json',
+      uri: 'https://s3.amazonaws.com/jbrowse.org/demos/app/species.json',
     },
     data: {
       msa: d,
