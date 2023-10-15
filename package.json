@@ -59,6 +59,7 @@
     "@jbrowse/cli": "^2.7.0",
     "@jbrowse/core": "^2.7.0",
     "@jbrowse/development-tools": "^2.1.1",
+    "@jbrowse/plugin-linear-genome-view": "^2.7.0",
     "@mui/material": "^5.14.12",
     "@mui/system": "^5.14.12",
     "@mui/x-data-grid": "^6.16.1",

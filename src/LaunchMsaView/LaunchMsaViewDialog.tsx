@@ -8,13 +8,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { Feature, getSession } from '@jbrowse/core/util'
+import { Feature, getContainingView, getSession } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
 
 // locals
 import { getDisplayName, getId, getTranscriptFeatures } from './util'
 import { fetchGeneList } from './fetchGeneList'
 import { launchView } from './launchViewSubmit'
+import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -29,11 +30,11 @@ export default function LaunchProteinViewDialog({
 }: {
   handleClose: () => void
   feature: Feature
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  model: any
+  model: BaseTrackModel
 }) {
   const { classes } = useStyles()
   const session = getSession(model)
+  const view = getContainingView(model)
   const [error, setError] = useState<unknown>()
   const [geneNameList, setGeneNameList] = useState<string[]>()
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function LaunchProteinViewDialog({
   const options = getTranscriptFeatures(feature)
   const ret = options.find(val => set.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const viewTitle = [
+  const newViewTitle = [
     feature.get('gene_name'),
     feature.get('name') || feature.get('id'),
   ]
@@ -118,7 +119,7 @@ export default function LaunchProteinViewDialog({
           onClick={() => {
             ;(async () => {
               try {
-                launchView({ userSelection, session, viewTitle })
+                launchView({ userSelection, session, newViewTitle, view })
                 handleClose()
               } catch (e) {
                 console.error(e)

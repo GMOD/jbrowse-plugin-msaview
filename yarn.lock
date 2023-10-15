@@ -1416,6 +1416,24 @@
     rollup-plugin-sourcemaps "^0.6.3"
     rollup-plugin-terser "^7.0.2"
 
+"@jbrowse/plugin-linear-genome-view@^2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@jbrowse/plugin-linear-genome-view/-/plugin-linear-genome-view-2.7.0.tgz#66d9e86b3db0b5a0bbb07c998770978aecf2adab"
+  integrity sha512-LBNOhadgsi0mdILocogpZEIgwbD7dSTtOGYT7b0xknbRxdJrXelNgrffsxtzM6twytdyc6reHLzXu9dYTMgPTg==
+  dependencies:
+    "@mui/icons-material" "^5.0.1"
+    "@popperjs/core" "^2.11.0"
+    "@types/file-saver" "^2.0.1"
+    "@types/normalize-wheel" "^1.0.0"
+    clone "^2.1.2"
+    clsx "^2.0.0"
+    copy-to-clipboard "^3.3.1"
+    file-saver "^2.0.0"
+    material-ui-popup-state "^5.0.0"
+    normalize-wheel "^1.0.1"
+    react-error-boundary "^4.0.3"
+    react-popper "^2.0.0"
+
 "@jridgewell/gen-mapping@^0.3.0", "@jridgewell/gen-mapping@^0.3.2":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@jridgewell/gen-mapping/-/gen-mapping-0.3.3.tgz#7e02e6eb5df901aaedb08514203b096614024098"
@@ -1657,7 +1675,7 @@
     picocolors "^1.0.0"
     tslib "^2.6.0"
 
-"@popperjs/core@^2.11.8":
+"@popperjs/core@^2.11.0", "@popperjs/core@^2.11.8":
   version "2.11.8"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
@@ -1801,6 +1819,11 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
   integrity sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
 
+"@types/file-saver@^2.0.1":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/file-saver/-/file-saver-2.0.5.tgz#9ee342a5d1314bb0928375424a2f162f97c310c7"
+  integrity sha512-zv9kNf3keYegP5oThGLaPk8E081DFDuwfqjtiTzm6PoxChdJ1raSuADf2YGCVIyrSynLrgc8JWv296s7Q7pQSQ==
+
 "@types/json-schema@^7.0.12", "@types/json-schema@^7.0.9":
   version "7.0.13"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.13.tgz#02c24f4363176d2d18fc8b70b9f3c54aba178a85"
@@ -1817,6 +1840,11 @@
   integrity sha512-eWO4K2Ji70QzKUqRy6oyJWUeB7+g2cRagT3T/nxYibYcT4y2BDL8lqolRXjTHmkZCdJfIPaY73KbJAZmcryxTQ==
   dependencies:
     undici-types "~5.25.1"
+
+"@types/normalize-wheel@^1.0.0":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/normalize-wheel/-/normalize-wheel-1.0.2.tgz#5ccb32cd81868a0da7928bc62159b3384798d191"
+  integrity sha512-BSGYjG5gvxXWMnYJlykd4ESHq/BZM+qQl4+6/St8KPudsP8DKl3uABRAgb729D5V6JVy2Jbrqs1VsTJLj1W8Rw==
 
 "@types/pako@^2.0.1":
   version "2.0.1"
@@ -4771,6 +4799,11 @@ file-entry-cache@^6.0.1:
   dependencies:
     flat-cache "^3.0.4"
 
+file-saver@^2.0.0:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/file-saver/-/file-saver-2.0.5.tgz#d61cfe2ce059f414d899e9dd6d4107ee25670c38"
+  integrity sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==
+
 file-type@^3.8.0:
   version "3.9.0"
   resolved "https://registry.yarnpkg.com/file-type/-/file-type-3.9.0.tgz#257a078384d1db8087bc449d107d52a52672b9e9"
@@ -6909,6 +6942,11 @@ react-error-boundary@^4.0.3:
   dependencies:
     "@babel/runtime" "^7.12.5"
 
+react-fast-compare@^3.0.1:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
+  integrity sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==
+
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
@@ -6933,6 +6971,14 @@ react-msaview@^2.1.0:
     rbush "^3.0.1"
     stockholm-js "^1.0.10"
     tss-react "^4.8.3"
+
+react-popper@^2.0.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-2.3.0.tgz#17891c620e1320dce318bad9fede46a5f71c70ba"
+  integrity sha512-e1hj8lL3uM+sgSR4Lxzn5h1GxBlpa4CQz0XLF8kx4MDrDRWY0Ena4c97PUeSX9i5W3UAfDP0z0FXCTQkoXUl3Q==
+  dependencies:
+    react-fast-compare "^3.0.1"
+    warning "^4.0.2"
 
 react-transition-group@^4.4.5:
   version "4.4.5"
@@ -8223,6 +8269,13 @@ wait-on@7.0.1:
     lodash "^4.17.21"
     minimist "^1.2.7"
     rxjs "^7.8.0"
+
+warning@^4.0.2:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
+  integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
+  dependencies:
+    loose-envify "^1.0.0"
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
