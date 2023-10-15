@@ -1,14 +1,17 @@
 import { AbstractSessionModel } from '@jbrowse/core/util'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { ungzip } from 'pako'
 
 export async function launchView({
   userSelection,
   session,
   newViewTitle,
+  view: connectedView,
 }: {
   session: AbstractSessionModel
   userSelection: string
   newViewTitle: string
+  view: LinearGenomeViewModel
 }) {
   const res = await fetch(
     `https://jbrowse.org/demos/msaview/knownCanonical/${userSelection}.mfa.gz`,
@@ -36,5 +39,6 @@ export async function launchView({
       msa: d,
     },
   })
-  view.setExtraData({ view, feature })
+  // @ts-expect-error
+  view.setExtraData({ view: connectedView, feature })
 }

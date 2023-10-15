@@ -8,14 +8,19 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { Feature, getContainingView, getSession } from '@jbrowse/core/util'
+import {
+  AbstractTrackModel,
+  Feature,
+  getContainingView,
+  getSession,
+} from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
 
 // locals
 import { getDisplayName, getId, getTranscriptFeatures } from './util'
 import { fetchGeneList } from './fetchGeneList'
 import { launchView } from './launchViewSubmit'
-import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -30,11 +35,11 @@ export default function LaunchProteinViewDialog({
 }: {
   handleClose: () => void
   feature: Feature
-  model: BaseTrackModel
+  model: AbstractTrackModel
 }) {
   const { classes } = useStyles()
   const session = getSession(model)
-  const view = getContainingView(model)
+  const view = getContainingView(model) as LinearGenomeViewModel
   const [error, setError] = useState<unknown>()
   const [geneNameList, setGeneNameList] = useState<string[]>()
   useEffect(() => {
