@@ -6367,9 +6367,9 @@ object-assign@^4, object-assign@^4.0.1, object-assign@^4.1.1:
   integrity sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==
 
 object-inspect@^1.12.3, object-inspect@^1.9.0:
-  version "1.12.3"
-  resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.12.3.tgz#ba62dffd67ee256c8c086dfae69e016cd1f198b9"
-  integrity sha512-geUvdk7c+eizMNUDkRpW1wJwgfOiOeHbxBR/hLXK1aT6zmVSO0jsQcs7fj6MGw89jC/cjGfLcNOrtMYtGqm81g==
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/object-inspect/-/object-inspect-1.13.0.tgz#42695d3879e1cd5bda6df5062164d80c996e23e2"
+  integrity sha512-HQ4J+ic8hKrgIt3mqk6cVOVrW2ozL4KdvHlqpBv9vDYWx9ysAgENAdvy4FoGF+KFdhR7nQTNm5J0ctAeOwn+3g==
 
 object-keys@^1.1.1:
   version "1.1.1"
@@ -6958,9 +6958,9 @@ react-is@^18.2.0:
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
 
 react-msaview@^2.1.0:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-2.1.1.tgz#b0a645e6027bda0dfcd62e8a2f202f2329711174"
-  integrity sha512-4jXSadC18xEgPIfYcAkgNWdpIoKFXXLjgOvLh8Um2iB7W3kwuVfqwc5tSN228YhhKe0opIYwBa7jXPvxAcd0mA==
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-2.1.2.tgz#19f75cd201aee7b2720af700d13e974ba113bf51"
+  integrity sha512-4AyHbvTa+Oxi07SHR0hMr5vZa/iuTnRprMQPzciZULg8UHzCt6xiS3F+UBjV/OQ8xycytJ6/nT7Sp+Q42ScoaQ==
   dependencies:
     clustal-js "^1.0.3"
     colord "^2.9.3"

@@ -124,7 +124,16 @@ export default function LaunchProteinViewDialog({
           onClick={() => {
             ;(async () => {
               try {
-                launchView({ userSelection, session, newViewTitle, view })
+                if (!ret) {
+                  return
+                }
+                launchView({
+                  userSelection,
+                  session,
+                  newViewTitle,
+                  view,
+                  feature: ret,
+                })
                 handleClose()
               } catch (e) {
                 console.error(e)
