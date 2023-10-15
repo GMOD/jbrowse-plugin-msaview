@@ -1,0 +1,102 @@
+Human	Homo sapiens	Dec 2013	hg38	Reference species
+Chimp	Pan troglodytes	Feb 2011	panTro4	Syntenic net	
+Gorilla	Gorilla gorilla gorilla	May 2011	gorGor3	Reciprocal best net 
+Orangutan	Pongo pygmaeus abelii	July 2007	ponAbe2	Reciprocal best net 
+Gibbon	Nomascus leucogenys	Oct 2012	nomLeu3	Syntenic net	
+Rhesus	Macaca mulatta	Oct 2010	rheMac3	Syntenic net	
+Crab-eating macaque	Macaca fascicularis	Jun 2013	macFas5	Syntenic net	
+Baboon	Papio hamadryas	Mar 2012	papAnu2	Reciprocal best net 
+Green monkey	Chlorocebus sabaeus	Mar 2014	chlSab2	Syntenic net	
+Marmoset	Callithrix jacchus	Mar 2009	calJac3	Syntenic net	
+Squirrel monkey	Saimiri boliviensis	Oct 2011	saiBol1	Syntenic net	
+Bushbaby	Otolemur garnettii	Mar 2011	otoGar3	Syntenic net	
+Chinese tree shrew	Tupaia chinensis	Jan 2013	tupChi1	Syntenic net	
+Squirrel	Spermophilus tridecemlineatus	Nov 2011	speTri2	Syntenic net	
+Lesser Egyptian jerboa	Jaculus jaculus	May 2012	jacJac1	Syntenic net	
+Prairie vole	Microtus ochrogaster	Oct 2012	micOch1	Syntenic net	
+Chinese hamster	Cricetulus griseus	Jul 2013	criGri1	Syntenic net	
+Golden hamster	Mesocricetus auratus	Mar 2013	mesAur1	Syntenic net	
+Mouse	Mus musculus	Dec 2011	mm10	Syntenic net	
+Rat	Rattus norvegicus	Jul 2014	rn6	Syntenic net	
+Naked mole-rat	Heterocephalus glaber	Jan 2012	hetGla2	Syntenic net	
+Guinea pig	Cavia porcellus	Feb 2008	cavPor3	Syntenic net	
+Chinchilla	Chinchilla lanigera	May 2012	chiLan1	Syntenic net	
+Brush-tailed rat	Octodon degus	Apr 2012	octDeg1	Syntenic net	
+Rabbit	Oryctolagus cuniculus	Apr 2009	oryCun2	Syntenic net	
+Pika	Ochotona princeps	May 2012	ochPri3	Syntenic net	
+Pig	Sus scrofa	Aug 2011	susScr3	Syntenic net	
+Alpaca	Vicugna pacos	Mar 2013	Vicugna_pacos-vicPac2	Syntenic net	
+Bactrian camel	Camelus ferus	Dec 2011	camFer1	Syntenic net	
+Dolphin	Tursiops truncatus	Oct 2011	turTru2	Reciprocal best net 
+Killer whale	Orcinus orca	Jan 2013	orcOrc1	Syntenic net	
+Tibetan antelope	Pantholops hodgsonii	May 2013	panHod1	Syntenic net	
+Cow	Bos taurus	Jun 2014	bosTau8	Syntenic net	
+Sheep	Ovis aries	Aug 2012	oviAri3	Syntenic net	
+Domestic goat	Capra hircus	May 2012	capHir1	Syntenic net	
+Horse	Equus caballus	Sep 2007	equCab2	Syntenic net	
+White rhinoceros	Ceratotherium simum	May 2012	cerSim1	Syntenic net	
+Cat	Felis catus	Nov 2014	felCat8	Syntenic net	
+Dog	Canis lupus familiaris	Sep 2011	canFam3	Syntenic net	
+Ferret	Mustela putorius furo	Apr 2011	musFur1	Syntenic net	
+Panda	Ailuropoda melanoleuca	Dec 2009	BGI-ailMel1	Syntenic net	
+Pacific walrus	Odobenus rosmarus divergens	Jan 2013	odoRosDiv1	Syntenic net	
+Weddell seal	Leptonychotes weddellii	Mar 2013	lepWed1	Reciprocal best net 
+Black flying-fox	Pteropus alecto	Aug 2012	pteAle1	Syntenic net	
+Megabat	Pteropus vampyrus	Jul 2008	pteVam1	Reciprocal best net 
+David's myotis bat	Myotis davidii	Aug 2012	myoDav1	Syntenic net	
+Microbat	Myotis lucifugus	Jul 2010	myoLuc2	Syntenic net	
+Big brown bat	Eptesicus fuscus	Jul 2012	eptFus1	Syntenic net	
+Hedgehog	Erinaceus europaeus	May 2012	eriEur2	Syntenic net	
+Shrew	Sorex araneus	Aug 2008	sorAra2	Syntenic net	
+Star-nosed mole	Condylura cristata	Mar 2012	conCri1	Syntenic net	
+
+Elephant	Loxodonta africana	Jul 2009	loxAfr3	Syntenic net	
+Cape elephant shrew	Elephantulus edwardii	Aug 2012	eleEdw1	Syntenic net	
+Manatee	Trichechus manatus latirostris	Oct 2011	triMan1	Syntenic net	
+Cape golden mole	Chrysochloris asiatica	Aug 2012	chrAsi1	Syntenic net	
+Tenrec	Echinops telfairi	Nov 2012	echTel2	Syntenic net	
+Aardvark	Orycteropus afer afer	May 2012	oryAfe1	Syntenic net	
+Armadillo	Dasypus novemcinctus	Dec 2011	dasNov3	Syntenic net	
+Opossum	Monodelphis domestica	Oct 2006	monDom5	Net	
+Tasmanian devil	Sarcophilus harrisii	Feb 2011	sarHar1	Net	
+Wallaby	Macropus eugenii	Sep 2009	macEug2	Reciprocal best net 
+Platypus	Ornithorhynchus anatinus	Mar 2007	ornAna1	Reciprocal best net 
+Saker falcon	Falco cherrug	Feb 2013	falChe1	Net	
+Peregrine falcon	Falco peregrinus	Feb 2013	falPer1	Net	
+Collared flycatcher	Ficedula albicollis	Jun 2013	ficAlb2	Net	
+White-throated sparrow	Zonotrichia albicollis	Apr 2013	zonAlb1	Net	
+Medium ground finch	Geospiza fortis	Apr 2012	geoFor1	Net	
+Zebra finch	Taeniopygia guttata	Feb 2013	taeGut2	Net	
+Tibetan ground jay	Pseudopodoces humilis	Jan 2013	pseHum1	Net	
+Budgerigar	Melopsittacus undulatus	Sep 2011	melUnd1	Net	
+Parrot	Amazona vittata	Jan 2013	amaVit1	Net	
+Scarlet macaw	Ara macao	Jun 2013	araMac1	Net	
+Rock pigeon	Columba livia	Feb 2013	colLiv1	Net	
+Mallard duck	Anas platyrhynchos	Apr 2013	anaPla1	Net	
+Chicken	Gallus gallus	Nov 2011	galGal4	Net	
+Turkey	Meleagris gallopavo	Dec 2009	melGal1	Net	
+American alligator	Alligator mississippiensis	Aug 2012	allMis1	Net	
+Green seaturtle	Chelonia mydas	Mar 2013	cheMyd1	Net	
+Painted turtle	Chrysemys picta bellii	Mar 2014	chrPic2	Net	
+Chinese softshell turtle Pelodiscus sinensis	Oct 2011	pelSin1	Net	
+Spiny softshell turtle	Apalone spinifera	May 2013	apaSpi1	Net	
+Lizard	Anolis carolinensis	May 2010	anoCar2	Net	
+X. tropicalis	Xenopus tropicalis	Sep 2012	xenTro7	Net	
+Coelacanth	Latimeria chalumnae	Aug 2011	latCha1	Net	
+Tetraodon	Tetraodon nigroviridis	Mar 2007	tetNig2	Net	
+Fugu	Takifugu rubripes	Oct 2011	fr3	Net	
+Yellowbelly pufferfish	Takifugu flavidus	May 2013	takFla1 Net	
+Nile tilapia	Oreochromis niloticus	Jan 2011	oreNil2	Net	
+Princess of Burundi	Neolamprologus brichardi	May 2011	neoBri1	Net	
+Burton's mouthbreeder	Haplochromis burtoni	Oct 2011	hapBur1	Net	
+Zebra mbuna	Maylandia zebra	Mar 2012	mayZeb1	Net	
+Pundamilia nyererei	Pundamilia nyererei	Oct 2011	punNye1	Net	
+Medaka	Oryzias latipes	Oct 2005	oryLat2	Net	
+Southern platyfish	Xiphophorus maculatus	Jan 2012	xipMac1	Net	
+Stickleback	Gasterosteus aculeatus	Feb 2006	gasAcu1	Net	
+Atlantic cod	Gadus morhua	May 2010	gadMor1	Net	
+Zebrafish	Danio rerio	Sep 2014	danRer10	Net	
+Mexican tetra (cavefish)	Astyanax mexicanus	Apr 2013	astMex1	Net	
+Spotted gar	Lepisosteus oculatus	Dec 2011	lepOcu1	Net	
+Lamprey	Petromyzon marinus	Sep 2010	petMar2	Net	
+
