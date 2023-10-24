@@ -17,82 +17,87 @@ interface IRegion {
   start: number
   end: number
 }
-const stateModel = types
-  .compose(
-    MSAModel,
-    types.model({
-      connectedViewId: types.string,
-      connectedFeature: types.frozen(),
-      connectedHighlights: types.array(Region),
-    }),
-  )
-  .actions(self => ({
-    setHighlights(r: IRegion[]) {
-      self.connectedHighlights = cast(r)
-    },
-    addToHighlights(r: IRegion) {
-      self.connectedHighlights.push(r)
-    },
-    clearHighlights() {
-      self.connectedHighlights = cast([])
-    },
-  }))
-  .views(self => ({
-    get transcriptToMsaMap() {
-      const f = new SimpleFeature(self.connectedFeature)
-      let iter = 0
 
-      const subs: Feature[] = f.get('subfeatures') || []
-      return subs
-        .filter(f => f.get('type') === 'CDS')
-        .map(f => {
-          const ref = f.get('refName').replace('chr', '')
-          const s = f.get('start')
-          const e = f.get('end')
-          const len = e - s
-          const op = Math.floor(len / 3)
-          const ps = iter
-          const pe = iter + op
-          iter += op
-          return [ref, s, e, ps, pe] as const
-        })
-    },
+export default function stateModelFactory() {
+  return types
+    .compose(
+      'MsaView',
+      MSAModel,
+      types.model({
+        connectedViewId: types.maybe(types.string),
+        connectedFeature: types.frozen(),
+        connectedHighlights: types.array(Region),
+      }),
+    )
+    .actions(self => ({
+      setHighlights(r: IRegion[]) {
+        self.connectedHighlights = cast(r)
+      },
+      addToHighlights(r: IRegion) {
+        self.connectedHighlights.push(r)
+      },
+      clearHighlights() {
+        self.connectedHighlights = cast([])
+      },
+    }))
+    .views(self => ({
+      get transcriptToMsaMap() {
+        const f = new SimpleFeature(self.connectedFeature)
+        let iter = 0
 
-    get connectedView() {
-      const session = getSession(self)
-      return session.views.find(f => f.id === self.connectedViewId) as
-        | LGV
-        | undefined
-    },
-  }))
+        const subs: Feature[] = f.get('subfeatures') || []
+        return subs
+          .filter(f => f.get('type') === 'CDS')
+          .map(f => {
+            const ref = f.get('refName').replace('chr', '')
+            const s = f.get('start')
+            const e = f.get('end')
+            const len = e - s
+            const op = Math.floor(len / 3)
+            const ps = iter
+            const pe = iter + op
+            iter += op
+            return [ref, s, e, ps, pe] as const
+          })
+      },
 
-  .actions(self => ({
-    afterCreate() {
-      addDisposer(
-        self,
-        autorun(() => {
-          const { mouseCol, connectedView } = self
-          if (connectedView?.initialized && mouseCol !== undefined) {
-            for (const entry of self.transcriptToMsaMap) {
-              if (doesIntersect2(entry[3], entry[4], mouseCol, mouseCol + 1)) {
-                const ret = (mouseCol - entry[3]) * 3
-                self.setHighlights([
-                  {
-                    assemblyName: 'hg38',
-                    refName: entry[0],
-                    start: entry[1] + ret,
-                    end: entry[1] + ret + 3,
-                  },
-                ])
-                break
+      get connectedView() {
+        const session = getSession(self)
+        return session.views.find(f => f.id === self.connectedViewId) as
+          | LGV
+          | undefined
+      },
+    }))
+
+    .actions(self => ({
+      afterCreate() {
+        addDisposer(
+          self,
+          autorun(() => {
+            const { mouseCol, connectedView } = self
+            if (connectedView?.initialized && mouseCol !== undefined) {
+              for (const entry of self.transcriptToMsaMap) {
+                if (
+                  doesIntersect2(entry[3], entry[4], mouseCol, mouseCol + 1)
+                ) {
+                  const ret = (mouseCol - entry[3]) * 3
+                  self.setHighlights([
+                    {
+                      assemblyName: 'hg38',
+                      refName: entry[0],
+                      start: entry[1] + ret,
+                      end: entry[1] + ret + 3,
+                    },
+                  ])
+                  break
+                }
               }
             }
-          }
-        }),
-      )
-    },
-  }))
+          }),
+        )
+      },
+    }))
+}
 
-export default stateModel
-
-export type MsaViewModel = Instance<typeof stateModel>
+export type MsaViewStateModel = ReturnType<typeof stateModelFactory>
+export type MsaViewModel = Instance<MsaViewStateModel>
