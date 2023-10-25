@@ -74,9 +74,9 @@ export default function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            const { mouseCol, connectedView } = self
+            const { transcriptToMsaMap, mouseCol, connectedView } = self
             if (connectedView?.initialized && mouseCol !== undefined) {
-              for (const entry of self.transcriptToMsaMap) {
+              for (const entry of transcriptToMsaMap) {
                 if (
                   doesIntersect2(entry[3], entry[4], mouseCol, mouseCol + 1)
                 ) {

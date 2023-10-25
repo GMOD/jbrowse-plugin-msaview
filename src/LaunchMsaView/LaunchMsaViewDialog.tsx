@@ -122,12 +122,13 @@ export default function LaunchProteinViewDialog({
           color="primary"
           variant="contained"
           onClick={() => {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
                 if (!ret) {
                   return
                 }
-                launchView({
+                await launchView({
                   userSelection,
                   session,
                   newViewTitle,

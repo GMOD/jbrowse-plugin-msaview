@@ -11,11 +11,11 @@ export function getTranscriptFeatures(feature: Feature) {
     : subfeatures
 }
 export function getId(val?: Feature) {
-  return val !== undefined ? val.get('name') || val.get('id') : ''
+  return val === undefined ? '' : val.get('name') || val.get('id')
 }
 
 export function getDisplayName(val?: Feature) {
-  return val !== undefined
-    ? [val.get('name'), val.get('id')].filter(f => !!f).join(' ')
-    : ''
+  return val === undefined
+    ? ''
+    : [val.get('name'), val.get('id')].filter(f => !!f).join(' ')
 }
