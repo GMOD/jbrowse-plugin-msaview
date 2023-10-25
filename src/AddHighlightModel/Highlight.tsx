@@ -30,6 +30,7 @@ function getCanonicalName(assembly: Assembly, s: string) {
 const MsaToGenomeHighlight = observer(function ({ model }: { model: LGV }) {
   const { classes } = useStyles()
   const { assemblyManager, views } = getSession(model)
+  // @ts-expect-error
   const p = views.find(f => f.type === 'MsaView') as MsaViewModel
   const assembly = assemblyManager.get(model.assemblyNames[0])
   return assembly ? (

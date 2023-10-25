@@ -49,15 +49,21 @@ export default function stateModelFactory() {
         return subs
           .filter(f => f.get('type') === 'CDS')
           .map(f => {
-            const ref = f.get('refName').replace('chr', '')
-            const s = f.get('start')
-            const e = f.get('end')
-            const len = e - s
+            const refName = f.get('refName').replace('chr', '')
+            const featureStart = f.get('start')
+            const featureEnd = f.get('end')
+            const len = featureEnd - featureStart
             const op = Math.floor(len / 3)
-            const ps = iter
-            const pe = iter + op
+            const proteinStart = iter
+            const proteinEnd = iter + op
             iter += op
-            return [ref, s, e, ps, pe] as const
+            return {
+              refName,
+              featureStart,
+              featureEnd,
+              proteinStart,
+              proteinEnd,
+            } as const
           })
       },
 
@@ -68,6 +74,43 @@ export default function stateModelFactory() {
           | undefined
       },
     }))
+    .views(self => ({
+      get mouseCol2() {
+        const session = getSession(self)
+        const { transcriptToMsaMap, connectedView } = self
+        if (!connectedView?.initialized) {
+          return
+        }
+        // @ts-expect-error
+        const { hovered } = session
+        if (!hovered) {
+          return undefined
+        }
+        const { hoverPosition } = hovered
+        for (const entry of transcriptToMsaMap) {
+          const {
+            featureStart,
+            featureEnd,
+            refName,
+            proteinStart,
+            proteinEnd,
+          } = entry
+          if (
+            refName === hoverPosition.refName &&
+            doesIntersect2(
+              featureStart,
+              featureEnd,
+              hoverPosition.coord,
+              hoverPosition.coord + 1,
+            )
+          ) {
+            const ret = (hoverPosition.coord - featureStart) / 3
+            return ret
+          }
+        }
+        return undefined
+      },
+    }))
 
     .actions(self => ({
       afterCreate() {
@@ -75,22 +118,24 @@ export default function stateModelFactory() {
           self,
           autorun(() => {
             const { transcriptToMsaMap, mouseCol, connectedView } = self
-            if (connectedView?.initialized && mouseCol !== undefined) {
-              for (const entry of transcriptToMsaMap) {
-                if (
-                  doesIntersect2(entry[3], entry[4], mouseCol, mouseCol + 1)
-                ) {
-                  const ret = (mouseCol - entry[3]) * 3
-                  self.setHighlights([
-                    {
-                      assemblyName: 'hg38',
-                      refName: entry[0],
-                      start: entry[1] + ret,
-                      end: entry[1] + ret + 3,
-                    },
-                  ])
-                  break
-                }
+            if (!connectedView?.initialized || mouseCol === undefined) {
+              return
+            }
+            for (const entry of transcriptToMsaMap) {
+              const { featureStart, refName, proteinStart, proteinEnd } = entry
+              if (
+                doesIntersect2(proteinStart, proteinEnd, mouseCol, mouseCol + 1)
+              ) {
+                const ret = (mouseCol - proteinStart) * 3
+                self.setHighlights([
+                  {
+                    assemblyName: 'hg38',
+                    refName,
+                    start: featureStart + ret,
+                    end: featureStart + ret + 3,
+                  },
+                ])
+                break
               }
             }
           }),
