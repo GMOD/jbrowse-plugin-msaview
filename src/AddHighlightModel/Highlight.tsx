@@ -25,7 +25,7 @@ function getCanonicalName(assembly: Assembly, s: string) {
   return assembly.getCanonicalRefName(s) ?? s
 }
 
-const Highlight = observer(function Highlight({ model }: { model: LGV }) {
+const MsaToGenomeHighlight = observer(function ({ model }: { model: LGV }) {
   const { classes } = useStyles()
   const { assemblyManager, views } = getSession(model)
   const p = views.find(f => f.type === 'MsaView') as MsaViewModel
@@ -51,6 +51,22 @@ const Highlight = observer(function Highlight({ model }: { model: LGV }) {
       })}
     </>
   ) : null
+})
+
+const GenomeToMsaHighlight = observer(function ({ model }: { model: LGV }) {
+  // @ts-expect-error
+  const { hovered } = getSession(model)
+  console.log({ hovered })
+  return <div />
+})
+
+const Highlight = observer(function Highlight({ model }: { model: LGV }) {
+  return (
+    <>
+      <MsaToGenomeHighlight model={model} />
+      <GenomeToMsaHighlight model={model} />
+    </>
+  )
 })
 
 export default Highlight
