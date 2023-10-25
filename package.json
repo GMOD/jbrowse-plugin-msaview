@@ -25,9 +25,8 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "start": "npm-run-all --sequential clean --parallel start:*",
-    "start:watch": "JB_NPM=false NODE_ENV=development rollup --config --watch --bundleConfigAsCjs",
-    "start:server": "serve --cors --listen $npm_package_config_port .",
+    "prestart": "mkdir dist; cp config.json dist",
+    "start": "node esbuild.mjs",
     "prebuild": "npm run clean",
     "build": "rollup --config --bundleConfigAsCjs",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src/",
@@ -42,7 +41,6 @@
     "react-msaview": "^2.1.0"
   },
   "devDependencies": {
-    "@types/pako": "^2.0.1",
     "@babel/core": "^7.23.0",
     "@babel/preset-react": "^7.22.15",
     "@emotion/react": "^11.10.4",
@@ -54,6 +52,7 @@
     "@mui/system": "^5.14.12",
     "@mui/x-data-grid": "^6.16.1",
     "@types/node": "^20.8.6",
+    "@types/pako": "^2.0.1",
     "@types/react": "^18.2.28",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
@@ -74,7 +73,7 @@
     "eslint-plugin-unicorn": "^48.0.1",
     "mobx": "^6.10.2",
     "mobx-react": "^9.0.1",
-    "mobx-state-tree": "5.2.0",
+    "mobx-state-tree": "5.3.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.0.3",
     "pretty-bytes": "^6.1.1",
