@@ -5663,7 +5663,7 @@ mobx-react@^9.0.1:
   dependencies:
     mobx-react-lite "^4.0.4"
 
-mobx-state-tree@^5.0.0:
+mobx-state-tree@^5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/mobx-state-tree/-/mobx-state-tree-5.3.0.tgz#fb743c4bfe770628aaed2f4d961a4b61fdd74126"
   integrity sha512-2XInCjIxGQx/UmTbpAreWKcHswmuOKOV23HJmy1x4gqyDqCcOHJcaClpWnD2/qQlGncg8gAUfP/mm+cLpTrtlQ==
@@ -6245,9 +6245,9 @@ react-is@^18.2.0:
   integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
 
 react-msaview@^2.1.0:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-2.1.4.tgz#10f3c08893e13ca1f38bd3bd2616e4f7adebb097"
-  integrity sha512-AvMN7vSG86mq7R8mHdtvOenSiw7msphNTdfHWzwm3tmRiCWU3BKnK/BWLBK3EwLaOf07k7/uf2PxgDBhNhNgtQ==
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-2.1.5.tgz#005deeb0550aa213acd4af7405cd8436d55dfc55"
+  integrity sha512-CkMEC5QQLDuz8fRBfcM238tgcMuWCNuDfEukPf17Nwor1EzrZmG2Pg49fiO2SgW+E2VlsHzOOZqSFxFe1swoMA==
   dependencies:
     clustal-js "^1.0.3"
     colord "^2.9.3"
