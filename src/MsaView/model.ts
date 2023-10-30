@@ -9,7 +9,9 @@ import {
   doesIntersect2,
   getSession,
 } from '@jbrowse/core/util'
+
 type LGV = LinearGenomeViewModel
+type MaybeLGV = LGV | undefined
 
 interface IRegion {
   assemblyName: string
@@ -24,23 +26,44 @@ export default function stateModelFactory() {
       'MsaView',
       MSAModel,
       types.model({
+        /**
+         * #property
+         */
         connectedViewId: types.maybe(types.string),
+        /**
+         * #property
+         */
         connectedFeature: types.frozen(),
+        /**
+         * #property
+         */
         connectedHighlights: types.array(Region),
       }),
     )
     .actions(self => ({
+      /**
+       * #action
+       */
       setHighlights(r: IRegion[]) {
         self.connectedHighlights = cast(r)
       },
+      /**
+       * #action
+       */
       addToHighlights(r: IRegion) {
         self.connectedHighlights.push(r)
       },
+      /**
+       * #action
+       */
       clearHighlights() {
         self.connectedHighlights = cast([])
       },
     }))
     .views(self => ({
+      /**
+       * #getter
+       */
       get transcriptToMsaMap() {
         const f = new SimpleFeature(self.connectedFeature)
         let iter = 0
@@ -67,14 +90,18 @@ export default function stateModelFactory() {
           })
       },
 
+      /**
+       * #getter
+       */
       get connectedView() {
-        const session = getSession(self)
-        return session.views.find(f => f.id === self.connectedViewId) as
-          | LGV
-          | undefined
+        const { views } = getSession(self)
+        return views.find(f => f.id === self.connectedViewId) as MaybeLGV
       },
     }))
     .views(self => ({
+      /**
+       * #getter
+       */
       get mouseCol2() {
         const session = getSession(self)
         const { transcriptToMsaMap, connectedView } = self
