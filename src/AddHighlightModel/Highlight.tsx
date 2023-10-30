@@ -57,16 +57,19 @@ const MsaToGenomeHighlight = observer(function ({ model }: { model: LGV }) {
 })
 
 const GenomeToMsaHighlight = observer(function ({ model }: { model: LGV }) {
-  // @ts-expect-error
   const { hovered } = getSession(model)
-  return hovered ? <HoverHighlight model={model} /> : null
+  return hovered &&
+    typeof hovered === 'object' &&
+    'hoverPosition' in hovered ? (
+    <HoverHighlight model={model} />
+  ) : null
 })
 
 const HoverHighlight = observer(function ({ model }: { model: LGV }) {
   const { classes } = useStyles()
-  // @ts-expect-error
   const { hovered } = getSession(model)
   const { offsetPx } = model
+  // @ts-expect-error
   const { coord, refName } = hovered.hoverPosition
 
   const s = model.bpToPx({ refName, coord: coord - 1 })

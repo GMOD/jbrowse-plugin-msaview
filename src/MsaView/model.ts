@@ -81,11 +81,11 @@ export default function stateModelFactory() {
         if (!connectedView?.initialized) {
           return
         }
-        // @ts-expect-error
         const { hovered } = session
         if (!hovered) {
           return undefined
         }
+        // @ts-expect-error
         const { hoverPosition } = hovered
         for (const entry of transcriptToMsaMap) {
           const {
