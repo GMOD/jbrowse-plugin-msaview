@@ -105,7 +105,7 @@ export default function stateModelFactory() {
             )
           ) {
             const ret = (hoverPosition.coord - featureStart) / 3
-            return ret
+            return Math.floor(ret)
           }
         }
         return undefined
