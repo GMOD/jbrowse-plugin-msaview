@@ -3,12 +3,7 @@ import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import {
-  Feature,
-  SimpleFeature,
-  doesIntersect2,
-  getSession,
-} from '@jbrowse/core/util'
+import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
 
 type LGV = LinearGenomeViewModel
 type MaybeLGV = LGV | undefined
@@ -44,19 +39,19 @@ export default function stateModelFactory() {
       /**
        * #action
        */
-      setHighlights(r: IRegion[]) {
+      setConnectedHighlights(r: IRegion[]) {
         self.connectedHighlights = cast(r)
       },
       /**
        * #action
        */
-      addToHighlights(r: IRegion) {
+      addToConnectedHighlights(r: IRegion) {
         self.connectedHighlights.push(r)
       },
       /**
        * #action
        */
-      clearHighlights() {
+      clearConnectedHighlights() {
         self.connectedHighlights = cast([])
       },
     }))
@@ -68,7 +63,10 @@ export default function stateModelFactory() {
         const f = new SimpleFeature(self.connectedFeature)
         let iter = 0
 
-        const subs: Feature[] = f.get('subfeatures') || []
+        const strand = f.get('strand')
+        const children = f.children() ?? []
+        const subs = strand === -1 ? children.reverse() : children
+
         return subs
           .filter(f => f.get('type') === 'CDS')
           .map(f => {
@@ -86,6 +84,7 @@ export default function stateModelFactory() {
               featureEnd,
               proteinStart,
               proteinEnd,
+              strand,
             } as const
           })
       },
@@ -150,11 +149,11 @@ export default function stateModelFactory() {
             }
             for (const entry of transcriptToMsaMap) {
               const { featureStart, refName, proteinStart, proteinEnd } = entry
-              if (
-                doesIntersect2(proteinStart, proteinEnd, mouseCol, mouseCol + 1)
-              ) {
-                const ret = (mouseCol - proteinStart) * 3
-                self.setHighlights([
+              const c = mouseCol - 1
+              console.log({ mouseCol })
+              if (doesIntersect2(proteinStart, proteinEnd, c, c + 1)) {
+                const ret = (c - proteinStart) * 3
+                self.setConnectedHighlights([
                   {
                     assemblyName: 'hg38',
                     refName,

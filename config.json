@@ -2,7 +2,7 @@
   "plugins": [
     {
       "name": "MsaView",
-      "url": "http://localhost:9000/out.js"
+      "url": "http://localhost:9000/dist/out.js"
     }
   ],
   "assemblies": [

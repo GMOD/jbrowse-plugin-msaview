@@ -25,7 +25,6 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "prestart": "mkdir dist; cp config.json dist",
     "start": "node esbuild.mjs",
     "prebuild": "npm run clean",
     "build": "rollup --config --bundleConfigAsCjs",

@@ -50,7 +50,7 @@ let ctx = await esbuild.context({
 })
 
 let { host, port } = await ctx.serve({
-  servedir: 'dist',
+  servedir: '.',
   port: 9000,
   host: 'localhost',
 })
