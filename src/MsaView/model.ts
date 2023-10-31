@@ -73,6 +73,7 @@ export default function stateModelFactory() {
             const refName = f.get('refName').replace('chr', '')
             const featureStart = f.get('start')
             const featureEnd = f.get('end')
+            const phase = f.get('phase')
             const len = featureEnd - featureStart
             const op = Math.floor(len / 3)
             const proteinStart = iter
@@ -84,6 +85,7 @@ export default function stateModelFactory() {
               featureEnd,
               proteinStart,
               proteinEnd,
+              phase,
               strand,
             } as const
           })
@@ -148,17 +150,18 @@ export default function stateModelFactory() {
               return
             }
             for (const entry of transcriptToMsaMap) {
-              const { featureStart, refName, proteinStart, proteinEnd } = entry
+              const { featureStart, refName, phase, proteinStart, proteinEnd } =
+                entry
               const c = mouseCol - 1
-              console.log({ mouseCol })
               if (doesIntersect2(proteinStart, proteinEnd, c, c + 1)) {
                 const ret = (c - proteinStart) * 3
+                const phaseOffset = (3 - phase) % 3
                 self.setConnectedHighlights([
                   {
                     assemblyName: 'hg38',
                     refName,
-                    start: featureStart + ret,
-                    end: featureStart + ret + 3,
+                    start: featureStart + ret - phaseOffset,
+                    end: featureStart + ret + 3 - phaseOffset,
                   },
                 ])
                 break
