@@ -122,18 +122,16 @@ export default function stateModelFactory() {
             refName,
             proteinStart,
             proteinEnd,
+            phase,
           } = entry
+          const c = hoverPosition.coord - 1
           if (
             refName === hoverPosition.refName &&
-            doesIntersect2(
-              featureStart,
-              featureEnd,
-              hoverPosition.coord,
-              hoverPosition.coord + 1,
-            )
+            doesIntersect2(featureStart, featureEnd, c, c + 1)
           ) {
-            const ret = (hoverPosition.coord - featureStart) / 3
-            return Math.floor(ret)
+            const phaseOffset = (3 - phase) % 3
+            const ret = (c - featureStart + phaseOffset) / 3
+            return Math.floor(ret + proteinStart) + 1
           }
         }
         return undefined
