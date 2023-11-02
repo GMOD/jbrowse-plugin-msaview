@@ -4,7 +4,7 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
 import MsaToGenomeHighlight from './MsaToGenomeHighlight'
-import GenomeToMsaHighlight from './GenomeToMsaHighlight'
+import GenomeMouseoverHighlight from './GenomeMouseoverHighlight'
 
 type LGV = LinearGenomeViewModel
 
@@ -12,7 +12,7 @@ const Highlight = observer(function Highlight({ model }: { model: LGV }) {
   return (
     <>
       <MsaToGenomeHighlight model={model} />
-      <GenomeToMsaHighlight model={model} />
+      <GenomeMouseoverHighlight model={model} />
     </>
   )
 })

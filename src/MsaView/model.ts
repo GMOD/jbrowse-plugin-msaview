@@ -75,7 +75,7 @@ export default function stateModelFactory() {
             const featureEnd = f.get('end')
             const phase = f.get('phase')
             const len = featureEnd - featureStart
-            const op = Math.floor(len / 3)
+            const op = len / 3
             const proteinStart = iter
             const proteinEnd = iter + op
             iter += op
@@ -110,11 +110,18 @@ export default function stateModelFactory() {
           return
         }
         const { hovered } = session
-        if (!hovered) {
+        if (
+          !hovered ||
+          typeof hovered !== 'object' ||
+          !('hoverFeature' in hovered) ||
+          !('hoverPosition' in hovered)
+        ) {
           return undefined
         }
-        // @ts-expect-error
-        const { hoverPosition } = hovered
+        const {
+          // @ts-expect-error
+          hoverPosition: { coord: hoverCoord, refName: hoverRef },
+        } = hovered
         for (const entry of transcriptToMsaMap) {
           const {
             featureStart,
@@ -124,9 +131,9 @@ export default function stateModelFactory() {
             proteinEnd,
             phase,
           } = entry
-          const c = hoverPosition.coord - 1
+          const c = hoverCoord - 1
           if (
-            refName === hoverPosition.refName &&
+            refName === hoverRef &&
             doesIntersect2(featureStart, featureEnd, c, c + 1)
           ) {
             const phaseOffset = (3 - phase) % 3

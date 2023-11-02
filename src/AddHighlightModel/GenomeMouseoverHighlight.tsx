@@ -1,23 +1,10 @@
 import React from 'react'
 import { observer } from 'mobx-react'
-import { makeStyles } from 'tss-react/mui'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { getSession } from '@jbrowse/core/util'
+import { useStyles } from './util'
 
-const useStyles = makeStyles()({
-  highlight: {
-    height: '100%',
-    background: 'rgba(255,255,0,0.2)',
-    border: '1px solid rgba(50,50,0,0.2)',
-    position: 'absolute',
-    zIndex: 1000,
-    textAlign: 'center',
-    pointerEvents: 'none',
-    overflow: 'hidden',
-  },
-})
-
-const GenomeToMsaHighlight = observer(function ({
+const GenomeMouseoverHighlight = observer(function ({
   model,
 }: {
   model: LinearGenomeViewModel
@@ -51,4 +38,4 @@ const HoverHighlight = observer(function ({
   return null
 })
 
-export default GenomeToMsaHighlight
+export default GenomeMouseoverHighlight
