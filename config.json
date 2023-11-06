@@ -144,17 +144,18 @@
     },
     {
       "type": "FeatureTrack",
-      "trackId": "sorted.gff",
-      "name": "sorted.gff",
+      "trackId": "ncbi_refseq",
+      "name": "NCBI RefSeq genes",
+      "category": ["Annotation"],
       "adapter": {
         "type": "Gff3TabixAdapter",
         "gffGzLocation": {
-          "uri": "sorted.gff.gz",
+          "uri": "https://jbrowse.org/demos/hg38/ncbi_refseq.gff.gz",
           "locationType": "UriLocation"
         },
         "index": {
           "location": {
-            "uri": "sorted.gff.gz.tbi",
+            "uri": "https://jbrowse.org/demos/hg38/ncbi_refseq.gff.gz.tbi",
             "locationType": "UriLocation"
           },
           "indexType": "TBI"

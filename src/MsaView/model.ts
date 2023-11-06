@@ -136,22 +136,14 @@ export default function stateModelFactory() {
           hoverPosition: { coord: hoverCoord, refName: hoverRef },
         } = hovered
         for (const entry of transcriptToMsaMap) {
-          const {
-            featureStart,
-            featureEnd,
-            refName,
-            proteinStart,
-            proteinEnd,
-            phase,
-          } = entry
-          const c = hoverCoord - 1
+          const { featureStart, featureEnd, refName, proteinStart } = entry
+          const c = hoverCoord + 1
           if (
             refName === hoverRef &&
             doesIntersect2(featureStart, featureEnd, c, c + 1)
           ) {
-            const phaseOffset = (3 - phase) % 3
-            const ret = (c - featureStart + phaseOffset) / 3
-            return Math.floor(ret + proteinStart) + 1
+            const ret = (c - featureStart) / 3
+            return Math.round(ret + proteinStart)
           }
         }
         return undefined
