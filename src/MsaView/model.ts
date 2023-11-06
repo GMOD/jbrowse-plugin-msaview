@@ -81,32 +81,54 @@ export default function stateModelFactory() {
         let iter = 0
 
         const strand = f.get('strand')
-        const children = f.children() ?? []
-        const subs = strand === -1 ? children.reverse() : children
-
-        return subs
-          .filter(f => f.get('type') === 'CDS')
-          .sort((a, b) => a.get('start') - b.get('start'))
-          .map(f => {
-            const refName = f.get('refName').replace('chr', '')
-            const featureStart = f.get('start')
-            const featureEnd = f.get('end')
-            const phase = f.get('phase')
-            const len = featureEnd - featureStart
-            const op = len / 3
-            const proteinStart = iter
-            const proteinEnd = iter + op
-            iter += op
-            return {
-              refName,
-              featureStart,
-              featureEnd,
-              proteinStart,
-              proteinEnd,
-              phase,
-              strand,
-            } as const
-          })
+        const subs = f.children() ?? []
+        return strand === -1
+          ? subs
+              .filter(f => f.get('type') === 'CDS')
+              .sort((a, b) => b.get('start') - a.get('start'))
+              .map(f => {
+                const refName = f.get('refName').replace('chr', '')
+                const featureStart = f.get('start')
+                const featureEnd = f.get('end')
+                const phase = f.get('phase')
+                const len = featureEnd - featureStart
+                const op = len / 3
+                const proteinStart = iter
+                const proteinEnd = iter + op
+                iter += op
+                return {
+                  refName,
+                  featureStart,
+                  featureEnd,
+                  proteinStart,
+                  proteinEnd,
+                  phase,
+                  strand,
+                } as const
+              })
+          : subs
+              .filter(f => f.get('type') === 'CDS')
+              .sort((a, b) => a.get('start') - b.get('start'))
+              .map(f => {
+                const refName = f.get('refName').replace('chr', '')
+                const featureStart = f.get('start')
+                const featureEnd = f.get('end')
+                const phase = f.get('phase')
+                const len = featureEnd - featureStart
+                const op = len / 3
+                const proteinStart = iter
+                const proteinEnd = iter + op
+                iter += op
+                return {
+                  refName,
+                  featureStart,
+                  featureEnd,
+                  proteinStart,
+                  proteinEnd,
+                  phase,
+                  strand,
+                } as const
+              })
       },
 
       /**
@@ -136,14 +158,23 @@ export default function stateModelFactory() {
           hoverPosition: { coord: hoverCoord, refName: hoverRef },
         } = hovered
         for (const entry of transcriptToMsaMap) {
-          const { featureStart, featureEnd, refName, proteinStart } = entry
+          const {
+            featureStart,
+            featureEnd,
+            refName,
+            proteinEnd,
+            proteinStart,
+            strand,
+          } = entry
           const c = hoverCoord + 1
           if (
             refName === hoverRef &&
             doesIntersect2(featureStart, featureEnd, c, c + 1)
           ) {
-            const ret = (c - featureStart) / 3
-            return Math.round(ret + proteinStart)
+            const ret = (strand === -1 ? featureEnd - c : c - featureStart) / 3
+            return Math.round(
+              strand === -1 ? proteinEnd - ret : ret + proteinStart,
+            )
           }
         }
         return undefined
@@ -160,7 +191,14 @@ export default function stateModelFactory() {
               return
             }
             for (const entry of transcriptToMsaMap) {
-              const { featureStart, refName, proteinStart, proteinEnd } = entry
+              const {
+                featureStart,
+                featureEnd,
+                refName,
+                proteinStart,
+                proteinEnd,
+                strand,
+              } = entry
               const c = mouseCol - 1
               if (doesIntersect2(proteinStart, proteinEnd, c, c + 1)) {
                 // does not take into account phase, so 'incomplete CDS' might
@@ -170,8 +208,12 @@ export default function stateModelFactory() {
                   {
                     assemblyName: 'hg38',
                     refName,
-                    start: featureStart + ret,
-                    end: featureStart + ret + 3,
+                    start:
+                      strand === -1 ? featureEnd - ret : featureStart + ret,
+                    end:
+                      strand === -1
+                        ? featureEnd - ret - 3
+                        : featureStart + ret + 3,
                   },
                 ])
                 break
