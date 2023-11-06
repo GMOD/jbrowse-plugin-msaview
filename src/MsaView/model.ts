@@ -3,7 +3,12 @@ import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
+import {
+  Feature,
+  SimpleFeature,
+  doesIntersect2,
+  getSession,
+} from '@jbrowse/core/util'
 
 type LGV = LinearGenomeViewModel
 type MaybeLGV = LGV | undefined
@@ -13,6 +18,18 @@ interface IRegion {
   refName: string
   start: number
   end: number
+}
+
+function checkHovered(hovered: unknown): hovered is {
+  hoverFeature: Feature
+  hoverPosition: { coord: number; refName: string }
+} {
+  return (
+    !!hovered &&
+    typeof hovered == 'object' &&
+    'hoverFeature' in hovered &&
+    'hoverPosition' in hovered
+  )
 }
 
 export default function stateModelFactory() {
@@ -69,6 +86,7 @@ export default function stateModelFactory() {
 
         return subs
           .filter(f => f.get('type') === 'CDS')
+          .sort((a, b) => a.get('start') - b.get('start'))
           .map(f => {
             const refName = f.get('refName').replace('chr', '')
             const featureStart = f.get('start')
@@ -107,19 +125,14 @@ export default function stateModelFactory() {
         const session = getSession(self)
         const { transcriptToMsaMap, connectedView } = self
         if (!connectedView?.initialized) {
-          return
-        }
-        const { hovered } = session
-        if (
-          !hovered ||
-          typeof hovered !== 'object' ||
-          !('hoverFeature' in hovered) ||
-          !('hoverPosition' in hovered)
-        ) {
           return undefined
         }
+        const { hovered } = session
+        if (!checkHovered(hovered)) {
+          return undefined
+        }
+
         const {
-          // @ts-expect-error
           hoverPosition: { coord: hoverCoord, refName: hoverRef },
         } = hovered
         for (const entry of transcriptToMsaMap) {
@@ -155,18 +168,18 @@ export default function stateModelFactory() {
               return
             }
             for (const entry of transcriptToMsaMap) {
-              const { featureStart, refName, phase, proteinStart, proteinEnd } =
-                entry
+              const { featureStart, refName, proteinStart, proteinEnd } = entry
               const c = mouseCol - 1
               if (doesIntersect2(proteinStart, proteinEnd, c, c + 1)) {
-                const ret = (c - proteinStart) * 3
-                const phaseOffset = (3 - phase) % 3
+                // does not take into account phase, so 'incomplete CDS' might
+                // be buggy
+                const ret = Math.round((c - proteinStart) * 3)
                 self.setConnectedHighlights([
                   {
                     assemblyName: 'hg38',
                     refName,
-                    start: featureStart + ret - phaseOffset,
-                    end: featureStart + ret + 3 - phaseOffset,
+                    start: featureStart + ret,
+                    end: featureStart + ret + 3,
                   },
                 ])
                 break
