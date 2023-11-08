@@ -3,12 +3,8 @@ import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import {
-  Feature,
-  SimpleFeature,
-  doesIntersect2,
-  getSession,
-} from '@jbrowse/core/util'
+import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
+import { checkHovered, generateMap } from './util'
 
 type LGV = LinearGenomeViewModel
 type MaybeLGV = LGV | undefined
@@ -18,18 +14,6 @@ interface IRegion {
   refName: string
   start: number
   end: number
-}
-
-function checkHovered(hovered: unknown): hovered is {
-  hoverFeature: Feature
-  hoverPosition: { coord: number; refName: string }
-} {
-  return (
-    !!hovered &&
-    typeof hovered == 'object' &&
-    'hoverFeature' in hovered &&
-    'hoverPosition' in hovered
-  )
 }
 
 export default function stateModelFactory() {
@@ -77,58 +61,7 @@ export default function stateModelFactory() {
        * #getter
        */
       get transcriptToMsaMap() {
-        const f = new SimpleFeature(self.connectedFeature)
-        let iter = 0
-
-        const strand = f.get('strand')
-        const subs = f.children() ?? []
-        return strand === -1
-          ? subs
-              .filter(f => f.get('type') === 'CDS')
-              .sort((a, b) => b.get('start') - a.get('start'))
-              .map(f => {
-                const refName = f.get('refName').replace('chr', '')
-                const featureStart = f.get('start')
-                const featureEnd = f.get('end')
-                const phase = f.get('phase')
-                const len = featureEnd - featureStart
-                const op = len / 3
-                const proteinStart = iter
-                const proteinEnd = iter + op
-                iter += op
-                return {
-                  refName,
-                  featureStart,
-                  featureEnd,
-                  proteinStart,
-                  proteinEnd,
-                  phase,
-                  strand,
-                } as const
-              })
-          : subs
-              .filter(f => f.get('type') === 'CDS')
-              .sort((a, b) => a.get('start') - b.get('start'))
-              .map(f => {
-                const refName = f.get('refName').replace('chr', '')
-                const featureStart = f.get('start')
-                const featureEnd = f.get('end')
-                const phase = f.get('phase')
-                const len = featureEnd - featureStart
-                const op = len / 3
-                const proteinStart = iter
-                const proteinEnd = iter + op
-                iter += op
-                return {
-                  refName,
-                  featureStart,
-                  featureEnd,
-                  proteinStart,
-                  proteinEnd,
-                  phase,
-                  strand,
-                } as const
-              })
+        return generateMap(new SimpleFeature(self.connectedFeature))
       },
 
       /**
