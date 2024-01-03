@@ -2,11 +2,20 @@ import { AbstractSessionModel, Feature } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { ungzip } from 'pako'
 
+async function myfetch(url: string) {
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status} fetching ${await res.text()}`)
+  }
+  const data = await res.arrayBuffer()
+  return new TextDecoder().decode(ungzip(data))
+}
+
 export async function launchView({
   userSelection,
   session,
   newViewTitle,
-  view: connectedView,
+  view,
   feature,
 }: {
   session: AbstractSessionModel
@@ -15,14 +24,10 @@ export async function launchView({
   view: LinearGenomeViewModel
   feature: Feature
 }) {
-  const res = await fetch(
+  const d = await myfetch(
     `https://jbrowse.org/demos/msaview/knownCanonical/${userSelection}.mfa.gz`,
   )
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} fetching ${await res.text()}`)
-  }
-  const data = await res.arrayBuffer()
-  const d = new TextDecoder().decode(ungzip(data))
+
   session.addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
@@ -43,7 +48,7 @@ export async function launchView({
     data: {
       msa: d,
     },
-    connectedViewId: connectedView.id,
+    connectedViewId: view.id,
     connectedFeature: feature.toJSON(),
   })
 }

@@ -2,8 +2,10 @@ import { MSAModel } from 'react-msaview'
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+
+// locals
 import { checkHovered, generateMap } from './util'
 
 type LGV = LinearGenomeViewModel
@@ -83,6 +85,7 @@ export default function stateModelFactory() {
           return undefined
         }
         const { hovered } = session
+
         if (!checkHovered(hovered)) {
           return undefined
         }

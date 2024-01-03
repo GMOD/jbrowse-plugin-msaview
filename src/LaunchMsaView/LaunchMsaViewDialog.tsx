@@ -64,12 +64,9 @@ export default function LaunchProteinViewDialog({
   const options = getTranscriptFeatures(feature)
   const ret = options.find(val => set.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const newViewTitle = [
-    feature.get('gene_name'),
-    feature.get('name') || feature.get('id'),
-  ]
-    .filter(f => !!f)
-    .join(' ')
+  const geneName = feature.get('gene_name')
+  const id = feature.get('name') || feature.get('id')
+  const newViewTitle = [geneName, id].filter(f => !!f).join(' ')
 
   return (
     <Dialog
