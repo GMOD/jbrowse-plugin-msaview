@@ -20,7 +20,8 @@
 
 # v1.0.13
 
-- Factor out code into the react-msaview package on NPM, and make the plugin more of a wrapper around this module
+- Factor out code into the react-msaview package on NPM, and make the plugin
+  more of a wrapper around this module
 
 # v1.0.12
 
@@ -49,7 +50,8 @@
 
 # v1.0.6
 
-- Use postversion to run build so that the accurate version is encoded into the release binary
+- Use postversion to run build so that the accurate version is encoded into the
+  release binary
 
 # v1.0.5
 
@@ -80,8 +82,8 @@
   as a newick tree embedded in stockholm metadata
 - View metadata about alignment from MSA headers (e.g. stockholm)
 - Collapse subtrees with click action on branches
-- The collapse subtree action hides gaps that were introduced by that subtree
-  in the rest of the alignment
+- The collapse subtree action hides gaps that were introduced by that subtree in
+  the rest of the alignment
 - Allows "zooming out" by setting tiny rowHeight/colWidth settings
 - Allows changing color schemes, with jalview, clustal, and other color schemes
 - Allows toggling the branch length rendering for the phylogenetic tree

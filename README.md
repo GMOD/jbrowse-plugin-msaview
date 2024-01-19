@@ -1,8 +1,10 @@
 # jbrowse-plugin-msaview
 
-This plugin packages https://github.com/gmod/react-msaview for usage inside of JBrowse 2
+This plugin packages https://github.com/gmod/react-msaview for usage inside of
+JBrowse 2
 
-See the docs for the react-msaview for more info https://github.com/GMOD/react-msaview/blob/main/docs/user_guide.md
+See the docs for the react-msaview for more info
+https://github.com/GMOD/react-msaview/blob/main/docs/user_guide.md
 
 ## Gallery
 

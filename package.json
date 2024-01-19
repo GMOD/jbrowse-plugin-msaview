@@ -6,59 +6,75 @@
     "jbrowse2"
   ],
   "main": "dist/index.js",
-  "module": "dist/jbrowse-plugin-msaview.esm.js",
+  "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist",
     "src"
   ],
+  "config": {
+    "port": 9000,
+    "browse": {
+      "port": 8999
+    },
+    "jbrowse": {
+      "plugin": {
+        "name": "MsaView"
+      }
+    }
+  },
   "scripts": {
-    "setup": "node scripts/setup.js && npm run browse-install",
     "clean": "rimraf dist",
-    "start": "tsdx watch --verbose --noClean --format umd --name JBrowsePluginMsaView --onFirstSuccess \"serve --cors --listen 9000 .\"",
+    "start": "node esbuild.mjs",
     "prebuild": "npm run clean",
-    "build": "tsdx build --format cjs,esm,umd --name JBrowsePluginMsaView && cp distconfig.json dist/config.json",
-    "browse-install": "cd .jbrowse && rm -rf * && jbrowse create .",
-    "browse": "cd .jbrowse && cp ../jbrowse_config.json . && mv jbrowse_config.json config.json && npx serve .",
-    "test": "tsdx test",
-    "lint": "tsdx lint",
-    "prepublishOnly": "npm test",
-    "prepare": "npm run build",
-    "postinstall": "jbrowse-plugin-postinstall",
+    "build": "rollup --config --bundleConfigAsCjs",
+    "lint": "eslint --ext .js,.ts,.jsx,.tsx src/",
+    "prepack": "npm run build",
     "postversion": "git push --follow-tags"
   },
   "jbrowse-plugin": {
     "name": "MsaView"
   },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "all"
-  },
   "dependencies": {
-    "@material-ui/icons": "^4.11.2",
-    "react-msaview": "^1.2.11"
-  },
-  "peerDependencies": {
-    "@jbrowse/core": "^1.0.4"
+    "pako": "^2.1.0",
+    "react-msaview": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.10.4",
-    "@jbrowse/core": "^1.0.4",
-    "@jbrowse/development-tools": "^1.0.3",
-    "@material-ui/core": "^4.9.13",
-    "@material-ui/lab": "^4.0.0-alpha.45",
-    "@types/react": "^17.0.0",
-    "cypress": "^6.2.1",
-    "mobx": "^5.0.0",
-    "mobx-react": "^6.0.0",
-    "mobx-state-tree": "3.14.1",
-    "react": "^16.8.0",
-    "rimraf": "^3.0.2",
-    "rxjs": "^6.0.0",
-    "serve": "^11.3.2",
-    "start-server-and-test": "^1.11.7",
-    "tslib": "^2.0.3",
-    "typescript": "^4.1.3"
-  }
+    "@babel/core": "^7.23.0",
+    "@babel/preset-react": "^7.22.15",
+    "@emotion/react": "^11.10.4",
+    "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
+    "@jbrowse/core": "^2.7.0",
+    "@jbrowse/development-tools": "^2.1.1",
+    "@jbrowse/plugin-linear-genome-view": "^2.7.0",
+    "@mui/material": "^5.14.12",
+    "@mui/system": "^5.14.12",
+    "@mui/x-data-grid": "^6.16.1",
+    "@types/node": "^20.8.6",
+    "@types/pako": "^2.0.1",
+    "@types/react": "^18.2.28",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "chalk": "^5.3.0",
+    "esbuild": "^0.19.5",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.0",
+    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "mobx": "^6.10.2",
+    "mobx-react": "^9.0.1",
+    "mobx-state-tree": "^5.3.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.0.3",
+    "pretty-bytes": "^6.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.9.5",
+    "rxjs": "^7.8.1",
+    "tss-react": "^4.9.2",
+    "typescript": "^5.2.2"
+  },
+  "private": true
 }
