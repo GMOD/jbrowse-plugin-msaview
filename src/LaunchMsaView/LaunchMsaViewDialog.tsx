@@ -1,32 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  MenuItem,
-  TextField,
-  Typography,
-} from '@mui/material'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-  getSession,
-} from '@jbrowse/core/util'
-import { makeStyles } from 'tss-react/mui'
+import React, { useState } from 'react'
+import { Dialog } from '@jbrowse/core/ui'
+import { Box, Tab, Tabs } from '@mui/material'
+import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 // locals
-import { getDisplayName, getId, getTranscriptFeatures } from './util'
-import { fetchGeneList } from './fetchGeneList'
-import { launchView } from './launchViewSubmit'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
-const useStyles = makeStyles()({
-  dialogContent: {
-    width: '80em',
-  },
-})
+import { CustomTabPanel, a11yProps } from './TabUtils'
+import NcbiBlastPanel from './NcbiBlastPanel'
+import PreLoadedMSA from './PreLoadedMSADataPanel'
 
 export default function LaunchProteinViewDialog({
   handleClose,
@@ -37,36 +18,7 @@ export default function LaunchProteinViewDialog({
   feature: Feature
   model: AbstractTrackModel
 }) {
-  const { classes } = useStyles()
-  const session = getSession(model)
-  const view = getContainingView(model) as LinearGenomeViewModel
-  const [error, setError] = useState<unknown>()
-  const [geneNameList, setGeneNameList] = useState<string[]>()
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        const data = await fetchGeneList()
-        setGeneNameList(data)
-        const set = new Set(data)
-        const options = getTranscriptFeatures(feature)
-        const ret = options.find(val => set.has(getId(val)))
-        if (ret) {
-          setUserSelection(getId(ret))
-        }
-      } catch (e) {
-        console.error(e)
-        setError(e)
-      }
-    })()
-  }, [feature])
-  const set = new Set(geneNameList)
-  const options = getTranscriptFeatures(feature)
-  const ret = options.find(val => set.has(getId(val)))
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const geneName = feature.get('gene_name')
-  const id = feature.get('name') || feature.get('id')
-  const newViewTitle = [geneName, id].filter(f => !!f).join(' ')
+  const [value, setValue] = useState(0)
 
   return (
     <Dialog
@@ -75,81 +27,22 @@ export default function LaunchProteinViewDialog({
       onClose={() => handleClose()}
       open
     >
-      <DialogContent className={classes.dialogContent}>
-        <Typography>
-          The source data for these multiple sequence alignments is from{' '}
-          <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
-            knownCanonical.multiz100way.protAA.fa.gz
-          </a>
-        </Typography>
-        {error ? <ErrorMessage error={error} /> : null}
-        {geneNameList && !ret ? (
-          <div style={{ color: 'red' }}>No MSA data for this gene found</div>
-        ) : null}
-        <TextField
-          value={userSelection}
-          onChange={event => setUserSelection(event.target.value)}
-          label="Choose isoform to view MSA for"
-          select
-        >
-          {options
-            .filter(val => set.has(getId(val)))
-            .map(val => {
-              const d = getDisplayName(val)
-              return (
-                <MenuItem value={getId(val)} key={val.id()}>
-                  {d} (has data)
-                </MenuItem>
-              )
-            })}
-          {options
-            .filter(val => !set.has(getId(val)))
-            .map(val => {
-              const d = getDisplayName(val)
-              return (
-                <MenuItem value={getId(val)} key={val.id()} disabled>
-                  {d}
-                </MenuItem>
-              )
-            })}
-        </TextField>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ;(async () => {
-              try {
-                if (!ret) {
-                  return
-                }
-                await launchView({
-                  userSelection,
-                  session,
-                  newViewTitle,
-                  view,
-                  feature: ret,
-                })
-                handleClose()
-              } catch (e) {
-                console.error(e)
-                setError(e)
-              }
-            })()
-          }}
-        >
-          Submit
-        </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => handleClose()}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={(_, val) => setValue(val)}>
+          <Tab label="NCBI BLAST" {...a11yProps(0)} />
+          <Tab label="Pre-loaded dataset" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
+      <CustomTabPanel value={value} index={0}>
+        <NcbiBlastPanel handleClose={handleClose} />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <PreLoadedMSA
+          model={model}
+          feature={feature}
+          handleClose={handleClose}
+        />
+      </CustomTabPanel>
     </Dialog>
   )
 }

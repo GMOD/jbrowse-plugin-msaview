@@ -19,3 +19,17 @@ export function getDisplayName(val?: Feature) {
     ? ''
     : [val.get('name'), val.get('id')].filter(f => !!f).join(' ')
 }
+
+export async function myfetch(url: string, args?: RequestInit) {
+  const response = await fetch(url, args)
+
+  if (!response.ok) {
+    throw new Error(`BLAST API request failed with status ${response.status}`)
+  }
+
+  return response.text()
+}
+
+export function timeout(time: number) {
+  return new Promise(res => setTimeout(res, time))
+}
