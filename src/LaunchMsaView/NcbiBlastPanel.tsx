@@ -28,16 +28,16 @@ const NcbiBlastPanel = observer(function ({
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
   const [querySequence, setQuerySequence] = useState('')
-  const [date, setDate] = useState<Date>()
-  const [startDate, setStartDate] = useState<Date>()
+  const [rid, setRid] = useState<string>()
+  const [countdown, setCountdown] = useState<number>()
 
   return (
     <DialogContent className={classes.dialogContent}>
       {error ? <ErrorMessage error={error} /> : null}
-      {date ? (
+      {rid ? (
         <Typography>
-          Waiting for result. Search started: {startDate?.toLocaleTimeString()}.
-          Last check: {`${date.toLocaleTimeString()}`}
+          Waiting for result. RID {rid}. Checking again in {countdown}{' '}
+          seconds...
         </Typography>
       ) : null}
       <Typography>Enter sequence:</Typography>
@@ -64,15 +64,17 @@ const NcbiBlastPanel = observer(function ({
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
-                const database = 'nr_clustered'
+                const database = 'nr'
                 const program = 'blastp'
-                setStartDate(new Date())
                 setError(undefined)
+                setRid(undefined)
+
                 const res = await queryBlast({
                   querySequence,
                   database,
                   program,
-                  onUpdate: (arg: Date) => setDate(arg),
+                  onCountdown: arg => setCountdown(arg),
+                  onRid: rid => setRid(rid),
                 })
                 console.log({ res })
                 handleClose()

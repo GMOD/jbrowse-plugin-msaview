@@ -1,0 +1,2841 @@
+export const data = `<?xml version="1.0"?>
+<!DOCTYPE BlastOutput PUBLIC "-//NCBI//NCBI BlastOutput/EN" "http://www.ncbi.nlm.nih.gov/dtd/NCBI_BlastOutput.dtd">
+<BlastOutput>
+  <BlastOutput_program>blastp</BlastOutput_program>
+  <BlastOutput_version>BLASTP 2.15.0+</BlastOutput_version>
+  <BlastOutput_reference>Stephen F. Altschul, Thomas L. Madden, Alejandro A. Sch&amp;auml;ffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), &quot;Gapped BLAST and PSI-BLAST: a new generation of protein database search programs&quot;, Nucleic Acids Res. 25:3389-3402.</BlastOutput_reference>
+  <BlastOutput_db>nr</BlastOutput_db>
+  <BlastOutput_query-ID>Query_4761433</BlastOutput_query-ID>
+  <BlastOutput_query-def>sp|P13786|HBAZ_CAPHI Hemoglobin subunit zeta OS=Capra hircus GN=HBZ1 PE=3 SV=2</BlastOutput_query-def>
+  <BlastOutput_query-len>142</BlastOutput_query-len>
+  <BlastOutput_param>
+    <Parameters>
+      <Parameters_matrix>BLOSUM62</Parameters_matrix>
+      <Parameters_expect>10</Parameters_expect>
+      <Parameters_gap-open>11</Parameters_gap-open>
+      <Parameters_gap-extend>1</Parameters_gap-extend>
+      <Parameters_filter>F</Parameters_filter>
+    </Parameters>
+  </BlastOutput_param>
+<BlastOutput_iterations>
+<Iteration>
+  <Iteration_iter-num>1</Iteration_iter-num>
+  <Iteration_query-ID>Query_4761433</Iteration_query-ID>
+  <Iteration_query-def>sp|P13786|HBAZ_CAPHI Hemoglobin subunit zeta OS=Capra hircus GN=HBZ1 PE=3 SV=2</Iteration_query-def>
+  <Iteration_query-len>142</Iteration_query-len>
+<Iteration_hits>
+<Hit>
+  <Hit_num>1</Hit_num>
+  <Hit_id>ref|XP_017895578.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Capra hircus] &gt;sp|P13786.2| RecName: Full=Hemoglobin subunit zeta; AltName: Full=Hemoglobin zeta chain; AltName: Full=Zeta-globin [Capra hircus] &gt;emb|CAA28435.1| alpha-globin [Capra hircus]</Hit_def>
+  <Hit_accession>XP_017895578</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>291.197</Hsp_bit-score>
+      <Hsp_score>744</Hsp_score>
+      <Hsp_evalue>5.90607e-99</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>142</Hsp_identity>
+      <Hsp_positive>142</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>2</Hit_num>
+  <Hit_id>ref|XP_055418416.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Bubalus carabanensis]</Hit_def>
+  <Hit_accession>XP_055418416</Hit_accession>
+  <Hit_len>151</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>288.115</Hsp_bit-score>
+      <Hsp_score>736</Hsp_score>
+      <Hsp_evalue>1.132e-97</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>151</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>138</Hsp_identity>
+      <Hsp_positive>142</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRTERTIIVSLWSKISTQADLIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAIKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTRTERTII+SLWSKISTQAD+IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDA+KSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>3</Hit_num>
+  <Hit_id>ref|XP_017895577.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta-like [Capra hircus]</Hit_def>
+  <Hit_accession>XP_017895577</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>286.96</Hsp_bit-score>
+      <Hsp_score>733</Hsp_score>
+      <Hsp_evalue>2.1384e-97</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>138</Hsp_identity>
+      <Hsp_positive>141</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIVVSMWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTI++S+WSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>4</Hit_num>
+  <Hit_id>ref|XP_052520329.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Budorcas taxicolor]</Hit_def>
+  <Hit_accession>XP_052520329</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>286.189</Hsp_bit-score>
+      <Hsp_score>731</Hsp_score>
+      <Hsp_evalue>5.20236e-97</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>138</Hsp_identity>
+      <Hsp_positive>141</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRTERTIVVSLWSEISTQADTIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTRTERTI++SLWS+ISTQAD IGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>5</Hit_num>
+  <Hit_id>ref|XP_052491417.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Budorcas taxicolor]</Hit_def>
+  <Hit_accession>XP_052491417</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>285.419</Hsp_bit-score>
+      <Hsp_score>729</Hsp_score>
+      <Hsp_evalue>9.72539e-97</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>137</Hsp_identity>
+      <Hsp_positive>140</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIVVSMWSKISTQADAIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTI++S+WSKISTQAD IGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>6</Hit_num>
+  <Hit_id>ref|XP_025130980.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Bubalus bubalis] &gt;ref|XP_055417689.1| hemoglobin subunit zeta-like [Bubalus carabanensis]</Hit_def>
+  <Hit_accession>XP_025130980</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>285.419</Hsp_bit-score>
+      <Hsp_score>729</Hsp_score>
+      <Hsp_evalue>1.07351e-96</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>137</Hsp_identity>
+      <Hsp_positive>141</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADLIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD+IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>7</Hit_num>
+  <Hit_id>ref|XP_044791913.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Bubalus bubalis]</Hit_def>
+  <Hit_accession>XP_044791913</Hit_accession>
+  <Hit_len>151</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>285.419</Hsp_bit-score>
+      <Hsp_score>729</Hsp_score>
+      <Hsp_evalue>1.42839e-96</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>151</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>138</Hsp_identity>
+      <Hsp_positive>141</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRTERTIIVSLWSKISTQADLIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGVAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTRTERTII+SLWSKISTQAD+IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVG AVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>8</Hit_num>
+  <Hit_id>ref|XP_014959459.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Ovis aries] &gt;gb|KAG5194851.1| hypothetical protein JEQ12_012140 [Ovis aries] &gt;gb|KAI4531386.1| hypothetical protein MG293_017900 [Ovis ammon polii] &gt;gb|KAI4551231.1| hypothetical protein MJT46_017483 [Ovis ammon polii x Ovis aries] &gt;gb|KAI4559257.1| hypothetical protein MJG53_017783 [Ovis ammon polii x Ovis aries]</Hit_def>
+  <Hit_accession>XP_014959459</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>284.263</Hsp_bit-score>
+      <Hsp_score>726</Hsp_score>
+      <Hsp_evalue>3.32492e-96</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>136</Hsp_identity>
+      <Hsp_positive>140</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIVVSMWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSLVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTI++S+WSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLS+VSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>9</Hit_num>
+  <Hit_id>ref|XP_040085046.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Oryx dammah]</Hit_def>
+  <Hit_accession>XP_040085046</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>283.878</Hsp_bit-score>
+      <Hsp_score>725</Hsp_score>
+      <Hsp_evalue>4.32695e-96</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>136</Hsp_identity>
+      <Hsp_positive>139</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADIIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVAAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD+IGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKV AAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>10</Hit_num>
+  <Hit_id>ref|XP_055264824.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Moschus berezovskii] &gt;ref|XP_055264825.1| hemoglobin subunit zeta [Moschus berezovskii] &gt;emb|CAI9172503.1| unnamed protein product [Rangifer tarandus platyrhynchus] &gt;emb|CAI9708425.1| unnamed protein product [Rangifer tarandus platyrhynchus]</Hit_def>
+  <Hit_accession>XP_055264824</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>283.108</Hsp_bit-score>
+      <Hsp_score>723</Hsp_score>
+      <Hsp_evalue>7.57324e-96</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>136</Hsp_identity>
+      <Hsp_positive>139</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADAIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>11</Hit_num>
+  <Hit_id>ref|XP_002683856.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Bos taurus] &gt;ref|XP_027383837.1| hemoglobin subunit zeta [Bos indicus x Bos taurus] &gt;ref|XP_061256530.1| hemoglobin subunit zeta [Bos javanicus] &gt;tpg|DAA15757.1| TPA: Hemoglobin subunit zeta-like [Bos taurus]</Hit_def>
+  <Hit_accession>XP_002683856</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>282.337</Hsp_bit-score>
+      <Hsp_score>721</Hsp_score>
+      <Hsp_evalue>1.54566e-95</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>135</Hsp_identity>
+      <Hsp_positive>140</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADLIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSRVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADVHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD+IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGS+VVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTAD HAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>12</Hit_num>
+  <Hit_id>ref|XP_043311926.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Cervus canadensis] &gt;ref|XP_043771629.1| hemoglobin subunit zeta [Cervus elaphus] &gt;gb|KAF4015406.1| hypothetical protein G4228_007212 [Cervus hanglu yarkandensis]</Hit_def>
+  <Hit_accession>XP_043311926</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>282.337</Hsp_bit-score>
+      <Hsp_score>721</Hsp_score>
+      <Hsp_evalue>1.56271e-95</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>135</Hsp_identity>
+      <Hsp_positive>139</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTVIVSMWSKISTQADAIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERT+I+S+WSKISTQAD IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>13</Hit_num>
+  <Hit_id>gb|MXQ80905.1|</Hit_id>
+  <Hit_def>hypothetical protein [Bos mutus]</Hit_def>
+  <Hit_accession>MXQ80905</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>282.337</Hsp_bit-score>
+      <Hsp_score>721</Hsp_score>
+      <Hsp_evalue>1.57996e-95</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>135</Hsp_identity>
+      <Hsp_positive>140</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADLIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSRVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADTHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD+IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGS+VVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTAD HAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>14</Hit_num>
+  <Hit_id>ref|XP_020755839.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Odocoileus virginianus texanus]</Hit_def>
+  <Hit_accession>XP_020755839</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>281.952</Hsp_bit-score>
+      <Hsp_score>720</Hsp_score>
+      <Hsp_evalue>2.85787e-95</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>136</Hsp_identity>
+      <Hsp_positive>138</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADAIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVAIALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD IGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>15</Hit_num>
+  <Hit_id>ref|XP_061009877.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Dama dama]</Hit_def>
+  <Hit_accession>XP_061009877</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>281.182</Hsp_bit-score>
+      <Hsp_score>718</Hsp_score>
+      <Hsp_evalue>4.73482e-95</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>134</Hsp_identity>
+      <Hsp_positive>139</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTVIVSMWSKISTQADAIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSLVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERT+I+S+WSKISTQAD IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLS+VSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>16</Hit_num>
+  <Hit_id>gb|KAJ1067364.1|</Hit_id>
+  <Hit_def>hypothetical protein K5549_010482 [Capra hircus]</Hit_def>
+  <Hit_accession>KAJ1067364</Hit_accession>
+  <Hit_len>164</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>281.952</Hsp_bit-score>
+      <Hsp_score>720</Hsp_score>
+      <Hsp_evalue>5.14348e-95</Hsp_evalue>
+      <Hsp_query-from>3</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>25</Hsp_hit-from>
+      <Hsp_hit-to>164</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>139</Hsp_identity>
+      <Hsp_positive>139</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>140</Hsp_align-len>
+      <Hsp_qseq>LTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>LHRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>L RTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>17</Hit_num>
+  <Hit_id>gb|KAB0384589.1|</Hit_id>
+  <Hit_def>hypothetical protein FD755_006506 [Muntiacus reevesi]</Hit_def>
+  <Hit_accession>KAB0384589</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>279.256</Hsp_bit-score>
+      <Hsp_score>713</Hsp_score>
+      <Hsp_evalue>3.0592e-94</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>134</Hsp_identity>
+      <Hsp_positive>137</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQTDAIGTETLERLFSCYPQAKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQ D IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>18</Hit_num>
+  <Hit_id>gb|KAB0348453.1|</Hit_id>
+  <Hit_def>hypothetical protein FD754_013310 [Muntiacus muntjak]</Hit_def>
+  <Hit_accession>KAB0348453</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>279.256</Hsp_bit-score>
+      <Hsp_score>713</Hsp_score>
+      <Hsp_evalue>3.09296e-94</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>134</Hsp_identity>
+      <Hsp_positive>137</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQTDAIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQ D IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>19</Hit_num>
+  <Hit_id>gb|MXQ80904.1|</Hit_id>
+  <Hit_def>hypothetical protein [Bos mutus]</Hit_def>
+  <Hit_accession>MXQ80904</Hit_accession>
+  <Hit_len>178</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>280.411</Hsp_bit-score>
+      <Hsp_score>716</Hsp_score>
+      <Hsp_evalue>3.2043e-94</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>37</Hsp_hit-from>
+      <Hsp_hit-to>178</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>134</Hsp_identity>
+      <Hsp_positive>140</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>ISLTRTERTIIVSLWSKISTQVDVIGTKTLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSRVLAAVGDAEKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>+SLTRTERTII+SLWSKISTQ DVIGT+TLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGS+V+AAVGDA KSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>20</Hit_num>
+  <Hit_id>gb|OWK11454.1|</Hit_id>
+  <Hit_def>hypothetical protein Celaphus_00006693 [Cervus elaphus hippelaphus]</Hit_def>
+  <Hit_accession>OWK11454</Hit_accession>
+  <Hit_len>154</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>273.863</Hsp_bit-score>
+      <Hsp_score>699</Hsp_score>
+      <Hsp_evalue>6.63893e-92</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>154</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>135</Hsp_identity>
+      <Hsp_positive>139</Hsp_positive>
+      <Hsp_gaps>12</Hsp_gaps>
+      <Hsp_align-len>154</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFK------------FLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTVIVSMWSKISTQADAIGTETLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGDAVKSIDNVASALSKLSELHAYVLRVDPVNFKVGSGPRGRGEVSFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERT+I+S+WSKISTQAD IGTETLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV SALSKLSELHAYVLRVDPVNFK            FLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>21</Hit_num>
+  <Hit_id>ref|XP_057603996.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Hippopotamus amphibius kiboko]</Hit_def>
+  <Hit_accession>XP_057603996</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>271.166</Hsp_bit-score>
+      <Hsp_score>692</Hsp_score>
+      <Hsp_evalue>4.00607e-91</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>130</Hsp_identity>
+      <Hsp_positive>136</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWAKISTQADLIGTETLERLFSSYPQAKTYFPHFDLHPGSAQLRAHGSKVLAAVGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKFLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W+KISTQAD+IGTETLERLFS YPQAKTYFPHFDLH GSAQLRAHGSKV+AAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFKFLSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>22</Hit_num>
+  <Hit_id>ref|XP_025130817.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Bubalus bubalis]</Hit_def>
+  <Hit_accession>XP_025130817</Hit_accession>
+  <Hit_len>163</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>270.396</Hsp_bit-score>
+      <Hsp_score>690</Hsp_score>
+      <Hsp_evalue>1.78401e-90</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>163</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>137</Hsp_identity>
+      <Hsp_positive>141</Hsp_positive>
+      <Hsp_gaps>21</Hsp_gaps>
+      <Hsp_align-len>163</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFK---------------------FLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRTERTIIVSLWSKISTQADLIGTKTLERLFSCYPQAKTYFPHFDLHTGSAQLRAHGSKVVAAVGVAVKSIDNVTSALSKLSELHAYVLRVDPVNFKVGAGPRARVSGPGSRGLEEVSFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTRTERTII+SLWSKISTQAD+IGT+TLERLFSCYPQAKTYFPHFDLH+GSAQLRAHGSKVVAAVG AVKSIDNVTSALSKLSELHAYVLRVDPVNFK                     FLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>23</Hit_num>
+  <Hit_id>ref|XP_004270434.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Orcinus orca] &gt;ref|XP_004322169.1| hemoglobin subunit zeta [Tursiops truncatus] &gt;ref|XP_022450004.1| hemoglobin subunit zeta [Delphinapterus leucas] &gt;ref|XP_024615458.1| hemoglobin subunit zeta [Neophocaena asiaeorientalis asiaeorientalis] &gt;ref|XP_026973858.1| hemoglobin subunit zeta [Lagenorhynchus obliquidens] &gt;ref|XP_029077515.1| hemoglobin subunit zeta [Monodon monoceros] &gt;ref|XP_030728238.1| hemoglobin subunit zeta [Globicephala melas] &gt;ref|XP_058895210.1| hemoglobin subunit zeta [Kogia breviceps] &gt;ref|XP_058907657.1| hemoglobin subunit zeta [Kogia breviceps] &gt;ref|XP_059976391.1| hemoglobin subunit zeta [Mesoplodon densirostris] &gt;ref|XP_059979425.1| hemoglobin subunit zeta [Lagenorhynchus albirostris] &gt;ref|XP_061064798.1| hemoglobin subunit zeta [Eubalaena glacialis] &gt;tpe|SAI82245.1| TPA: globin E1 [Tursiops truncatus]</Hit_def>
+  <Hit_accession>XP_004270434</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>267.314</Hsp_bit-score>
+      <Hsp_score>682</Hsp_score>
+      <Hsp_evalue>1.51435e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>128</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKISTQADIIGTEALERLFSSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KISTQAD+IGTE LERLFS YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>24</Hit_num>
+  <Hit_id>ref|XP_007453701.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Lipotes vexillifer]</Hit_def>
+  <Hit_accession>XP_007453701</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.929</Hsp_bit-score>
+      <Hsp_score>681</Hsp_score>
+      <Hsp_evalue>2.19919e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>127</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKVSTQADIIGTEALERLFSSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W K+STQAD+IGTE LERLFS YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>25</Hit_num>
+  <Hit_id>ref|XP_007181884.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Balaenoptera acutorostrata] &gt;ref|XP_036680021.1| hemoglobin subunit zeta [Balaenoptera musculus] &gt;ref|XP_059752970.1| hemoglobin subunit zeta [Balaenoptera ricei]</Hit_def>
+  <Hit_accession>XP_007181884</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.929</Hsp_bit-score>
+      <Hsp_score>681</Hsp_score>
+      <Hsp_evalue>2.19919e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>127</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIVVSMWGKISTQADIIGTEALERLFSSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTI++S+W KISTQAD+IGTE LERLFS YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>26</Hit_num>
+  <Hit_id>ref|XP_057603995.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Hippopotamus amphibius kiboko]</Hit_def>
+  <Hit_accession>XP_057603995</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.929</Hsp_bit-score>
+      <Hsp_score>681</Hsp_score>
+      <Hsp_evalue>2.56438e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>128</Hsp_identity>
+      <Hsp_positive>134</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWAKISTQADLIGAETLERLFSSYPQAKTYFPHFDLHPGSAQLRAHGSKVLAAVGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKFLSHCLLVTVASHFPADFTADAHAAWDKFLCIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W+KISTQAD+IG ETLERLFS YPQAKTYFPHFDLH GSAQLRAHGSKV+AAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFKFLSHCLLVT+ASHFPADFTADAHAAWDKFL IVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>27</Hit_num>
+  <Hit_id>gb|KAJ8786480.1|</Hit_id>
+  <Hit_def>hypothetical protein J1605_005969 [Eschrichtius robustus]</Hit_def>
+  <Hit_accession>KAJ8786480</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.159</Hsp_bit-score>
+      <Hsp_score>679</Hsp_score>
+      <Hsp_evalue>3.97751e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>126</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIVVSMWGKISTQADIVGTEALERLFSSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTI++S+W KISTQAD++GTE LERLFS YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>28</Hit_num>
+  <Hit_id>ref|XP_059888937.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Delphinus delphis]</Hit_def>
+  <Hit_accession>XP_059888937</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.159</Hsp_bit-score>
+      <Hsp_score>679</Hsp_score>
+      <Hsp_evalue>4.15599e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>127</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKISTQADIIGTEALERLFSSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKNIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KISTQAD+IGTE LERLFS YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVK+IDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>29</Hit_num>
+  <Hit_id>ref|XP_007130443.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Physeter catodon]</Hit_def>
+  <Hit_accession>XP_007130443</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.159</Hsp_bit-score>
+      <Hsp_score>679</Hsp_score>
+      <Hsp_evalue>5.17593e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>127</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKISTQADIIGTEALERLFSSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAALGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KISTQAD+IGTE LERLFS YPQ KTYFPHFDLH+GSAQLRAHGSKVVAA+GDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>30</Hit_num>
+  <Hit_id>ref|XP_019842593.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Bos indicus]</Hit_def>
+  <Hit_accession>XP_019842593</Hit_accession>
+  <Hit_len>160</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>266.544</Hsp_bit-score>
+      <Hsp_score>680</Hsp_score>
+      <Hsp_evalue>6.56673e-89</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>160</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>133</Hsp_identity>
+      <Hsp_positive>138</Hsp_positive>
+      <Hsp_gaps>18</Hsp_gaps>
+      <Hsp_align-len>160</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLE------------------RLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWSKISTQADLIGTETLESGYRKSHPERSLTRPPARRLFSCYPQAKTYFPHFDLHTGSAQLXXHGSRVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADVHAAWDKFLSIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+WSKISTQAD+IGTETLE                  RLFSCYPQAKTYFPHFDLH+GSAQL  HGS+VVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTAD HAAWDKFLSIVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>31</Hit_num>
+  <Hit_id>ref|XP_004604283.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Sorex araneus] &gt;ref|XP_004604284.1| hemoglobin subunit zeta [Sorex araneus] &gt;gb|ACE73631.1| hemoglobin, zeta (predicted) [Sorex araneus] &gt;gb|ACE73632.1| hemoglobin subunit zeta (predicted) [Sorex araneus]</Hit_def>
+  <Hit_accession>XP_004604283</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>263.462</Hsp_bit-score>
+      <Hsp_score>672</Hsp_score>
+      <Hsp_evalue>5.47763e-88</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>124</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIILSMWGKISTQADVIGTEALERLFTSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNIPSALAKLSELHAYVLRVDPVNFKLLSHCLLVTLASHFPADFSADTHAAWDKFLTVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTIILS+W KISTQADVIGTE LERLF+ YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDN+ SAL+KLSELHAYVLRVDPVNFK LSHCLLVTLASHFPADF+AD HAAWDKFL++VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>32</Hit_num>
+  <Hit_id>ref|XP_055991294.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Sorex fumeus] &gt;ref|XP_055991295.1| hemoglobin subunit zeta [Sorex fumeus]</Hit_def>
+  <Hit_accession>XP_055991294</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>263.077</Hsp_bit-score>
+      <Hsp_score>671</Hsp_score>
+      <Hsp_evalue>7.86783e-88</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>123</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISTQADAIGTETLERLFTSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNIPSALAKLSELHAYVLRVDPVNFKLLSHCLLVTLASHFPADFSADTHAAWDKFLTVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KISTQAD IGTETLERLF+ YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDN+ SAL+KLSELHAYVLRVDPVNFK LSHCLLVTLASHFPADF+AD HAAWDKFL++VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>33</Hit_num>
+  <Hit_id>ref|XP_019504017.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Hipposideros armiger]</Hit_def>
+  <Hit_accession>XP_019504017</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>262.692</Hsp_bit-score>
+      <Hsp_score>670</Hsp_score>
+      <Hsp_evalue>8.87718e-88</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>124</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWSKIATQADGIGTEALERLFASYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+WSKI+TQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>34</Hit_num>
+  <Hit_id>gb|KAK1344615.1|</Hit_id>
+  <Hit_def>hypothetical protein QTO34_013312 [Eptesicus nilssonii]</Hit_def>
+  <Hit_accession>KAK1344615</Hit_accession>
+  <Hit_len>151</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>262.307</Hsp_bit-score>
+      <Hsp_score>669</Hsp_score>
+      <Hsp_evalue>1.69166e-87</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>151</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIMSMWGKISAQADIIGTETLERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKNIDNIASALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KIS QAD+IGTETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK+IDN+ SALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>35</Hit_num>
+  <Hit_id>ref|XP_003481130.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Sus scrofa] &gt;ref|XP_047635138.1| hemoglobin subunit zeta [Phacochoerus africanus]</Hit_def>
+  <Hit_accession>XP_003481130</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>261.536</Hsp_bit-score>
+      <Hsp_score>667</Hsp_score>
+      <Hsp_evalue>2.84062e-87</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>123</Hsp_identity>
+      <Hsp_positive>135</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIITSMWGKISSQADTIGTETLERLFASYPQAKTYFPHFDLNPGSAQLRAHGSKVLAAVGEAVKSIDNVSAALAKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADLTAEAHAAWDKFLTIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII S+W KIS+QAD IGTETLERLF+ YPQAKTYFPHFDL+ GSAQLRAHGSKV+AAVG+AVKSIDNV++AL+KLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPAD TA+AHAAWDKFL+IVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>36</Hit_num>
+  <Hit_id>ref|XP_039333962.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Saimiri boliviensis boliviensis] &gt;gb|ACA51070.1| zeta globin (predicted) [Plecturocebus moloch]</Hit_def>
+  <Hit_accession>XP_039333962</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>260.766</Hsp_bit-score>
+      <Hsp_score>665</Hsp_score>
+      <Hsp_evalue>6.68516e-87</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>123</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGAALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+ +ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>37</Hit_num>
+  <Hit_id>ref|XP_006914103.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Pteropus alecto] &gt;ref|XP_011375034.1| hemoglobin subunit zeta [Pteropus vampyrus] &gt;ref|XP_039740671.1| hemoglobin subunit zeta [Pteropus giganteus] &gt;gb|ELK10890.1| Hemoglobin subunit zeta [Pteropus alecto]</Hit_def>
+  <Hit_accession>XP_006914103</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>259.996</Hsp_bit-score>
+      <Hsp_score>663</Hsp_score>
+      <Hsp_evalue>1.05988e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKSERTVIMSMWGKISTQADAIGTEALERLFASYPQTKTYFPHFDLHPGSAQLRLHGSKVVAAVGEAVKSIDNIAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSNVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT++ERT+I+S+W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLR HGSKVVAAVG+AVKSIDN+  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>38</Hit_num>
+  <Hit_id>ref|XP_015991970.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Rousettus aegyptiacus] &gt;gb|KAF6440694.1| hypothetical protein HJG63_006142 [Rousettus aegyptiacus]</Hit_def>
+  <Hit_accession>XP_015991970</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>259.61</Hsp_bit-score>
+      <Hsp_score>662</Hsp_score>
+      <Hsp_evalue>1.45697e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKSERAIIMSMWGKISTQADAIGTEALERLFTSYPQTKTYFPHFDLHPGSAQLRVHGSKVLAAVGDAVKSIDNIAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSIVSNVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT++ER II+S+W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLR HGSKV+AAVGDAVKSIDN+  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>39</Hit_num>
+  <Hit_id>ref|XP_006873883.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta isoform X1 [Chrysochloris asiatica]</Hit_def>
+  <Hit_accession>XP_006873883</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>259.225</Hsp_bit-score>
+      <Hsp_score>661</Hsp_score>
+      <Hsp_evalue>2.23509e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIILSMWSKISTQADSIGTETLERLFAGYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKNIDNISLALSKLSELHAYILRVDPVNFKLLSHCLLVTMAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTIILS+WSKISTQAD IGTETLERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVK+IDN++ ALSKLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>40</Hit_num>
+  <Hit_id>ref|XP_036890529.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Sturnira hondurensis]</Hit_def>
+  <Hit_accession>XP_036890529</Hit_accession>
+  <Hit_len>151</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>259.225</Hsp_bit-score>
+      <Hsp_score>661</Hsp_score>
+      <Hsp_evalue>3.16569e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>151</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSLWGKISAQADVVGTEALERLFASYPQTKTYFPHFDLHPGSAHLRAHGSKVVAAVGDAVKNIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+SLW KIS QADV+GTE LERLF+ YPQ KTYFPHFDLH GSA LRAHGSKVVAAVGDAVK+IDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>41</Hit_num>
+  <Hit_id>ref|XP_017366360.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Cebus imitator] &gt;ref|XP_032129815.1| hemoglobin subunit zeta [Sapajus apella] &gt;ref|XP_032129816.1| hemoglobin subunit zeta [Sapajus apella] &gt;ref|XP_035122197.1| hemoglobin subunit zeta [Callithrix jacchus] &gt;gb|ABZ80335.1| zeta globin (predicted) [Callithrix jacchus]</Hit_def>
+  <Hit_accession>XP_017366360</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>258.84</Hsp_bit-score>
+      <Hsp_score>660</Hsp_score>
+      <Hsp_evalue>3.39136e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAAKSIDNIGAALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDA KSIDN+ +ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>42</Hit_num>
+  <Hit_id>ref|XP_008155898.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Eptesicus fuscus]</Hit_def>
+  <Hit_accession>XP_008155898</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>258.84</Hsp_bit-score>
+      <Hsp_score>660</Hsp_score>
+      <Hsp_evalue>3.50485e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIMSMWGKISAQADIIGTETLERLFASYPQTKTYFPHFDLHPGSAHLRNHGSKVVAAVGDAVKSIDNIAGALSKLSDLHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KIS QAD+IGTETLERLF+ YPQ KTYFPHFDLH GSA LR HGSKVVAAVGDAVKSIDN+  ALSKLS+LHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>43</Hit_num>
+  <Hit_id>gb|KAK2097145.1|</Hit_id>
+  <Hit_def>hypothetical protein P7K49_022595 [Saguinus oedipus]</Hit_def>
+  <Hit_accession>KAK2097145</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>258.84</Hsp_bit-score>
+      <Hsp_score>660</Hsp_score>
+      <Hsp_evalue>3.50485e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQVDTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGAALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQ D IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+ +ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>44</Hit_num>
+  <Hit_id>sp|P02009.1|</Hit_id>
+  <Hit_def>RecName: Full=Hemoglobin subunit zeta; AltName: Full=Hemoglobin zeta chain; AltName: Full=Zeta-globin [Sus scrofa]</Hit_def>
+  <Hit_accession>P02009</Hit_accession>
+  <Hit_len>141</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>258.455</Hsp_bit-score>
+      <Hsp_score>659</Hsp_score>
+      <Hsp_evalue>4.76149e-86</Hsp_evalue>
+      <Hsp_query-from>2</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>141</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>135</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>141</Hsp_align-len>
+      <Hsp_qseq>SLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>SLTKAERTIIGSMWTKISSQADTIGTETLERLFASYPQAKTYFPHFDLNPGSAQLRAHGSKVLAAVGEAVKSIDNVSAALAKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADLTAEAHAAWDKFLTIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>SLT+ ERTII S+W+KIS+QAD IGTETLERLF+ YPQAKTYFPHFDL+ GSAQLRAHGSKV+AAVG+AVKSIDNV++AL+KLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPAD TA+AHAAWDKFL+IVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>45</Hit_num>
+  <Hit_id>ref|XP_045704994.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta isoform X1 [Phyllostomus hastatus]</Hit_def>
+  <Hit_accession>XP_045704994</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>258.455</Hsp_bit-score>
+      <Hsp_score>659</Hsp_score>
+      <Hsp_evalue>5.80589e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISAQADVIGTEALERLFASYPQTKTYFPHFDLHPGSAHLRAHGSKVVAAVGDAVRNIDNIAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KIS QADVIGTE LERLF+ YPQ KTYFPHFDLH GSA LRAHGSKVVAAVGDAV++IDN+  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>46</Hit_num>
+  <Hit_id>ref|XP_030654650.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Nomascus leucogenys] &gt;ref|XP_030654651.1| hemoglobin subunit zeta [Nomascus leucogenys] &gt;ref|XP_055099078.1| hemoglobin subunit zeta [Symphalangus syndactylus]</Hit_def>
+  <Hit_accession>XP_030654650</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>257.684</Hsp_bit-score>
+      <Hsp_score>657</Hsp_score>
+      <Hsp_evalue>9.30618e-86</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>123</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTNTERTIIVSLWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGAALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT TERTII+SLW+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+ +ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>47</Hit_num>
+  <Hit_id>ref|XP_024089065.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Pongo abelii] &gt;ref|XP_054310206.1| hemoglobin subunit zeta [Pongo pygmaeus] &gt;ref|XP_054310571.1| hemoglobin subunit zeta [Pongo pygmaeus] &gt;ref|XP_054310842.1| hemoglobin subunit zeta [Pongo pygmaeus] &gt;ref|XP_054310843.1| hemoglobin subunit zeta [Pongo pygmaeus] &gt;ref|XP_055220687.1| hemoglobin subunit zeta [Gorilla gorilla gorilla] &gt;gb|PNJ02730.1| HBZ isoform 1 [Pongo abelii]</Hit_def>
+  <Hit_accession>XP_024089065</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>257.684</Hsp_bit-score>
+      <Hsp_score>657</Hsp_score>
+      <Hsp_evalue>1.15898e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGGALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>48</Hit_num>
+  <Hit_id>ref|XP_010380161.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Rhinopithecus roxellana] &gt;ref|XP_010380162.1| hemoglobin subunit zeta [Rhinopithecus roxellana] &gt;ref|XP_030781487.1| hemoglobin subunit zeta [Rhinopithecus roxellana]</Hit_def>
+  <Hit_accession>XP_010380161</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>257.299</Hsp_bit-score>
+      <Hsp_score>656</Hsp_score>
+      <Hsp_evalue>1.38139e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAAKNIDNIGAALTKLSELHAYVLRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDA K+IDN+ +AL+KLSELHAYVLRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>49</Hit_num>
+  <Hit_id>ref|XP_021530835.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Aotus nancymaae]</Hit_def>
+  <Hit_accession>XP_021530835</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>257.299</Hsp_bit-score>
+      <Hsp_score>656</Hsp_score>
+      <Hsp_evalue>1.45929e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDSIGAALSKLSELHAYVLRVDPVNFKLLSHCLLVTLAARFPSDFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSID++ +ALSKLSELHAYVLRVDPVNFK LSHCLLVTLA+ FP+DFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>50</Hit_num>
+  <Hit_id>ref|XP_036135089.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Molossus molossus] &gt;gb|KAF6489604.1| hypothetical protein HJG59_006170 [Molossus molossus]</Hit_def>
+  <Hit_accession>XP_036135089</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.914</Hsp_bit-score>
+      <Hsp_score>655</Hsp_score>
+      <Hsp_evalue>2.09599e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISPQADAIGTETLERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKNIDNISGALSKLSELHAYILRVDPVNFKLLSHCLLVTMASHFPVDFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KIS QAD IGTETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK+IDN++ ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFP DFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>51</Hit_num>
+  <Hit_id>ref|XP_012661205.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Otolemur garnettii]</Hit_def>
+  <Hit_accession>XP_012661205</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.914</Hsp_bit-score>
+      <Hsp_score>655</Hsp_score>
+      <Hsp_evalue>2.31353e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>133</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWGKISTQADPIGTETLERLFLSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAALGDAVKNIDNITGALAKLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFMSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W KISTQAD IGTETLERLF  YPQ KTYFPHFDLH+GSAQLRAHGSKVVAA+GDAVK+IDN+T AL+KLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKF+S+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>52</Hit_num>
+  <Hit_id>ref|XP_028369720.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Phyllostomus discolor] &gt;gb|KAF6124722.1| hemoglobin subunit zeta [Phyllostomus discolor]</Hit_def>
+  <Hit_accession>XP_028369720</Hit_accession>
+  <Hit_len>151</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.914</Hsp_bit-score>
+      <Hsp_score>655</Hsp_score>
+      <Hsp_evalue>2.383e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>151</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISAQADVIGTEALERLFASYPQTKTYFPHFDLHPGSAHLRAHGSKVAAAVGDAVRNIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KIS QADVIGTE LERLF+ YPQ KTYFPHFDLH GSA LRAHGSKV AAVGDAV++IDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>53</Hit_num>
+  <Hit_id>ref|XP_033092346.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Trachypithecus francoisi]</Hit_def>
+  <Hit_accession>XP_033092346</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.529</Hsp_bit-score>
+      <Hsp_score>654</Hsp_score>
+      <Hsp_evalue>2.49822e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAAKNIDNIGAALTKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDA K+IDN+ +AL+KLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>54</Hit_num>
+  <Hit_id>ref|XP_045396945.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Lemur catta]</Hit_def>
+  <Hit_accession>XP_045396945</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.529</Hsp_bit-score>
+      <Hsp_score>654</Hsp_score>
+      <Hsp_evalue>2.75751e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERAIIVSMWGKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNIAGALAKLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFMSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TER II+S+W KISTQAD IGTETLERLF  YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDN+  AL+KLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKF+S+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>55</Hit_num>
+  <Hit_id>ref|XP_012593319.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like isoform X2 [Microcebus murinus]</Hit_def>
+  <Hit_accession>XP_012593319</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.529</Hsp_bit-score>
+      <Hsp_score>654</Hsp_score>
+      <Hsp_evalue>2.78793e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERAIIVSMWGKISTQADAIGTETLERLFLSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNIAGALARLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TER II+S+W KISTQAD IGTETLERLF  YPQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDN+  AL++LSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>56</Hit_num>
+  <Hit_id>ref|XP_032956925.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta isoform X1 [Rhinolophus ferrumequinum] &gt;gb|KAF6271452.1| hemoglobin subunit zeta [Rhinolophus ferrumequinum]</Hit_def>
+  <Hit_accession>XP_032956925</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.144</Hsp_bit-score>
+      <Hsp_score>653</Hsp_score>
+      <Hsp_evalue>4.13832e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIITSMWNKISTQADAIGTEALERLFASYPQTKTYFPHFDLNPGSAQLRAHGSKVVAAVGDAVKSIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVALHFPAEFTADAHAAWDKFLSVVSNVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII S+W+KISTQAD IGTE LERLF+ YPQ KTYFPHFDL+ GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+A HFPA+FTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>57</Hit_num>
+  <Hit_id>ref|XP_003417855.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Loxodonta africana] &gt;ref|XP_049759699.1| hemoglobin subunit zeta [Elephas maximus indicus] &gt;tpe|SAI82299.1| TPA: globin E1 [Loxodonta africana]</Hit_def>
+  <Hit_accession>XP_003417855</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.144</Hsp_bit-score>
+      <Hsp_score>653</Hsp_score>
+      <Hsp_evalue>4.23013e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIVSMWNKVSTQADSIGTEALERLFASYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNISGALSKLSELHAYILRVDPVNFKLLSHCLLVTLGTRFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W+K+STQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN++ ALSKLSELHAY+LRVDPVNFK LSHCLLVTL + FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>58</Hit_num>
+  <Hit_id>gb|KAF6124723.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Phyllostomus discolor]</Hit_def>
+  <Hit_accession>KAF6124723</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.144</Hsp_bit-score>
+      <Hsp_score>653</Hsp_score>
+      <Hsp_evalue>4.41992e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISAQADVIGTEALERLFASYPQTKTYFPHFDLHPGSAHLRAHGSKVAAAVGDAVRNIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KIS QADVIGTE LERLF+ YPQ KTYFPHFDLH GSA LRAHGSKV AAVGDAV++IDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>59</Hit_num>
+  <Hit_id>gb|ACG63684.1|</Hit_id>
+  <Hit_def>zeta globin (predicted) [Otolemur garnettii]</Hit_def>
+  <Hit_accession>ACG63684</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>256.144</Hsp_bit-score>
+      <Hsp_score>653</Hsp_score>
+      <Hsp_evalue>4.61822e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERAIIVSMWGKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHAGSAQLRAHGSKVVAALGDAVKNIDNITGALAKLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFMSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TER II+S+W KISTQAD IGTETLERLF  YPQ KTYFPHFDLH+GSAQLRAHGSKVVAA+GDAVK+IDN+T AL+KLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKF+S+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>60</Hit_num>
+  <Hit_id>prf||0909303C</Hit_id>
+  <Hit_def>hemoglobin zeta [Sus scrofa domesticus]</Hit_def>
+  <Hit_accession>0909303C</Hit_accession>
+  <Hit_len>141</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.758</Hsp_bit-score>
+      <Hsp_score>652</Hsp_score>
+      <Hsp_evalue>5.5609e-85</Hsp_evalue>
+      <Hsp_query-from>2</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>141</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>134</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>141</Hsp_align-len>
+      <Hsp_qseq>SLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>SLTKAERTIIGSMWTKISSQADTIGTETLERLFASYPQAKTYFPHFDLNPGSDQLRAHGSKVLAAVGEAVKSIDNVSAALAKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADLTAEAHAAWDKFLTIVSGVLTEKYR</Hsp_hseq>
+      <Hsp_midline>SLT+ ERTII S+W+KIS+QAD IGTETLERLF+ YPQAKTYFPHFDL+ GS QLRAHGSKV+AAVG+AVKSIDNV++AL+KLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPAD TA+AHAAWDKFL+IVSGVLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>61</Hit_num>
+  <Hit_id>ref|XP_004705820.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Echinops telfairi]</Hit_def>
+  <Hit_accession>XP_004705820</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.758</Hsp_bit-score>
+      <Hsp_score>652</Hsp_score>
+      <Hsp_evalue>6.00945e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIVLSMWSKVSTQADSIGTETLERLFTSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGEAVKHIDNISGALAKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPVDFTAEAHSAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTI+LS+WSK+STQAD IGTETLERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVG+AVK IDN++ AL+KLSELHAY+LRVDPVNFK LSHCLLVTLA+ FP DFTA+AH+AWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>62</Hit_num>
+  <Hit_id>ref|XP_036857642.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Manis javanica]</Hit_def>
+  <Hit_accession>XP_036857642</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.758</Hsp_bit-score>
+      <Hsp_score>652</Hsp_score>
+      <Hsp_evalue>6.07575e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKISTQADAIGTEALERLFASYPQTKTYFPHFDLHAGSAHLRAHGSKVVAALGDAVKNIDNVAGALAKLSELHAYILRVDPVNFKLLSHCVLVTVASHFPADFTAEAHAAWDKFLSLVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH+GSA LRAHGSKVVAA+GDAVK+IDNV  AL+KLSELHAY+LRVDPVNFK LSHC+LVT+ASHFPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>63</Hit_num>
+  <Hit_id>ref|XP_036316223.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Pipistrellus kuhlii]</Hit_def>
+  <Hit_accession>XP_036316223</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.758</Hsp_bit-score>
+      <Hsp_score>652</Hsp_score>
+      <Hsp_evalue>6.21055e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIMSMWGKISGQAEAIGTETLERLFTSYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKNMDNIDSALSKLSELHAYILRVDPVNFKLLSHCLLVTMASHFPEDFTADAHAAWDKFLSVVSTVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KIS QA+ IGTETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK++DN+ SALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFP DFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>64</Hit_num>
+  <Hit_id>ref|XP_050630726.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Macaca thibetana thibetana]</Hit_def>
+  <Hit_accession>XP_050630726</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.758</Hsp_bit-score>
+      <Hsp_score>652</Hsp_score>
+      <Hsp_evalue>6.27906e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTLIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLQAHGSKVVAAVGDAAKNIDNIGAALSKLSELHAYVLRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERT+I+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQL+AHGSKVVAAVGDA K+IDN+ +ALSKLSELHAYVLRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>65</Hit_num>
+  <Hit_id>ref|XP_031303606.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Camelus dromedarius] &gt;ref|XP_032316602.1| hemoglobin subunit zeta [Camelus ferus] &gt;gb|KAB1252024.1| Hemoglobin subunit zeta [Camelus dromedarius]</Hit_def>
+  <Hit_accession>XP_031303606</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.373</Hsp_bit-score>
+      <Hsp_score>651</Hsp_score>
+      <Hsp_evalue>7.00721e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIVVSMWGKIATQADVIGMEALERLFSSFPQTKTYFPHFDLHPGSAQLRAHGSKVLAALGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSTVSRVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTI++S+W KI+TQADVIG E LERLFS +PQ KTYFPHFDLH GSAQLRAHGSKV+AA+GDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>66</Hit_num>
+  <Hit_id>ref|XP_036159033.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Myotis myotis] &gt;gb|KAF6272060.1| hemoglobin subunit zeta [Myotis myotis]</Hit_def>
+  <Hit_accession>XP_036159033</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.373</Hsp_bit-score>
+      <Hsp_score>651</Hsp_score>
+      <Hsp_evalue>7.16267e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKIAAQADTIGTETLERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKHIDDIASALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KI+ QAD IGTETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK ID++ SALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>67</Hit_num>
+  <Hit_id>ref|XP_004438307.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Ceratotherium simum simum] &gt;ref|XP_058426589.1| hemoglobin subunit zeta [Diceros bicornis minor] &gt;gb|KAF5921012.1| hypothetical protein HPG69_005590 [Diceros bicornis minor]</Hit_def>
+  <Hit_accession>XP_004438307</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.373</Hsp_bit-score>
+      <Hsp_score>651</Hsp_score>
+      <Hsp_evalue>8.44403e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>128</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISMQADAIGTEALERLFASYPQTKTYFPHFDLHPGSAQLRAHGSKVAAAVGDAVKSIDNVAGALAKLSELHAYILRVDPVNFKLLSHCLLVTVASRFPAEFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KIS QAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKV AAVGDAVKSIDNV  AL+KLSELHAY+LRVDPVNFK LSHCLLVT+AS FPA+FTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>68</Hit_num>
+  <Hit_id>ref|XP_019611839.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Rhinolophus sinicus]</Hit_def>
+  <Hit_accession>XP_019611839</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.373</Hsp_bit-score>
+      <Hsp_score>651</Hsp_score>
+      <Hsp_evalue>8.53719e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIITSMWSKISTQADTIGTEALERLFASYPQTKTYFPHFDLNPGSAQLRAHGSKVLAAVGEAVKSIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVALHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII S+WSKISTQAD IGTE LERLF+ YPQ KTYFPHFDL+ GSAQLRAHGSKV+AAVG+AVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+A HFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>69</Hit_num>
+  <Hit_id>ref|XP_014409855.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Camelus ferus] &gt;gb|EPY85331.1| hemoglobin subunit zeta [Camelus ferus] &gt;gb|KAB1252023.1| Hemoglobin subunit zeta [Camelus dromedarius]</Hit_def>
+  <Hit_accession>XP_014409855</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.373</Hsp_bit-score>
+      <Hsp_score>651</Hsp_score>
+      <Hsp_evalue>9.2187e-85</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIVVSMWGKIATQADVIGMEALERLFSSFPQTKTYFPHFDLHPGSAQLRAHGSKVLAALGDAVKSIDNVAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFSADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTI++S+W KI+TQADVIG E LERLFS +PQ KTYFPHFDLH GSAQLRAHGSKV+AA+GDAVKSIDNV  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHF ADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>70</Hit_num>
+  <Hit_id>ref|NP_005323.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Homo sapiens] &gt;sp|P02008.2| RecName: Full=Hemoglobin subunit zeta; AltName: Full=HBAZ; AltName: Full=Hemoglobin zeta chain; AltName: Full=Zeta-globin [Homo sapiens] &gt;pdb|3W4U|A Chain A, Hemoglobin subunit zeta [Homo sapiens] &gt;pdb|3W4U|C Chain C, Hemoglobin subunit zeta [Homo sapiens] &gt;pdb|3W4U|E Chain E, Hemoglobin subunit zeta [Homo sapiens] &gt;gb|ABM85006.1| hemoglobin, zeta, partial [synthetic construct] &gt;emb|SJX25988.1| unnamed protein product, partial [Human ORFeome Gateway entry vector] &gt;gb|AAA61306.1| zeta hemoglobin [Homo sapiens] &gt;gb|AAB59406.1| hemoglobin zeta [Homo sapiens] &gt;gb|AAH27892.1| Hemoglobin, zeta [Homo sapiens]</Hit_def>
+  <Hit_accession>NP_005323</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.988</Hsp_bit-score>
+      <Hsp_score>650</Hsp_score>
+      <Hsp_evalue>1.0632e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDDIGGALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSID++  ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>71</Hit_num>
+  <Hit_id>ref|XP_037013151.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Artibeus jamaicensis]</Hit_def>
+  <Hit_accession>XP_037013151</Hit_accession>
+  <Hit_len>151</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>255.373</Hsp_bit-score>
+      <Hsp_score>651</Hsp_score>
+      <Hsp_evalue>1.10694e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>10</Hsp_hit-from>
+      <Hsp_hit-to>151</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIMSMWGKISAQADVVGTEALERLFASFPQTKTYFPHFDLHTGSAHLHAHGSKVVAAVGDAVKNIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+S+W KIS QADV+GTE LERLF+ +PQ KTYFPHFDLH+GSA L AHGSKVVAAVGDAVK+IDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>72</Hit_num>
+  <Hit_id>gb|KAI5228847.1|</Hit_id>
+  <Hit_def>Hemoglobin Subunit Zeta [Manis pentadactyla]</Hit_def>
+  <Hit_accession>KAI5228847</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.38348e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIVVSMWGKISTQADAIGTEALERLFASYPQTKTYFPHFDLHAGSAHLRAHGSKVVAALGDAVKNIDNVAGALAKLSELHAYILRVDPVNFKLLSHCVLVTVASHFPADFTAEAHAAWDKFLSLVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTI++S+W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH+GSA LRAHGSKVVAA+GDAVK+IDNV  AL+KLSELHAY+LRVDPVNFK LSHC+LVT+ASHFPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>73</Hit_num>
+  <Hit_id>ref|XP_054442736.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Pteronotus parnellii mesoamericanus]</Hit_def>
+  <Hit_accession>XP_054442736</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.47762e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>128</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERAIIMSMWGKISAQADAIGTEALERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKNIDNIAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ER II+S+W KIS QAD IGTE LERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK+IDN+  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>74</Hit_num>
+  <Hit_id>ref|XP_007955631.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Orycteropus afer afer]</Hit_def>
+  <Hit_accession>XP_007955631</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.57817e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIASMWGKVSTQADSIGTEALERLFTSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII S+W K+STQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>75</Hit_num>
+  <Hit_id>ref|XP_007955630.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Orycteropus afer afer]</Hit_def>
+  <Hit_accession>XP_007955630</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.63098e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIITSMWGKVSTQADSIGTEALERLFTSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII S+W K+STQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>76</Hit_num>
+  <Hit_id>ref|XP_055099081.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Symphalangus syndactylus]</Hit_def>
+  <Hit_accession>XP_055099081</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.66716e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTNTERTIIVSLWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGAALSKLSELHAYILRVDPVNFKLLSHSLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT TERTII+SLW+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+ +ALSKLSELHAY+LRVDPVNFK LSH LLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>77</Hit_num>
+  <Hit_id>ref|XP_024205342.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Pan troglodytes] &gt;ref|XP_024205359.2| hemoglobin subunit zeta [Pan troglodytes] &gt;ref|XP_034807445.1| hemoglobin subunit zeta [Pan paniscus] &gt;ref|XP_055220688.1| hemoglobin subunit zeta [Gorilla gorilla gorilla] &gt;sp|P06347.2| RecName: Full=Hemoglobin subunit zeta; AltName: Full=Hemoglobin zeta chain; AltName: Full=Zeta-globin [Pan troglodytes] &gt;gb|PNI12031.1| HBZ isoform 1 [Pan troglodytes] &gt;gb|PNI12033.1| hypothetical protein CK820_G0054682 [Pan troglodytes] &gt;emb|CAA26980.1| zeta-1-globin [Pan troglodytes]</Hit_def>
+  <Hit_accession>XP_024205342</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.7806e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTEGTIIVSMWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGGALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TE TII+S+W+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>78</Hit_num>
+  <Hit_id>ref|XP_059547796.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Myotis daubentonii]</Hit_def>
+  <Hit_accession>XP_059547796</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.603</Hsp_bit-score>
+      <Hsp_score>649</Hsp_score>
+      <Hsp_evalue>1.86049e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKIAAQADTIGTETLERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKHIDDIASALSKLSELHAYILRVDPVNFKLLAHCLLVTVASHFPADFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KI+ QAD IGTETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK ID++ SALSKLSELHAY+LRVDPVNFK L+HCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>79</Hit_num>
+  <Hit_id>ref|XP_008585504.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Galeopterus variegatus]</Hit_def>
+  <Hit_accession>XP_008585504</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.218</Hsp_bit-score>
+      <Hsp_score>648</Hsp_score>
+      <Hsp_evalue>1.9654e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERAVIVSMWGKISTQADAIGTETLERLFSSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDDIPGALAKLSELHAYVLRVDPVNFKLLSHCLLVSVAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TER +I+S+W KISTQAD IGTETLERLFS YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSID++  AL+KLSELHAYVLRVDPVNFK LSHCLLV++A+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>80</Hit_num>
+  <Hit_id>ref|XP_005590786.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Macaca fascicularis] &gt;ref|XP_011746867.1| hemoglobin subunit zeta [Macaca nemestrina] &gt;ref|XP_011746868.1| hemoglobin subunit zeta [Macaca nemestrina] &gt;ref|XP_014980670.2| hemoglobin subunit zeta [Macaca mulatta] &gt;ref|XP_045238228.1| hemoglobin subunit zeta-like [Macaca fascicularis] &gt;ref|XP_050630724.1| hemoglobin subunit zeta-like [Macaca thibetana thibetana]</Hit_def>
+  <Hit_accession>XP_005590786</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.218</Hsp_bit-score>
+      <Hsp_score>648</Hsp_score>
+      <Hsp_evalue>1.9654e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTLIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLHAHGSKVVAAVGDAAKNIDNIGAALSKLSELHAYVLRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERT+I+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQL AHGSKVVAAVGDA K+IDN+ +ALSKLSELHAYVLRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>81</Hit_num>
+  <Hit_id>ref|XP_036135549.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Molossus molossus] &gt;gb|KAF6489605.1| hemoglobin subunit zeta [Molossus molossus]</Hit_def>
+  <Hit_accession>XP_036135549</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>254.218</Hsp_bit-score>
+      <Hsp_score>648</Hsp_score>
+      <Hsp_evalue>2.6722e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>117</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTTIMSMWSKISTQADAMGVEALERLFTSYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKNIDNISGALSKLSELHAYILRVDPVNFKLLSHCLLVTMASHFPVDFTADAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERT I+S+WSKISTQAD +G E LERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK+IDN++ ALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFP DFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>82</Hit_num>
+  <Hit_id>ref|XP_003417854.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Loxodonta africana]</Hit_def>
+  <Hit_accession>XP_003417854</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.832</Hsp_bit-score>
+      <Hsp_score>647</Hsp_score>
+      <Hsp_evalue>3.71377e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKVERTIITSMWGKVSTQADSIGTEALERLFTSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNISGALSKLSELHAYILRVDPVNFKLLSHCLLVTLDTRFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII S+W K+STQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN++ ALSKLSELHAY+LRVDPVNFK LSHCLLVTL + FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>83</Hit_num>
+  <Hit_id>ref|XP_033092345.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Trachypithecus francoisi]</Hit_def>
+  <Hit_accession>XP_033092345</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.447</Hsp_bit-score>
+      <Hsp_score>646</Hsp_score>
+      <Hsp_evalue>4.01023e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTETERTIIVSMWAKICTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAAKNIDNIGAALTKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT TERTII+S+W+KI TQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDA K+IDN+ +AL+KLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>84</Hit_num>
+  <Hit_id>ref|XP_024089066.2|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Pongo abelii]</Hit_def>
+  <Hit_accession>XP_024089066</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.447</Hsp_bit-score>
+      <Hsp_score>646</Hsp_score>
+      <Hsp_evalue>4.57454e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNIGGALSKLSELHAYILRVDPVNFKLRSHCLLVNLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDN+  ALSKLSELHAY+LRVDPVNFK  SHCLLV LA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>85</Hit_num>
+  <Hit_id>ref|XP_012593219.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Microcebus murinus]</Hit_def>
+  <Hit_accession>XP_012593219</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.447</Hsp_bit-score>
+      <Hsp_score>646</Hsp_score>
+      <Hsp_evalue>4.77977e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERAIIVSMWGKISTQADAIGTETLERLFLSHPQTKTYFPHFDLHAGSAQLRAHGSKVVAAVGDAVKSIDNIAGALARLSELHAYILRVDPVNFKLLSHCLLVTVAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TER II+S+W KISTQAD IGTETLERLF  +PQ KTYFPHFDLH+GSAQLRAHGSKVVAAVGDAVKSIDN+  AL++LSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>86</Hit_num>
+  <Hit_id>ref|XP_036771902.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Manis pentadactyla] &gt;gb|KAI5228844.1| Hemoglobin Subunit Zeta [Manis pentadactyla]</Hit_def>
+  <Hit_accession>XP_036771902</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.062</Hsp_bit-score>
+      <Hsp_score>645</Hsp_score>
+      <Hsp_evalue>5.63481e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>117</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTQAERTIVVSMWGKISTQADAIGTEALERLFASYPQTKTYFPHFDLHAGSAHLRAHGSKVVAALGDAVKNIDNVAGALAKLSELHAYILRVDPVNFKLLSHCVLVTVASHFPADFTAEAHAAWDKFLSLVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTI++S+W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH+GSA LRAHGSKVVAA+GDAVK+IDNV  AL+KLSELHAY+LRVDPVNFK LSHC+LVT+ASHFPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>87</Hit_num>
+  <Hit_id>ref|XP_006103751.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta isoform X1 [Myotis lucifugus] &gt;ref|XP_006103752.1| hemoglobin subunit zeta isoform X2 [Myotis lucifugus] &gt;tpe|SAI82276.1| TPA: globin E1 [Myotis lucifugus]</Hit_def>
+  <Hit_accession>XP_006103751</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.062</Hsp_bit-score>
+      <Hsp_score>645</Hsp_score>
+      <Hsp_evalue>5.95256e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKIAAQADTIGMETLERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKHIDDIASALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHAAWDKFLSLVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KI+ QAD IG ETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK ID++ SALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>88</Hit_num>
+  <Hit_id>gb|QBK15000.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Dugong dugon] &gt;gb|QBK15001.1| hemoglobin subunit zeta [Dugong dugon]</Hit_def>
+  <Hit_accession>QBK15000</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.062</Hsp_bit-score>
+      <Hsp_score>645</Hsp_score>
+      <Hsp_evalue>6.64281e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>117</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIIITMWGKISTQADSIGTEALERLFASYPQTKTYFPHFDLHPGSAQLRTHGSKVVAAVGDAVKSVDNIAGALSKLSELHAYILRVDPVNFKLLSHCLLVTVATRFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTII+++W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH GSAQLR HGSKVVAAVGDAVKS+DN+  ALSKLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>89</Hit_num>
+  <Hit_id>ref|XP_039333961.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Saimiri boliviensis boliviensis]</Hit_def>
+  <Hit_accession>XP_039333961</Hit_accession>
+  <Hit_len>141</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.062</Hsp_bit-score>
+      <Hsp_score>645</Hsp_score>
+      <Hsp_evalue>7.48943e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>141</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>122</Hsp_identity>
+      <Hsp_positive>132</Hsp_positive>
+      <Hsp_gaps>1</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSID-IGAALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSID + +ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>90</Hit_num>
+  <Hit_id>ref|XP_044603209.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Equus asinus]</Hit_def>
+  <Hit_accession>XP_044603209</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.062</Hsp_bit-score>
+      <Hsp_score>645</Hsp_score>
+      <Hsp_evalue>7.49488e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>127</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTMVVSIWGKISMQADAVGTEALQRLFCSYPQTKTYFPHFDLHEGSPQLRAHGSKVAAAVGDAVKSIDNVAGALAKLSELHAYILRVDPVNFKFLSHCLLVTLASHLPADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERT+++S+W KIS QAD +GTE L+RLF  YPQ KTYFPHFDLH GS QLRAHGSKV AAVGDAVKSIDNV  AL+KLSELHAY+LRVDPVNFKFLSHCLLVTLASH PADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>91</Hit_num>
+  <Hit_id>ref|XP_006146400.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Tupaia chinensis] &gt;gb|ELW67743.1| Hemoglobin subunit zeta [Tupaia chinensis]</Hit_def>
+  <Hit_accession>XP_006146400</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>253.062</Hsp_bit-score>
+      <Hsp_score>645</Hsp_score>
+      <Hsp_evalue>7.74567e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVTMWGKISSQADAIGAETLERLFLSYPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDNVAGALAKLSELHAYILRVDPVNFKLLSHCLLVTVAARFPAEFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+++W KIS+QAD IG ETLERLF  YPQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSIDNV  AL+KLSELHAY+LRVDPVNFK LSHCLLVT+A+ FPA+FTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>92</Hit_num>
+  <Hit_id>ref|NP_001108014.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Equus caballus] &gt;sp|P13787.2| RecName: Full=Hemoglobin subunit zeta; AltName: Full=Hemoglobin zeta chain; AltName: Full=Zeta-globin [Equus caballus] &gt;emb|CAA30095.1| zeta globin [Equus caballus] &gt;emb|CAA30096.1| zeta globin [Equus caballus]</Hit_def>
+  <Hit_accession>NP_001108014</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.677</Hsp_bit-score>
+      <Hsp_score>644</Hsp_score>
+      <Hsp_evalue>8.09316e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>127</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTMVVSIWGKISMQADAVGTEALQRLFSSYPQTKTYFPHFDLHEGSPQLRAHGSKVAAAVGDAVKSIDNVAGALAKLSELHAYILRVDPVNFKFLSHCLLVTLASRLPADFTADAHAAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERT+++S+W KIS QAD +GTE L+RLFS YPQ KTYFPHFDLH GS QLRAHGSKV AAVGDAVKSIDNV  AL+KLSELHAY+LRVDPVNFKFLSHCLLVTLAS  PADFTADAHAAWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>93</Hit_num>
+  <Hit_id>ref|XP_035939457.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Halichoerus grypus]</Hit_def>
+  <Hit_accession>XP_035939457</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.677</Hsp_bit-score>
+      <Hsp_score>644</Hsp_score>
+      <Hsp_evalue>9.03164e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>121</Hsp_identity>
+      <Hsp_positive>128</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIILSMWDKISTQADAIGTETLERLFASYPQTKTYFPHFDLRPGSAHLRVHGAKVVAALGDAVKSIDNVAGALAKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTADAHTAWDKFLSIVSCVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTIILS+W KISTQAD IGTETLERLF+ YPQ KTYFPHFDL  GSA LR HG+KVVAA+GDAVKSIDNV  AL+KLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTADAH AWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>94</Hit_num>
+  <Hit_id>ref|XP_005870404.1|</Hit_id>
+  <Hit_def>PREDICTED: hemoglobin subunit zeta [Myotis brandtii] &gt;gb|EPQ10255.1| Hemoglobin subunit zeta [Myotis brandtii]</Hit_def>
+  <Hit_accession>XP_005870404</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.677</Hsp_bit-score>
+      <Hsp_score>644</Hsp_score>
+      <Hsp_evalue>9.13127e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>118</Hsp_identity>
+      <Hsp_positive>129</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTRAERTIIVSMWGKIAAQADTIGTETLERLFASYPQTKTYFPHFDLHPGSAHLRSHGSKVVAAVGDAVKHIDDIASALSKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADTHAAWDKFLSVVTSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLTR ERTII+S+W KI+ QAD IGTETLERLF+ YPQ KTYFPHFDLH GSA LR+HGSKVVAAVGDAVK ID++ SALSKLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTAD HAAWDKFLS+V+ VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>95</Hit_num>
+  <Hit_id>ref|XP_028696705.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Macaca mulatta] &gt;ref|XP_028696706.1| hemoglobin subunit zeta [Macaca mulatta]</Hit_def>
+  <Hit_accession>XP_028696705</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.677</Hsp_bit-score>
+      <Hsp_score>644</Hsp_score>
+      <Hsp_evalue>9.86018e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>119</Hsp_identity>
+      <Hsp_positive>130</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTLIVSMWAKISTQADTIGTETLERLFLSYPQTKTYFPHFDLHPGSAQLHAHGSKVVAAVGDAAKNIDNIGAALSKLSELHAYVLRVDPVNFKLLSHCLLVTLAARFPTDFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERT+I+S+W+KISTQAD IGTETLERLF  YPQ KTYFPHFDLH GSAQL AHGSKVVAAVGDA K+IDN+ +ALSKLSELHAYVLRVDPVNFK LSHCLLVTLA+ FP DFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>96</Hit_num>
+  <Hit_id>gb|ABD95908.1|</Hit_id>
+  <Hit_def>hemoglobin zeta subunit [Homo sapiens]</Hit_def>
+  <Hit_accession>ABD95908</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.677</Hsp_bit-score>
+      <Hsp_score>644</Hsp_score>
+      <Hsp_evalue>9.96895e-84</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKTERTIIVSMWAKISTQADTIGTETLERPFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDDIGGALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+TERTII+S+W+KISTQAD IGTETLER F  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSID++  ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>97</Hit_num>
+  <Hit_id>pdb|1JEB|A</Hit_id>
+  <Hit_def>Chain A, HEMOGLOBIN ZETA CHAIN [Homo sapiens] &gt;pdb|1JEB|C Chain C, HEMOGLOBIN ZETA CHAIN [Homo sapiens]</Hit_def>
+  <Hit_accession>1JEB_A</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.677</Hsp_bit-score>
+      <Hsp_score>644</Hsp_score>
+      <Hsp_evalue>1.00789e-83</Hsp_evalue>
+      <Hsp_query-from>2</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>2</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>141</Hsp_align-len>
+      <Hsp_qseq>SLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>SLTKTERTIIVSMWAKISTQADTIGTETLERLFLSHPQTKTYFPHFDLHPGSAQLRAHGSKVVAAVGDAVKSIDDIGGALSKLSELHAYILRVDPVNFKLLSHCLLVTLAARFPADFTAEAHAAWDKFLSVVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>SLT+TERTII+S+W+KISTQAD IGTETLERLF  +PQ KTYFPHFDLH GSAQLRAHGSKVVAAVGDAVKSID++  ALSKLSELHAY+LRVDPVNFK LSHCLLVTLA+ FPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>98</Hit_num>
+  <Hit_id>ref|XP_024408878.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Desmodus rotundus]</Hit_def>
+  <Hit_accession>XP_024408878</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.292</Hsp_bit-score>
+      <Hsp_score>643</Hsp_score>
+      <Hsp_evalue>1.28304e-83</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>117</Hsp_identity>
+      <Hsp_positive>128</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTMVMSMWDKISAQADAIGTEALERLFTSYPQTKTYFPHFDLHRGSAHLRAHGSKVVAAVGDAVRNIDNIAGALSKLSELHAYVLRVDPVNFKLLSHCLLVTVASHFPADFTAEAHTAWDKFLSIVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERT+++S+W KIS QAD IGTE LERLF+ YPQ KTYFPHFDLH GSA LRAHGSKVVAAVGDAV++IDN+  ALSKLSELHAYVLRVDPVNFK LSHCLLVT+ASHFPADFTA+AH AWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>99</Hit_num>
+  <Hit_id>ref|XP_032281760.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta [Phoca vitulina]</Hit_def>
+  <Hit_accession>XP_032281760</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>252.292</Hsp_bit-score>
+      <Hsp_score>643</Hsp_score>
+      <Hsp_evalue>1.56317e-83</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>120</Hsp_identity>
+      <Hsp_positive>128</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTKAERTIILSMWDKISTQADAIGTETLERLFASYPQTKTYFPHFDLRPGSAHLRVHGAKVVAALGDAVKSIDNVAGALAKLSELHAYILRVDPVNFKLLSHCLLVTVASHFPADFTADAHTAWDKFLSIVSCVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTIILS+W KISTQAD IGTETLERLF+ YPQ KTYFPHFDL  GSA LR HG+KVVAA+GDAVKSIDNV  AL+KLSELHAY+LRVDPVNFK LSHCLLVT+ASHFPADFTADAH AWDKFLSIVS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+<Hit>
+  <Hit_num>100</Hit_num>
+  <Hit_id>ref|XP_036857643.1|</Hit_id>
+  <Hit_def>hemoglobin subunit zeta-like [Manis javanica] &gt;gb|KAI5932694.1| Hemoglobin subunit zeta [Manis javanica]</Hit_def>
+  <Hit_accession>XP_036857643</Hit_accession>
+  <Hit_len>142</Hit_len>
+  <Hit_hsps>
+    <Hsp>
+      <Hsp_num>1</Hsp_num>
+      <Hsp_bit-score>251.906</Hsp_bit-score>
+      <Hsp_score>642</Hsp_score>
+      <Hsp_evalue>1.82269e-83</Hsp_evalue>
+      <Hsp_query-from>1</Hsp_query-from>
+      <Hsp_query-to>142</Hsp_query-to>
+      <Hsp_hit-from>1</Hsp_hit-from>
+      <Hsp_hit-to>142</Hsp_hit-to>
+      <Hsp_query-frame>0</Hsp_query-frame>
+      <Hsp_hit-frame>0</Hsp_hit-frame>
+      <Hsp_identity>116</Hsp_identity>
+      <Hsp_positive>131</Hsp_positive>
+      <Hsp_gaps>0</Hsp_gaps>
+      <Hsp_align-len>142</Hsp_align-len>
+      <Hsp_qseq>MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHSGSAQLRAHGSKVVAAVGDAVKSIDNVTSALSKLSELHAYVLRVDPVNFKFLSHCLLVTLASHFPADFTADAHAAWDKFLSIVSGVLTEKYR</Hsp_qseq>
+      <Hsp_hseq>MSLTQAERTIVVSMWGKISTQADAIGTEALERLFASYPQTKTYFPHFDLHAGSAHLRAHGSKVVAALGDAVKNIDNVAGALAKLSELHAYILRVDPLNFKLLSHCVLVTVASHFPADFTAEAHAAWDKFLSLVSSVLTEKYR</Hsp_hseq>
+      <Hsp_midline>MSLT+ ERTI++S+W KISTQAD IGTE LERLF+ YPQ KTYFPHFDLH+GSA LRAHGSKVVAA+GDAVK+IDNV  AL+KLSELHAY+LRVDP+NFK LSHC+LVT+ASHFPADFTA+AHAAWDKFLS+VS VLTEKYR</Hsp_midline>
+    </Hsp>
+  </Hit_hsps>
+</Hit>
+</Iteration_hits>
+  <Iteration_stat>
+    <Statistics>
+      <Statistics_db-num>649241592</Statistics_db-num>
+      <Statistics_db-len>1101050999</Statistics_db-len>
+      <Statistics_hsp-len>0</Statistics_hsp-len>
+      <Statistics_eff-space>0</Statistics_eff-space>
+      <Statistics_kappa>0.041</Statistics_kappa>
+      <Statistics_lambda>0.267</Statistics_lambda>
+      <Statistics_entropy>0.14</Statistics_entropy>
+    </Statistics>
+  </Iteration_stat>
+</Iteration>
+</BlastOutput_iterations>
+</BlastOutput>`
