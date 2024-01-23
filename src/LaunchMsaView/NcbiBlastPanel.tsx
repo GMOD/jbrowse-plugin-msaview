@@ -9,6 +9,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { ErrorMessage } from '@jbrowse/core/ui'
+
 // locals
 import { queryBlast } from './blast'
 
@@ -20,6 +21,7 @@ const useStyles = makeStyles()({
     fontFamily: 'Courier New',
   },
 })
+
 const NcbiBlastPanel = observer(function ({
   handleClose,
 }: {
@@ -30,6 +32,9 @@ const NcbiBlastPanel = observer(function ({
   const [querySequence, setQuerySequence] = useState('')
   const [rid, setRid] = useState<string>()
   const [countdown, setCountdown] = useState<number>()
+  const [results, setResults] = useState<unknown>()
+  const database = 'nr_cluster_seq'
+  const program = 'blastp'
 
   return (
     <DialogContent className={classes.dialogContent}>
@@ -40,6 +45,12 @@ const NcbiBlastPanel = observer(function ({
           seconds...
         </Typography>
       ) : null}
+      {results ? (
+        <pre style={{ color: 'green' }}>{JSON.stringify(results, null, 2)}</pre>
+      ) : null}
+      <Typography>
+        Querying {database} with {program}:
+      </Typography>
       <Typography>Enter sequence:</Typography>
       <TextField
         variant="outlined"
@@ -64,10 +75,9 @@ const NcbiBlastPanel = observer(function ({
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
-                const database = 'nr'
-                const program = 'blastp'
                 setError(undefined)
                 setRid(undefined)
+                console.log({ database, program })
 
                 const res = await queryBlast({
                   querySequence,
@@ -77,6 +87,7 @@ const NcbiBlastPanel = observer(function ({
                   onRid: rid => setRid(rid),
                 })
                 console.log({ res })
+                setResults(res)
                 handleClose()
               } catch (e) {
                 console.error(e)
