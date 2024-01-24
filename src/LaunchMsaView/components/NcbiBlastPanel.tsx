@@ -12,6 +12,14 @@ import { ErrorMessage } from '@jbrowse/core/ui'
 
 // locals
 import { queryBlast } from '../blast'
+import { ncbiBlastLaunchView } from '../ncbiBlastLaunchView'
+import {
+  AbstractTrackModel,
+  Feature,
+  getContainingView,
+  getSession,
+} from '@jbrowse/core/util'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -24,15 +32,20 @@ const useStyles = makeStyles()({
 
 const NcbiBlastPanel = observer(function ({
   handleClose,
+  feature,
+  model,
 }: {
+  model: AbstractTrackModel
+  feature: Feature
   handleClose: () => void
 }) {
   const { classes } = useStyles()
+  const session = getSession(model)
+  const view = getContainingView(model) as LinearGenomeViewModel
   const [error, setError] = useState<unknown>()
   const [query, setQuery] = useState('')
   const [rid, setRid] = useState<string>()
-  const [countdown, setCountdown] = useState<number>()
-  const [results, setResults] = useState<unknown>()
+  const [progress, setProgress] = useState('')
   const database = 'nr_cluster_seq'
   const program = 'blastp'
 
@@ -41,13 +54,10 @@ const NcbiBlastPanel = observer(function ({
       {error ? <ErrorMessage error={error} /> : null}
       {rid ? (
         <Typography>
-          Waiting for result. RID {rid}. Checking again in {countdown}{' '}
-          seconds...
+          Waiting for result. RID {rid}. {progress}
         </Typography>
       ) : null}
-      {results ? (
-        <pre style={{ color: 'green' }}>{JSON.stringify(results, null, 2)}</pre>
-      ) : null}
+
       <Typography>
         Querying {database} with {program}:
       </Typography>
@@ -77,17 +87,22 @@ const NcbiBlastPanel = observer(function ({
               try {
                 setError(undefined)
                 setRid(undefined)
-                console.log({ database, program })
 
                 const res = await queryBlast({
                   query,
                   database,
                   program,
-                  onCountdown: arg => setCountdown(arg),
+                  onProgress: arg => setProgress(arg),
                   onRid: rid => setRid(rid),
                 })
-                console.log({ res })
-                setResults(res)
+                await ncbiBlastLaunchView({
+                  session,
+                  feature,
+                  view,
+                  newViewTitle: 'testing',
+                  data: res,
+                })
+                handleClose()
               } catch (e) {
                 console.error(e)
                 setError(e)

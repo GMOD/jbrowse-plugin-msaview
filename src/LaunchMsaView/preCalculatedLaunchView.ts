@@ -11,7 +11,7 @@ async function myfetch(url: string) {
   return new TextDecoder().decode(ungzip(data))
 }
 
-export async function launchView({
+export async function preCalculatedLaunchView({
   userSelection,
   session,
   newViewTitle,

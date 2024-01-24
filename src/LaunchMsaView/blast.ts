@@ -1,83 +1,43 @@
 import { jsonfetch, textfetch, timeout } from './util'
-import { data } from './testFile'
+import { launchMSA } from './clustalOmega'
 
 export async function queryBlast({
   query,
   database,
   program,
-  onCountdown,
+  onProgress,
   onRid,
 }: {
   query: string
   database: string
   program: string
-  onCountdown: (arg: number) => void
+  onProgress: (arg: string) => void
   onRid: (arg: string) => void
 }) {
   // const { rid, rtoe } = await initialQuery({ query, database, program })
   // console.log({ rid, rtoe })
   // onRid(rid)
-  // await waitForRid({ rid, onCountdown })
+  // await waitForRid({ rid, onProgress })
   const rid = 'UZYB5KJA013'
   const ret = await jsonfetch(
     `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
   )
   const hits = ret.BlastOutput2[0].report.results.search.hits as {
-    description: { id: string }[]
+    description: { accession: string; id: string; sciname: string }[]
     hsps: { hseq: string }[]
   }[]
+  console.log({ hits })
   const results = hits.map(
-    h => [h.description[0].id, h.hsps[0].hseq.replaceAll('-', '')] as const,
+    h =>
+      [
+        h.description[0].accession +
+          '-' +
+          h.description[0].sciname.replaceAll(' ', '_'),
+        h.hsps[0].hseq.replaceAll('-', ''),
+      ] as const,
   )
   const fasta = results.map(([id, seq]) => `>${id}\n${seq}`).join('\n')
-  // console.log({
-  //   ret,
-  //   hits_text: results.map(([id, seq]) => `>${id}\n${seq}`).join('\n'),
-  //   hits,
-  //   results,
-  //   results2: results.map(r => r[1].replaceAll('-', '')),
-  // })
-  const msa = await launchMSA(fasta)
-  console.log({ msa })
-
-  //   const parser = new DOMParser()
-  //   const xmlDoc = parser.parseFromString(final, 'text/xml')
-
-  //   // Access elements and extract data
-  //   const query = xmlDoc.querySelector('BlastOutput_query-def')?.textContent
-  //   const hits = [...xmlDoc.querySelectorAll('Hit')].map(h => {
-  //     const hitSeq = h.querySelector('Hsp_hseq')?.textContent
-  //     const eValue = h.querySelector('Hsp_evalue')?.textContent
-  //     return { hitSeq, eValue }
-  //   })
-  //   console.log({ hits, query })
-  return { hello: 'world' }
-}
-
-async function launchMSA(sequence: string) {
-  const jobId = await textfetch(
-    'https://www.ebi.ac.uk/Tools/services/rest/clustalo/run',
-    {
-      method: 'POST',
-      body: new URLSearchParams({ email: 'colin.diesh@gmail.com', sequence }),
-    },
-  )
-  console.log({ jobId })
-
-  while (true) {
-    const result = await textfetch(
-      `https://www.ebi.ac.uk/Tools/services/rest/clustalo/status/${jobId}`,
-    )
-
-    console.log({ jobId, result })
-    if (result === 'FINISHED') {
-      break
-    }
-  }
-
-  return textfetch(
-    `https://www.ebi.ac.uk/Tools/services/rest/clustalo/result/${jobId}/aln-clustal_num`,
-  )
+  return launchMSA({ sequence: fasta, onProgress })
 }
 
 async function initialQuery({
@@ -112,15 +72,15 @@ async function initialQuery({
 
 async function waitForRid({
   rid,
-  onCountdown,
+  onProgress,
 }: {
   rid: string
-  onCountdown: (arg: number) => void
+  onProgress: (arg: string) => void
 }) {
   while (true) {
     for (let i = 0; i < 10; i++) {
       await timeout(1000)
-      onCountdown(10 - i)
+      onProgress(`Re-checking BLAST status in... ${10 - i}`)
     }
 
     const res = await textfetch(

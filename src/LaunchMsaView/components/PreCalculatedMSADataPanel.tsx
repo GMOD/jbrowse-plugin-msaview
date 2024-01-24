@@ -9,13 +9,19 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { AbstractTrackModel, Feature, getSession } from '@jbrowse/core/util'
+import {
+  AbstractTrackModel,
+  Feature,
+  getContainingView,
+  getSession,
+} from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
 
 // locals
 import { getDisplayName, getId, getTranscriptFeatures } from '../util'
 import { fetchGeneList } from '../fetchGeneList'
-import { preLoaded } from '../preCalculatedLaunchView'
+import { preCalculatedLaunchView } from '../preCalculatedLaunchView'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -33,6 +39,7 @@ const PreLoadedMSA = observer(function ({
   handleClose: () => void
 }) {
   const session = getSession(model)
+  const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
   const [geneNameList, setGeneNameList] = useState<string[]>()
@@ -112,13 +119,13 @@ const PreLoadedMSA = observer(function ({
                 if (!ret) {
                   return
                 }
-                // await launchView({
-                //   userSelection,
-                //   session,
-                //   newViewTitle,
-                //   view,
-                //   feature: ret,
-                // })
+                await preCalculatedLaunchView({
+                  userSelection,
+                  session,
+                  newViewTitle: '',
+                  view,
+                  feature: ret,
+                })
                 handleClose()
               } catch (e) {
                 console.error(e)
