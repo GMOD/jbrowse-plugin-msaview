@@ -8,7 +8,7 @@ import { getSession, getContainingTrack } from '@jbrowse/core/util'
 import AddIcon from '@mui/icons-material/Add'
 
 // locals
-import LaunchMsaViewDialog from './LaunchMsaViewDialog'
+import LaunchMsaViewDialog from './components/LaunchMsaViewDialog'
 
 function isDisplay(elt: { name: string }): elt is DisplayType {
   return elt.name === 'LinearBasicDisplay'

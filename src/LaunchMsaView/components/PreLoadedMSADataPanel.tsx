@@ -13,9 +13,9 @@ import { AbstractTrackModel, Feature, getSession } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
 
 // locals
-import { getDisplayName, getId, getTranscriptFeatures } from './util'
-import { fetchGeneList } from './fetchGeneList'
-import { launchView } from './launchViewSubmit'
+import { getDisplayName, getId, getTranscriptFeatures } from '../util'
+import { fetchGeneList } from '../fetchGeneList'
+import { launchView } from '../launchViewSubmit'
 
 const useStyles = makeStyles()({
   dialogContent: {

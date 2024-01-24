@@ -11,7 +11,7 @@ import { makeStyles } from 'tss-react/mui'
 import { ErrorMessage } from '@jbrowse/core/ui'
 
 // locals
-import { queryBlast } from './blast'
+import { queryBlast } from '../blast'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -29,7 +29,7 @@ const NcbiBlastPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
-  const [querySequence, setQuerySequence] = useState('')
+  const [query, setQuery] = useState('')
   const [rid, setRid] = useState<string>()
   const [countdown, setCountdown] = useState<number>()
   const [results, setResults] = useState<unknown>()
@@ -55,11 +55,11 @@ const NcbiBlastPanel = observer(function ({
       <TextField
         variant="outlined"
         multiline
-        onChange={event => setQuerySequence(event.target.value)}
+        onChange={event => setQuery(event.target.value)}
         minRows={5}
         maxRows={10}
         fullWidth
-        value={querySequence}
+        value={query}
         InputProps={{
           classes: {
             input: classes.textAreaFont,
@@ -80,7 +80,7 @@ const NcbiBlastPanel = observer(function ({
                 console.log({ database, program })
 
                 const res = await queryBlast({
-                  querySequence,
+                  query,
                   database,
                   program,
                   onCountdown: arg => setCountdown(arg),
@@ -88,7 +88,6 @@ const NcbiBlastPanel = observer(function ({
                 })
                 console.log({ res })
                 setResults(res)
-                handleClose()
               } catch (e) {
                 console.error(e)
                 setError(e)

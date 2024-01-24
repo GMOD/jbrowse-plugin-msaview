@@ -1,4 +1,4 @@
-import { myfetch, timeout } from './util'
+import { jsonfetch, textfetch, timeout } from './util'
 import { data } from './testFile'
 
 export async function queryBlast({
@@ -19,21 +19,26 @@ export async function queryBlast({
   // onRid(rid)
   // await waitForRid({ rid, onCountdown })
   const rid = 'UZYB5KJA013'
-  const final = await myfetch(
+  const ret = await jsonfetch(
     `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
   )
-  const ret = JSON.parse(final)
-  console.log({ ret })
   const hits = ret.BlastOutput2[0].report.results.search.hits as {
     description: { id: string }[]
     hsps: { hseq: string }[]
   }[]
-  const results = hits.map(h => [h.description[0].id, h.hsps[0].hseq] as const)
-  console.log({
-    ret,
-    hits_text: results.map(([id, seq]) => `>${id}\n${seq}`).join('\n'),
-    hits,
-  })
+  const results = hits.map(
+    h => [h.description[0].id, h.hsps[0].hseq.replaceAll('-', '')] as const,
+  )
+  const fasta = results.map(([id, seq]) => `>${id}\n${seq}`).join('\n')
+  // console.log({
+  //   ret,
+  //   hits_text: results.map(([id, seq]) => `>${id}\n${seq}`).join('\n'),
+  //   hits,
+  //   results,
+  //   results2: results.map(r => r[1].replaceAll('-', '')),
+  // })
+  const msa = await launchMSA(fasta)
+  console.log({ msa })
 
   //   const parser = new DOMParser()
   //   const xmlDoc = parser.parseFromString(final, 'text/xml')
@@ -49,6 +54,32 @@ export async function queryBlast({
   return { hello: 'world' }
 }
 
+async function launchMSA(sequence: string) {
+  const jobId = await textfetch(
+    'https://www.ebi.ac.uk/Tools/services/rest/clustalo/run',
+    {
+      method: 'POST',
+      body: new URLSearchParams({ email: 'colin.diesh@gmail.com', sequence }),
+    },
+  )
+  console.log({ jobId })
+
+  while (true) {
+    const result = await textfetch(
+      `https://www.ebi.ac.uk/Tools/services/rest/clustalo/status/${jobId}`,
+    )
+
+    console.log({ jobId, result })
+    if (result === 'FINISHED') {
+      break
+    }
+  }
+
+  return textfetch(
+    `https://www.ebi.ac.uk/Tools/services/rest/clustalo/result/${jobId}/aln-clustal_num`,
+  )
+}
+
 async function initialQuery({
   query,
   program,
@@ -59,16 +90,17 @@ async function initialQuery({
   database: string
 }) {
   const url = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
-  const data = new URLSearchParams({
-    CMD: 'Put',
-    PROGRAM: program,
-    DATABASE: database,
-    QUERY: query,
-    CLUSTERED_DB: 'on',
-    DB_TYPE: 'Experimental Databases',
+  const res = await textfetch(url, {
+    method: 'POST',
+    body: new URLSearchParams({
+      CMD: 'Put',
+      PROGRAM: program,
+      DATABASE: database,
+      QUERY: query,
+      CLUSTERED_DB: 'on',
+      DB_TYPE: 'Experimental Databases',
+    }),
   })
-
-  const res = await myfetch(url, { method: 'POST', body: data })
   const rid = res.match(/^    RID = (.*$)/m)?.[1]
   const rtoe = res.match(/^    RTOE = (.*$)/m)?.[1]
 
@@ -91,7 +123,7 @@ async function waitForRid({
       onCountdown(10 - i)
     }
 
-    const res = await myfetch(
+    const res = await textfetch(
       `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
     )
     if (res.match(/\s+Status=WAITING/m)) {
