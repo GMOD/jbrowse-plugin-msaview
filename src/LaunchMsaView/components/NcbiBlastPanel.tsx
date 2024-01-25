@@ -1,27 +1,34 @@
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { observer } from 'mobx-react'
 import {
   Button,
   DialogActions,
   DialogContent,
+  MenuItem,
   TextField,
   Typography,
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { ErrorMessage } from '@jbrowse/core/ui'
-
-// locals
-import { queryBlast } from '../blast'
-import { ncbiBlastLaunchView } from '../ncbiBlastLaunchView'
 import {
   AbstractTrackModel,
   Feature,
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
+
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { calculateProteinSequence } from '../calculateProteinSequence'
-import { argv0 } from 'process'
+
+// locals
+import { queryBlast } from '../blast'
+import { ncbiBlastLaunchView } from '../ncbiBlastLaunchView'
+import { useFeatureSequence } from './useFeatureSequence'
+import {
+  getDisplayName,
+  getId,
+  getProteinSequence,
+  getTranscriptFeatures,
+} from '../util'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -45,26 +52,30 @@ const NcbiBlastPanel = observer(function ({
   const session = getSession(model)
   const view = getContainingView(model) as LinearGenomeViewModel
   const [error, setError] = useState<unknown>()
-  const [query, setQuery] = useState('')
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
   const database = 'nr_cluster_seq'
   const program = 'blastp'
-  const state = { view }
-  const upDownBp = 0
-  const forceLoad = false
-  const seq = useFeatureSequence({ state, feature, upDownBp, forceLoad })
+  const fs = useMemo(() => feature.toJSON(), [feature])
+  const { sequence, error: error2 } = useFeatureSequence({
+    view,
+    feature: fs,
+    upDownBp: 0,
+    forceLoad: true,
+  })
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      calculateProteinSequence({ cds: [], seq: '', codonTable })
-    })()
-  }, [])
+  const options = getTranscriptFeatures(feature)
+  const selectedTranscript = options.find(val => getId(val))
+  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const protein =
+    selectedTranscript && sequence && !('error' in sequence)
+      ? getProteinSequence({ seq: sequence.seq, selectedTranscript })
+      : ''
 
+  const e = error || error2
   return (
     <DialogContent className={classes.dialogContent}>
-      {error ? <ErrorMessage error={error} /> : null}
+      {e ? <ErrorMessage error={e} /> : null}
       {rid ? (
         <Typography>
           Waiting for result. RID {rid}. {progress}
@@ -74,16 +85,30 @@ const NcbiBlastPanel = observer(function ({
       <Typography>
         Querying {database} with {program}:
       </Typography>
-      <Typography>Enter sequence:</Typography>
+
+      <TextField
+        value={userSelection}
+        onChange={event => setUserSelection(event.target.value)}
+        label="Choose isoform to BLAST"
+        select
+      >
+        {options.map(val => (
+          <MenuItem value={getId(val)} key={val.id()}>
+            {getDisplayName(val)}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      <Typography>Sequence to BLAST:</Typography>
       <TextField
         variant="outlined"
         multiline
-        onChange={event => setQuery(event.target.value)}
         minRows={5}
         maxRows={10}
         fullWidth
-        value={query}
+        value={protein}
         InputProps={{
+          readOnly: true,
           classes: {
             input: classes.textAreaFont,
           },
@@ -102,7 +127,7 @@ const NcbiBlastPanel = observer(function ({
                 setRid(undefined)
 
                 const res = await queryBlast({
-                  query,
+                  query: protein,
                   database,
                   program,
                   onProgress: arg => setProgress(arg),
@@ -112,7 +137,7 @@ const NcbiBlastPanel = observer(function ({
                   session,
                   feature,
                   view,
-                  newViewTitle: 'testing',
+                  newViewTitle: `NCBI BLAST - ${getDisplayName(selectedTranscript)}`,
                   data: res,
                 })
                 handleClose()
@@ -122,6 +147,7 @@ const NcbiBlastPanel = observer(function ({
               }
             })()
           }}
+          disabled={!protein}
         >
           Submit
         </Button>

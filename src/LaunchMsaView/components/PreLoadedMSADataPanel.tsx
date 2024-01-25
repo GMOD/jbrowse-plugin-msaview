@@ -15,7 +15,7 @@ import { makeStyles } from 'tss-react/mui'
 // locals
 import { getDisplayName, getId, getTranscriptFeatures } from '../util'
 import { fetchGeneList } from '../fetchGeneList'
-import { preLoaded } from '../preCalculatedLaunchView'
+import { preCalculatedLaunchView } from '../preCalculatedLaunchView'
 
 const useStyles = makeStyles()({
   dialogContent: {

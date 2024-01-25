@@ -1,6 +1,16 @@
 import { jsonfetch, textfetch, timeout } from './util'
 import { launchMSA } from './clustalOmega'
 
+function makeId(h: { accession: string; sciname: string }) {
+  return `${h.accession}-${h.sciname.replaceAll(' ', '_')}`
+}
+
+function strip(s: string) {
+  return s.replace('-', '')
+}
+
+const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
+
 export async function queryBlast({
   query,
   database,
@@ -14,30 +24,28 @@ export async function queryBlast({
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
 }) {
-  // const { rid, rtoe } = await initialQuery({ query, database, program })
-  // console.log({ rid, rtoe })
-  // onRid(rid)
-  // await waitForRid({ rid, onProgress })
-  const rid = 'UZYB5KJA013'
+  onProgress('Submitting to NCBI BLAST...')
+  const { rid } = await initialQuery({
+    query: query.replaceAll('*', ''),
+    database,
+    program,
+  })
+  onRid(rid)
+  await waitForRid({ rid, onProgress })
   const ret = await jsonfetch(
-    `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
+    `${BLAST_URL}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
   )
   const hits = ret.BlastOutput2[0].report.results.search.hits as {
     description: { accession: string; id: string; sciname: string }[]
     hsps: { hseq: string }[]
   }[]
-  console.log({ hits })
-  const results = hits.map(
-    h =>
-      [
-        h.description[0].accession +
-          '-' +
-          h.description[0].sciname.replaceAll(' ', '_'),
-        h.hsps[0].hseq.replaceAll('-', ''),
-      ] as const,
-  )
-  const fasta = results.map(([id, seq]) => `>${id}\n${seq}`).join('\n')
-  return launchMSA({ sequence: fasta, onProgress })
+  return launchMSA({
+    sequence: hits
+      .map(h => [makeId(h.description[0]), strip(h.hsps[0].hseq)] as const)
+      .map(([id, seq]) => `>${id}\n${seq}`)
+      .join('\n'),
+    onProgress,
+  })
 }
 
 async function initialQuery({
@@ -49,8 +57,7 @@ async function initialQuery({
   program: string
   database: string
 }) {
-  const url = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
-  const res = await textfetch(url, {
+  const res = await textfetch(BLAST_URL, {
     method: 'POST',
     body: new URLSearchParams({
       CMD: 'Put',
@@ -84,7 +91,7 @@ async function waitForRid({
     }
 
     const res = await textfetch(
-      `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
+      `${BLAST_URL}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
     )
     if (res.match(/\s+Status=WAITING/m)) {
       continue

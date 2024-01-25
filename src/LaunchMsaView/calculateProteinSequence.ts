@@ -2,8 +2,6 @@ export interface Feat {
   start: number
   end: number
   type: string
-  name?: string
-  id?: string
 }
 
 export function stitch(subfeats: Feat[], sequence: string) {
