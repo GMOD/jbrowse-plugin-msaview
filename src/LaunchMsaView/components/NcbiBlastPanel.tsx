@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { observer } from 'mobx-react'
 import {
   Button,
@@ -20,6 +20,8 @@ import {
   getSession,
 } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { calculateProteinSequence } from '../calculateProteinSequence'
+import { argv0 } from 'process'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -48,6 +50,17 @@ const NcbiBlastPanel = observer(function ({
   const [progress, setProgress] = useState('')
   const database = 'nr_cluster_seq'
   const program = 'blastp'
+  const state = { view }
+  const upDownBp = 0
+  const forceLoad = false
+  const seq = useFeatureSequence({ state, feature, upDownBp, forceLoad })
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      calculateProteinSequence({ cds: [], seq: '', codonTable })
+    })()
+  }, [])
 
   return (
     <DialogContent className={classes.dialogContent}>
