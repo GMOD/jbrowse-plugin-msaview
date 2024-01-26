@@ -1,5 +1,5 @@
 import { jsonfetch, textfetch, timeout } from './fetchUtils'
-import { launchMSA } from './clustalOmega'
+import { launchMSA } from './clustalOmegaUtils'
 
 function makeId(h: { accession: string; sciname: string }) {
   return `${h.accession}-${h.sciname.replaceAll(' ', '_')}`

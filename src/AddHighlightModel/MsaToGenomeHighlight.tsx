@@ -28,7 +28,7 @@ const MsaToGenomeHighlight = observer(function ({ model }: { model: LGV }) {
         const e = model.bpToPx({ refName, coord: r.end })
         if (s && e) {
           const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
-          const left = Math.min(s.offsetPx, e.offsetPx) - model.offsetPx
+          const left = Math.min(s.offsetPx, e.offsetPx) - model.offsetPx - 2
           return (
             <div
               key={`${JSON.stringify(r)}-${idx}`}

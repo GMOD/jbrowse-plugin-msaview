@@ -21,16 +21,17 @@ import {
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import { BLAST_URL, queryBlast } from '../blast'
+import { BLAST_URL, queryBlast } from '../ncbiBlastUtils'
 import { ncbiBlastLaunchView } from '../ncbiBlastLaunchView'
 import { useFeatureSequence } from './useFeatureSequence'
 import {
-  getTranscriptDisplayName,
   getId,
-  getProteinSequence,
+  getTranscriptDisplayName,
   getTranscriptFeatures,
   getGeneDisplayName,
 } from '../util'
+import { getProteinSequence } from '../calculateProteinSequence'
+import OpenInNewIcon from './OpenInNewIcon'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -81,9 +82,11 @@ const NcbiBlastPanel = observer(function ({
       {e ? <ErrorMessage error={e} /> : null}
       {rid ? (
         <Typography>
-          Waiting for result.{' '}
-          <Link href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>RID {rid}</Link>.{' '}
-          {progress}
+          Waiting for result. RID {rid}
+          <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
+            (see status at NCBI <OpenInNewIcon />)
+          </Link>
+          . {progress}
         </Typography>
       ) : null}
 
@@ -143,7 +146,7 @@ const NcbiBlastPanel = observer(function ({
                 })
                 await ncbiBlastLaunchView({
                   session,
-                  feature,
+                  feature: selectedTranscript,
                   view,
                   newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
                   data: res,

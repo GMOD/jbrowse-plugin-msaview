@@ -17,11 +17,15 @@ interface IRegion {
   start: number
   end: number
 }
-
+/**
+ * #stateModel MsaViewPlugin
+ * extends
+ * - MSAModel from https://github.com/GMOD/react-msaview
+ */
 export default function stateModelFactory() {
   return types
     .compose(
-      'MsaView',
+      'MsaViewPlugin',
       MSAModel,
       types.model({
         /**
