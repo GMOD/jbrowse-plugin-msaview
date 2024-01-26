@@ -7,6 +7,7 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
 import { checkHovered, generateMap } from './util'
+import { warn } from 'console'
 
 type LGV = LinearGenomeViewModel
 type MaybeLGV = LGV | undefined
@@ -63,6 +64,23 @@ export default function stateModelFactory() {
       },
     }))
     .views(self => ({
+      ungappedPositionMap(rowName: string, position: number) {
+        const row = self.rows.find(f => f[0] === rowName)
+        const seq = row?.[1]
+        if (seq && position < seq.length) {
+          let i = 0
+          let j = 0
+          for (; j < position; j++, i++) {
+            while (seq[i] === '-') {
+              i++
+            }
+          }
+          return i
+        }
+        return undefined
+      },
+    }))
+    .views(self => ({
       /**
        * #getter
        */
@@ -112,8 +130,13 @@ export default function stateModelFactory() {
             doesIntersect2(featureStart, featureEnd, c, c + 1)
           ) {
             const ret = (strand === -1 ? featureEnd - c : c - featureStart) / 3
-            return Math.round(
-              strand === -1 ? proteinEnd - ret : ret + proteinStart,
+            return (
+              self.ungappedPositionMap(
+                'QUERY',
+                Math.round(
+                  strand === -1 ? proteinEnd - ret : ret + proteinStart,
+                ),
+              ) || 0
             )
           }
         }
