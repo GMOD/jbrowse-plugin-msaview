@@ -25,8 +25,9 @@ export async function queryBlast({
   onRid: (arg: string) => void
 }) {
   onProgress('Submitting to NCBI BLAST...')
+  const q = query.replaceAll('*', '')
   const { rid } = await initialQuery({
-    query: query.replaceAll('*', ''),
+    query: q,
     database,
     program,
   })
@@ -40,10 +41,12 @@ export async function queryBlast({
     hsps: { hseq: string }[]
   }[]
   return launchMSA({
-    sequence: hits
-      .map(h => [makeId(h.description[0]), strip(h.hsps[0].hseq)] as const)
-      .map(([id, seq]) => `>${id}\n${seq}`)
-      .join('\n'),
+    sequence: [
+      `>QUERY\n${q}`,
+      ...hits
+        .map(h => [makeId(h.description[0]), strip(h.hsps[0].hseq)] as const)
+        .map(([id, seq]) => `>${id}\n${seq}`),
+    ].join('\n'),
     onProgress,
   })
 }
@@ -85,9 +88,10 @@ async function waitForRid({
   onProgress: (arg: string) => void
 }) {
   while (true) {
-    for (let i = 0; i < 10; i++) {
+    const iter = 20
+    for (let i = 0; i < iter; i++) {
       await timeout(1000)
-      onProgress(`Re-checking BLAST status in... ${10 - i}`)
+      onProgress(`Re-checking BLAST status in... ${iter - i}`)
     }
 
     const res = await textfetch(

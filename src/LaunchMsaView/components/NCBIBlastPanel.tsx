@@ -74,7 +74,6 @@ const NcbiBlastPanel = observer(function ({
           selectedTranscript,
         })
       : ''
-  console.log({ sequence, protein, selectedTranscript })
 
   const e = error || error2
   return (
@@ -148,7 +147,7 @@ const NcbiBlastPanel = observer(function ({
                   session,
                   feature: selectedTranscript,
                   view,
-                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - RID ${rid}`,
                   data: res,
                 })
                 handleClose()
