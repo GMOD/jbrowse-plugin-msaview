@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { observer } from 'mobx-react'
 import {
   Button,
   DialogActions,
   DialogContent,
+  Link,
   MenuItem,
   TextField,
   Typography,
@@ -20,14 +21,15 @@ import {
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import { queryBlast } from '../blast'
+import { BLAST_URL, queryBlast } from '../blast'
 import { ncbiBlastLaunchView } from '../ncbiBlastLaunchView'
 import { useFeatureSequence } from './useFeatureSequence'
 import {
-  getDisplayName,
+  getTranscriptDisplayName,
   getId,
   getProteinSequence,
   getTranscriptFeatures,
+  getGeneDisplayName,
 } from '../util'
 
 const useStyles = makeStyles()({
@@ -56,21 +58,22 @@ const NcbiBlastPanel = observer(function ({
   const [progress, setProgress] = useState('')
   const database = 'nr_cluster_seq'
   const program = 'blastp'
-  const fs = useMemo(() => feature.toJSON(), [feature])
-  const { sequence, error: error2 } = useFeatureSequence({
-    view,
-    feature: fs,
-    upDownBp: 0,
-    forceLoad: true,
-  })
 
   const options = getTranscriptFeatures(feature)
-  const selectedTranscript = options.find(val => getId(val))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const selectedTranscript = options.find(val => getId(val) === userSelection)!
+  const { sequence, error: error2 } = useFeatureSequence({
+    view,
+    feature: selectedTranscript,
+  })
   const protein =
-    selectedTranscript && sequence && !('error' in sequence)
-      ? getProteinSequence({ seq: sequence.seq, selectedTranscript })
+    sequence && !('error' in sequence)
+      ? getProteinSequence({
+          seq: sequence.seq,
+          selectedTranscript,
+        })
       : ''
+  console.log({ sequence, protein, selectedTranscript })
 
   const e = error || error2
   return (
@@ -78,7 +81,9 @@ const NcbiBlastPanel = observer(function ({
       {e ? <ErrorMessage error={e} /> : null}
       {rid ? (
         <Typography>
-          Waiting for result. RID {rid}. {progress}
+          Waiting for result.{' '}
+          <Link href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>RID {rid}</Link>.{' '}
+          {progress}
         </Typography>
       ) : null}
 
@@ -94,19 +99,22 @@ const NcbiBlastPanel = observer(function ({
       >
         {options.map(val => (
           <MenuItem value={getId(val)} key={val.id()}>
-            {getDisplayName(val)}
+            {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
           </MenuItem>
         ))}
       </TextField>
 
-      <Typography>Sequence to BLAST:</Typography>
       <TextField
         variant="outlined"
         multiline
         minRows={5}
         maxRows={10}
         fullWidth
-        value={protein}
+        value={
+          !protein
+            ? 'Loading...'
+            : `>${getTranscriptDisplayName(selectedTranscript)}\n${protein}`
+        }
         InputProps={{
           readOnly: true,
           classes: {
@@ -137,7 +145,7 @@ const NcbiBlastPanel = observer(function ({
                   session,
                   feature,
                   view,
-                  newViewTitle: `NCBI BLAST - ${getDisplayName(selectedTranscript)}`,
+                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
                   data: res,
                 })
                 handleClose()

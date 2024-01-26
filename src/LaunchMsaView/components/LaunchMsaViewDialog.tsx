@@ -6,7 +6,7 @@ import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 // locals
 
 import { CustomTabPanel, a11yProps } from './TabUtils'
-import NcbiBlastPanel from './NcbiBlastPanel'
+import NCBIBlastPanel from './NCBIBlastPanel'
 import PreLoadedMSA from './PreCalculatedMSADataPanel'
 
 export default function LaunchProteinViewDialog({
@@ -34,7 +34,7 @@ export default function LaunchProteinViewDialog({
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <NcbiBlastPanel
+        <NCBIBlastPanel
           handleClose={handleClose}
           feature={feature}
           model={model}

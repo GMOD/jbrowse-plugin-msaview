@@ -1,4 +1,4 @@
-import { jsonfetch, textfetch, timeout } from './util'
+import { jsonfetch, textfetch, timeout } from './fetchUtils'
 import { launchMSA } from './clustalOmega'
 
 function makeId(h: { accession: string; sciname: string }) {
@@ -9,7 +9,7 @@ function strip(s: string) {
   return s.replace('-', '')
 }
 
-const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
+export const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
 
 export async function queryBlast({
   query,

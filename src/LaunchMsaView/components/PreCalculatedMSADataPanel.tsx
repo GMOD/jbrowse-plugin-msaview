@@ -18,7 +18,7 @@ import {
 import { makeStyles } from 'tss-react/mui'
 
 // locals
-import { getDisplayName, getId, getTranscriptFeatures } from '../util'
+import { getTranscriptDisplayName, getId, getTranscriptFeatures } from '../util'
 import { fetchGeneList } from '../fetchGeneList'
 import { preCalculatedLaunchView } from '../preCalculatedLaunchView'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -87,24 +87,18 @@ const PreLoadedMSA = observer(function ({
         >
           {options
             .filter(val => set.has(getId(val)))
-            .map(val => {
-              const d = getDisplayName(val)
-              return (
-                <MenuItem value={getId(val)} key={val.id()}>
-                  {d} (has data)
-                </MenuItem>
-              )
-            })}
+            .map(val => (
+              <MenuItem value={getId(val)} key={val.id()}>
+                {getTranscriptDisplayName(val)} (has data)
+              </MenuItem>
+            ))}
           {options
             .filter(val => !set.has(getId(val)))
-            .map(val => {
-              const d = getDisplayName(val)
-              return (
-                <MenuItem value={getId(val)} key={val.id()} disabled>
-                  {d}
-                </MenuItem>
-              )
-            })}
+            .map(val => (
+              <MenuItem value={getId(val)} key={val.id()} disabled>
+                {getTranscriptDisplayName(val)}
+              </MenuItem>
+            ))}
         </TextField>
       </DialogContent>
 

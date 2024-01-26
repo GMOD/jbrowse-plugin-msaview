@@ -1,4 +1,4 @@
-import { textfetch, timeout } from './util'
+import { textfetch, timeout } from './fetchUtils'
 
 export async function launchMSA({
   sequence,
