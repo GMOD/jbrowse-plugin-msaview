@@ -28,7 +28,6 @@ export function useFeatureSequence({
   const [sequence, setSequence] = useState<SeqState | ErrorState>()
   const [error, setError] = useState<unknown>()
   useEffect(() => {
-    console.log('here')
     if (view) {
       const { assemblyManager, rpcManager } = getSession(view)
       const [assemblyName] = view?.assemblyNames || []

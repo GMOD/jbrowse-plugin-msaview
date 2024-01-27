@@ -57,7 +57,7 @@ const NcbiBlastPanel = observer(function ({
   const [error, setError] = useState<unknown>()
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
-  const database = 'nr_cluster_seq'
+  const [database, setDatabase] = useState('nr_clustered_seq')
   const program = 'blastp'
 
   const options = getTranscriptFeatures(feature)
@@ -76,6 +76,7 @@ const NcbiBlastPanel = observer(function ({
       : ''
 
   const e = error || error2
+  const databaseOptions = ['nr', 'nr_clustered_seq']
   return (
     <DialogContent className={classes.dialogContent}>
       {e ? <ErrorMessage error={e} /> : null}
@@ -89,22 +90,34 @@ const NcbiBlastPanel = observer(function ({
         </Typography>
       ) : null}
 
-      <Typography>
-        Querying {database} with {program}:
-      </Typography>
-
-      <TextField
-        value={userSelection}
-        onChange={event => setUserSelection(event.target.value)}
-        label="Choose isoform to BLAST"
-        select
-      >
-        {options.map(val => (
-          <MenuItem value={getId(val)} key={val.id()}>
-            {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
-          </MenuItem>
-        ))}
-      </TextField>
+      <div>
+        <TextField
+          value={database}
+          onChange={event => setDatabase(event.target.value)}
+          label="BLAST database"
+          select
+        >
+          {databaseOptions.map(val => (
+            <MenuItem value={val} key={val}>
+              {val}
+            </MenuItem>
+          ))}
+        </TextField>
+      </div>
+      <div>
+        <TextField
+          value={userSelection}
+          onChange={event => setUserSelection(event.target.value)}
+          label="Choose isoform to BLAST"
+          select
+        >
+          {options.map(val => (
+            <MenuItem value={getId(val)} key={val.id()}>
+              {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
+            </MenuItem>
+          ))}
+        </TextField>
+      </div>
 
       <TextField
         variant="outlined"
@@ -134,8 +147,6 @@ const NcbiBlastPanel = observer(function ({
             ;(async () => {
               try {
                 setError(undefined)
-                setRid(undefined)
-
                 const res = await queryBlast({
                   query: protein,
                   database,
