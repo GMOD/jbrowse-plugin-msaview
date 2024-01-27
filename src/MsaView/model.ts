@@ -111,40 +111,46 @@ export default function stateModelFactory() {
           return undefined
         }
 
-        const {
-          hoverPosition: { coord: hoverCoord, refName: hoverRef },
-        } = hovered
+        const { hoverPosition } = hovered
+        const { coord: hoverCoord, refName: hoverRef } = hoverPosition
         for (const entry of transcriptToMsaMap) {
           const {
             featureStart,
             featureEnd,
             refName,
-            proteinEnd,
             proteinStart,
+            proteinEnd,
             strand,
           } = entry
-          const c = hoverCoord + 1
-          if (
-            refName === hoverRef &&
-            doesIntersect2(featureStart, featureEnd, c, c + 1)
-          ) {
-            const ret = (strand === -1 ? featureEnd - c : c - featureStart) / 3
-            return (
-              self.ungappedPositionMap(
-                'QUERY',
-                Math.round(
-                  strand === -1 ? proteinEnd - ret : ret + proteinStart,
-                ),
-              ) || 0
-            )
+          const c = mouseCol - 1
+          const k1 = self.rowSpecificBpToPx('QUERY', c) || 0
+          const k2 = self.rowSpecificBpToPx('QUERY', c + 1) || 0
+          if (doesIntersect2(proteinStart, proteinEnd, k1, k2)) {
+            // does not take into account phase, so 'incomplete CDS' might
+            // be buggy
+            const ret = Math.round((k1 - proteinStart) * 3)
+            self.setConnectedHighlights([
+              {
+                assemblyName: 'hg38',
+                refName,
+                start: strand === -1 ? featureEnd - ret : featureStart + ret,
+                end:
+                  strand === -1 ? featureEnd - ret - 3 : featureStart + ret + 3,
+              },
+            ])
+            break
           }
         }
+        return undefined
+      },
+      get clickCol2() {
         return undefined
       },
     }))
 
     .actions(self => ({
       afterCreate() {
+        // this adds highlights to the genome view when mouse-ing over the MSA
         addDisposer(
           self,
           autorun(() => {
@@ -164,7 +170,6 @@ export default function stateModelFactory() {
               const c = mouseCol - 1
               const k1 = self.relativePxToBp('QUERY', c) || 0
               const k2 = self.relativePxToBp('QUERY', c + 1) || 0
-              console.log({ k1, k2, c, c1: c + 1, proteinStart, proteinEnd })
               if (doesIntersect2(proteinStart, proteinEnd, k1, k2)) {
                 // does not take into account phase, so 'incomplete CDS' might
                 // be buggy

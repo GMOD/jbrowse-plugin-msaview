@@ -101,7 +101,7 @@ async function waitForRid({
       continue
     } else if (res.match(/\s+Status=FAILED/m)) {
       throw new Error(
-        `Search ${rid} failed; please report to blast-help@ncbi.nlm.nih.gov`,
+        `BLAST ${rid} failed; please report to blast-help@ncbi.nlm.nih.gov`,
       )
     } else if (res.match(/\s+Status=READY/m)) {
       if (res.match(/\s+ThereAreHits=yes/m)) {

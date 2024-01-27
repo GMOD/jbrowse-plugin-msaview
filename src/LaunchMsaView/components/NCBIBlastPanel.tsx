@@ -81,7 +81,7 @@ const NcbiBlastPanel = observer(function ({
       {e ? <ErrorMessage error={e} /> : null}
       {rid ? (
         <Typography>
-          Waiting for result. RID {rid}
+          Waiting for result. RID {rid}{' '}
           <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
             (see status at NCBI <OpenInNewIcon />)
           </Link>
