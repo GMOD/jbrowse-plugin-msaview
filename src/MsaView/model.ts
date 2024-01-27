@@ -7,7 +7,6 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
 import { checkHovered, generateMap } from './util'
-import { warn } from 'console'
 
 type LGV = LinearGenomeViewModel
 type MaybeLGV = LGV | undefined
@@ -163,10 +162,13 @@ export default function stateModelFactory() {
                 strand,
               } = entry
               const c = mouseCol - 1
-              if (doesIntersect2(proteinStart, proteinEnd, c, c + 1)) {
+              const k1 = self.relativePxToBp('QUERY', c) || 0
+              const k2 = self.relativePxToBp('QUERY', c + 1) || 0
+              console.log({ k1, k2, c, c1: c + 1, proteinStart, proteinEnd })
+              if (doesIntersect2(proteinStart, proteinEnd, k1, k2)) {
                 // does not take into account phase, so 'incomplete CDS' might
                 // be buggy
-                const ret = Math.round((c - proteinStart) * 3)
+                const ret = Math.round((k1 - proteinStart) * 3)
                 self.setConnectedHighlights([
                   {
                     assemblyName: 'hg38',
