@@ -2,7 +2,12 @@ import { MSAModel } from 'react-msaview'
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
-import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
+import {
+  SimpleFeature,
+  doesIntersect2,
+  getSession,
+  isContainedWithin,
+} from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
@@ -114,31 +119,27 @@ export default function stateModelFactory() {
         const { hoverPosition } = hovered
         const { coord: hoverCoord, refName: hoverRef } = hoverPosition
         for (const entry of transcriptToMsaMap) {
-          const {
-            featureStart,
-            featureEnd,
-            refName,
-            proteinStart,
-            proteinEnd,
-            strand,
-          } = entry
-          const c = mouseCol - 1
-          const k1 = self.rowSpecificBpToPx('QUERY', c) || 0
-          const k2 = self.rowSpecificBpToPx('QUERY', c + 1) || 0
-          if (doesIntersect2(proteinStart, proteinEnd, k1, k2)) {
-            // does not take into account phase, so 'incomplete CDS' might
-            // be buggy
-            const ret = Math.round((k1 - proteinStart) * 3)
-            self.setConnectedHighlights([
-              {
-                assemblyName: 'hg38',
-                refName,
-                start: strand === -1 ? featureEnd - ret : featureStart + ret,
-                end:
-                  strand === -1 ? featureEnd - ret - 3 : featureStart + ret + 3,
-              },
-            ])
-            break
+          const { featureStart, featureEnd, refName, proteinStart, strand } =
+            entry
+
+          if (
+            refName === hoverRef &&
+            isContainedWithin(
+              hoverCoord - 1,
+              hoverCoord,
+              featureStart,
+              featureEnd,
+            )
+          ) {
+            const ret =
+              Math.floor(
+                proteinStart +
+                  (strand === -1
+                    ? featureEnd - hoverCoord
+                    : hoverCoord - featureStart) /
+                    3,
+              ) + 1
+            return self.relativePxToBp2('QUERY', ret)
           }
         }
         return undefined
@@ -186,7 +187,6 @@ export default function stateModelFactory() {
                         : featureStart + ret + 3,
                   },
                 ])
-                break
               }
             }
           }),
