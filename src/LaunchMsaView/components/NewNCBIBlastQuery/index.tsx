@@ -77,7 +77,7 @@ const NcbiBlastPanel = observer(function ({
   const [error, setError] = useState<unknown>()
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
-  const [database, setDatabase] = useState('nr_clustered_seq')
+  const [database, setDatabase] = useState('nr_cluster_seq')
   const [previousQueries, setPreviousQueries] = useLocalStorage(
     'previous-blast-queries',
     [] as PreviousBLASTQueries[],
@@ -100,7 +100,7 @@ const NcbiBlastPanel = observer(function ({
       : ''
 
   const e = error || error2
-  const databaseOptions = ['nr', 'nr_clustered_seq']
+  const databaseOptions = ['nr', 'nr_cluster_seq']
   return (
     <DialogContent className={classes.dialogContent}>
       {e ? (
