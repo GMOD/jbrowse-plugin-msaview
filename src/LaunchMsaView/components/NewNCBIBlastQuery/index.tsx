@@ -7,6 +7,7 @@ import {
   Link,
   MenuItem,
   TextField,
+  TextFieldProps,
   Typography,
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
@@ -14,8 +15,10 @@ import { ErrorMessage } from '@jbrowse/core/ui'
 import {
   AbstractTrackModel,
   Feature,
+  SimpleFeatureSerialized,
   getContainingView,
   getSession,
+  useLocalStorage,
 } from '@jbrowse/core/util'
 
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -42,6 +45,23 @@ const useStyles = makeStyles()({
   },
 })
 
+function TextField2({ children, ...rest }: TextFieldProps) {
+  return (
+    <div>
+      <TextField {...rest}>{children}</TextField>
+    </div>
+  )
+}
+
+interface PreviousBLASTQueries {
+  rid: string
+  transcript: SimpleFeatureSerialized
+  data: {
+    msa: string
+    tree: string
+  }
+}
+
 const NcbiBlastPanel = observer(function ({
   handleClose,
   feature,
@@ -58,6 +78,10 @@ const NcbiBlastPanel = observer(function ({
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
   const [database, setDatabase] = useState('nr_clustered_seq')
+  const [previousQueries, setPreviousQueries] = useLocalStorage(
+    'previous-blast-queries',
+    [] as PreviousBLASTQueries[],
+  )
   const program = 'blastp'
 
   const options = getTranscriptFeatures(feature)
@@ -79,8 +103,15 @@ const NcbiBlastPanel = observer(function ({
   const databaseOptions = ['nr', 'nr_clustered_seq']
   return (
     <DialogContent className={classes.dialogContent}>
-      {e ? <ErrorMessage error={e} /> : null}
-      {rid ? (
+      {e ? (
+        <div>
+          RID {rid}{' '}
+          <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
+            (see status at NCBI <OpenInNewIcon />)
+          </Link>
+          <ErrorMessage error={e} />
+        </div>
+      ) : (
         <Typography>
           Waiting for result. RID {rid}{' '}
           <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
@@ -88,38 +119,33 @@ const NcbiBlastPanel = observer(function ({
           </Link>
           . {progress}
         </Typography>
-      ) : null}
+      )}
 
-      <div>
-        <TextField
-          value={database}
-          onChange={event => setDatabase(event.target.value)}
-          label="BLAST database"
-          select
-        >
-          {databaseOptions.map(val => (
-            <MenuItem value={val} key={val}>
-              {val}
-            </MenuItem>
-          ))}
-        </TextField>
-      </div>
-      <div>
-        <TextField
-          value={userSelection}
-          onChange={event => setUserSelection(event.target.value)}
-          label="Choose isoform to BLAST"
-          select
-        >
-          {options.map(val => (
-            <MenuItem value={getId(val)} key={val.id()}>
-              {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
-            </MenuItem>
-          ))}
-        </TextField>
-      </div>
-
-      <TextField
+      <TextField2
+        value={database}
+        onChange={event => setDatabase(event.target.value)}
+        label="BLAST database"
+        select
+      >
+        {databaseOptions.map(val => (
+          <MenuItem value={val} key={val}>
+            {val}
+          </MenuItem>
+        ))}
+      </TextField2>
+      <TextField2
+        value={userSelection}
+        onChange={event => setUserSelection(event.target.value)}
+        label="Choose isoform to BLAST"
+        select
+      >
+        {options.map(val => (
+          <MenuItem value={getId(val)} key={val.id()}>
+            {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
+          </MenuItem>
+        ))}
+      </TextField2>
+      <TextField2
         variant="outlined"
         multiline
         minRows={5}
@@ -147,7 +173,7 @@ const NcbiBlastPanel = observer(function ({
             ;(async () => {
               try {
                 setError(undefined)
-                const res = await queryBlast({
+                const { rid, data } = await queryBlast({
                   query: protein,
                   database,
                   program,
@@ -158,9 +184,17 @@ const NcbiBlastPanel = observer(function ({
                   session,
                   feature: selectedTranscript,
                   view,
-                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - RID ${rid}`,
-                  data: res,
+                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                  data,
                 })
+                setPreviousQueries([
+                  {
+                    transcript: selectedTranscript.toJSON(),
+                    rid,
+                    data,
+                  },
+                  ...previousQueries,
+                ])
                 handleClose()
               } catch (e) {
                 console.error(e)

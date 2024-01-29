@@ -6,7 +6,8 @@ import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 // locals
 
 import { CustomTabPanel, a11yProps } from './TabUtils'
-import NCBIBlastPanel from './NCBIBlast/NCBIBlastPanel'
+import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
+import PreviousNcbiBlastQueryPanel from './PreviousNCBIBlastQuery'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 
 export default function LaunchProteinViewDialog({
@@ -29,18 +30,26 @@ export default function LaunchProteinViewDialog({
     >
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={(_, val) => setValue(val)}>
-          <Tab label="NCBI BLAST" {...a11yProps(0)} />
-          <Tab label="Pre-loaded dataset" {...a11yProps(1)} />
+          <Tab label="New NCBI BLAST query" {...a11yProps(0)} />
+          <Tab label="Previous NCBI BLAST query" {...a11yProps(1)} />
+          <Tab label="Pre-loaded dataset" {...a11yProps(2)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
-        <NCBIBlastPanel
+        <NewNcbiBlastQueryPanel
           handleClose={handleClose}
           feature={feature}
           model={model}
         />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
+        <PreviousNcbiBlastQueryPanel
+          handleClose={handleClose}
+          feature={feature}
+          model={model}
+        />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
         <PreLoadedMSA
           model={model}
           feature={feature}
