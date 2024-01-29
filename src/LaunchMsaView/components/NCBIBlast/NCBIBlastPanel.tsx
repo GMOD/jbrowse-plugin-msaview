@@ -21,16 +21,16 @@ import {
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import { BLAST_URL, queryBlast } from '../ncbiBlastUtils'
-import { ncbiBlastLaunchView } from '../ncbiBlastLaunchView'
+import { BLAST_URL, queryBlast } from './ncbiBlastUtils'
+import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 import { useFeatureSequence } from './useFeatureSequence'
 import {
   getId,
   getTranscriptDisplayName,
   getTranscriptFeatures,
   getGeneDisplayName,
-} from '../util'
-import { getProteinSequence } from '../calculateProteinSequence'
+} from '../../util'
+import { getProteinSequence } from './calculateProteinSequence'
 import OpenInNewIcon from './OpenInNewIcon'
 
 const useStyles = makeStyles()({

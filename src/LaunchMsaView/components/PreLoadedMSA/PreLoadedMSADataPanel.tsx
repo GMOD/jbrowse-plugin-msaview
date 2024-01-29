@@ -16,12 +16,16 @@ import {
   getSession,
 } from '@jbrowse/core/util'
 import { makeStyles } from 'tss-react/mui'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import { getTranscriptDisplayName, getId, getTranscriptFeatures } from '../util'
-import { fetchGeneList } from '../fetchGeneList'
-import { preCalculatedLaunchView } from '../preCalculatedLaunchView'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import {
+  getTranscriptDisplayName,
+  getId,
+  getTranscriptFeatures,
+} from '../../util'
+import { fetchGeneList } from './fetchGeneList'
+import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 
 const useStyles = makeStyles()({
   dialogContent: {

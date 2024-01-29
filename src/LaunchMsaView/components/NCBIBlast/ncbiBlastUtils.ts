@@ -1,4 +1,4 @@
-import { jsonfetch, textfetch, timeout } from './fetchUtils'
+import { jsonfetch, textfetch, timeout } from '../../fetchUtils'
 import { launchMSA } from './clustalOmegaUtils'
 
 function makeId(h: { accession: string; sciname: string }) {
