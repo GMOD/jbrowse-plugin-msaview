@@ -2,7 +2,9 @@ export async function myfetch(url: string, args?: RequestInit) {
   const response = await fetch(url, args)
 
   if (!response.ok) {
-    throw new Error(`BLAST API request failed with status ${response.status}`)
+    throw new Error(
+      `HTTP ${response.status} fetching ${url} ${await response.text()}`,
+    )
   }
 
   return response

@@ -78,7 +78,6 @@ const NcbiBlastPanel = observer(function ({
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
   const [database, setDatabase] = useState('nr_cluster_seq')
-  const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
   const [previousQueries, setPreviousQueries] = useLocalStorage(
     'previous-blast-queries',
     [] as PreviousBLASTQueries[],
@@ -102,7 +101,6 @@ const NcbiBlastPanel = observer(function ({
 
   const e = error || error2
   const databaseOptions = ['nr', 'nr_cluster_seq']
-  const msaAlgorithms = ['clustalo', 'kalign', 'mafft', 'muscle']
   return (
     <DialogContent className={classes.dialogContent}>
       {e ? (
@@ -136,18 +134,6 @@ const NcbiBlastPanel = observer(function ({
         ))}
       </TextField2>
 
-      <TextField2
-        value={msaAlgorithm}
-        onChange={event => setMsaAlgorithm(event.target.value)}
-        label="MSA Algorithm"
-        select
-      >
-        {msaAlgorithms.map(val => (
-          <MenuItem value={val} key={val}>
-            {val}
-          </MenuItem>
-        ))}
-      </TextField2>
       <TextField2
         value={userSelection}
         onChange={event => setUserSelection(event.target.value)}

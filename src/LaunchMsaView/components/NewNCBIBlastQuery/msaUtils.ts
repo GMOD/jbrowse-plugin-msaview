@@ -1,20 +1,26 @@
 import { textfetch, timeout } from '../../fetchUtils'
 
+// currently only allows clustalo, could be extended to handle more potentially
+const msaAlgorithm = 'clustalo'
+
 export async function launchMSA({
   sequence,
-  msaAlgorithm,
   onProgress,
 }: {
   sequence: string
-  msaAlgorithm: string
   onProgress: (arg: string) => void
 }) {
+  console.log({ msaAlgorithm })
   onProgress('Launching MSA')
   const jobId = await textfetch(
     `https://www.ebi.ac.uk/Tools/services/rest/${msaAlgorithm}/run`,
     {
       method: 'POST',
-      body: new URLSearchParams({ email: 'colin.diesh@gmail.com', sequence }),
+      body: new URLSearchParams({
+        email: 'colin.diesh@gmail.com',
+        sequence,
+        stype: 'protein',
+      }),
     },
   )
 

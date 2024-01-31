@@ -1,5 +1,5 @@
 import { jsonfetch, textfetch, timeout } from '../../fetchUtils'
-import { launchMSA } from './clustalOmegaUtils'
+import { launchMSA } from './msaUtils'
 
 function makeId(h: { accession: string; sciname: string }) {
   return `${h.accession}-${h.sciname.replaceAll(' ', '_')}`
@@ -15,14 +15,12 @@ export async function queryBlast({
   query,
   database,
   program,
-  msaAlgorithm,
   onProgress,
   onRid,
 }: {
   query: string
   database: string
   program: string
-  msaAlgorithm: string
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
 }) {
@@ -43,7 +41,6 @@ export async function queryBlast({
     hsps: { hseq: string }[]
   }[]
   const data = await launchMSA({
-    msaAlgorithm,
     sequence: [
       `>QUERY\n${q}`,
       ...hits
