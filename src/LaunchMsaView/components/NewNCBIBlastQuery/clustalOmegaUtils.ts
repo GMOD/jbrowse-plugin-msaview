@@ -2,14 +2,16 @@ import { textfetch, timeout } from '../../fetchUtils'
 
 export async function launchMSA({
   sequence,
+  msaAlgorithm,
   onProgress,
 }: {
   sequence: string
+  msaAlgorithm: string
   onProgress: (arg: string) => void
 }) {
   onProgress('Launching MSA')
   const jobId = await textfetch(
-    'https://www.ebi.ac.uk/Tools/services/rest/clustalo/run',
+    `https://www.ebi.ac.uk/Tools/services/rest/${msaAlgorithm}/run`,
     {
       method: 'POST',
       body: new URLSearchParams({ email: 'colin.diesh@gmail.com', sequence }),
@@ -22,7 +24,7 @@ export async function launchMSA({
       onProgress(`Re-checking MSA status in... ${10 - i}`)
     }
     const result = await textfetch(
-      `https://www.ebi.ac.uk/Tools/services/rest/clustalo/status/${jobId}`,
+      `https://www.ebi.ac.uk/Tools/services/rest/${msaAlgorithm}/status/${jobId}`,
     )
 
     if (result === 'FINISHED') {
@@ -32,10 +34,10 @@ export async function launchMSA({
 
   onProgress('Downloading MSA')
   const msa = await textfetch(
-    `https://www.ebi.ac.uk/Tools/services/rest/clustalo/result/${jobId}/aln-clustal_num`,
+    `https://www.ebi.ac.uk/Tools/services/rest/${msaAlgorithm}/result/${jobId}/aln-clustal_num`,
   )
   const tree = await textfetch(
-    `https://www.ebi.ac.uk/Tools/services/rest/clustalo/result/${jobId}/phylotree`,
+    `https://www.ebi.ac.uk/Tools/services/rest/${msaAlgorithm}/result/${jobId}/phylotree`,
   )
   return { msa, tree }
 }

@@ -109,6 +109,7 @@ const NcbiBlastPanel = observer(function ({
                 }
                 const { transcript, rid, data } = result
                 const selectedTranscript = new SimpleFeature(transcript)
+                console.log({ selectedTranscript })
                 setError(undefined)
                 await ncbiBlastLaunchView({
                   session,
