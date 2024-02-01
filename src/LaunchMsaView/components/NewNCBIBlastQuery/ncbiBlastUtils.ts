@@ -1,13 +1,4 @@
 import { jsonfetch, textfetch, timeout } from '../../fetchUtils'
-import { launchMSA } from './msaUtils'
-
-function makeId(h: { accession: string; sciname: string }) {
-  return `${h.accession}-${h.sciname.replaceAll(' ', '_')}`
-}
-
-function strip(s: string) {
-  return s.replace('-', '')
-}
 
 export const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
 
@@ -25,14 +16,14 @@ export async function queryBlast({
   onRid: (arg: string) => void
 }) {
   onProgress('Submitting to NCBI BLAST...')
-  const q = query.replaceAll('*', '')
   const { rid } = await initialQuery({
-    query: q,
+    query,
     database,
     program,
   })
   onRid(rid)
   await waitForRid({ rid, onProgress })
+  console.log({ rid })
   const ret = await jsonfetch(
     `${BLAST_URL}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
   )
@@ -40,17 +31,8 @@ export async function queryBlast({
     description: { accession: string; id: string; sciname: string }[]
     hsps: { hseq: string }[]
   }[]
-  const data = await launchMSA({
-    sequence: [
-      `>QUERY\n${q}`,
-      ...hits
-        .map(h => [makeId(h.description[0]), strip(h.hsps[0].hseq)] as const)
-        .map(([id, seq]) => `>${id}\n${seq}`),
-    ].join('\n'),
-    onProgress,
-  })
 
-  return { rid, data }
+  return { rid, hits }
 }
 
 async function initialQuery({

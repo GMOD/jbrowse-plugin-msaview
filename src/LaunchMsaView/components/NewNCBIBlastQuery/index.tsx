@@ -35,6 +35,8 @@ import {
 } from '../../util'
 import { getProteinSequence } from './calculateProteinSequence'
 import OpenInNewIcon from './OpenInNewIcon'
+import { launchMSA } from './msaUtils'
+import { makeId, strip } from './util'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -78,6 +80,7 @@ const NcbiBlastPanel = observer(function ({
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
   const [database, setDatabase] = useState('nr_cluster_seq')
+  const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
   const [previousQueries, setPreviousQueries] = useLocalStorage(
     'previous-blast-queries',
     [] as PreviousBLASTQueries[],
@@ -101,6 +104,7 @@ const NcbiBlastPanel = observer(function ({
 
   const e = error || error2
   const databaseOptions = ['nr', 'nr_cluster_seq']
+  const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
   return (
     <DialogContent className={classes.dialogContent}>
       {e ? (
@@ -128,6 +132,19 @@ const NcbiBlastPanel = observer(function ({
         select
       >
         {databaseOptions.map(val => (
+          <MenuItem value={val} key={val}>
+            {val}
+          </MenuItem>
+        ))}
+      </TextField2>
+
+      <TextField2
+        value={msaAlgorithm}
+        onChange={event => setMsaAlgorithm(event.target.value)}
+        label="MSA Algorithm"
+        select
+      >
+        {msaAlgorithms.map(val => (
           <MenuItem value={val} key={val}>
             {val}
           </MenuItem>
@@ -174,21 +191,43 @@ const NcbiBlastPanel = observer(function ({
             ;(async () => {
               try {
                 setError(undefined)
-                const { rid, data } = await queryBlast({
-                  query: protein,
+
+                const query = protein.replaceAll('*', '')
+                const { rid, hits } = await queryBlast({
+                  query,
                   database,
                   program,
                   onProgress: arg => setProgress(arg),
                   onRid: rid => setRid(rid),
                 })
 
+                const sequence = [
+                  `>QUERY\n${query}`,
+                  ...hits
+                    .map(
+                      h =>
+                        [
+                          makeId(h.description[0]),
+                          strip(h.hsps[0].hseq),
+                        ] as const,
+                    )
+                    .map(([id, seq]) => `>${id}\n${seq}`),
+                ].join('\n')
+
+                const data = await launchMSA({
+                  algorithm: msaAlgorithm,
+                  sequence,
+                  onProgress: arg => setProgress(arg),
+                })
+
                 await ncbiBlastLaunchView({
                   session,
                   feature: selectedTranscript,
                   view,
-                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                  newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - ${msaAlgorithm}`,
                   data,
                 })
+
                 setPreviousQueries([
                   {
                     transcript: selectedTranscript.toJSON(),
