@@ -64,6 +64,17 @@ interface PreviousBLASTQueries {
   }
 }
 
+function RIDLink({ rid }: { rid: string }) {
+  return (
+    <>
+      RID {rid}{' '}
+      <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
+        (see status at NCBI <OpenInNewIcon />)
+      </Link>
+    </>
+  )
+}
+
 const NcbiBlastPanel = observer(function ({
   handleClose,
   feature,
@@ -109,21 +120,19 @@ const NcbiBlastPanel = observer(function ({
     <DialogContent className={classes.dialogContent}>
       {e ? (
         <div>
-          RID {rid}{' '}
-          <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
-            (see status at NCBI <OpenInNewIcon />)
-          </Link>
+          {rid ? <RIDLink rid={rid} /> : null}
           <ErrorMessage error={e} />
         </div>
-      ) : (
+      ) : rid ? (
         <Typography>
-          Waiting for result. RID {rid}{' '}
-          <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
-            (see status at NCBI <OpenInNewIcon />)
-          </Link>
-          . {progress}
+          {rid ? (
+            <>
+              <RIDLink rid={rid} />.{' '}
+            </>
+          ) : null}
+          {progress}
         </Typography>
-      )}
+      ) : null}
 
       <TextField2
         value={database}
@@ -192,7 +201,7 @@ const NcbiBlastPanel = observer(function ({
               try {
                 setError(undefined)
 
-                const query = protein.replaceAll('*', '')
+                const query = protein.replaceAll('*', '').replaceAll('&', '')
                 const { rid, hits } = await queryBlast({
                   query,
                   database,

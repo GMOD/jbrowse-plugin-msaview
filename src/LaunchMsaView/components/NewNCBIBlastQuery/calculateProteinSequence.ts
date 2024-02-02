@@ -46,6 +46,18 @@ export function revlist(
     .sort((a, b) => a.start - b.start)
 }
 
+// filter items if they have the same "ID" or location
+function getItemId(feat: Feat) {
+  return `${feat.start}-${feat.end}`
+}
+
+// filters if successive elements share same start/end
+export function dedupe(list: Feat[]) {
+  return list.filter(
+    (item, pos, ary) => !pos || getItemId(item) !== getItemId(ary[pos - 1]),
+  )
+}
+
 export function getProteinSequence({
   selectedTranscript,
   seq,
@@ -61,14 +73,16 @@ export function getProteinSequence({
     type: string
     subfeatures: { start: number; end: number; type: string }[]
   }
-  const cds = f.subfeatures
-    .sort((a, b) => a.start - b.start)
-    .map(sub => ({
-      ...sub,
-      start: sub.start - f.start,
-      end: sub.end - f.start,
-    }))
-    .filter(f => f.type === 'CDS')
+  const cds = dedupe(
+    f.subfeatures
+      .sort((a, b) => a.start - b.start)
+      .map(sub => ({
+        ...sub,
+        start: sub.start - f.start,
+        end: sub.end - f.start,
+      }))
+      .filter(f => f.type === 'CDS'),
+  )
 
   return calculateProteinSequence({
     cds: f.strand === -1 ? revlist(cds, seq.length) : cds,

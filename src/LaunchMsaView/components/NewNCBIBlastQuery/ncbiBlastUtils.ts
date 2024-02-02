@@ -23,7 +23,6 @@ export async function queryBlast({
   })
   onRid(rid)
   await waitForRid({ rid, onProgress })
-  console.log({ rid })
   const ret = await jsonfetch(
     `${BLAST_URL}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
   )
