@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "pako": "^2.1.0",
-    "react-msaview": "^3.0.0"
+    "react-msaview": "^3.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",

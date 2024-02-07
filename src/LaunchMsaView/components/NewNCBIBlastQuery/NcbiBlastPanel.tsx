@@ -91,6 +91,7 @@ const NcbiBlastPanel = observer(function ({
   const [rid, setRid] = useState<string>()
   const [progress, setProgress] = useState('')
   const [database, setDatabase] = useState('nr_cluster_seq')
+  const [processing, setProcessing] = useState(false)
   const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
   const [previousQueries, setPreviousQueries] = useLocalStorage(
     'previous-blast-queries',
@@ -199,8 +200,9 @@ const NcbiBlastPanel = observer(function ({
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
+                setProcessing(true)
                 setError(undefined)
-
+                setProgress('Submitting query')
                 const query = protein.replaceAll('*', '').replaceAll('&', '')
                 const { rid, hits } = await queryBlast({
                   query,
@@ -248,11 +250,12 @@ const NcbiBlastPanel = observer(function ({
                 handleClose()
               } catch (e) {
                 console.error(e)
+                setProcessing(false)
                 setError(e)
               }
             })()
           }}
-          disabled={!protein}
+          disabled={!protein || processing}
         >
           Submit
         </Button>
