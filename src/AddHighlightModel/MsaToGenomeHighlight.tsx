@@ -6,7 +6,7 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { Assembly } from '@jbrowse/core/assemblyManager/assembly'
 
 // locals
-import { MsaViewModel } from '../MsaView/model'
+import { JBrowsePluginMsaViewModel } from '../MsaView/model'
 import { useStyles } from './util'
 
 type LGV = LinearGenomeViewModel
@@ -18,7 +18,7 @@ function getCanonicalName(assembly: Assembly, s: string) {
 const MsaToGenomeHighlight = observer(function ({ model }: { model: LGV }) {
   const { classes } = useStyles()
   const { assemblyManager, views } = getSession(model)
-  const p = views.find(f => f.type === 'MsaView') as MsaViewModel
+  const p = views.find(f => f.type === 'MsaView') as JBrowsePluginMsaViewModel
   const assembly = assemblyManager.get(model.assemblyNames[0])
   return assembly ? (
     <>
