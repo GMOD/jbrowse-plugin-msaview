@@ -2,16 +2,11 @@ import { MSAModel } from 'react-msaview'
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
-import {
-  SimpleFeature,
-  doesIntersect2,
-  getSession,
-  isContainedWithin,
-} from '@jbrowse/core/util'
+import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import { checkHovered, generateMap } from './util'
+import { generateMap } from './util'
 import { genomeToMSA } from './genomeToMSA'
 
 type LGV = LinearGenomeViewModel
@@ -108,6 +103,9 @@ export default function stateModelFactory() {
       get mouseCol2(): number | undefined {
         return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
       },
+      /**
+       * #getter
+       */
       get clickCol2() {
         return undefined
       },

@@ -23,17 +23,20 @@ const HoverHighlight = observer(function ({
   model: LinearGenomeViewModel
 }) {
   const { classes } = useStyles()
-  const { hovered } = getSession(model)
-  const { offsetPx } = model
-  // @ts-expect-error
-  const { coord, refName } = hovered.hoverPosition
+  const session = getSession(model)
+  if (session.views.some(s => s.type === 'MsaView')) {
+    const { hovered } = session
+    const { offsetPx } = model
+    // @ts-expect-error
+    const { coord, refName } = hovered.hoverPosition
 
-  const s = model.bpToPx({ refName, coord: coord - 1 })
-  const e = model.bpToPx({ refName, coord: coord })
-  if (s && e) {
-    const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
-    const left = Math.min(s.offsetPx, e.offsetPx) - offsetPx
-    return <div className={classes.highlight} style={{ left, width }} />
+    const s = model.bpToPx({ refName, coord: coord - 1 })
+    const e = model.bpToPx({ refName, coord: coord })
+    if (s && e) {
+      const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
+      const left = Math.min(s.offsetPx, e.offsetPx) - offsetPx
+      return <div className={classes.highlight} style={{ left, width }} />
+    }
   }
   return null
 })

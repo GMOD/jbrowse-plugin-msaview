@@ -3,9 +3,11 @@ import PluginManager from '@jbrowse/core/PluginManager'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import Highlight from './Highlight'
+import HighlightComponents from './HighlightComponents'
 
-export default function AddHighlightModelF(pluginManager: PluginManager) {
+export default function AddHighlightComponentsModelF(
+  pluginManager: PluginManager,
+) {
   pluginManager.addToExtensionPoint(
     'LinearGenomeView-TracksContainerComponent',
     // @ts-expect-error
@@ -15,7 +17,10 @@ export default function AddHighlightModelF(pluginManager: PluginManager) {
     ) => {
       return [
         ...rest,
-        <Highlight key="highlight_protein_viewer_msaview" model={model} />,
+        <HighlightComponents
+          key="highlight_protein_viewer_msaview"
+          model={model}
+        />,
       ]
     },
   )
