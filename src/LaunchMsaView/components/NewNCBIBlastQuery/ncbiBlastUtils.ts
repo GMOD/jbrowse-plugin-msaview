@@ -4,22 +4,22 @@ export const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
 
 export async function queryBlast({
   query,
-  database,
-  program,
+  blastDatabase,
+  blastProgram,
   onProgress,
   onRid,
 }: {
   query: string
-  database: string
-  program: string
+  blastDatabase: string
+  blastProgram: string
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
 }) {
   onProgress('Submitting to NCBI BLAST...')
   const { rid } = await initialQuery({
     query,
-    database,
-    program,
+    blastDatabase,
+    blastProgram,
   })
   onRid(rid)
   await waitForRid({ rid, onProgress })
@@ -36,21 +36,21 @@ export async function queryBlast({
 
 async function initialQuery({
   query,
-  program,
-  database,
+  blastProgram,
+  blastDatabase,
 }: {
   query: string
-  program: string
-  database: string
+  blastProgram: string
+  blastDatabase: string
 }) {
   const res = await textfetch(BLAST_URL, {
     method: 'POST',
     body: new URLSearchParams({
       CMD: 'Put',
-      PROGRAM: program,
-      DATABASE: database,
+      PROGRAM: blastProgram,
+      DATABASE: blastDatabase,
       QUERY: query,
-      ...(database === 'nr_clustered_seq'
+      ...(blastDatabase === 'nr_clustered_seq'
         ? {
             CLUSTERED_DB: 'on',
             DB_TYPE: 'Experimental Databases',

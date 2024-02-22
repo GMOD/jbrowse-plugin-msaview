@@ -8,6 +8,7 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 // locals
 import { generateMap } from './util'
 import { genomeToMSA } from './genomeToMSA'
+import { doLaunchBlast } from './doLaunchBlast'
 
 type LGV = LinearGenomeViewModel
 type MaybeLGV = LGV | undefined
@@ -43,7 +44,32 @@ export default function stateModelFactory() {
         connectedHighlights: types.array(Region),
       }),
     )
+    .volatile(() => ({
+      blastParams: undefined as
+        | {
+            blastDatabase: string
+            msaAlgorithm: string
+            blastProgram: string
+            selectedTranscript: unknown
+            proteinSequence: string
+          }
+        | undefined,
+      rid: undefined as string | undefined,
+      progress: '',
+    }))
     .actions(self => ({
+      /**
+       * #action
+       */
+      setProgress(arg: string) {
+        self.progress = arg
+      },
+      /**
+       * #action
+       */
+      setRid(arg: string) {
+        self.rid = arg
+      },
       /**
        * #action
        */
@@ -61,6 +87,17 @@ export default function stateModelFactory() {
        */
       clearConnectedHighlights() {
         self.connectedHighlights = cast([])
+      },
+      /**
+       * #action
+       */
+      setBlastParams(args: {
+        blastDatabase: string
+        program: string
+        selectedTranscript: unknown
+        msaAlgorithm: string
+      }) {
+        self.blastParams = args
       },
     }))
     .views(self => ({
@@ -81,6 +118,9 @@ export default function stateModelFactory() {
       },
     }))
     .views(self => ({
+      get processing() {
+        return !!self.progress
+      },
       /**
        * #getter
        */
@@ -150,6 +190,17 @@ export default function stateModelFactory() {
                   },
                 ])
               }
+            }
+          }),
+        )
+
+        addDisposer(
+          self,
+          autorun(async () => {
+            self.setError(undefined)
+            self.setProgress('Submitting query')
+            if (self.blastParams) {
+              await doLaunchBlast({ self })
             }
           }),
         )
