@@ -12,9 +12,9 @@ const LoadingBLAST = observer(function ({
 }: {
   model: JBrowsePluginMsaViewModel
 }) {
-  const { progress, error, rid, processing, blastParams } = model
-  const { database, msaAlgorithm, proteinSequence, selectedTranscript } =
-    blastParams
+  const { progress, rid, error, processing, blastParams } = model
+  const { blastDatabase, msaAlgorithm, proteinSequence, selectedTranscript } =
+    blastParams!
 
   return (
     <div>

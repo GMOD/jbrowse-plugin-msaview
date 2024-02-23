@@ -1,30 +1,18 @@
-import { getSession } from '@jbrowse/core/util'
 import { launchMSA } from '../LaunchMsaView/components/NewNCBIBlastQuery/msaUtils'
-import { ncbiBlastLaunchView } from '../LaunchMsaView/components/NewNCBIBlastQuery/ncbiBlastLaunchView'
 import { queryBlast } from '../LaunchMsaView/components/NewNCBIBlastQuery/ncbiBlastUtils'
 import {
   makeId,
   strip,
 } from '../LaunchMsaView/components/NewNCBIBlastQuery/util'
 import { JBrowsePluginMsaViewModel } from './model'
-import {
-  getGeneDisplayName,
-  getTranscriptDisplayName,
-} from '../LaunchMsaView/util'
 
 export async function doLaunchBlast({
   self,
 }: {
   self: JBrowsePluginMsaViewModel
 }) {
-  const {
-    blastDatabase,
-    blastProgram,
-    msaAlgorithm,
-    selectedTranscript,
-    proteinSequence,
-  } = self.blastParams!
-  const session = getSession(self)
+  const { blastDatabase, blastProgram, msaAlgorithm, proteinSequence } =
+    self.blastParams!
   const query = proteinSequence.replaceAll('*', '').replaceAll('&', '')
   const { hits } = await queryBlast({
     query,
@@ -46,12 +34,5 @@ export async function doLaunchBlast({
     sequence,
     onProgress: arg => self.setProgress(arg),
   })
-
-  await ncbiBlastLaunchView({
-    session,
-    feature: selectedTranscript,
-    view,
-    newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - ${msaAlgorithm}`,
-    data,
-  })
+  return data
 }

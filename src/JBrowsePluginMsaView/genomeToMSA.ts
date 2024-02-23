@@ -1,11 +1,11 @@
 import { getSession, isContainedWithin } from '@jbrowse/core/util'
 import { checkHovered } from './util'
-import { JBrowsePluginMsaViewModel } from './model'
+import { ExtendedReactMSAViewModel } from './ExtendedReactMSAViewModel'
 
 export function genomeToMSA({
   model,
 }: {
-  model: JBrowsePluginMsaViewModel
+  model: ExtendedReactMSAViewModel
 }): number | undefined {
   const session = getSession(self)
   const { transcriptToMsaMap, connectedView } = model
