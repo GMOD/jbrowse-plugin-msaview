@@ -1,36 +1,53 @@
 import React from 'react'
 import { JBrowsePluginMsaViewModel } from '../model'
+import { Paper, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
-import { Typography } from '@mui/material'
-import { ErrorMessage } from '@jbrowse/core/ui'
+import { makeStyles } from 'tss-react/mui'
+import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 
 // locals
 import RIDLink from './RIDLink'
 
+const useStyles = makeStyles()({
+  margin: {
+    margin: 20,
+  },
+})
+
+function RIDError({ rid, error }: { rid?: string; error: unknown }) {
+  return (
+    <div>
+      {rid ? <RIDLink rid={rid} /> : null}
+      <ErrorMessage error={error} />
+    </div>
+  )
+}
+
+function RIDProgress({ rid, progress }: { rid: string; progress: string }) {
+  return (
+    <Typography>
+      {rid ? <RIDLink rid={rid} /> : null}
+      {progress}
+    </Typography>
+  )
+}
 const LoadingBLAST = observer(function ({
   model,
 }: {
   model: JBrowsePluginMsaViewModel
 }) {
-  const { progress, rid, error, processing, blastParams } = model
-  const { blastDatabase, msaAlgorithm, proteinSequence, selectedTranscript } =
-    blastParams!
-
+  const { progress, rid, error, processing } = model
+  const { classes } = useStyles()
   return (
-    <div>
+    <Paper className={classes.margin}>
+      <LoadingEllipses variant="h5">Running NCBI BLAST</LoadingEllipses>
       {error ? (
-        <div>
-          {rid ? <RIDLink rid={rid} /> : null}
-          <ErrorMessage error={error} />
-        </div>
+        <RIDError rid={rid} error={error} />
       ) : rid ? (
-        <Typography>
-          {rid ? <RIDLink rid={rid} /> : null}
-          {progress}
-        </Typography>
+        <RIDProgress rid={rid} progress={progress} />
       ) : null}
-      <Typography>{processing}</Typography>
-    </div>
+      <Typography>{processing || 'Initializing BLAST query'}</Typography>
+    </Paper>
   )
 })
 

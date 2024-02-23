@@ -11,8 +11,8 @@ export function ncbiBlastLaunchView({
   view: LinearGenomeViewModel
   feature: Feature
 }) {
-  return getSession(view).addView('JBrowsePluginMsaView', {
-    type: 'JBrowsePluginMsaView',
+  return getSession(view).addView('MsaView', {
+    type: 'MsaView',
     displayName: newViewTitle,
     connectedViewId: view.id,
     connectedFeature: feature.toJSON(),

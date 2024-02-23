@@ -1,13 +1,16 @@
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
+import { MSAModel } from 'react-msaview'
 import { Region } from '@jbrowse/core/util/types/mst'
-import { Feature, getSession } from '@jbrowse/core/util'
+import { Feature, SimpleFeature, getSession } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 
 // locals
 import { doLaunchBlast } from './doLaunchBlast'
-import extendedModelFactory from './ExtendedReactMSAViewModel'
+import { generateMap } from './util'
+import { genomeToMSA } from './genomeToMSA'
+import { msaHoverToGenomeHighlight } from './msaHoverToGenomeHighlight'
 
 type LGV = LinearGenomeViewModel
 
@@ -36,15 +39,8 @@ export default function stateModelFactory() {
   return types
     .compose(
       BaseViewModel,
+      MSAModel,
       types.model('MsaView', {
-        /**
-         * #property
-         */
-        msaView: types.optional(extendedModelFactory(), { type: 'MsaView' }),
-        /**
-         * #property
-         */
-        type: types.literal('MsaView'),
         /**
          * #property
          */
@@ -59,12 +55,59 @@ export default function stateModelFactory() {
         connectedHighlights: types.array(Region),
       }),
     )
+
     .volatile(() => ({
       blastParams: undefined as BlastParams | undefined,
       rid: undefined as string | undefined,
       progress: '',
       error: undefined as unknown,
     }))
+
+    .views(self => ({
+      /**
+       * #method
+       */
+      ungappedPositionMap(rowName: string, position: number) {
+        const row = self.rows.find(f => f[0] === rowName)
+        const seq = row?.[1]
+        if (seq && position < seq.length) {
+          let i = 0
+          let j = 0
+          for (; j < position; j++, i++) {
+            while (seq[i] === '-') {
+              i++
+            }
+          }
+          return i
+        }
+        return undefined
+      },
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get transcriptToMsaMap() {
+        return self.connectedFeature
+          ? generateMap(new SimpleFeature(self.connectedFeature))
+          : undefined
+      },
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get mouseCol2(): number | undefined {
+        return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
+      },
+      /**
+       * #getter
+       */
+      get clickCol2() {
+        return undefined
+      },
+    }))
+
     .views(self => ({
       /**
        * #getter
@@ -150,9 +193,21 @@ export default function stateModelFactory() {
           autorun(async () => {
             if (self.blastParams) {
               self.setProgress('Submitting query')
-              await doLaunchBlast({ self: self as JBrowsePluginMsaViewModel })
+              const data = await doLaunchBlast({
+                self: self as JBrowsePluginMsaViewModel,
+              })
+              self.setData(data)
+              self.setBlastParams(undefined)
               self.setProgress('')
             }
+          }),
+        )
+
+        // this adds highlights to the genome view when mouse-ing over the MSA
+        addDisposer(
+          self,
+          autorun(() => {
+            msaHoverToGenomeHighlight({ model: self })
           }),
         )
       },

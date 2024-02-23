@@ -140,6 +140,7 @@ const NcbiBlastPanel = observer(function ({
               selectedTranscript,
               proteinSequence,
             })
+            handleClose()
           }}
           disabled={!proteinSequence}
         >

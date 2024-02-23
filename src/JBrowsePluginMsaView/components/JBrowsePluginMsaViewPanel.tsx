@@ -11,14 +11,10 @@ const JBrowsePluginMsaViewPanel = observer(function ({
 }: {
   model: JBrowsePluginMsaViewModel
 }) {
-  const { blastParams, msaView } = model
+  const { blastParams } = model
   return (
     <div>
-      {blastParams ? (
-        <LoadingBLAST model={model} />
-      ) : (
-        <MSAView model={msaView} />
-      )}
+      {blastParams ? <LoadingBLAST model={model} /> : <MSAView model={model} />}
     </div>
   )
 })
