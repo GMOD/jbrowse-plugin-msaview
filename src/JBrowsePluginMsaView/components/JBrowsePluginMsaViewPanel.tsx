@@ -1,20 +1,24 @@
 import React from 'react'
 import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
+// locals
 import { JBrowsePluginMsaViewModel } from '../model'
+import LoadingBLAST from './LoadingBLAST'
 
 const JBrowsePluginMsaViewPanel = observer(function ({
   model,
 }: {
   model: JBrowsePluginMsaViewModel
 }) {
-  const { loadingBLAST } = model
+  const { blastParams } = model
   return (
     <div>
-      {loadingBlast ? (
+      {blastParams ? (
         <LoadingBLAST model={model} />
+      ) : model.msaView ? (
+        <MSAView model={model.msaView} />
       ) : (
-        <MSAView model={model} />
+        'Loading...'
       )}
     </div>
   )

@@ -2,23 +2,38 @@ import { MSAModel } from 'react-msaview'
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { Region } from '@jbrowse/core/util/types/mst'
-import { SimpleFeature, doesIntersect2, getSession } from '@jbrowse/core/util'
+import {
+  Feature,
+  SimpleFeature,
+  doesIntersect2,
+  getSession,
+} from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
 import { generateMap } from './util'
 import { genomeToMSA } from './genomeToMSA'
 import { doLaunchBlast } from './doLaunchBlast'
+import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 
 type LGV = LinearGenomeViewModel
+
 type MaybeLGV = LGV | undefined
 
-interface IRegion {
+export interface IRegion {
   assemblyName: string
   refName: string
   start: number
   end: number
 }
+export interface BlastParams {
+  blastDatabase: string
+  msaAlgorithm: string
+  blastProgram: string
+  selectedTranscript: Feature
+  proteinSequence: string
+}
+
 /**
  * #stateModel MsaViewPlugin
  * extends
@@ -27,9 +42,18 @@ interface IRegion {
 export default function stateModelFactory() {
   return types
     .compose(
-      'MsaViewPlugin',
+      BaseViewModel,
       MSAModel,
-      types.model({
+      types.model('JBrowsePluginMsaView', {
+        /**
+         * #property
+         */
+        type: types.literal('JBrowsePluginMsaView'),
+        /**
+         * #property
+         * optionally initialized
+         */
+        msaView: types.maybe(stateModelFactory()),
         /**
          * #property
          */
@@ -45,17 +69,31 @@ export default function stateModelFactory() {
       }),
     )
     .volatile(() => ({
-      blastParams: undefined as
-        | {
-            blastDatabase: string
-            msaAlgorithm: string
-            blastProgram: string
-            selectedTranscript: unknown
-            proteinSequence: string
-          }
-        | undefined,
+      blastParams: undefined as BlastParams | undefined,
       rid: undefined as string | undefined,
       progress: '',
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get processing() {
+        return !!self.progress
+      },
+      /**
+       * #getter
+       */
+      get transcriptToMsaMap() {
+        return generateMap(new SimpleFeature(self.connectedFeature))
+      },
+
+      /**
+       * #getter
+       */
+      get connectedView() {
+        const { views } = getSession(self)
+        return views.find(f => f.id === self.connectedViewId) as MaybeLGV
+      },
     }))
     .actions(self => ({
       /**
@@ -91,12 +129,7 @@ export default function stateModelFactory() {
       /**
        * #action
        */
-      setBlastParams(args: {
-        blastDatabase: string
-        program: string
-        selectedTranscript: unknown
-        msaAlgorithm: string
-      }) {
+      setBlastParams(args?: BlastParams) {
         self.blastParams = args
       },
     }))
@@ -118,6 +151,9 @@ export default function stateModelFactory() {
       },
     }))
     .views(self => ({
+      /**
+       * #getter
+       */
       get processing() {
         return !!self.progress
       },
@@ -157,7 +193,11 @@ export default function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            const { transcriptToMsaMap, mouseCol, connectedView } = self
+            const { transcriptToMsaMap, msaView, connectedView } = self
+            if (!msaView) {
+              return
+            }
+            const { mouseCol } = msaView
             if (!connectedView?.initialized || mouseCol === undefined) {
               return
             }
@@ -171,22 +211,19 @@ export default function stateModelFactory() {
                 strand,
               } = entry
               const c = mouseCol - 1
-              const k1 = self.relativePxToBp('QUERY', c) || 0
-              const k2 = self.relativePxToBp('QUERY', c + 1) || 0
+              const k1 = msaView.relativePxToBp('QUERY', c) || 0
+              const k2 = msaView.relativePxToBp('QUERY', c + 1) || 0
               if (doesIntersect2(proteinStart, proteinEnd, k1, k2)) {
                 // does not take into account phase, so 'incomplete CDS' might
                 // be buggy
                 const ret = Math.round((k1 - proteinStart) * 3)
+                const rev = strand === -1
                 self.setConnectedHighlights([
                   {
                     assemblyName: 'hg38',
                     refName,
-                    start:
-                      strand === -1 ? featureEnd - ret : featureStart + ret,
-                    end:
-                      strand === -1
-                        ? featureEnd - ret - 3
-                        : featureStart + ret + 3,
+                    start: rev ? featureEnd - ret : featureStart + ret,
+                    end: rev ? featureEnd - ret - 3 : featureStart + ret + 3,
                   },
                 ])
               }
@@ -197,10 +234,10 @@ export default function stateModelFactory() {
         addDisposer(
           self,
           autorun(async () => {
-            self.setError(undefined)
-            self.setProgress('Submitting query')
             if (self.blastParams) {
-              await doLaunchBlast({ self })
+              self.setProgress('Submitting query')
+              await doLaunchBlast({ self: self as JBrowsePluginMsaViewModel })
+              self.setProgress('')
             }
           }),
         )

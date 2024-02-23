@@ -7,7 +7,7 @@ import GridOn from '@mui/icons-material/GridOn'
 
 // locals
 import { version } from '../package.json'
-import MsaViewF from './MsaView'
+import MsaViewF from './JBrowsePluginMsaView'
 import LaunchMsaViewF from './LaunchMsaView'
 import AddHighlightModelF from './AddHighlightModel'
 

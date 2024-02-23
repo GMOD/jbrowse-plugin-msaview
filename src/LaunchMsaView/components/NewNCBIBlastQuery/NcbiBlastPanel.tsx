@@ -1,13 +1,6 @@
 import React, { useState } from 'react'
 import { observer } from 'mobx-react'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  MenuItem,
-  TextField,
-  TextFieldProps,
-} from '@mui/material'
+import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import {
   AbstractTrackModel,
@@ -28,6 +21,7 @@ import { getProteinSequence } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
 import { ErrorMessage } from '@jbrowse/core/ui'
 import TextField2 from '../../../TextField2'
+import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -49,7 +43,7 @@ const NcbiBlastPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
-  const [database, setDatabase] = useState('nr_cluster_seq')
+  const [blastDatabase, setBlastDatabase] = useState('nr_cluster_seq')
   const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
 
   const options = getTranscriptFeatures(feature)
@@ -59,7 +53,7 @@ const NcbiBlastPanel = observer(function ({
     view,
     feature: selectedTranscript,
   })
-  const protein =
+  const proteinSequence =
     sequence && !('error' in sequence)
       ? getProteinSequence({
           seq: sequence.seq,
@@ -67,18 +61,18 @@ const NcbiBlastPanel = observer(function ({
         })
       : ''
 
-  const databaseOptions = ['nr', 'nr_cluster_seq']
+  const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
   const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
   return (
     <DialogContent className={classes.dialogContent}>
       {error ? <ErrorMessage error={error} /> : null}
       <TextField2
-        value={database}
-        onChange={event => setDatabase(event.target.value)}
-        label="BLAST database"
+        value={blastDatabase}
+        onChange={event => setBlastDatabase(event.target.value)}
+        label="BLAST blastDatabase"
         select
       >
-        {databaseOptions.map(val => (
+        {blastDatabaseOptions.map(val => (
           <MenuItem value={val} key={val}>
             {val}
           </MenuItem>
@@ -117,9 +111,9 @@ const NcbiBlastPanel = observer(function ({
         maxRows={10}
         fullWidth
         value={
-          !protein
+          !proteinSequence
             ? 'Loading...'
-            : `>${getTranscriptDisplayName(selectedTranscript)}\n${protein}`
+            : `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
         }
         InputProps={{
           readOnly: true,
@@ -134,9 +128,20 @@ const NcbiBlastPanel = observer(function ({
           color="primary"
           variant="contained"
           onClick={() => {
-            model.setBLAST({ database })
+            const newView = ncbiBlastLaunchView({
+              feature: selectedTranscript,
+              view,
+              newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - ${msaAlgorithm}`,
+            })
+            newView.setBlastParams({
+              blastProgram: 'blastp',
+              blastDatabase,
+              msaAlgorithm,
+              selectedTranscript,
+              proteinSequence,
+            })
           }}
-          disabled={!protein}
+          disabled={!proteinSequence}
         >
           Submit
         </Button>
