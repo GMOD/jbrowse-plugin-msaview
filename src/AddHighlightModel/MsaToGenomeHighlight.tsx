@@ -15,7 +15,11 @@ function getCanonicalName(assembly: Assembly, s: string) {
   return assembly.getCanonicalRefName(s) ?? s
 }
 
-const MsaToGenomeHighlight = observer(function({ model }: { model: LGV }) {
+const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
+  model,
+}: {
+  model: LGV
+}) {
   const { classes } = useStyles()
   const { assemblyManager, views } = getSession(model)
   const p = views.find(f => f.type === 'MsaView') as JBrowsePluginMsaViewModel

@@ -8,7 +8,7 @@ import GenomeMouseoverHighlight from './GenomeMouseoverHighlight'
 
 type LGV = LinearGenomeViewModel
 
-const HighlightComponents = observer(function Highlight({
+const HighlightComponents = observer(function HighlightComponents2({
   model,
 }: {
   model: LGV

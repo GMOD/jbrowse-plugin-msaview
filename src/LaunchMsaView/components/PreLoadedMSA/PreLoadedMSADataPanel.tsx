@@ -33,7 +33,7 @@ const useStyles = makeStyles()({
   },
 })
 
-const PreLoadedMSA = observer(function ({
+const PreLoadedMSA = observer(function PreLoadedMSA2({
   model,
   feature,
   handleClose,

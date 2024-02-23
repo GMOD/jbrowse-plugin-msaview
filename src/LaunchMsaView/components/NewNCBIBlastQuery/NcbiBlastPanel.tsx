@@ -7,7 +7,7 @@ import {
   Feature,
   getContainingView,
 } from '@jbrowse/core/util'
-
+import { ErrorMessage } from '@jbrowse/core/ui'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
@@ -19,7 +19,6 @@ import {
 } from '../../util'
 import { getProteinSequence } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
-import { ErrorMessage } from '@jbrowse/core/ui'
 import TextField2 from '../../../TextField2'
 import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 
@@ -32,7 +31,7 @@ const useStyles = makeStyles()({
   },
 })
 
-const NcbiBlastPanel = observer(function ({
+const NcbiBlastPanel = observer(function NcbiBlastPanel2({
   handleClose,
   feature,
   model,
@@ -43,7 +42,7 @@ const NcbiBlastPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
-  const [blastDatabase, setBlastDatabase] = useState('nr_cluster_seq')
+  const [blastDatabase, setBlastDatabase] = useState('nr')
   const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
 
   const options = getTranscriptFeatures(feature)

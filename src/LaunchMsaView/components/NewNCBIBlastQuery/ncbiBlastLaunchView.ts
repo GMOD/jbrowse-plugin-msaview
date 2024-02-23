@@ -1,5 +1,6 @@
 import { Feature, getSession } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+// locals
 import { JBrowsePluginMsaViewModel } from '../../../JBrowsePluginMsaView/model'
 
 export function ncbiBlastLaunchView({
@@ -16,15 +17,12 @@ export function ncbiBlastLaunchView({
     displayName: newViewTitle,
     connectedViewId: view.id,
     connectedFeature: feature.toJSON(),
+    treeAreaWidth: 250,
+    treeWidth: 100,
+    drawNodeBubbles: true,
+    labelsAlignRight: true,
+    colWidth: 10,
+    rowHeight: 12,
+    colorSchemeName: 'percent_identity_dynamic',
   }) as JBrowsePluginMsaViewModel
 }
-
-// treeAreaWidth: 200,
-//   treeWidth: 100,
-//   drawNodeBubbles: true,
-//   labelsAlignRight: true,
-//   showBranchLen: false,
-//   colWidth: 10,
-//   rowHeight: 12,
-//   colorSchemeName: 'percent_identity_dynamic',
-//   data,

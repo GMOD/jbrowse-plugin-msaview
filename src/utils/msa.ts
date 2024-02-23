@@ -1,4 +1,4 @@
-import { textfetch, timeout } from '../../fetchUtils'
+import { textfetch, timeout } from './fetch'
 
 const base = `https://www.ebi.ac.uk/Tools/services/rest`
 

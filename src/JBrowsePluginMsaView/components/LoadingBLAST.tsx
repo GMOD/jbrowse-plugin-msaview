@@ -1,6 +1,6 @@
 import React from 'react'
 import { JBrowsePluginMsaViewModel } from '../model'
-import { Paper, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
@@ -8,11 +8,14 @@ import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 // locals
 import RIDLink from './RIDLink'
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()(theme => ({
   margin: {
-    margin: 20,
+    padding: 20,
   },
-})
+  loading: {
+    background: theme.palette.background.paper,
+  },
+}))
 
 function RIDError({ rid, error }: { rid?: string; error: unknown }) {
   return (
@@ -24,14 +27,16 @@ function RIDError({ rid, error }: { rid?: string; error: unknown }) {
 }
 
 function RIDProgress({ rid, progress }: { rid: string; progress: string }) {
+  const { classes } = useStyles()
   return (
-    <Typography>
+    <div className={classes.loading}>
       {rid ? <RIDLink rid={rid} /> : null}
-      {progress}
-    </Typography>
+      <Typography>{progress}</Typography>
+    </div>
   )
 }
-const LoadingBLAST = observer(function ({
+
+const LoadingBLAST = observer(function LoadingBLAST2({
   model,
 }: {
   model: JBrowsePluginMsaViewModel
@@ -39,15 +44,15 @@ const LoadingBLAST = observer(function ({
   const { progress, rid, error, processing } = model
   const { classes } = useStyles()
   return (
-    <Paper className={classes.margin}>
-      <LoadingEllipses variant="h5">Running NCBI BLAST</LoadingEllipses>
+    <div className={classes.margin}>
+      <LoadingEllipses message="Running NCBI BLAST" variant="h5" />
       {error ? (
         <RIDError rid={rid} error={error} />
       ) : rid ? (
         <RIDProgress rid={rid} progress={progress} />
       ) : null}
       <Typography>{processing || 'Initializing BLAST query'}</Typography>
-    </Paper>
+    </div>
   )
 })
 

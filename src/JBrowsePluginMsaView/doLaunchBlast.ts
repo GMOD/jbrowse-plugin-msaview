@@ -1,5 +1,5 @@
-import { launchMSA } from '../LaunchMsaView/components/NewNCBIBlastQuery/msaUtils'
-import { queryBlast } from '../LaunchMsaView/components/NewNCBIBlastQuery/ncbiBlastUtils'
+import { launchMSA } from '../utils/msa'
+import { queryBlast } from '../utils/ncbiBlast'
 import {
   makeId,
   strip,

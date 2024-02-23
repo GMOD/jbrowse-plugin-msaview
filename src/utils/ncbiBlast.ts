@@ -1,4 +1,4 @@
-import { jsonfetch, textfetch, timeout } from '../../fetchUtils'
+import { jsonfetch, textfetch, timeout } from './fetch'
 
 export const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
 

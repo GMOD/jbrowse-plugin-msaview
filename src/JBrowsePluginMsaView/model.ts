@@ -53,11 +53,14 @@ export default function stateModelFactory() {
          * #property
          */
         connectedHighlights: types.array(Region),
+        /**
+         * #property
+         */
+        blastParams: types.frozen<BlastParams | undefined>(),
       }),
     )
 
     .volatile(() => ({
-      blastParams: undefined as BlastParams | undefined,
       rid: undefined as string | undefined,
       progress: '',
       error: undefined as unknown,

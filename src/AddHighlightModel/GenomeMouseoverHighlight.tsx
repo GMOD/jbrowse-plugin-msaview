@@ -4,7 +4,7 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { getSession } from '@jbrowse/core/util'
 import { useStyles } from './util'
 
-const GenomeMouseoverHighlight = observer(function ({
+const GenomeMouseoverHighlight = observer(function GenomeMouseoverHighlight2({
   model,
 }: {
   model: LinearGenomeViewModel
@@ -17,7 +17,7 @@ const GenomeMouseoverHighlight = observer(function ({
   ) : null
 })
 
-const HoverHighlight = observer(function ({
+const HoverHighlight = observer(function HoverHighlight2({
   model,
 }: {
   model: LinearGenomeViewModel

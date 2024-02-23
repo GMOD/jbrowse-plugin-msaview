@@ -1,17 +1,17 @@
 import React from 'react'
-import { Link } from '@mui/material'
+import { Link, Typography } from '@mui/material'
 // locals
-import OpenInNewIcon from '../../LaunchMsaView/components/NewNCBIBlastQuery/OpenInNewIcon'
-import { BLAST_URL } from '../../LaunchMsaView/components/NewNCBIBlastQuery/ncbiBlastUtils'
+import OpenInNewIcon from '../../OpenInNewIcon'
+import { BLAST_URL } from '../../utils/ncbiBlast'
 
 function RIDLink({ rid }: { rid: string }) {
   return (
-    <>
+    <Typography>
       RID {rid}{' '}
       <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
         (see status at NCBI <OpenInNewIcon />)
       </Link>
-    </>
+    </Typography>
   )
 }
 
