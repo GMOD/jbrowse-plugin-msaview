@@ -6,7 +6,7 @@ import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { Assembly } from '@jbrowse/core/assemblyManager/assembly'
 
 // locals
-import { JBrowsePluginMsaViewModel } from '../JBrowsePluginMsaView/model'
+import { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 import { useStyles } from './util'
 
 type LGV = LinearGenomeViewModel

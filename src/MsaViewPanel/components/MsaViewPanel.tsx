@@ -6,7 +6,7 @@ import { MSAView } from 'react-msaview'
 import { JBrowsePluginMsaViewModel } from '../model'
 import LoadingBLAST from './LoadingBLAST'
 
-const JBrowsePluginMsaViewPanel = observer(function JBrowsePluginMsaViewPanel2({
+const MsaViewPanel = observer(function MsaViewPanel2({
   model,
 }: {
   model: JBrowsePluginMsaViewModel
@@ -19,4 +19,4 @@ const JBrowsePluginMsaViewPanel = observer(function JBrowsePluginMsaViewPanel2({
   )
 })
 
-export default JBrowsePluginMsaViewPanel
+export default MsaViewPanel

@@ -2,7 +2,12 @@ import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { MSAModel } from 'react-msaview'
 import { Region } from '@jbrowse/core/util/types/mst'
-import { Feature, SimpleFeature, getSession } from '@jbrowse/core/util'
+import {
+  Feature,
+  SimpleFeature,
+  getSession,
+  notEmpty,
+} from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 
@@ -10,7 +15,7 @@ import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { doLaunchBlast } from './doLaunchBlast'
 import { generateMap } from './util'
 import { genomeToMSA } from './genomeToMSA'
-import { msaHoverToGenomeHighlight } from './msaHoverToGenomeHighlight'
+import { msaCoordToGenomePosition } from './msaCoordToGenomePosition'
 
 type LGV = LinearGenomeViewModel
 
@@ -210,7 +215,25 @@ export default function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            msaHoverToGenomeHighlight({ model: self })
+            const r1 =
+              self.mouseCol !== undefined
+                ? msaCoordToGenomePosition({
+                    model: self,
+                    coord: self.mouseCol,
+                  })
+                : undefined
+            const r2 =
+              self.mouseClickCol !== undefined
+                ? msaCoordToGenomePosition({
+                    model: self,
+                    coord: self.mouseClickCol,
+                  })
+                : undefined
+            self.setConnectedHighlights([r1, r2].filter(notEmpty))
+
+            if (r2) {
+              self.connectedView?.navTo(r2)
+            }
           }),
         )
       },

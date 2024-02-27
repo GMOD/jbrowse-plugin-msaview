@@ -3,12 +3,14 @@ import { doesIntersect2 } from '@jbrowse/core/util'
 // locals
 import { JBrowsePluginMsaViewModel } from './model'
 
-export function msaHoverToGenomeHighlight({
+export function msaCoordToGenomePosition({
   model,
+  coord: mouseCol,
 }: {
   model: JBrowsePluginMsaViewModel
+  coord: number
 }) {
-  const { mouseCol, transcriptToMsaMap, connectedView } = model
+  const { transcriptToMsaMap, connectedView } = model
   if (
     !connectedView?.initialized ||
     mouseCol === undefined ||
@@ -33,14 +35,15 @@ export function msaHoverToGenomeHighlight({
       // be buggy
       const ret = Math.round((k1 - proteinStart) * 3)
       const rev = strand === -1
-      model.setConnectedHighlights([
-        {
-          assemblyName: 'hg38',
-          refName,
-          start: rev ? featureEnd - ret : featureStart + ret,
-          end: rev ? featureEnd - ret - 3 : featureStart + ret + 3,
-        },
-      ])
+      const s = rev ? featureEnd - ret : featureStart + ret
+      const e = rev ? featureEnd - ret - 3 : featureStart + ret + 3
+      return {
+        assemblyName: 'hg38',
+        refName,
+        start: Math.min(s, e),
+        end: Math.max(s, e),
+      }
     }
   }
+  return undefined
 }

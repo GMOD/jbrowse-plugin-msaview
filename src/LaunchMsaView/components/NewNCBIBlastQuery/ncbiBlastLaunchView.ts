@@ -1,7 +1,7 @@
 import { Feature, getSession } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 // locals
-import { JBrowsePluginMsaViewModel } from '../../../JBrowsePluginMsaView/model'
+import { JBrowsePluginMsaViewModel } from '../../../MsaViewPanel/model'
 
 export function ncbiBlastLaunchView({
   newViewTitle,

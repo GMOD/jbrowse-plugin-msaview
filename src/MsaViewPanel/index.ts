@@ -6,16 +6,14 @@ import ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
 import stateModelFactory from './model'
 
 // lazies
-const JBrowsePluginMsaViewPanel = lazy(
-  () => import('./components/JBrowsePluginMsaViewPanel'),
-)
+const MsaViewPanel = lazy(() => import('./components/MsaViewPanel'))
 
 export default function MsaViewF(pluginManager: PluginManager) {
   pluginManager.addViewType(() => {
     return new ViewType({
       name: 'MsaView',
       stateModel: stateModelFactory(),
-      ReactComponent: JBrowsePluginMsaViewPanel,
+      ReactComponent: MsaViewPanel,
     })
   })
 }
