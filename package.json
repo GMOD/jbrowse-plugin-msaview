@@ -26,8 +26,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "start": "node esbuild.mjs",
+    "build": "tsc && NODE_ENV=production node esbuild.mjs",
     "prebuild": "npm run clean",
-    "build": "rollup --config --bundleConfigAsCjs",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0 --ext .js,.ts,.jsx,.tsx src/",
     "prepack": "npm run build",
     "postversion": "git push --follow-tags"
@@ -40,12 +40,9 @@
     "react-msaview": "^3.0.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.0",
-    "@babel/preset-react": "^7.22.15",
     "@emotion/react": "^11.10.4",
     "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
     "@jbrowse/core": "^2.10.1",
-    "@jbrowse/development-tools": "^2.1.1",
     "@jbrowse/plugin-linear-genome-view": "^2.7.0",
     "@mui/icons-material": "^5.15.6",
     "@mui/material": "^5.14.12",
@@ -56,7 +53,6 @@
     "@types/react": "^18.2.28",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
-    "chalk": "^5.3.0",
     "esbuild": "^0.20.0",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.1.0",
@@ -72,8 +68,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rimraf": "^5.0.5",
-    "rollup": "^4.9.5",
     "rxjs": "^7.8.1",
+    "ts-node": "^10.9.2",
     "tss-react": "^4.9.2",
     "typescript": "^5.2.2"
   },
