@@ -27,7 +27,7 @@
     "clean": "rimraf dist",
     "start": "node esbuild.mjs",
     "prebuild": "npm run clean",
-    "build": "rollup --config --bundleConfigAsCjs",
+    "build": "rollup -c rollup.config.js",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0 --ext .js,.ts,.jsx,.tsx src/",
     "prepack": "npm run build",
     "postversion": "git push --follow-tags"
@@ -36,8 +36,12 @@
     "name": "MsaView"
   },
   "dependencies": {
+    "@rollup/plugin-typescript": "^11.1.6",
     "pako": "^2.1.0",
-    "react-msaview": "^3.0.3"
+    "react-msaview": "^3.0.3",
+    "rollup-plugin-external-globals": "^0.9.2",
+    "rollup-plugin-polyfill-node": "^0.13.0",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
@@ -56,7 +60,6 @@
     "@types/react": "^18.2.28",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
-    "chalk": "^5.3.0",
     "esbuild": "^0.20.0",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.1.0",
@@ -74,6 +77,7 @@
     "rimraf": "^5.0.5",
     "rollup": "^4.9.5",
     "rxjs": "^7.8.1",
+    "ts-node": "^10.9.2",
     "tss-react": "^4.9.2",
     "typescript": "^5.2.2"
   },
