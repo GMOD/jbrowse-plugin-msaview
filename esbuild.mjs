@@ -18,8 +18,9 @@ if (process.env.NODE_ENV === 'production') {
   await esbuild.build({
     entryPoints: ['src/index.ts'],
     bundle: true,
-    globalName: 'JBrowsePluginProtein3d',
+    globalName: 'JBrowsePluginMsaView',
     outfile: 'dist/jbrowse-plugin-msaview.umd.production.min.js',
+    sourcemap: true,
     metafile: true,
     minify: true,
     plugins: [
@@ -54,7 +55,7 @@ if (process.env.NODE_ENV === 'production') {
   let ctx = await esbuild.context({
     entryPoints: ['src/index.ts'],
     bundle: true,
-    globalName: 'JBrowsePluginProtein3d',
+    globalName: 'JBrowsePluginMsaView',
     outfile: 'dist/out.js',
     metafile: true,
     plugins: [
@@ -87,7 +88,7 @@ if (process.env.NODE_ENV === 'production') {
   })
   let { host, port } = await ctx.serve({
     servedir: '.',
-    port: 9001,
+    port: 9000,
     host: 'localhost',
   })
   const formattedHost = host === '127.0.0.1' ? 'localhost' : host
