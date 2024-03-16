@@ -1,6 +1,6 @@
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
-import { MSAModel } from 'react-msaview'
+import { MSAModelF } from 'react-msaview'
 import { Region } from '@jbrowse/core/util/types/mst'
 import {
   Feature,
@@ -15,7 +15,7 @@ import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { doLaunchBlast } from './doLaunchBlast'
 import { generateMap } from './util'
 import { genomeToMSA } from './genomeToMSA'
-import { msaCoordToGenomePosition } from './msaCoordToGenomePosition'
+import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 
 type LGV = LinearGenomeViewModel
 
@@ -44,7 +44,7 @@ export default function stateModelFactory() {
   return types
     .compose(
       BaseViewModel,
-      MSAModel,
+      MSAModelF(),
       types.model('MsaView', {
         /**
          * #property
@@ -62,6 +62,11 @@ export default function stateModelFactory() {
          * #property
          */
         blastParams: types.frozen<BlastParams | undefined>(),
+
+        /**
+         * #property
+         */
+        zoomToBaseLevel: false,
       }),
     )
 
@@ -75,7 +80,7 @@ export default function stateModelFactory() {
       /**
        * #method
        */
-      ungappedPositionMap(rowName: string, position: number) {
+      ungappedCoordMap(rowName: string, position: number) {
         const row = self.rows.find(f => f[0] === rowName)
         const seq = row?.[1]
         if (seq && position < seq.length) {
@@ -136,6 +141,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setZoomToBaseLevel(arg: boolean) {
+        self.zoomToBaseLevel = arg
+      },
+      /**
+       * #action
+       */
       setError(e: unknown) {
         self.error = e
       },
@@ -179,6 +190,20 @@ export default function stateModelFactory() {
 
     .views(self => ({
       /**
+       * #method
+       * overrides base
+       */
+      extraViewMenuItems() {
+        return [
+          {
+            label: 'Zoom to base level on click?',
+            checked: self.zoomToBaseLevel,
+            type: 'checkbox',
+            onClick: () => self.setZoomToBaseLevel(!self.zoomToBaseLevel),
+          },
+        ]
+      },
+      /**
        * #getter
        */
       get processing() {
@@ -215,24 +240,43 @@ export default function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
+            const { mouseCol, mouseClickCol } = self
             const r1 =
-              self.mouseCol !== undefined
-                ? msaCoordToGenomePosition({
-                    model: self,
-                    coord: self.mouseCol,
-                  })
+              mouseCol !== undefined
+                ? msaCoordToGenomeCoord({ model: self, coord: mouseCol })
                 : undefined
             const r2 =
-              self.mouseClickCol !== undefined
-                ? msaCoordToGenomePosition({
-                    model: self,
-                    coord: self.mouseClickCol,
-                  })
+              mouseClickCol !== undefined
+                ? msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
                 : undefined
             self.setConnectedHighlights([r1, r2].filter(notEmpty))
+          }),
+        )
 
-            if (r2) {
-              self.connectedView?.navTo(r2)
+        // nav to genome position after click
+        addDisposer(
+          self,
+          autorun(() => {
+            const { connectedView, zoomToBaseLevel, mouseClickCol } = self
+            const { assemblyManager } = getSession(self)
+            const r2 =
+              mouseClickCol !== undefined
+                ? msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
+                : undefined
+
+            if (!r2 || !connectedView) {
+              return
+            }
+
+            if (zoomToBaseLevel) {
+              connectedView.navTo(r2)
+            } else {
+              const r =
+                assemblyManager
+                  .get(connectedView.assemblyNames[0])
+                  ?.getCanonicalRefName(r2.refName) ?? r2.refName
+              // @ts-expect-error
+              connectedView.centerAt(r2.start, r)
             }
           }),
         )

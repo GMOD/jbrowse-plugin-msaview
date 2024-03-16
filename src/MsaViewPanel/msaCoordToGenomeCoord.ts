@@ -3,7 +3,7 @@ import { doesIntersect2 } from '@jbrowse/core/util'
 // locals
 import { JBrowsePluginMsaViewModel } from './model'
 
-export function msaCoordToGenomePosition({
+export function msaCoordToGenomeCoord({
   model,
   coord: mouseCol,
 }: {
@@ -28,8 +28,8 @@ export function msaCoordToGenomePosition({
       strand,
     } = entry
     const c = mouseCol - 1
-    const k1 = model.relativePxToBp('QUERY', c) || 0
-    const k2 = model.relativePxToBp('QUERY', c + 1) || 0
+    const k1 = model.seqCoordToRowSpecificGlobalCoord('QUERY', c) || 0
+    const k2 = model.seqCoordToRowSpecificGlobalCoord('QUERY', c + 1) || 0
     if (doesIntersect2(proteinStart, proteinEnd, k1, k2)) {
       // does not take into account phase, so 'incomplete CDS' might
       // be buggy

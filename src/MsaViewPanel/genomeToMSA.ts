@@ -17,7 +17,7 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
         refName === hoverRef &&
         isContainedWithin(hoverCoord - 1, hoverCoord, featureStart, featureEnd)
       ) {
-        return model.relativePxToBp2(
+        return model.seqCoordToRowSpecificGlobalCoord(
           'QUERY',
           Math.floor(
             proteinStart +
