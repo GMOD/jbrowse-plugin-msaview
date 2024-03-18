@@ -1,32 +1,26 @@
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
-import { Region } from '@jbrowse/core/util/types/mst'
-import {
-  Feature,
-  SimpleFeature,
-  getSession,
-  notEmpty,
-} from '@jbrowse/core/util'
+import { Feature, getSession, notEmpty } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 
 // locals
 import { doLaunchBlast } from './doLaunchBlast'
-import { generateMap } from './util'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
+import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 
 type LGV = LinearGenomeViewModel
 
 type MaybeLGV = LGV | undefined
 
 export interface IRegion {
-  assemblyName: string
   refName: string
   start: number
   end: number
 }
+
 export interface BlastParams {
   blastDatabase: string
   msaAlgorithm: string
@@ -57,7 +51,13 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        connectedHighlights: types.array(Region),
+        connectedHighlights: types.array(
+          types.model({
+            refName: types.string,
+            start: types.number,
+            end: types.number,
+          }),
+        ),
         /**
          * #property
          */
@@ -101,8 +101,9 @@ export default function stateModelFactory() {
        * #getter
        */
       get transcriptToMsaMap() {
+        console.log(self.connectedFeature)
         return self.connectedFeature
-          ? generateMap(new SimpleFeature(self.connectedFeature))
+          ? genomeToTranscriptSeqMapping(self.connectedFeature)
           : undefined
       },
     }))

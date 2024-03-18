@@ -36,6 +36,7 @@
     "name": "MsaView"
   },
   "dependencies": {
+    "g2p_mapper": "^1.0.4",
     "pako": "^2.1.0",
     "react-msaview": "^3.0.3"
   },

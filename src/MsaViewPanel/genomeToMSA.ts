@@ -1,4 +1,4 @@
-import { getSession, isContainedWithin } from '@jbrowse/core/util'
+import { getSession } from '@jbrowse/core/util'
 import { checkHovered } from './util'
 import { JBrowsePluginMsaViewModel } from './model'
 
@@ -10,24 +10,11 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
     transcriptToMsaMap &&
     checkHovered(hovered)
   ) {
-    const { coord: hoverCoord, refName: hoverRef } = hovered.hoverPosition
-    for (const entry of transcriptToMsaMap) {
-      const { featureStart, featureEnd, refName, proteinStart, strand } = entry
-      if (
-        refName === hoverRef &&
-        isContainedWithin(hoverCoord - 1, hoverCoord, featureStart, featureEnd)
-      ) {
-        return model.seqCoordToRowSpecificGlobalCoord(
-          'QUERY',
-          Math.floor(
-            proteinStart +
-              (strand === -1
-                ? featureEnd - hoverCoord
-                : hoverCoord - featureStart) /
-                3,
-          ) + 1,
-        )
-      }
+    const { coord: hoverCoord } = hovered.hoverPosition
+    const { g2p } = transcriptToMsaMap
+    const ret = g2p[hoverCoord]
+    if (ret !== undefined) {
+      return model.seqCoordToRowSpecificGlobalCoord('QUERY', ret + 1)
     }
   }
   return undefined
