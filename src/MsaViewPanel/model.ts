@@ -276,7 +276,6 @@ export default function stateModelFactory() {
                 assemblyManager
                   .get(connectedView.assemblyNames[0])
                   ?.getCanonicalRefName(r2.refName) ?? r2.refName
-              // @ts-expect-error
               connectedView.centerAt(r2.start, r)
             }
           }),
