@@ -29,7 +29,7 @@
     "start": "node esbuild.mjs",
     "build": "tsc && NODE_ENV=production node esbuild.mjs",
     "prebuild": "npm run clean",
-    "lint": "eslint --report-unused-disable-directives --max-warnings 0 --ext .js,.ts,.jsx,.tsx src/",
+    "lint": "eslint --report-unused-disable-directives --max-warnings 0 src/",
     "prepack": "npm run build",
     "postversion": "git push --follow-tags"
   },
@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@emotion/react": "^11.10.4",
+    "@eslint/compat": "^1.1.0",
     "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
     "@jbrowse/core": "^2.10.1",
     "@jbrowse/plugin-linear-genome-view": "^2.7.0",
@@ -56,7 +57,7 @@
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
     "esbuild": "^0.21.4",
-    "eslint": "^8.51.0",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.0",
     "eslint-plugin-react": "^7.20.3",
