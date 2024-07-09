@@ -110,9 +110,9 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
         maxRows={10}
         fullWidth
         value={
-          !proteinSequence
-            ? 'Loading...'
-            : `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
+          proteinSequence
+            ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
+            : 'Loading...'
         }
         InputProps={{
           readOnly: true,

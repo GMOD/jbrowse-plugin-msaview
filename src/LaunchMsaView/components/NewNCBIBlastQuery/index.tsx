@@ -1,2 +1,1 @@
-import NcbiBlastPanel from './NcbiBlastPanel'
-export default NcbiBlastPanel
+export { default } from './NcbiBlastPanel'

@@ -121,15 +121,21 @@ export async function launchMSA({
   onProgress: (arg: string) => void
 }) {
   onProgress(`Launching ${algorithm} MSA...`)
-  if (algorithm === 'clustalo') {
-    return runClustalOmega({ sequence, onProgress })
-  } else if (algorithm === 'muscle') {
-    return runMuscle({ sequence, onProgress })
-  } else if (algorithm === 'kalign') {
-    return runKalign({ sequence, onProgress })
-  } else if (algorithm === 'mafft') {
-    return runMafft({ sequence, onProgress })
-  } else {
-    throw new Error('unknown algorithm')
+  switch (algorithm) {
+    case 'clustalo': {
+      return runClustalOmega({ sequence, onProgress })
+    }
+    case 'muscle': {
+      return runMuscle({ sequence, onProgress })
+    }
+    case 'kalign': {
+      return runKalign({ sequence, onProgress })
+    }
+    case 'mafft': {
+      return runMafft({ sequence, onProgress })
+    }
+    default: {
+      throw new Error('unknown algorithm')
+    }
   }
 }

@@ -23,6 +23,7 @@ import {
   getTranscriptDisplayName,
   getId,
   getTranscriptFeatures,
+  getGeneDisplayName,
 } from '../../util'
 import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
@@ -120,7 +121,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                 await preCalculatedLaunchView({
                   userSelection,
                   session,
-                  newViewTitle: '',
+                  newViewTitle: getGeneDisplayName(ret),
                   view,
                   feature: ret,
                 })

@@ -1,7 +1,7 @@
 import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
-import { Feature, getSession, notEmpty } from '@jbrowse/core/util'
+import { Feature, getSession } from '@jbrowse/core/util'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 
@@ -101,7 +101,6 @@ export default function stateModelFactory() {
        * #getter
        */
       get transcriptToMsaMap() {
-        console.log(self.connectedFeature)
         return self.connectedFeature
           ? genomeToTranscriptSeqMapping(self.connectedFeature)
           : undefined
@@ -250,14 +249,14 @@ export default function stateModelFactory() {
           autorun(() => {
             const { mouseCol, mouseClickCol } = self
             const r1 =
-              mouseCol !== undefined
-                ? msaCoordToGenomeCoord({ model: self, coord: mouseCol })
-                : undefined
+              mouseCol === undefined
+                ? undefined
+                : msaCoordToGenomeCoord({ model: self, coord: mouseCol })
             const r2 =
-              mouseClickCol !== undefined
-                ? msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
-                : undefined
-            self.setConnectedHighlights([r1, r2].filter(notEmpty))
+              mouseClickCol === undefined
+                ? undefined
+                : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
+            self.setConnectedHighlights([r1, r2].filter(f => !!f))
           }),
         )
 
@@ -268,9 +267,9 @@ export default function stateModelFactory() {
             const { connectedView, zoomToBaseLevel, mouseClickCol } = self
             const { assemblyManager } = getSession(self)
             const r2 =
-              mouseClickCol !== undefined
-                ? msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
-                : undefined
+              mouseClickCol === undefined
+                ? undefined
+                : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
 
             if (!r2 || !connectedView) {
               return

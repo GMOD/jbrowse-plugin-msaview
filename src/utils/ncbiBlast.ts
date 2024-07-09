@@ -88,14 +88,14 @@ async function waitForRid({
     const res = await textfetch(
       `${BLAST_URL}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
     )
-    if (res.match(/\s+Status=WAITING/m)) {
+    if (/\s+Status=WAITING/m.test(res)) {
       continue
-    } else if (res.match(/\s+Status=FAILED/m)) {
+    } else if (/\s+Status=FAILED/m.test(res)) {
       throw new Error(
         `BLAST ${rid} failed; please report to blast-help@ncbi.nlm.nih.gov`,
       )
-    } else if (res.match(/\s+Status=READY/m)) {
-      if (res.match(/\s+ThereAreHits=yes/m)) {
+    } else if (/\s+Status=READY/m.test(res)) {
+      if (/\s+ThereAreHits=yes/m.test(res)) {
         return true
       } else {
         throw new Error('No hits found')

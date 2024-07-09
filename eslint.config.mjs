@@ -25,6 +25,7 @@ export default [
       'plugin:@typescript-eslint/stylistic-type-checked',
       'plugin:react/recommended',
       'plugin:react-hooks/recommended',
+      'plugin:unicorn/recommended',
     ),
   ),
   {
@@ -50,6 +51,13 @@ export default [
     },
 
     rules: {
+      'unicorn/prevent-abbreviations': 'off',
+      'unicorn/no-null': 'off',
+      'unicorn/filename-case': 'off',
+      'unicorn/no-useless-undefined': 'off',
+      'unicorn/catch-error-name': 'off',
+      'unicorn/no-nested-ternary': 'off',
+      'unicorn/better-regex': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -59,7 +67,12 @@ export default [
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/require-await': 'off',
-
+      'no-console': [
+        'warn',
+        {
+          allow: ['error', 'warn'],
+        },
+      ],
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
