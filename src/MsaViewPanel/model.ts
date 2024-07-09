@@ -226,13 +226,20 @@ export default function stateModelFactory() {
           self,
           autorun(async () => {
             if (self.blastParams) {
-              self.setProgress('Submitting query')
-              const data = await doLaunchBlast({
-                self: self as JBrowsePluginMsaViewModel,
-              })
-              self.setData(data)
-              self.setBlastParams(undefined)
-              self.setProgress('')
+              try {
+                self.setProgress('Submitting query')
+                const data = await doLaunchBlast({
+                  self: self as JBrowsePluginMsaViewModel,
+                })
+                self.setData(data)
+                self.setBlastParams(undefined)
+                self.setProgress('')
+              } catch (e) {
+                self.setError(e)
+                console.error(e)
+              } finally {
+                self.setProgress('')
+              }
             }
           }),
         )
