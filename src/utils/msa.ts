@@ -67,6 +67,28 @@ async function runKalign({
     tree: await textfetch(`${base}/kalign/result/${jobId}/phylotree`),
   }
 }
+
+async function runMafft({
+  sequence,
+  onProgress,
+}: {
+  sequence: string
+  onProgress: (arg: string) => void
+}) {
+  const jobId = await textfetch(`${base}/mafft/run`, {
+    method: 'POST',
+    body: new URLSearchParams({
+      email: 'colin.diesh@gmail.com',
+      stype: 'protein',
+      sequence,
+    }),
+  })
+  await wait({ jobId, algorithm: 'mafft', onProgress })
+  return {
+    msa: await textfetch(`${base}/mafft/result/${jobId}/fa`),
+    tree: await textfetch(`${base}/mafft/result/${jobId}/phylotree`),
+  }
+}
 async function wait({
   onProgress,
   jobId,
@@ -105,6 +127,8 @@ export async function launchMSA({
     return runMuscle({ sequence, onProgress })
   } else if (algorithm === 'kalign') {
     return runKalign({ sequence, onProgress })
+  } else if (algorithm === 'mafft') {
+    return runMafft({ sequence, onProgress })
   } else {
     throw new Error('unknown algorithm')
   }
