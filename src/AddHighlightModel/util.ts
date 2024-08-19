@@ -6,7 +6,7 @@ export const useStyles = makeStyles()({
     background: 'rgba(255,255,0,0.2)',
     border: '1px solid rgba(50,50,0,0.2)',
     position: 'absolute',
-    zIndex: 1000,
+    zIndex: 99,
     textAlign: 'center',
     pointerEvents: 'none',
     overflow: 'hidden',

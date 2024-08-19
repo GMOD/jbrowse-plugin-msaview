@@ -4,11 +4,10 @@ import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
 import eslintPluginReactRefresh from 'eslint-plugin-react-refresh'
 import eslintPluginUnicorn from 'eslint-plugin-unicorn'
 import tseslint from 'typescript-eslint'
-import globals from 'globals'
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**/*'],
+    ignores: ['**/dist/**/*', 'esbuild.mjs', 'eslint.config.mjs', 'ucsc/*'],
   },
   {
     languageOptions: {
@@ -63,6 +62,11 @@ export default tseslint.config(
         },
       ],
 
+      'unicorn/no-null': 'off',
+
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',

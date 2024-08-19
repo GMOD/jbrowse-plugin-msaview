@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Feature, getSession } from '@jbrowse/core/util'
+import { AbstractSessionModel, Feature, getSession } from '@jbrowse/core/util'
 import { getConf } from '@jbrowse/core/configuration'
 
 export interface SeqState {
@@ -13,6 +13,40 @@ export interface ErrorState {
   error: string
 }
 const BPLIMIT = 500_000
+
+async function fetchSeq({
+  start,
+  end,
+  refName,
+  session,
+  assemblyName,
+}: {
+  start: number
+  end: number
+  refName: string
+  assemblyName: string
+  session: AbstractSessionModel
+}) {
+  const { assemblyManager, rpcManager } = session
+  const assembly = await assemblyManager.waitForAssembly(assemblyName)
+  if (!assembly) {
+    throw new Error('assembly not found')
+  }
+  const sessionId = 'getSequence'
+  const feats = (await rpcManager.call(sessionId, 'CoreGetFeatures', {
+    adapterConfig: getConf(assembly, ['sequence', 'adapter']),
+    sessionId,
+    regions: [
+      {
+        start,
+        end,
+        refName: assembly.getCanonicalRefName(refName),
+        assemblyName,
+      },
+    ],
+  })) as Feature[]
+  return (feats[0]?.get('seq') as string | undefined) ?? ''
+}
 
 export function useFeatureSequence({
   view,
@@ -27,43 +61,23 @@ export function useFeatureSequence({
 }) {
   const [sequence, setSequence] = useState<SeqState | ErrorState>()
   const [error, setError] = useState<unknown>()
+  const assemblyName = view?.assemblyNames?.[0]
   useEffect(() => {
     if (view) {
-      const { assemblyManager, rpcManager } = getSession(view)
-      const assemblyName = view.assemblyNames?.[0]
-      async function fetchSeq(start: number, end: number, refName: string) {
-        const assembly = assemblyName
-          ? await assemblyManager.waitForAssembly(assemblyName)
-          : undefined
-        if (!assembly) {
-          throw new Error('assembly not found')
-        }
-        const sessionId = 'getSequence'
-        const feats = await rpcManager.call(sessionId, 'CoreGetFeatures', {
-          adapterConfig: getConf(assembly, ['sequence', 'adapter']),
-          sessionId,
-          regions: [
-            {
-              start,
-              end,
-              refName: assembly.getCanonicalRefName(refName),
-              assemblyName,
-            },
-          ],
-        })
-
-        const [feat] = feats as Feature[]
-        return (feat?.get('seq') as string | undefined) || ''
-      }
-
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       ;(async () => {
         try {
           setError(undefined)
           setSequence(undefined)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { start, end, refName } = feature.toJSON() as any
-
+          const session = getSession(view)
+          const { start, end, refName } = feature.toJSON() as {
+            start: number
+            end: number
+            refName: string
+          }
+          if (!assemblyName) {
+            throw new Error('No assembly found')
+          }
           if (!forceLoad && end - start > BPLIMIT) {
             setSequence({
               error: `Genomic sequence larger than ${BPLIMIT}bp, use "force load" button to display`,
@@ -71,10 +85,29 @@ export function useFeatureSequence({
           } else {
             const b = start - upDownBp
             const e = end + upDownBp
-            const seq = await fetchSeq(start, end, refName)
-            const up = await fetchSeq(Math.max(0, b), start, refName)
-            const down = await fetchSeq(end, e, refName)
-            setSequence({ seq, upstream: up, downstream: down })
+            setSequence({
+              seq: await fetchSeq({
+                start,
+                end,
+                refName,
+                assemblyName,
+                session,
+              }),
+              upstream: await fetchSeq({
+                start: Math.max(0, b),
+                end: start,
+                refName,
+                assemblyName,
+                session,
+              }),
+              downstream: await fetchSeq({
+                start: end,
+                end: e,
+                refName,
+                assemblyName,
+                session,
+              }),
+            })
           }
         } catch (e) {
           console.error(e)
@@ -82,6 +115,6 @@ export function useFeatureSequence({
         }
       })()
     }
-  }, [feature, view, upDownBp, forceLoad])
+  }, [feature, view, upDownBp, assemblyName, forceLoad])
   return { sequence, error }
 }

@@ -28,7 +28,7 @@
     "format": "prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs",
     "prebuild": "npm run clean",
-    "lint": "eslint --report-unused-disable-directives --max-warnings 0 src/",
+    "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "prepack": "npm run build",
     "postversion": "git push --follow-tags"
   },

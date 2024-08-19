@@ -7,7 +7,7 @@ interface TabPanelProps {
   value: number
 }
 
-export function CustomTabPanel(props: TabPanelProps) {
+export default function CustomTabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props
 
   return (
@@ -21,10 +21,4 @@ export function CustomTabPanel(props: TabPanelProps) {
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   )
-}
-export function a11yProps(index: number) {
-  return {
-    id: `gtab-${index}`,
-    'aria-controls': `gtabpanel-${index}`,
-  }
 }

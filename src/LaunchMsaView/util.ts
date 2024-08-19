@@ -11,8 +11,8 @@ export function getTranscriptFeatures(feature: Feature) {
         f.get('subfeatures')?.some(f => f.get('type') === 'CDS'),
       )
 }
-export function getId(val?: Feature) {
-  return val === undefined ? '' : val.get('name') || val.get('id')
+export function getId(val?: Feature): string {
+  return val?.get('name') || val?.get('id') || ''
 }
 
 export function getTranscriptDisplayName(val?: Feature) {

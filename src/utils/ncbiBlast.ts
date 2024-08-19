@@ -23,15 +23,26 @@ export async function queryBlast({
   })
   onRid(rid)
   await waitForRid({ rid, onProgress })
-  const ret = await jsonfetch(
+  const ret = (await jsonfetch(
     `${BLAST_URL}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
-  )
-  const hits = ret.BlastOutput2[0].report.results.search.hits as {
-    description: { accession: string; id: string; sciname: string }[]
-    hsps: { hseq: string }[]
-  }[]
-
-  return { rid, hits }
+  )) as {
+    BlastOutput2: {
+      report: {
+        results: {
+          search: {
+            hits: {
+              description: { accession: string; id: string; sciname: string }[]
+              hsps: { hseq: string }[]
+            }[]
+          }
+        }
+      }
+    }[]
+  }
+  return {
+    rid,
+    hits: ret.BlastOutput2[0]?.report.results.search.hits ?? [],
+  }
 }
 
 async function initialQuery({
@@ -78,6 +89,7 @@ async function waitForRid({
   rid: string
   onProgress: (arg: string) => void
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const iter = 20
     for (let i = 0; i < iter; i++) {
