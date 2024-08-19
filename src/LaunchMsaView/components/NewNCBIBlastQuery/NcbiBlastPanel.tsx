@@ -67,7 +67,9 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
       {error ? <ErrorMessage error={error} /> : null}
       <TextField2
         value={blastDatabase}
-        onChange={event => setBlastDatabase(event.target.value)}
+        onChange={event => {
+          setBlastDatabase(event.target.value)
+        }}
         label="BLAST blastDatabase"
         select
       >
@@ -80,7 +82,9 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
 
       <TextField2
         value={msaAlgorithm}
-        onChange={event => setMsaAlgorithm(event.target.value)}
+        onChange={event => {
+          setMsaAlgorithm(event.target.value)
+        }}
         label="MSA Algorithm"
         select
       >
@@ -93,7 +97,9 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
 
       <TextField2
         value={userSelection}
-        onChange={event => setUserSelection(event.target.value)}
+        onChange={event => {
+          setUserSelection(event.target.value)
+        }}
         label="Choose isoform to BLAST"
         select
       >
@@ -148,7 +154,9 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
         <Button
           color="secondary"
           variant="contained"
-          onClick={() => handleClose()}
+          onClick={() => {
+            handleClose()
+          }}
         >
           Cancel
         </Button>

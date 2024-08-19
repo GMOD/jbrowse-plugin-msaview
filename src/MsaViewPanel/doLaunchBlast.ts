@@ -18,8 +18,12 @@ export async function doLaunchBlast({
     query,
     blastDatabase,
     blastProgram,
-    onProgress: arg => self.setProgress(arg),
-    onRid: rid => self.setRid(rid),
+    onProgress: arg => {
+      self.setProgress(arg)
+    },
+    onRid: rid => {
+      self.setRid(rid)
+    },
   })
 
   const sequence = [
@@ -32,7 +36,9 @@ export async function doLaunchBlast({
   const data = await launchMSA({
     algorithm: msaAlgorithm,
     sequence,
-    onProgress: arg => self.setProgress(arg),
+    onProgress: arg => {
+      self.setProgress(arg)
+    },
   })
   return data
 }

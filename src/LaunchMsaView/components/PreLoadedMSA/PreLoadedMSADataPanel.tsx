@@ -86,7 +86,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         ) : null}
         <TextField
           value={userSelection}
-          onChange={event => setUserSelection(event.target.value)}
+          onChange={event => {
+            setUserSelection(event.target.value)
+          }}
           label="Choose isoform to view MSA for"
           select
         >
@@ -138,7 +140,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         <Button
           color="secondary"
           variant="contained"
-          onClick={() => handleClose()}
+          onClick={() => {
+            handleClose()
+          }}
         >
           Cancel
         </Button>

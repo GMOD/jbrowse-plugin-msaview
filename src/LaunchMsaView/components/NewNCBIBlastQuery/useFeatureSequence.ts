@@ -30,7 +30,7 @@ export function useFeatureSequence({
   useEffect(() => {
     if (view) {
       const { assemblyManager, rpcManager } = getSession(view)
-      const [assemblyName] = view?.assemblyNames || []
+      const [assemblyName] = view.assemblyNames || []
       async function fetchSeq(start: number, end: number, refName: string) {
         const assembly = await assemblyManager.waitForAssembly(assemblyName)
         if (!assembly) {

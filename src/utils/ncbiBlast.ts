@@ -62,8 +62,8 @@ async function initialQuery({
   // the initial submission/query to the BLAST "REST API" does not return JSON
   // as a response (e.g. FORMAT_TYPE=JSON does not work), so the RID is
   // literally parsed from the text of the HTML that is returned
-  const rid = /^    RID = (.*$)/m.exec(res)?.[1]
-  const rtoe = /^    RTOE = (.*$)/m.exec(res)?.[1]
+  const rid = /^ {4}RID = (.*$)/m.exec(res)?.[1]
+  const rtoe = /^ {4}RTOE = (.*$)/m.exec(res)?.[1]
 
   if (!rid) {
     throw new Error('Failed to get RID from BLAST request')

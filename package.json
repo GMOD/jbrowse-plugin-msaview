@@ -25,6 +25,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "start": "node esbuild.mjs",
+    "format": "prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs",
     "prebuild": "npm run clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0 src/",
@@ -60,6 +61,7 @@
     "eslint-plugin-prettier": "^5.1.0",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.9",
     "eslint-plugin-unicorn": "^55.0.0",
     "mobx": "^6.10.2",
     "mobx-react": "^9.0.1",
@@ -71,6 +73,7 @@
     "rimraf": "^6.0.0",
     "rxjs": "^7.8.1",
     "tss-react": "^4.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^8.1.0"
   }
 }

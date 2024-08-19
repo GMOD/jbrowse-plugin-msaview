@@ -199,7 +199,9 @@ export default function stateModelFactory() {
             label: 'Zoom to base level on click?',
             checked: self.zoomToBaseLevel,
             type: 'checkbox',
-            onClick: () => self.setZoomToBaseLevel(!self.zoomToBaseLevel),
+            onClick: () => {
+              self.setZoomToBaseLevel(!self.zoomToBaseLevel)
+            },
           },
         ]
       },
