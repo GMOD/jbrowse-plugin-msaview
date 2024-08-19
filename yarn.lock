@@ -342,7 +342,7 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@eslint/js@9.9.0":
+"@eslint/js@9.9.0", "@eslint/js@^9.8.0":
   version "9.9.0"
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-9.9.0.tgz#d8437adda50b3ed4401964517b64b4f59b0e2638"
   integrity sha512-hhetes6ZHP3BlXLxmd8K2SNgkhNSi+UcecbnwWKwpP7kyi/uC75DJ1lOOBO3xrC4jyojtGE3YxKZPHfk4yrgug==
@@ -522,14 +522,14 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.16.7.tgz#182a325a520f7ebd75de051fceabfc0314cfd004"
   integrity sha512-RtsCt4Geed2/v74sbihWzzRs+HsIQCfclHeORh5Ynu2fS4icIKozcSubwuG7vtzq2uW3fOR1zITSP84TNt2GoQ==
 
-"@mui/icons-material@^5.0.1", "@mui/icons-material@^5.15.6":
+"@mui/icons-material@^5.0.1", "@mui/icons-material@^5.15.6", "@mui/icons-material@^5.16.6":
   version "5.16.7"
   resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.16.7.tgz#e27f901af792065efc9f3d75d74a66af7529a10a"
   integrity sha512-UrGwDJCXEszbDI7yV047BYU5A28eGJ79keTCP4cc74WyncuVrnurlmIRxaHL8YK+LI1Kzq+/JM52IAkNnv4u+Q==
   dependencies:
     "@babel/runtime" "^7.23.9"
 
-"@mui/material@^5.14.12":
+"@mui/material@^5.14.12", "@mui/material@^5.16.6":
   version "5.16.7"
   resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.16.7.tgz#6e814e2eefdaf065a769cecf549c3569e107a50b"
   integrity sha512-cwwVQxBhK60OIOqZOVLFt55t01zmarKJiJUWbk0+8s/Ix5IaUzAShqlJchxsIQ4mSrWqgcKCCXKtIlG5H+/Jmg==
@@ -668,6 +668,13 @@
   version "20.16.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.16.1.tgz#0b44b15271d0e2191ca68faf1fbe506e06aed732"
   integrity sha512-zJDo7wEadFtSyNz5QITDfRcrhqDvQI1xQNQ0VoizPjM/dVAODqqIUWbJPkvsxmTI0MYRGRikcdjMPhOssnPejQ==
+  dependencies:
+    undici-types "~6.19.2"
+
+"@types/node@^22.1.0":
+  version "22.4.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.4.1.tgz#9b595d292c65b94c20923159e2ce947731b6fdce"
+  integrity sha512-1tbpb9325+gPnKK0dMm+/LMriX0vKxf6RnB0SZUqfyVkQ4fMgUSySqhxE/y8Jvs4NyF1yHzTfG9KlnkIODxPKg==
   dependencies:
     undici-types "~6.19.2"
 
@@ -1544,7 +1551,7 @@ eslint-visitor-keys@^4.0.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-4.0.0.tgz#e3adc021aa038a2a8e0b2f8b0ce8f66b9483b1fb"
   integrity sha512-OtIRv/2GyiF6o/d8K7MYKKbXrOUBIK6SfkIRM4Z0dY3w+LiQ0vy3F57m0Z71bjbyeiWFiHJ8brqnmE6H6/jEuw==
 
-eslint@^9.0.0:
+eslint@^9.0.0, eslint@^9.8.0:
   version "9.9.0"
   resolved "https://registry.yarnpkg.com/eslint/-/eslint-9.9.0.tgz#8d214e69ae4debeca7ae97daebbefe462072d975"
   integrity sha512-JfiKJrbx0506OEerjK2Y1QlldtBxkAlLxT5OEcRF8uaQ86noDe2k31Vw9rnSWv+MXZHj7OOUV/dA0AhdLFcyvA==
@@ -2670,15 +2677,20 @@ react-is@^18.3.1:
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
 react-msaview@^3.0.3:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-3.2.0.tgz#018d4339ed78ecc454d71736ee73d4ec6c21c18b"
-  integrity sha512-4vF4VsftS7R2r2to6LwLndZJz/gLfCwlO4wI5XtJr21FO8pnjUK5/lKS+/m3BBCeF25jnHSJseRFuGJIyghg7g==
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-3.2.1.tgz#adcaf44a3d6781a1298598e6160ec5f8d0cded61"
+  integrity sha512-/wMQQq/qzvPMco5uhG6KTppL0Igs9kGtBJHbYlG3ANstWs1Niies5TEMx58B0ANFDpsjPuEscRSVjW1BaUXmNg==
   dependencies:
+    "@eslint/js" "^9.8.0"
+    "@mui/icons-material" "^5.16.6"
+    "@mui/material" "^5.16.6"
+    "@types/node" "^22.1.0"
     clustal-js "^2.0.0"
     colord "^2.9.3"
     copy-to-clipboard "^3.3.1"
     d3-array "^3.2.3"
     d3-hierarchy "^3.1.2"
+    eslint "^9.8.0"
     file-saver "^2.0.5"
     pako "^2.1.0"
     rbush "^3.0.1"
