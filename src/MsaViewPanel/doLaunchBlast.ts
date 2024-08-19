@@ -29,7 +29,19 @@ export async function doLaunchBlast({
   const sequence = [
     `>QUERY\n${query}`,
     ...hits
-      .map(h => [makeId(h.description[0]), strip(h.hsps[0].hseq)] as const)
+      .map(
+        h =>
+          [
+            makeId(
+              h.description[0] ?? {
+                accession: 'unknown',
+                id: 'unknown',
+                sciname: 'unknown',
+              },
+            ),
+            strip(h.hsps[0]?.hseq ?? ''),
+          ] as const,
+      )
       .map(([id, seq]) => `>${id}\n${seq}`),
   ].join('\n')
 

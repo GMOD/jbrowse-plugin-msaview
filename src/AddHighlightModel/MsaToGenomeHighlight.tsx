@@ -23,7 +23,7 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   const { classes } = useStyles()
   const { assemblyManager, views } = getSession(model)
   const p = views.find(f => f.type === 'MsaView') as JBrowsePluginMsaViewModel
-  const assembly = assemblyManager.get(model.assemblyNames[0])
+  const assembly = assemblyManager.get(model.assemblyNames[0]!)
   return assembly ? (
     <>
       {p.connectedHighlights.map((r, idx) => {

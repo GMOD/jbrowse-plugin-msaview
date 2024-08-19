@@ -30,9 +30,11 @@ export function useFeatureSequence({
   useEffect(() => {
     if (view) {
       const { assemblyManager, rpcManager } = getSession(view)
-      const [assemblyName] = view.assemblyNames || []
+      const assemblyName = view.assemblyNames?.[0]
       async function fetchSeq(start: number, end: number, refName: string) {
-        const assembly = await assemblyManager.waitForAssembly(assemblyName)
+        const assembly = assemblyName
+          ? await assemblyManager.waitForAssembly(assemblyName)
+          : undefined
         if (!assembly) {
           throw new Error('assembly not found')
         }

@@ -28,7 +28,7 @@ export function calculateProteinSequence({
   let protein = ''
   for (let i = 0; i < str.length; i += 3) {
     // use & symbol for undefined codon, or partial slice
-    protein += codonTable[str.slice(i, i + 3)] || '&'
+    protein += codonTable[str.slice(i, i + 3)] ?? '&'
   }
   return protein
 }
@@ -54,7 +54,7 @@ function getItemId(feat: Feat) {
 // filters if successive elements share same start/end
 export function dedupe(list: Feat[]) {
   return list.filter(
-    (item, pos, ary) => !pos || getItemId(item) !== getItemId(ary[pos - 1]),
+    (item, pos, ary) => !pos || getItemId(item) !== getItemId(ary[pos - 1]!),
   )
 }
 

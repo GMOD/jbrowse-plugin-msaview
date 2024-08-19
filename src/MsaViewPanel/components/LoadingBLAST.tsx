@@ -48,9 +48,9 @@ const LoadingBLAST = observer(function LoadingBLAST2({
       <LoadingEllipses message="Running NCBI BLAST" variant="h5" />
       {error ? (
         <RIDError rid={rid} error={error} />
-      ) : rid ? (
+      ) : (rid ? (
         <RIDProgress rid={rid} progress={progress} />
-      ) : null}
+      ) : null)}
       <Typography>{processing || 'Initializing BLAST query'}</Typography>
     </div>
   )

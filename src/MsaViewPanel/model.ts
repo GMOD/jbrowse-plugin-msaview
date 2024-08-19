@@ -282,7 +282,7 @@ export default function stateModelFactory() {
             } else {
               const r =
                 assemblyManager
-                  .get(connectedView.assemblyNames[0])
+                  .get(connectedView.assemblyNames[0]!)
                   ?.getCanonicalRefName(r2.refName) ?? r2.refName
               connectedView.centerAt(r2.start, r)
             }
