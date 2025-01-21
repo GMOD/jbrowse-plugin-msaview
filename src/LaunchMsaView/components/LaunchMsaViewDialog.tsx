@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
+
 import { Dialog } from '@jbrowse/core/ui'
-import { Box, Tab, Tabs } from '@mui/material'
 import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
+import { Box, Tab, Tabs } from '@mui/material'
 
 // locals
 
-import CustomTabPanel from './TabUtils'
 import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
+import CustomTabPanel from './TabUtils'
 import { a11yProps } from './tabUtil'
 
 export default function LaunchProteinViewDialog({

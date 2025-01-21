@@ -1,10 +1,10 @@
-import { launchMSA } from '../utils/msa'
-import { queryBlast } from '../utils/ncbiBlast'
+import { JBrowsePluginMsaViewModel } from './model'
 import {
   makeId,
   strip,
 } from '../LaunchMsaView/components/NewNCBIBlastQuery/util'
-import { JBrowsePluginMsaViewModel } from './model'
+import { launchMSA } from '../utils/msa'
+import { queryBlast } from '../utils/ncbiBlast'
 
 export async function doLaunchBlast({
   self,

@@ -1,26 +1,27 @@
 import React, { useState } from 'react'
-import { observer } from 'mobx-react'
-import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
-import { makeStyles } from 'tss-react/mui'
+
+import { ErrorMessage } from '@jbrowse/core/ui'
 import {
   AbstractTrackModel,
   Feature,
   getContainingView,
 } from '@jbrowse/core/util'
-import { ErrorMessage } from '@jbrowse/core/ui'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
+import { observer } from 'mobx-react'
+import { makeStyles } from 'tss-react/mui'
 
 // locals
+import { getProteinSequence } from './calculateProteinSequence'
+import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
+import { useFeatureSequence } from './useFeatureSequence'
+import TextField2 from '../../../TextField2'
 import {
+  getGeneDisplayName,
   getId,
   getTranscriptDisplayName,
   getTranscriptFeatures,
-  getGeneDisplayName,
 } from '../../util'
-import { getProteinSequence } from './calculateProteinSequence'
-import { useFeatureSequence } from './useFeatureSequence'
-import TextField2 from '../../../TextField2'
-import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 
 const useStyles = makeStyles()({
   dialogContent: {

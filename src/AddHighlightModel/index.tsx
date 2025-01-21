@@ -1,4 +1,5 @@
 import React from 'react'
+
 import PluginManager from '@jbrowse/core/PluginManager'
 import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 

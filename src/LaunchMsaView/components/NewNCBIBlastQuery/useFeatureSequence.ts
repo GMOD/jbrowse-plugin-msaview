@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { AbstractSessionModel, Feature, getSession } from '@jbrowse/core/util'
 import { getConf } from '@jbrowse/core/configuration'
+import { AbstractSessionModel, Feature, getSession } from '@jbrowse/core/util'
 
 export interface SeqState {
   seq: string

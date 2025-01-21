@@ -1,9 +1,11 @@
 import React from 'react'
-import { JBrowsePluginMsaViewModel } from '../model'
+
+import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
-import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
+
+import { JBrowsePluginMsaViewModel } from '../model'
 
 // locals
 import RIDLink from './RIDLink'

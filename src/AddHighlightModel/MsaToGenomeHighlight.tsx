@@ -1,13 +1,14 @@
 import React from 'react'
-import { observer } from 'mobx-react'
-import { getSession } from '@jbrowse/core/util'
 
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { Assembly } from '@jbrowse/core/assemblyManager/assembly'
+import { getSession } from '@jbrowse/core/util'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { observer } from 'mobx-react'
+
 
 // locals
-import { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 import { useStyles } from './util'
+import { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 
 type LGV = LinearGenomeViewModel
 

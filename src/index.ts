@@ -7,9 +7,9 @@ import GridOn from '@mui/icons-material/GridOn'
 
 // locals
 import { version } from '../package.json'
-import MsaViewF from './MsaViewPanel'
-import LaunchMsaViewF from './LaunchMsaView'
 import AddHighlightModelF from './AddHighlightModel'
+import LaunchMsaViewF from './LaunchMsaView'
+import MsaViewF from './MsaViewPanel'
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'

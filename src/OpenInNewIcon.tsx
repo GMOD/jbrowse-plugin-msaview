@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { SvgIcon, SvgIconProps } from '@mui/material'
 
 export default function OpenInNewIcon(props: SvgIconProps) {

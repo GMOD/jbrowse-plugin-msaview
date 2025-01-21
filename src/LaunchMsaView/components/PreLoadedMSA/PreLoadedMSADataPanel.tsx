@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { observer } from 'mobx-react'
+
 import { ErrorMessage } from '@jbrowse/core/ui'
+import {
+  AbstractTrackModel,
+  Feature,
+  getContainingView,
+  getSession,
+} from '@jbrowse/core/util'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import {
   Button,
   DialogActions,
@@ -9,24 +16,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-  getSession,
-} from '@jbrowse/core/util'
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // locals
-import {
-  getTranscriptDisplayName,
-  getId,
-  getTranscriptFeatures,
-  getGeneDisplayName,
-} from '../../util'
 import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
+import {
+  getGeneDisplayName,
+  getId,
+  getTranscriptDisplayName,
+  getTranscriptFeatures,
+} from '../../util'
 
 const useStyles = makeStyles()({
   dialogContent: {

@@ -1,6 +1,7 @@
 import { getSession } from '@jbrowse/core/util'
-import { checkHovered } from './util'
+
 import { JBrowsePluginMsaViewModel } from './model'
+import { checkHovered } from './util'
 
 export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   const { hovered } = getSession(model)

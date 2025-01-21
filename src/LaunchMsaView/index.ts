@@ -1,15 +1,16 @@
 import PluginManager from '@jbrowse/core/PluginManager'
-import DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
 import { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
+import DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
+import { MenuItem } from '@jbrowse/core/ui'
+import { Feature, getContainingTrack, getSession } from '@jbrowse/core/util'
+import AddIcon from '@mui/icons-material/Add'
 import { IAnyModelType } from 'mobx-state-tree'
-import { getSession, getContainingTrack, Feature } from '@jbrowse/core/util'
 
 // icons
-import AddIcon from '@mui/icons-material/Add'
 
 // locals
 import LaunchMsaViewDialog from './components/LaunchMsaViewDialog'
-import { MenuItem } from '@jbrowse/core/ui'
+
 
 function isDisplay(elt: { name: string }): elt is DisplayType {
   return elt.name === 'LinearBasicDisplay'
