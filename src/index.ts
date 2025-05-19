@@ -7,7 +7,6 @@ import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
 import LaunchMsaViewF from './LaunchMsaView'
 import MsaViewF from './MsaViewPanel'
-console.log({ version })
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'
