@@ -24,7 +24,7 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "start": "node esbuild.mjs",
+    "start": "node esbuild-watch.mjs",
     "format": "prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs",
     "prebuild": "npm run clean",
@@ -36,6 +36,7 @@
     "name": "MsaView"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.0",
     "g2p_mapper": "^1.0.4",
     "pako": "^2.1.0",
     "react-msaview": "^4.0.0"
