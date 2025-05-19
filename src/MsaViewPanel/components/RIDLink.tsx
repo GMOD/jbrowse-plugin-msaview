@@ -2,7 +2,6 @@ import React from 'react'
 
 import { Link, Typography } from '@mui/material'
 
-// locals
 import OpenInNewIcon from '../../OpenInNewIcon'
 import { BLAST_URL } from '../../utils/ncbiBlast'
 

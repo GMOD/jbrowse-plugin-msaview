@@ -7,7 +7,6 @@ import {
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import {
   Button,
   DialogActions,
@@ -19,7 +18,6 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-// locals
 import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import {
@@ -28,6 +26,8 @@ import {
   getTranscriptDisplayName,
   getTranscriptFeatures,
 } from '../../util'
+
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {

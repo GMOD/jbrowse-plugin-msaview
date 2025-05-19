@@ -1,6 +1,7 @@
 import { AbstractSessionModel, Feature } from '@jbrowse/core/util'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { ungzip } from 'pako'
+
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 async function myfetch(url: string) {
   const res = await fetch(url)

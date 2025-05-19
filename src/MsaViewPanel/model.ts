@@ -1,16 +1,16 @@
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { Feature, getSession } from '@jbrowse/core/util'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { autorun } from 'mobx'
-import { Instance, addDisposer, cast, types } from 'mobx-state-tree'
+import { addDisposer, cast, types } from 'mobx-state-tree'
 import { MSAModelF } from 'react-msaview'
 
-// locals
 import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import type { Instance } from 'mobx-state-tree'
 
 type LGV = LinearGenomeViewModel
 

@@ -4,8 +4,6 @@ import { Dialog } from '@jbrowse/core/ui'
 import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import { Box, Tab, Tabs } from '@mui/material'
 
-// locals
-
 import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import CustomTabPanel from './TabUtils'

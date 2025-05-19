@@ -3,7 +3,6 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 
-// locals
 import { JBrowsePluginMsaViewModel } from '../model'
 import LoadingBLAST from './LoadingBLAST'
 

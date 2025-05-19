@@ -1,11 +1,8 @@
 import Plugin from '@jbrowse/core/Plugin'
 import PluginManager from '@jbrowse/core/PluginManager'
 import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
-
-// icons
 import GridOn from '@mui/icons-material/GridOn'
 
-// locals
 import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
 import LaunchMsaViewF from './LaunchMsaView'

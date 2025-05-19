@@ -1,10 +1,11 @@
 import React from 'react'
 
 import { getSession } from '@jbrowse/core/util'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { observer } from 'mobx-react'
 
 import { useStyles } from './util'
+
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const GenomeMouseoverHighlight = observer(function GenomeMouseoverHighlight2({
   model,

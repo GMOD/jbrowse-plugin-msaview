@@ -8,7 +8,13 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**/*', 'esbuild.mjs', 'eslint.config.mjs', 'ucsc/*'],
+    ignores: [
+      '**/dist/**/*',
+      'esbuild.mjs',
+      'esbuild-watch.mjs',
+      'eslint.config.mjs',
+      'ucsc/*',
+    ],
   },
   {
     languageOptions: {

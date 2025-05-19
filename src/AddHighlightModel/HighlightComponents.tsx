@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { observer } from 'mobx-react'
 
-// locals
 import GenomeMouseoverHighlight from './GenomeMouseoverHighlight'
 import MsaToGenomeHighlight from './MsaToGenomeHighlight'
+
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 type LGV = LinearGenomeViewModel
 

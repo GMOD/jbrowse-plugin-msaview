@@ -12,7 +12,7 @@ export function getTranscriptFeatures(feature: Feature) {
       )
 }
 export function getId(val?: Feature): string {
-  return val?.get('name') || val?.get('id') || ''
+  return val?.get('name') ?? val?.get('id') ?? ''
 }
 
 export function getTranscriptDisplayName(val?: Feature) {
@@ -24,7 +24,7 @@ export function getTranscriptDisplayName(val?: Feature) {
 export function getGeneDisplayName(val?: Feature) {
   return val === undefined
     ? ''
-    : [val.get('gene_name') || val.get('name'), val.get('id')]
+    : [val.get('gene_name') ?? val.get('name'), val.get('id')]
         .filter(f => !!f)
         .join(' ')
 }

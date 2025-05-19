@@ -6,12 +6,10 @@ import {
   Feature,
   getContainingView,
 } from '@jbrowse/core/util'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-// locals
 import { getProteinSequence } from './calculateProteinSequence'
 import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 import { useFeatureSequence } from './useFeatureSequence'
@@ -22,6 +20,8 @@ import {
   getTranscriptDisplayName,
   getTranscriptFeatures,
 } from '../../util'
+
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -121,10 +121,12 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
             ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
             : 'Loading...'
         }
-        InputProps={{
-          readOnly: true,
-          classes: {
-            input: classes.textAreaFont,
+        slotProps={{
+          input: {
+            readOnly: true,
+            classes: {
+              input: classes.textAreaFont,
+            },
           },
         }}
       />

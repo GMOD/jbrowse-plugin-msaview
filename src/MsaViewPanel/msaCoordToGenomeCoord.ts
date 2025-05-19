@@ -1,4 +1,3 @@
-// locals
 import { JBrowsePluginMsaViewModel } from './model'
 
 export function msaCoordToGenomeCoord({
