@@ -1,5 +1,5 @@
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
-import { Feature, getSession } from '@jbrowse/core/util'
+import { getSession } from '@jbrowse/core/util'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { autorun } from 'mobx'
 import { addDisposer, cast, types } from 'mobx-state-tree'
@@ -9,6 +9,7 @@ import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 
+import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import type { Instance } from 'mobx-state-tree'
 
@@ -72,8 +73,17 @@ export default function stateModelFactory() {
     )
 
     .volatile(() => ({
+      /**
+       * #volatile
+       */
       rid: undefined as string | undefined,
+      /**
+       * #volatile
+       */
       progress: '',
+      /**
+       * #volatile
+       */
       error: undefined as unknown,
     }))
 
