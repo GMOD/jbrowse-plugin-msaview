@@ -6,8 +6,7 @@ import { Tab, Tabs } from '@mui/material'
 
 import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
-import CustomTabPanel from './TabUtils'
-import { a11yProps } from './tabUtil'
+import TabPanel from './TabPanel'
 
 export default function LaunchProteinViewDialog({
   handleClose,
@@ -35,23 +34,23 @@ export default function LaunchProteinViewDialog({
           setValue(val)
         }}
       >
-        <Tab label="NCBI BLAST query" {...a11yProps(0)} />
-        <Tab label="UCSC 100-way dataset" {...a11yProps(1)} />
+        <Tab label="NCBI BLAST query" value={0} />
+        <Tab label="UCSC 100-way dataset" value={1} />
       </Tabs>
-      <CustomTabPanel value={value} index={0}>
+      <TabPanel value={value} index={0}>
         <NewNcbiBlastQueryPanel
           handleClose={handleClose}
           feature={feature}
           model={model}
         />
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
+      </TabPanel>
+      <TabPanel value={value} index={1}>
         <PreLoadedMSA
           model={model}
           feature={feature}
           handleClose={handleClose}
         />
-      </CustomTabPanel>
+      </TabPanel>
     </Dialog>
   )
 }
