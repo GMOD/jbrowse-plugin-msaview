@@ -24,22 +24,20 @@ export default function LaunchProteinViewDialog({
     <Dialog
       maxWidth="xl"
       title="Launch MSA view"
+      open
       onClose={() => {
         handleClose()
       }}
-      open
     >
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={value}
-          onChange={(_, val) => {
-            setValue(val)
-          }}
-        >
-          <Tab label="NCBI BLAST query" {...a11yProps(0)} />
-          <Tab label="UCSC 100-way dataset" {...a11yProps(1)} />
-        </Tabs>
-      </Box>
+      <Tabs
+        value={value}
+        onChange={(_, val) => {
+          setValue(val)
+        }}
+      >
+        <Tab label="NCBI BLAST query" {...a11yProps(0)} />
+        <Tab label="UCSC 100-way dataset" {...a11yProps(1)} />
+      </Tabs>
       <CustomTabPanel value={value} index={0}>
         <NewNcbiBlastQueryPanel
           handleClose={handleClose}
