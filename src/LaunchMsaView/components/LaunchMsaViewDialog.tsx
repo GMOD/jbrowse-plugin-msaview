@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import { Dialog } from '@jbrowse/core/ui'
 import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Tab, Tabs } from '@mui/material'
 
 import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'

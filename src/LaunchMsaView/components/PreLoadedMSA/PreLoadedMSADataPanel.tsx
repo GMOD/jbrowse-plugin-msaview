@@ -83,7 +83,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         </Typography>
         {error ? <ErrorMessage error={error} /> : null}
         {geneNameList && !ret ? (
-          <div style={{ color: 'red' }}>No MSA data for this gene found</div>
+          <Typography color="error">No MSA data for this gene found</Typography>
         ) : null}
         <TextField
           value={userSelection}
