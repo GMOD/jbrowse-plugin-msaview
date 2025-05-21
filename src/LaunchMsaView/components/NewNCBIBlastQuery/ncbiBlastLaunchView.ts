@@ -7,12 +7,14 @@ export function ncbiBlastLaunchView({
   newViewTitle,
   view,
   feature,
+  data,
 }: {
   newViewTitle: string
   view: LinearGenomeViewModel
   feature: Feature
+  data: { msa: string; tree: string }
 }) {
-  return getSession(view).addView('MsaView', {
+  const msaView = getSession(view).addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
     connectedViewId: view.id,
@@ -24,5 +26,8 @@ export function ncbiBlastLaunchView({
     colWidth: 10,
     rowHeight: 12,
     colorSchemeName: 'percent_identity_dynamic',
+    data,
   }) as JBrowsePluginMsaViewModel
+
+  return msaView
 }

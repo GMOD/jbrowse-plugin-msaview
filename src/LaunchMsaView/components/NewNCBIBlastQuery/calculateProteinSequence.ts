@@ -67,7 +67,7 @@ export function getProteinSequenceFromFeature({
         start: sub.start - f.start,
         end: sub.end - f.start,
       }))
-      .filter(f => f.type === 'CDS') || [],
+      .filter(f => f.type === 'CDS') ?? [],
   )
 
   return calculateProteinSequence({
