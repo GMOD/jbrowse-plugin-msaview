@@ -5,11 +5,9 @@ import { autorun } from 'mobx'
 import { addDisposer, cast, types } from 'mobx-state-tree'
 import { MSAModelF } from 'react-msaview'
 
-import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 
-import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import type { Instance } from 'mobx-state-tree'
 
@@ -21,14 +19,6 @@ export interface IRegion {
   refName: string
   start: number
   end: number
-}
-
-export interface BlastParams {
-  blastDatabase: string
-  msaAlgorithm: string
-  blastProgram: string
-  selectedTranscript: Feature
-  proteinSequence: string
 }
 
 /**
@@ -60,10 +50,6 @@ export default function stateModelFactory() {
             end: types.number,
           }),
         ),
-        /**
-         * #property
-         */
-        blastParams: types.frozen<BlastParams | undefined>(),
 
         /**
          * #property
@@ -191,12 +177,6 @@ export default function stateModelFactory() {
       clearConnectedHighlights() {
         self.connectedHighlights = cast([])
       },
-      /**
-       * #action
-       */
-      setBlastParams(args?: BlastParams) {
-        self.blastParams = args
-      },
     }))
 
     .views(self => ({
@@ -234,28 +214,6 @@ export default function stateModelFactory() {
 
     .actions(self => ({
       afterCreate() {
-        addDisposer(
-          self,
-          autorun(async () => {
-            if (self.blastParams) {
-              try {
-                self.setProgress('Submitting query')
-                const data = await doLaunchBlast({
-                  self: self as JBrowsePluginMsaViewModel,
-                })
-                self.setData(data)
-                self.setBlastParams(undefined)
-                self.setProgress('')
-              } catch (e) {
-                self.setError(e)
-                console.error(e)
-              } finally {
-                self.setProgress('')
-              }
-            }
-          }),
-        )
-
         // this adds highlights to the genome view when mouse-ing over the MSA
         addDisposer(
           self,
@@ -264,7 +222,10 @@ export default function stateModelFactory() {
             const r1 =
               mouseCol === undefined
                 ? undefined
-                : msaCoordToGenomeCoord({ model: self, coord: mouseCol })
+                : msaCoordToGenomeCoord({
+                    model: self,
+                    coord: mouseCol,
+                  })
             const r2 =
               mouseClickCol === undefined
                 ? undefined

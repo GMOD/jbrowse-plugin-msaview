@@ -51,7 +51,7 @@ export function dedupe(list: Feat[]) {
   )
 }
 
-export function getProteinSequence({
+export function getProteinSequenceFromFeature({
   selectedTranscript,
   seq,
 }: {

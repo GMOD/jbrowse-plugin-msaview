@@ -10,9 +10,10 @@ import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { getProteinSequence } from './calculateProteinSequence'
+import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 import { useFeatureSequence } from './useFeatureSequence'
+import BlastOptions from './BlastOptions'
 import TextField2 from '../../../TextField2'
 import {
   getGeneDisplayName,
@@ -45,6 +46,7 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
   const view = getContainingView(model) as LinearGenomeViewModel
   const [blastDatabase, setBlastDatabase] = useState('nr')
   const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
+  const [geneTreeId, setGeneTreeId] = useState('')
 
   const options = getTranscriptFeatures(feature)
   const [userSelection, setUserSelection] = useState(getId(options[0]))
@@ -55,7 +57,7 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
   })
   const proteinSequence =
     sequence && !('error' in sequence)
-      ? getProteinSequence({
+      ? getProteinSequenceFromFeature({
           seq: sequence.seq,
           selectedTranscript,
         })
@@ -63,46 +65,18 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
 
   const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
   const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
+  const seq = proteinSequence ? proteinSequence : 'Loading...'
   return (
     <DialogContent className={classes.dialogContent}>
       {error ? <ErrorMessage error={error} /> : null}
-      <TextField2
-        value={blastDatabase}
-        onChange={event => {
-          setBlastDatabase(event.target.value)
-        }}
-        label="BLAST blastDatabase"
-        select
-      >
-        {blastDatabaseOptions.map(val => (
-          <MenuItem value={val} key={val}>
-            {val}
-          </MenuItem>
-        ))}
-      </TextField2>
 
       <TextField2
-        value={msaAlgorithm}
-        onChange={event => {
-          setMsaAlgorithm(event.target.value)
-        }}
-        label="MSA Algorithm"
+        label="Choose isoform to BLAST"
         select
-      >
-        {msaAlgorithms.map(val => (
-          <MenuItem value={val} key={val}>
-            {val}
-          </MenuItem>
-        ))}
-      </TextField2>
-
-      <TextField2
         value={userSelection}
         onChange={event => {
           setUserSelection(event.target.value)
         }}
-        label="Choose isoform to BLAST"
-        select
       >
         {options.map(val => (
           <MenuItem value={getId(val)} key={val.id()}>
@@ -110,6 +84,14 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
           </MenuItem>
         ))}
       </TextField2>
+      {proteinSequence ? (
+        <a
+          target="_blank"
+          href={`https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${proteinSequence}`}
+        >
+          Link to NCBI BLAST
+        </a>
+      ) : null}
       <TextField2
         variant="outlined"
         multiline
@@ -136,18 +118,12 @@ const NcbiBlastPanel = observer(function NcbiBlastPanel2({
           color="primary"
           variant="contained"
           onClick={() => {
-            const newView = ncbiBlastLaunchView({
+            ncbiBlastLaunchView({
               feature: selectedTranscript,
               view,
               newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - ${msaAlgorithm}`,
             })
-            newView.setBlastParams({
-              blastProgram: 'blastp',
-              blastDatabase,
-              msaAlgorithm,
-              selectedTranscript,
-              proteinSequence,
-            })
+
             handleClose()
           }}
           disabled={!proteinSequence}
