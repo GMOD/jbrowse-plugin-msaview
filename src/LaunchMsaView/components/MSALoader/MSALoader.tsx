@@ -37,8 +37,10 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const session = getSession(model)
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
-  const [error, setError] = useState<unknown>()
+  const [, setError] = useState<unknown>()
   const [geneNameList, setGeneNameList] = useState<string[]>()
+  const [fileLocation, setFileLocation] = useState<FileLocation>()
+
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
@@ -63,22 +65,19 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     ;(async () => {
       try {
         if (fileLocation) {
-          const ret = await openLocation(fileLocation).readFile()
-
-          console.log({ ret })
+          await openLocation(fileLocation).readFile()
         }
       } catch (e) {
         console.error(e)
         setError(e)
       }
     })()
-  }, [feature])
+  }, [fileLocation, feature])
 
   const set = new Set(geneNameList)
   const options = getTranscriptFeatures(feature)
   const ret = options.find(val => set.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const [fileLocation, setFileLocation] = useState<FileLocation>()
 
   return (
     <>

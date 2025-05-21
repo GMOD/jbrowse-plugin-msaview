@@ -18,8 +18,8 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
 import { geneTreeFetcher } from './ensemblGeneTreeUtils'
-import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import {
   getGeneDisplayName,
   getId,
@@ -28,7 +28,6 @@ import {
 } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -105,27 +104,24 @@ const EnsemblGeneTree = observer(function ({
           color="primary"
           variant="contained"
           onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ;(async () => {
-              try {
-                if (!treeData) {
-                  return
-                }
-                setError(undefined)
-
-                ensemblGeneTreeLaunchView({
-                  feature,
-                  view,
-                  session,
-                  newViewTitle: 'hello',
-                  data: treeData,
-                })
-                handleClose()
-              } catch (e) {
-                console.error(e)
-                setError(e)
+            try {
+              if (!treeData) {
+                return
               }
-            })()
+              setError(undefined)
+
+              ensemblGeneTreeLaunchView({
+                feature,
+                view,
+                session,
+                newViewTitle: getGeneDisplayName(feature),
+                data: treeData,
+              })
+              handleClose()
+            } catch (e) {
+              console.error(e)
+              setError(e)
+            }
           }}
         >
           Submit

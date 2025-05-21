@@ -55,7 +55,9 @@ const base = 'https://rest.ensembl.org'
 export async function geneTreeFetcher(id2: string) {
   const id = id2.replace(/\..*/, '')
   const { species } = await fetchWithLocalStorageCache(`${id}-ensembl`, () =>
-    jsonfetch<any>(`${base}/lookup/id/${id}?content-type=application/json`),
+    jsonfetch<{ species: string }>(
+      `${base}/lookup/id/${id}?content-type=application/json`,
+    ),
   )
   const treeBase = `${base}/genetree/member/id/${species}/${id}`
   const msa = await fetchWithLocalStorageCache(`${id}-msa`, () =>
