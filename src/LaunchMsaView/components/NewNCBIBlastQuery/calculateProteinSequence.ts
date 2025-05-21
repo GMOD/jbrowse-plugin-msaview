@@ -8,7 +8,7 @@ import {
 export interface Feat {
   start: number
   end: number
-  type: string
+  type?: string
 }
 
 export function stitch(subfeats: Feat[], sequence: string) {
@@ -33,10 +33,7 @@ export function calculateProteinSequence({
   return protein
 }
 
-export function revlist(
-  list: { start: number; end: number; type: string }[],
-  seqlen: number,
-) {
+export function revlist(list: Feat[], seqlen: number) {
   return list
     .map(sub => ({
       ...sub,
@@ -65,23 +62,16 @@ export function getProteinSequence({
   seq: string
   selectedTranscript: Feature
 }) {
-  // @ts-expect-error
-  const f = selectedTranscript.toJSON() as {
-    start: number
-    end: number
-    strand: number
-    type: string
-    subfeatures: { start: number; end: number; type: string }[]
-  }
+  const f = selectedTranscript.toJSON()
   const cds = dedupe(
     f.subfeatures
-      .sort((a, b) => a.start - b.start)
+      ?.sort((a, b) => a.start - b.start)
       .map(sub => ({
         ...sub,
         start: sub.start - f.start,
         end: sub.end - f.start,
       }))
-      .filter(f => f.type === 'CDS'),
+      .filter(f => f.type === 'CDS') || [],
   )
 
   return calculateProteinSequence({
