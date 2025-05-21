@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import { ErrorMessage } from '@jbrowse/core/ui'
+import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 import {
   AbstractTrackModel,
   Feature,
@@ -18,7 +18,7 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { fetchGeneList } from './fetchGeneList'
+import { geneTreeFetcher } from './ensemblGeneTreeUtils'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import {
   getGeneDisplayName,
@@ -28,6 +28,7 @@ import {
 } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -35,7 +36,9 @@ const useStyles = makeStyles()({
   },
 })
 
-const PreLoadedMSA = observer(function PreLoadedMSA2({
+type Ret = Awaited<ReturnType<typeof geneTreeFetcher>>
+
+const EnsemblGeneTree = observer(function ({
   model,
   feature,
   handleClose,
@@ -48,43 +51,39 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
-  const [geneNameList, setGeneNameList] = useState<string[]>()
+  const [treeData, setTreeData] = useState<Ret>()
+  const [isTreeLoading, setIsTreeLoading] = useState(false)
+  const [treeError, setTreeError] = useState<unknown>()
+  const options = getTranscriptFeatures(feature)
+  const [userSelection, setUserSelection] = useState(getId(options[0]))
+
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
-        const data = await fetchGeneList()
-        setGeneNameList(data)
-        const set = new Set(data)
-        const options = getTranscriptFeatures(feature)
-        const ret = options.find(val => set.has(getId(val)))
-        if (ret) {
-          setUserSelection(getId(ret))
-        }
+        setIsTreeLoading(true)
+        const result = await geneTreeFetcher(userSelection)
+        setTreeData(result)
       } catch (e) {
         console.error(e)
-        setError(e)
+        setTreeError(e)
+      } finally {
+        setIsTreeLoading(false)
       }
     })()
-  }, [feature])
-  const set = new Set(geneNameList)
-  const options = getTranscriptFeatures(feature)
-  const ret = options.find(val => set.has(getId(val)))
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  }, [userSelection])
+
+  const loadingMessage = isTreeLoading
+    ? 'Loading tree data from Ensembl GeneTree'
+    : undefined
+  const e = treeError ?? error
 
   return (
     <>
       <DialogContent className={classes.dialogContent}>
-        <Typography>
-          The source data for these multiple sequence alignments is from{' '}
-          <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
-            knownCanonical.multiz100way.protAA.fa.gz
-          </a>
-        </Typography>
-        {error ? <ErrorMessage error={error} /> : null}
-        {geneNameList && !ret ? (
-          <Typography color="error">No MSA data for this gene found</Typography>
-        ) : null}
+        {e ? <ErrorMessage error={e} /> : null}
+        {loadingMessage ? <LoadingEllipses message={loadingMessage} /> : null}
+        <Typography>Load data from Ensembl GeneTree</Typography>
         <TextField
           select
           label="Choose isoform to view MSA for"
@@ -93,14 +92,11 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
             setUserSelection(event.target.value)
           }}
         >
-          {options.map(val => {
-            const inSet = set.has(getId(val))
-            return (
-              <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                {getTranscriptDisplayName(val)} {inSet ? ' (has data)' : ''}
-              </MenuItem>
-            )
-          })}
+          {options.map(val => (
+            <MenuItem value={getId(val)} key={val.id()}>
+              {getTranscriptDisplayName(val)}
+            </MenuItem>
+          ))}
         </TextField>
       </DialogContent>
 
@@ -112,15 +108,17 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
-                if (!ret) {
+                if (!treeData) {
                   return
                 }
-                await preCalculatedLaunchView({
-                  userSelection,
-                  session,
-                  newViewTitle: getGeneDisplayName(ret),
+                setError(undefined)
+
+                ensemblGeneTreeLaunchView({
+                  feature,
                   view,
-                  feature: ret,
+                  session,
+                  newViewTitle: 'hello',
+                  data: treeData,
                 })
                 handleClose()
               } catch (e) {
@@ -146,4 +144,4 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   )
 })
 
-export default PreLoadedMSA
+export default EnsemblGeneTree

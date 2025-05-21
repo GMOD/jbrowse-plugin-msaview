@@ -1,31 +1,21 @@
 import React, { useEffect, useState } from 'react'
 
-import { ErrorMessage } from '@jbrowse/core/ui'
+import { FileSelector } from '@jbrowse/core/ui'
 import {
   AbstractTrackModel,
   Feature,
+  FileLocation,
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  MenuItem,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { openLocation } from '@jbrowse/core/util/io'
+import { Button, DialogActions, DialogContent } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
-import {
-  getGeneDisplayName,
-  getId,
-  getTranscriptDisplayName,
-  getTranscriptFeatures,
-} from '../../util'
+import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -67,41 +57,33 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
       }
     })()
   }, [feature])
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      try {
+        if (fileLocation) {
+          const ret = await openLocation(fileLocation).readFile()
+
+          console.log({ ret })
+        }
+      } catch (e) {
+        console.error(e)
+        setError(e)
+      }
+    })()
+  }, [feature])
+
   const set = new Set(geneNameList)
   const options = getTranscriptFeatures(feature)
   const ret = options.find(val => set.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const [fileLocation, setFileLocation] = useState<FileLocation>()
 
   return (
     <>
       <DialogContent className={classes.dialogContent}>
-        <Typography>
-          The source data for these multiple sequence alignments is from{' '}
-          <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
-            knownCanonical.multiz100way.protAA.fa.gz
-          </a>
-        </Typography>
-        {error ? <ErrorMessage error={error} /> : null}
-        {geneNameList && !ret ? (
-          <Typography color="error">No MSA data for this gene found</Typography>
-        ) : null}
-        <TextField
-          select
-          label="Choose isoform to view MSA for"
-          value={userSelection}
-          onChange={event => {
-            setUserSelection(event.target.value)
-          }}
-        >
-          {options.map(val => {
-            const inSet = set.has(getId(val))
-            return (
-              <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                {getTranscriptDisplayName(val)} {inSet ? ' (has data)' : ''}
-              </MenuItem>
-            )
-          })}
-        </TextField>
+        <FileSelector location={fileLocation} setLocation={setFileLocation} />
       </DialogContent>
 
       <DialogActions>
