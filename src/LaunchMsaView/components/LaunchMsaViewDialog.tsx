@@ -6,7 +6,7 @@ import { Tab, Tabs } from '@mui/material'
 
 import EnsemblGeneTree from './EnsemblGeneTree/EnsemblGeneTree'
 import MSALoader from './MSALoader/MSALoader'
-import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
+import NCBIBlastQueryPanel from './NCBIBlastQuery/NCBIBlastPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import TabPanel from './TabPanel'
 
@@ -36,14 +36,20 @@ export default function LaunchProteinViewDialog({
           setValue(val)
         }}
       >
-        <Tab label="NCBI BLAST query" value={0} />
+        <Tab label="NCBI BLAST" value={0} />
         <Tab label="UCSC 100-way dataset" value={1} />
         <Tab label="Ensembl GeneTree" value={2} />
-        <Tab label="Manually open MSA" value={3} />
+        <Tab label="Open MSA" value={3} />
       </Tabs>
       <TabPanel value={value} index={0}>
-        <NewNcbiBlastQueryPanel
-          handleClose={handleClose}
+        <NCBIBlastQueryPanel
+          handleClose={arg => {
+            if (arg) {
+              setValue(3)
+            } else {
+              handleClose()
+            }
+          }}
           feature={feature}
           model={model}
         />
