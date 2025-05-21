@@ -1,52 +1,16 @@
 import { useEffect, useState } from 'react'
 
-import { getConf } from '@jbrowse/core/configuration'
-import { AbstractSessionModel, Feature, getSession } from '@jbrowse/core/util'
+import { getSession } from '@jbrowse/core/util'
 
-export interface SeqState {
-  seq: string
-  upstream?: string
-  downstream?: string
-}
+import { fetchSeq } from './fetchSeq'
+
+import type { Feature } from '@jbrowse/core/util'
+import type { SeqState } from './types'
 
 export interface ErrorState {
   error: string
 }
 const BPLIMIT = 500_000
-
-async function fetchSeq({
-  start,
-  end,
-  refName,
-  session,
-  assemblyName,
-}: {
-  start: number
-  end: number
-  refName: string
-  assemblyName: string
-  session: AbstractSessionModel
-}) {
-  const { assemblyManager, rpcManager } = session
-  const assembly = await assemblyManager.waitForAssembly(assemblyName)
-  if (!assembly) {
-    throw new Error('assembly not found')
-  }
-  const sessionId = 'getSequence'
-  const feats = (await rpcManager.call(sessionId, 'CoreGetFeatures', {
-    adapterConfig: getConf(assembly, ['sequence', 'adapter']),
-    sessionId,
-    regions: [
-      {
-        start,
-        end,
-        refName: assembly.getCanonicalRefName(refName),
-        assemblyName,
-      },
-    ],
-  })) as Feature[]
-  return (feats[0]?.get('seq') as string | undefined) ?? ''
-}
 
 export function useFeatureSequence({
   view,

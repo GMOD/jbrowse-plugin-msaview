@@ -1,15 +1,11 @@
 import {
-  Feature,
   defaultCodonTable,
   generateCodonTable,
   revcom,
 } from '@jbrowse/core/util'
 
-export interface Feat {
-  start: number
-  end: number
-  type?: string
-}
+import type { Feat } from './types'
+import type { Feature } from '@jbrowse/core/util'
 
 export function stitch(subfeats: Feat[], sequence: string) {
   return subfeats.map(sub => sequence.slice(sub.start, sub.end)).join('')
