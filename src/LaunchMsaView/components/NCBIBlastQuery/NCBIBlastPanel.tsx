@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { getContainingView, shorten2 } from '@jbrowse/core/util'
+import HelpIcon from '@mui/icons-material/Help'
 import {
   Button,
   DialogActions,
@@ -14,10 +15,10 @@ import {
   RadioGroup,
   Typography,
 } from '@mui/material'
-import HelpIcon from '@mui/icons-material/Help'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import HelpDialog from './HelpDialog'
 import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
 import TextField2 from '../../../TextField2'
@@ -28,9 +29,8 @@ import {
   getTranscriptFeatures,
 } from '../../util'
 
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import HelpDialog from './HelpDialog'
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -43,8 +43,6 @@ const useStyles = makeStyles()({
     fontFamily: 'Courier New',
   },
 })
-
-const maxWidth = 600
 
 const NCBIBlastPanel = observer(function ({
   handleClose,
@@ -110,7 +108,7 @@ const NCBIBlastPanel = observer(function ({
         <FormControl component="fieldset">
           <RadioGroup
             value={blastMethod}
-            onChange={event => setBlastMethod(event.target.value)}
+            onChange={event => { setBlastMethod(event.target.value) }}
           >
             <FormControlLabel
               value="direct"
@@ -126,9 +124,9 @@ const NCBIBlastPanel = observer(function ({
         </FormControl>
 
         {blastMethod === 'direct' && proteinSequence ? (
-          <div style={{ maxWidth, wordBreak: 'break-all' }}>
+          <div style={{ wordBreak: 'break-all' }}>
             Link to NCBI BLAST:{' '}
-            <a target="_blank" href={link}>
+            <a target="_blank" href={link} rel="noreferrer">
               {link2}
             </a>
           </div>
@@ -162,7 +160,7 @@ const NCBIBlastPanel = observer(function ({
             />
           </div>
         )}
-        <Typography style={{ maxWidth }}>
+        <Typography>
           After you have run NCBI BLAST, you can download .aln and/or newick
           tree .nh file, and manually open them in the "Open MSA" tab{' '}
           <IconButton

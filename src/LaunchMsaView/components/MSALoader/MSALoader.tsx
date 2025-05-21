@@ -1,14 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import { FileSelector } from '@jbrowse/core/ui'
-import {
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Typography,
-} from '@mui/material'
-import TextField2 from '../../../TextField2'
 import {
   AbstractTrackModel,
   Feature,
@@ -16,15 +8,25 @@ import {
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
-import { Button, DialogActions, DialogContent } from '@mui/material'
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Typography,
+} from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
+import TextField2 from '../../../TextField2'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { openLocation } from '@jbrowse/core/util/io'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -49,33 +51,12 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const [msaText, setMsaText] = useState('')
   const [treeText, setTreeText] = useState('')
 
-  const [geneNameList, setGeneNameList] = useState<string[]>()
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        const data = await fetchGeneList()
-        setGeneNameList(data)
-        const set = new Set(data)
-        const options = getTranscriptFeatures(feature)
-        const ret = options.find(val => set.has(getId(val)))
-        if (ret) {
-          setUserSelection(getId(ret))
-        }
-      } catch (e) {
-        console.error(e)
-        setError(e)
-      }
-    })()
-  }, [feature])
-
-  const set = new Set(geneNameList)
   const options = getTranscriptFeatures(feature)
-  const ret = options.find(val => set.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const ret = options.find(val => userSelection === getId(val))
 
   return (
     <>
@@ -85,7 +66,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
             aria-label="input-method"
             name="input-method"
             value={inputMethod}
-            onChange={event => setInputMethod(event.target.value)}
+            onChange={event => {
+              setInputMethod(event.target.value)
+            }}
             row
           >
             <FormControlLabel
@@ -128,7 +111,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
               maxRows={10}
               fullWidth
               value={msaText}
-              onChange={event => setMsaText(event.target.value)}
+              onChange={event => {
+                setMsaText(event.target.value)
+              }}
               placeholder="Paste MSA here"
               style={{ marginBottom: '20px' }}
             />
@@ -142,7 +127,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
               maxRows={10}
               fullWidth
               value={treeText}
-              onChange={event => setTreeText(event.target.value)}
+              onChange={event => {
+                setTreeText(event.target.value)
+              }}
               placeholder="Paste newick tree (optional)"
             />
           </>
@@ -166,31 +153,30 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                   return
                 }
 
-                if (inputMethod === 'file') {
-                  // Handle file input
-                  await preCalculatedLaunchView({
-                    userSelection,
-                    session,
-                    newViewTitle: getGeneDisplayName(ret),
-                    view,
-                    feature: ret,
-                    msaFileLocation,
-                    treeFileLocation,
-                  })
-                } else {
-                  // Handle text input
-                  await preCalculatedLaunchView({
-                    userSelection,
-                    session,
-                    newViewTitle: getGeneDisplayName(ret),
-                    view,
-                    feature: ret,
-                    data: {
-                      msa: msaText,
-                      tree: treeText,
-                    },
-                  })
-                }
+                await preCalculatedLaunchView({
+                  session,
+                  newViewTitle: getGeneDisplayName(ret),
+                  view,
+                  feature: ret,
+                  data:
+                    inputMethod === 'file'
+                      ? {
+                          msa: msaFileLocation
+                            ? await openLocation(msaFileLocation).readFile(
+                                'utf8',
+                              )
+                            : '',
+                          tree: treeFileLocation
+                            ? await openLocation(treeFileLocation).readFile(
+                                'utf8',
+                              )
+                            : undefined,
+                        }
+                      : {
+                          msa: msaText,
+                          tree: treeText,
+                        },
+                })
 
                 handleClose()
               } catch (e) {
