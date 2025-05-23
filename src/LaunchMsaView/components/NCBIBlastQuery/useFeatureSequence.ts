@@ -6,6 +6,7 @@ import { fetchSeq } from './fetchSeq'
 
 import type { SeqState } from './types'
 import type { Feature } from '@jbrowse/core/util'
+import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 
 export interface ErrorState {
   error: string
@@ -80,5 +81,18 @@ export function useFeatureSequence({
       })()
     }
   }, [feature, view, upDownBp, assemblyName, forceLoad])
-  return { sequence, error }
+
+  const proteinSequence =
+    sequence && !('error' in sequence)
+      ? getProteinSequenceFromFeature({
+          seq: sequence.seq,
+          selectedTranscript: feature,
+        })
+      : ''
+
+  return {
+    proteinSequence,
+    sequence,
+    error,
+  }
 }

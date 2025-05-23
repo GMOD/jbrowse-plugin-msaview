@@ -29,6 +29,9 @@ import {
 } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { getProteinSequenceFromFeature } from '../NCBIBlastQuery/calculateProteinSequence'
+import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
+import { TranscriptSelector } from '../NCBIBlastQuery'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -48,7 +51,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const session = getSession(model)
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
-  const [error, setError] = useState<unknown>()
+  const [error1, setError] = useState<unknown>()
   const [geneNameList, setGeneNameList] = useState<string[]>()
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -72,38 +75,34 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const options = getTranscriptFeatures(feature)
   const ret = options.find(val => set.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const selectedTranscript = options.find(val => getId(val) === userSelection)!
+  const { proteinSequence, error: error2 } = useFeatureSequence({
+    view,
+    feature: selectedTranscript,
+  })
+
+  const e = error1 ?? error2
 
   return (
     <>
       <DialogContent className={classes.dialogContent}>
+        {e ? <ErrorMessage error={e} /> : null}
         <Typography>
           The source data for these multiple sequence alignments is from{' '}
           <ExternalLink href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
             knownCanonical.multiz100way.protAA.fa.gz
           </ExternalLink>
         </Typography>
-        {error ? <ErrorMessage error={error} /> : null}
         {geneNameList && !ret ? (
           <Typography color="error">No MSA data for this gene found</Typography>
         ) : null}
-        <TextField
-          select
-          variant="outlined"
-          label="Choose isoform to view MSA for"
-          value={userSelection}
-          onChange={event => {
-            setUserSelection(event.target.value)
-          }}
-        >
-          {options.map(val => {
-            const inSet = set.has(getId(val))
-            return (
-              <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                {getTranscriptDisplayName(val)} {inSet ? ' (has data)' : ''}
-              </MenuItem>
-            )
-          })}
-        </TextField>
+        <TranscriptSelector
+          feature={feature}
+          options={options}
+          selectedTranscriptId={userSelection}
+          onTranscriptChange={setUserSelection}
+          proteinSequence={proteinSequence}
+        />
       </DialogContent>
 
       <DialogActions>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 import {
@@ -19,15 +19,12 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
-import { geneTreeFetcher } from './ensemblGeneTreeUtils'
-import {
-  getGeneDisplayName,
-  getId,
-  getTranscriptDisplayName,
-  getTranscriptFeatures,
-} from '../../util'
+import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { useGeneTree } from './useGeneTree'
+import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
+import { TranscriptSelector } from '../NCBIBlastQuery'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -37,8 +34,6 @@ const useStyles = makeStyles()({
     gap: 16,
   },
 })
-
-type Ret = Awaited<ReturnType<typeof geneTreeFetcher>>
 
 const EnsemblGeneTree = observer(function ({
   model,
@@ -52,33 +47,21 @@ const EnsemblGeneTree = observer(function ({
   const session = getSession(model)
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
-  const [error, setError] = useState<unknown>()
-  const [treeData, setTreeData] = useState<Ret>()
-  const [isTreeLoading, setIsTreeLoading] = useState(false)
-  const [treeError, setTreeError] = useState<unknown>()
+  const [launchViewError, setLaunchViewError] = useState<unknown>()
   const options = getTranscriptFeatures(feature)
   const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const { treeData, isTreeLoading, treeError } = useGeneTree(userSelection)
+  const selectedTranscript = options.find(val => getId(val) === userSelection)!
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        setIsTreeLoading(true)
-        const result = await geneTreeFetcher(userSelection)
-        setTreeData(result)
-      } catch (e) {
-        console.error(e)
-        setTreeError(e)
-      } finally {
-        setIsTreeLoading(false)
-      }
-    })()
-  }, [userSelection])
+  const { proteinSequence, error: featureSequenceError } = useFeatureSequence({
+    view,
+    feature: selectedTranscript,
+  })
 
   const loadingMessage = isTreeLoading
     ? 'Loading tree data from Ensembl GeneTree'
     : undefined
-  const e = treeError ?? error
+  const e = treeError ?? launchViewError ?? featureSequenceError
 
   return (
     <>
@@ -88,7 +71,6 @@ const EnsemblGeneTree = observer(function ({
         {treeData ? (
           <div>
             <div>Found Ensembl Compara GeneTree: {treeData.geneTreeId}</div>
-
             <Link
               target="_blank"
               href={`https://useast.ensembl.org/Multi/GeneTree/Image?gt=${treeData.geneTreeId}`}
@@ -97,22 +79,14 @@ const EnsemblGeneTree = observer(function ({
             </Link>
           </div>
         ) : null}
-        <div>
-          <TextField
-            select
-            label="Choose isoform to view MSA for"
-            value={userSelection}
-            onChange={event => {
-              setUserSelection(event.target.value)
-            }}
-          >
-            {options.map(val => (
-              <MenuItem value={getId(val)} key={val.id()}>
-                {getTranscriptDisplayName(val)}
-              </MenuItem>
-            ))}
-          </TextField>
-        </div>
+
+        <TranscriptSelector
+          feature={feature}
+          options={options}
+          selectedTranscriptId={userSelection}
+          onTranscriptChange={setUserSelection}
+          proteinSequence={proteinSequence}
+        />
       </DialogContent>
 
       <DialogActions>
@@ -124,7 +98,7 @@ const EnsemblGeneTree = observer(function ({
               if (!treeData) {
                 return
               }
-              setError(undefined)
+              setLaunchViewError(undefined)
 
               ensemblGeneTreeLaunchView({
                 feature,
@@ -136,7 +110,7 @@ const EnsemblGeneTree = observer(function ({
               handleClose()
             } catch (e) {
               console.error(e)
-              setError(e)
+              setLaunchViewError(e)
             }
           }}
         >

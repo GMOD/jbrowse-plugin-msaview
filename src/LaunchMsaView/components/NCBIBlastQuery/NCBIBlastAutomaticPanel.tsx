@@ -58,17 +58,10 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const options = getTranscriptFeatures(feature)
   const [userSelection, setUserSelection] = useState(getId(options[0]))
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
-  const { sequence, error } = useFeatureSequence({
+  const { error, proteinSequence } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
-  const proteinSequence =
-    sequence && !('error' in sequence)
-      ? getProteinSequenceFromFeature({
-          seq: sequence.seq,
-          selectedTranscript,
-        })
-      : ''
 
   const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
   const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']

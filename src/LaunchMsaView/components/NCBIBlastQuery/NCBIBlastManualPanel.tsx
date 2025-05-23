@@ -2,26 +2,14 @@ import React, { useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { getContainingView, shorten2 } from '@jbrowse/core/util'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  MenuItem,
-  Typography,
-} from '@mui/material'
+import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
-import TextField2 from '../../../TextField2'
 import { TranscriptSelector } from '.'
-import {
-  getGeneDisplayName,
-  getId,
-  getTranscriptDisplayName,
-  getTranscriptFeatures,
-} from '../../util'
+import { getId, getTranscriptFeatures } from '../../util'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -51,21 +39,13 @@ const NCBIBlastManualPanel = observer(function ({
   const options = getTranscriptFeatures(feature)
   const [userSelection, setUserSelection] = useState(getId(options[0]))
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
-  const { sequence, error } = useFeatureSequence({
+  const { proteinSequence, error } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
-  const proteinSequence =
-    sequence && !('error' in sequence)
-      ? getProteinSequenceFromFeature({
-          seq: sequence.seq,
-          selectedTranscript,
-        })
-      : ''
 
   const link = `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${proteinSequence}`
   const link2 = `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(proteinSequence, 10)}`
-  const [showSequence, setShowSequence] = useState(false)
 
   return (
     <>
@@ -73,57 +53,13 @@ const NCBIBlastManualPanel = observer(function ({
         {children}
         {error ? <ErrorMessage error={error} /> : null}
 
-        <div style={{ display: 'flex' }}>
-          <TextField2
-            variant="outlined"
-            label="Choose isoform to BLAST"
-            select
-            value={userSelection}
-            onChange={event => {
-              setUserSelection(event.target.value)
-            }}
-          >
-            {options.map(val => (
-              <MenuItem value={getId(val)} key={val.id()}>
-                {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
-              </MenuItem>
-            ))}
-          </TextField2>
-          <div style={{ alignContent: 'center', marginLeft: 20 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setShowSequence(!showSequence)
-              }}
-            >
-              {showSequence ? 'Hide sequence' : 'Show sequence'}
-            </Button>
-          </div>
-        </div>
-
-        {showSequence && (
-          <TextField2
-            variant="outlined"
-            multiline
-            minRows={5}
-            maxRows={10}
-            fullWidth
-            value={
-              proteinSequence
-                ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
-                : 'Loading...'
-            }
-            slotProps={{
-              input: {
-                readOnly: true,
-                classes: {
-                  input: classes.textAreaFont,
-                },
-              },
-            }}
-          />
-        )}
+        <TranscriptSelector
+          feature={feature}
+          options={options}
+          selectedTranscriptId={userSelection}
+          onTranscriptChange={setUserSelection}
+          proteinSequence={proteinSequence}
+        />
 
         {proteinSequence ? (
           <div style={{ wordBreak: 'break-all', margin: 30, maxWidth: 600 }}>

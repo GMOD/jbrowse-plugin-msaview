@@ -15,7 +15,6 @@ import {
   DialogContent,
   FormControl,
   FormControlLabel,
-  MenuItem,
   Radio,
   RadioGroup,
 } from '@mui/material'
@@ -24,16 +23,11 @@ import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
 import TextField2 from '../../../TextField2'
-import {
-  getGeneDisplayName,
-  getId,
-  getTranscriptDisplayName,
-  getTranscriptFeatures,
-} from '../../util'
-import { getProteinSequenceFromFeature } from '../NCBIBlastQuery/calculateProteinSequence'
+import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { TranscriptSelector } from '../NCBIBlastQuery'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -56,30 +50,22 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const session = getSession(model)
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
-  const [error1, setError] = useState<unknown>()
-  const [inputMethod, setInputMethod] = useState('file') // 'file' or 'text'
+  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const [inputMethod, setInputMethod] = useState<'file' | 'text'>('file')
   const [msaText, setMsaText] = useState('')
   const [treeText, setTreeText] = useState('')
-  const [showSequence, setShowSequence] = useState(false)
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
   const options = getTranscriptFeatures(feature)
   const [userSelection, setUserSelection] = useState(getId(options[0]))
   const ret = options.find(val => userSelection === getId(val))
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
-  const { sequence, error: error2 } = useFeatureSequence({
+  const { proteinSequence, error: error2 } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
-  const proteinSequence =
-    sequence && !('error' in sequence)
-      ? getProteinSequenceFromFeature({
-          seq: sequence.seq,
-          selectedTranscript,
-        })
-      : ''
 
-  const e = error1 ?? error2
+  const e = launchViewError ?? error2
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -89,7 +75,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             row
             value={inputMethod}
             onChange={event => {
-              setInputMethod(event.target.value)
+              setInputMethod(event.target.value as 'file' | 'text')
             }}
           >
             <FormControlLabel
@@ -128,6 +114,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                 name="MSA"
                 multiline
                 minRows={5}
+                style={{ marginBottom: '20px' }}
                 maxRows={10}
                 fullWidth
                 placeholder="Paste MSA here"
@@ -152,56 +139,14 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             </>
           )}
         </div>
-        <div style={{ display: 'flex' }}>
-          <TextField2
-            variant="outlined"
-            label="Choose isoform to BLAST"
-            select
-            value={userSelection}
-            onChange={event => {
-              setUserSelection(event.target.value)
-            }}
-          >
-            {options.map(val => (
-              <MenuItem value={getId(val)} key={val.id()}>
-                {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
-              </MenuItem>
-            ))}
-          </TextField2>
-          <div style={{ alignContent: 'center', marginLeft: 20 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setShowSequence(!showSequence)
-              }}
-            >
-              {showSequence ? 'Hide sequence' : 'Show sequence'}
-            </Button>
-          </div>
-        </div>
-        {showSequence && (
-          <TextField2
-            variant="outlined"
-            multiline
-            minRows={5}
-            maxRows={10}
-            fullWidth
-            value={
-              proteinSequence
-                ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
-                : 'Loading...'
-            }
-            slotProps={{
-              input: {
-                readOnly: true,
-                classes: {
-                  input: classes.textAreaFont,
-                },
-              },
-            }}
-          />
-        )}
+
+        <TranscriptSelector
+          feature={feature}
+          options={options}
+          selectedTranscriptId={userSelection}
+          onTranscriptChange={setUserSelection}
+          proteinSequence={proteinSequence}
+        />
       </DialogContent>
 
       <DialogActions>
@@ -221,7 +166,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                   return
                 }
 
-                setError(undefined)
+                setLaunchViewError(undefined)
                 launchView({
                   session,
                   newViewTitle: getGeneDisplayName(ret),
@@ -250,7 +195,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                 handleClose()
               } catch (e) {
                 console.error(e)
-                setError(e)
+                setLaunchViewError(e)
               }
             })()
           }}
