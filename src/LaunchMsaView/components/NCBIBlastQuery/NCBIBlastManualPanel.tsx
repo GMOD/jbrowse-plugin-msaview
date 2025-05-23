@@ -15,6 +15,7 @@ import { makeStyles } from 'tss-react/mui'
 import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
 import TextField2 from '../../../TextField2'
+import { TranscriptSelector } from '.'
 import {
   getGeneDisplayName,
   getId,

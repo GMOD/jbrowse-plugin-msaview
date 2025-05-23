@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { FileSelector } from '@jbrowse/core/ui'
+import { ErrorMessage, FileSelector } from '@jbrowse/core/ui'
 import {
   AbstractTrackModel,
   Feature,
@@ -15,22 +15,32 @@ import {
   DialogContent,
   FormControl,
   FormControlLabel,
+  MenuItem,
   Radio,
   RadioGroup,
-  Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
 import TextField2 from '../../../TextField2'
-import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import {
+  getGeneDisplayName,
+  getId,
+  getTranscriptDisplayName,
+  getTranscriptFeatures,
+} from '../../util'
+import { getProteinSequenceFromFeature } from '../NCBIBlastQuery/calculateProteinSequence'
+import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
+  },
+  textAreaFont: {
+    fontFamily: 'Courier New',
   },
 })
 
@@ -46,30 +56,41 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const session = getSession(model)
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
-  const [, setError] = useState<unknown>()
+  const [error1, setError] = useState<unknown>()
   const [inputMethod, setInputMethod] = useState('file') // 'file' or 'text'
   const [msaText, setMsaText] = useState('')
   const [treeText, setTreeText] = useState('')
-
+  const [showSequence, setShowSequence] = useState(false)
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
-
   const options = getTranscriptFeatures(feature)
   const [userSelection, setUserSelection] = useState(getId(options[0]))
   const ret = options.find(val => userSelection === getId(val))
+  const selectedTranscript = options.find(val => getId(val) === userSelection)!
+  const { sequence, error: error2 } = useFeatureSequence({
+    view,
+    feature: selectedTranscript,
+  })
+  const proteinSequence =
+    sequence && !('error' in sequence)
+      ? getProteinSequenceFromFeature({
+          seq: sequence.seq,
+          selectedTranscript,
+        })
+      : ''
 
+  const e = error1 ?? error2
   return (
     <>
       <DialogContent className={classes.dialogContent}>
-        <FormControl component="fieldset" style={{ marginBottom: '20px' }}>
+        {e ? <ErrorMessage error={e} /> : null}
+        <FormControl component="fieldset">
           <RadioGroup
-            aria-label="input-method"
-            name="input-method"
+            row
             value={inputMethod}
             onChange={event => {
               setInputMethod(event.target.value)
             }}
-            row
           >
             <FormControlLabel
               value="file"
@@ -84,55 +105,102 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           </RadioGroup>
         </FormControl>
 
-        {inputMethod === 'file' ? (
-          <>
-            <Typography variant="subtitle1">MSA File</Typography>
-            <FileSelector
-              location={msaFileLocation}
-              setLocation={setMsaFileLocation}
-            />
-            <Typography variant="subtitle1" style={{ marginTop: '20px' }}>
-              Tree File
-            </Typography>
-            <FileSelector
-              location={treeFileLocation}
-              setLocation={setTreeFileLocation}
-            />
-          </>
-        ) : (
-          <>
-            <Typography variant="subtitle1">
-              Paste MSA here (clustal .aln, aligned .fa/.mfa, etc.)
-            </Typography>
-            <TextField2
-              variant="outlined"
-              multiline
-              minRows={5}
-              maxRows={10}
-              fullWidth
-              value={msaText}
-              onChange={event => {
-                setMsaText(event.target.value)
+        <div style={{ marginBottom: 30 }}>
+          {inputMethod === 'file' ? (
+            <div style={{ maxWidth: 500 }}>
+              <FileSelector
+                name="MSA File"
+                inline
+                location={msaFileLocation}
+                setLocation={setMsaFileLocation}
+              />
+              <FileSelector
+                name="Tree file"
+                inline
+                location={treeFileLocation}
+                setLocation={setTreeFileLocation}
+              />
+            </div>
+          ) : (
+            <>
+              <TextField2
+                variant="outlined"
+                name="MSA"
+                multiline
+                minRows={5}
+                maxRows={10}
+                fullWidth
+                placeholder="Paste MSA here"
+                value={msaText}
+                onChange={event => {
+                  setMsaText(event.target.value)
+                }}
+              />
+              <TextField2
+                variant="outlined"
+                name="Tree"
+                multiline
+                minRows={5}
+                maxRows={10}
+                fullWidth
+                placeholder="Paste newick tree (optional)"
+                value={treeText}
+                onChange={event => {
+                  setTreeText(event.target.value)
+                }}
+              />
+            </>
+          )}
+        </div>
+        <div style={{ display: 'flex' }}>
+          <TextField2
+            variant="outlined"
+            label="Choose isoform to BLAST"
+            select
+            value={userSelection}
+            onChange={event => {
+              setUserSelection(event.target.value)
+            }}
+          >
+            {options.map(val => (
+              <MenuItem value={getId(val)} key={val.id()}>
+                {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
+              </MenuItem>
+            ))}
+          </TextField2>
+          <div style={{ alignContent: 'center', marginLeft: 20 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setShowSequence(!showSequence)
               }}
-              placeholder="Paste MSA here"
-              style={{ marginBottom: '20px' }}
-            />
-            <Typography variant="subtitle1">
-              Paste newick tree here (.nh)
-            </Typography>
-            <TextField2
-              variant="outlined"
-              multiline
-              minRows={5}
-              maxRows={10}
-              fullWidth
-              value={treeText}
-              onChange={event => {
-                setTreeText(event.target.value)
-              }}
-              placeholder="Paste newick tree (optional)"
-            />
-          </>
+            >
+              {showSequence ? 'Hide sequence' : 'Show sequence'}
+            </Button>
+          </div>
+        </div>
+        {showSequence && (
+          <TextField2
+            variant="outlined"
+            multiline
+            minRows={5}
+            maxRows={10}
+            fullWidth
+            value={
+              proteinSequence
+                ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
+                : 'Loading...'
+            }
+            slotProps={{
+              input: {
+                readOnly: true,
+                classes: {
+                  input: classes.textAreaFont,
+                },
+              },
+            }}
+          />
         )}
       </DialogContent>
 
@@ -153,6 +221,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                   return
                 }
 
+                setError(undefined)
                 launchView({
                   session,
                   newViewTitle: getGeneDisplayName(ret),

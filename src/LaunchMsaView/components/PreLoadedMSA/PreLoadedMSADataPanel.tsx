@@ -88,6 +88,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         ) : null}
         <TextField
           select
+          variant="outlined"
           label="Choose isoform to view MSA for"
           value={userSelection}
           onChange={event => {

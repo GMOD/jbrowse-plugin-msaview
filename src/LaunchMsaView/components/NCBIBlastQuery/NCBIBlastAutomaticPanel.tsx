@@ -11,7 +11,6 @@ import {
   DialogActions,
   DialogContent,
   MenuItem,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
@@ -21,6 +20,7 @@ import { ncbiBlastLaunchView } from './blastLaunchView'
 import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
 import TextField2 from '../../../TextField2'
+import { TranscriptSelector } from '.'
 import {
   getGeneDisplayName,
   getId,
@@ -72,7 +72,6 @@ const NCBIBlastAutomaticPanel = observer(function ({
 
   const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
   const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
-  const [showSequence, setShowSequence] = useState(false)
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -112,57 +111,13 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ))}
         </TextField2>
 
-        <div style={{ display: 'flex' }}>
-          <TextField2
-            variant="outlined"
-            label="Choose isoform to BLAST"
-            select
-            value={userSelection}
-            onChange={event => {
-              setUserSelection(event.target.value)
-            }}
-          >
-            {options.map(val => (
-              <MenuItem value={getId(val)} key={val.id()}>
-                {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
-              </MenuItem>
-            ))}
-          </TextField2>
-          <div style={{ alignContent: 'center', marginLeft: 20 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setShowSequence(!showSequence)
-              }}
-            >
-              {showSequence ? 'Hide sequence' : 'Show sequence'}
-            </Button>
-          </div>
-        </div>
-
-        {showSequence && (
-          <TextField2
-            variant="outlined"
-            multiline
-            minRows={5}
-            maxRows={10}
-            fullWidth
-            value={
-              proteinSequence
-                ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
-                : 'Loading...'
-            }
-            slotProps={{
-              input: {
-                readOnly: true,
-                classes: {
-                  input: classes.textAreaFont,
-                },
-              },
-            }}
-          />
-        )}
+        <TranscriptSelector
+          feature={feature}
+          options={options}
+          selectedTranscriptId={userSelection}
+          onTranscriptChange={setUserSelection}
+          proteinSequence={proteinSequence}
+        />
 
         <Typography style={{ marginTop: 20 }}>
           This panel will automatically submit a query to NCBI using blastp. The

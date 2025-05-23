@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 
 import NCBIBlastAutomaticPanel from './NCBIBlastAutomaticPanel'
-import NCBIBlastMethodSelector from './NCBIBlastMethodSelector'
 import NCBIBlastManualPanel from './NCBIBlastManualPanel'
+import NCBIBlastMethodSelector from './NCBIBlastMethodSelector'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
