@@ -17,12 +17,8 @@ export function ncbiBlastLaunchView({
     displayName: newViewTitle,
     connectedViewId: view.id,
     connectedFeature: feature.toJSON(),
-    treeAreaWidth: 250,
-    treeWidth: 100,
     drawNodeBubbles: true,
-    labelsAlignRight: true,
     colWidth: 10,
     rowHeight: 12,
-    colorSchemeName: 'percent_identity_dynamic',
   }) as JBrowsePluginMsaViewModel
 }

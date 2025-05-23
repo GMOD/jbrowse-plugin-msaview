@@ -1,17 +1,18 @@
 import React from 'react'
 
-import { Link, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 
-import OpenInNewIcon from '../../OpenInNewIcon'
 import { BLAST_URL } from '../../utils/ncbiBlast'
+import ExternalLink from '../../ExternalLink'
 
 function RIDLink({ rid }: { rid: string }) {
   return (
     <Typography>
-      RID {rid}{' '}
-      <Link target="_black" href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
-        (see status at NCBI <OpenInNewIcon />)
-      </Link>
+      RID {rid} (
+      <ExternalLink href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
+        see status at NCBI
+      </ExternalLink>
+      )
     </Typography>
   )
 }

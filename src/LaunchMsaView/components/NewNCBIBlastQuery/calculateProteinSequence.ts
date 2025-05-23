@@ -1,4 +1,5 @@
 import {
+  dedupe,
   defaultCodonTable,
   generateCodonTable,
   revcom,
@@ -36,19 +37,7 @@ export function revlist(list: Feat[], seqlen: number) {
       start: seqlen - sub.end,
       end: seqlen - sub.start,
     }))
-    .sort((a, b) => a.start - b.start)
-}
-
-// filter items if they have the same "ID" or location
-function getItemId(feat: Feat) {
-  return `${feat.start}-${feat.end}`
-}
-
-// filters if successive elements share same start/end
-export function dedupe(list: Feat[]) {
-  return list.filter(
-    (item, pos, ary) => !pos || getItemId(item) !== getItemId(ary[pos - 1]!),
-  )
+    .toSorted((a, b) => a.start - b.start)
 }
 
 export function getProteinSequence({
@@ -58,21 +47,22 @@ export function getProteinSequence({
   seq: string
   selectedTranscript: Feature
 }) {
-  const f = selectedTranscript.toJSON()
+  const { subfeatures, start, strand } = selectedTranscript.toJSON()
   const cds = dedupe(
-    f.subfeatures
-      ?.sort((a, b) => a.start - b.start)
+    subfeatures
+      ?.toSorted((a, b) => a.start - b.start)
       .map(sub => ({
         ...sub,
-        start: sub.start - f.start,
-        end: sub.end - f.start,
+        start: sub.start - start,
+        end: sub.end - start,
       }))
-      .filter(f => f.type === 'CDS') ?? [],
+      .filter(subfeature => subfeature.type === 'CDS') ?? [],
+    feat => `${feat.start}-${feat.end}`,
   )
 
   return calculateProteinSequence({
-    cds: f.strand === -1 ? revlist(cds, seq.length) : cds,
-    sequence: f.strand === -1 ? revcom(seq) : seq,
+    cds: strand === -1 ? revlist(cds, seq.length) : cds,
+    sequence: strand === -1 ? revcom(seq) : seq,
     codonTable: generateCodonTable(defaultCodonTable),
   })
 }

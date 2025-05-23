@@ -28,6 +28,7 @@ import {
 } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import ExternalLink from '../../../ExternalLink'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -77,9 +78,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
       <DialogContent className={classes.dialogContent}>
         <Typography>
           The source data for these multiple sequence alignments is from{' '}
-          <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
+          <ExternalLink href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">
             knownCanonical.multiz100way.protAA.fa.gz
-          </a>
+          </ExternalLink>
         </Typography>
         {error ? <ErrorMessage error={error} /> : null}
         {geneNameList && !ret ? (

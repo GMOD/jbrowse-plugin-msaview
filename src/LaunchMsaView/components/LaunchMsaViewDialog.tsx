@@ -5,8 +5,8 @@ import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 
 import EnsemblGeneTree from './EnsemblGeneTree/EnsemblGeneTree'
-import MSALoader from './MSALoader/MSALoader'
-import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery'
+import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
+import NewNcbiBlastQueryPanel from './NewNCBIBlastQuery/NCBIBlastPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import TabPanel from './TabPanel'
 
@@ -39,7 +39,7 @@ export default function LaunchProteinViewDialog({
         <Tab label="NCBI BLAST query" value={0} />
         <Tab label="UCSC 100-way dataset" value={1} />
         <Tab label="Ensembl GeneTree" value={2} />
-        <Tab label="Manually open MSA" value={3} />
+        <Tab label="Manually open MSA/tree" value={3} />
       </Tabs>
       <TabPanel value={value} index={0}>
         <NewNcbiBlastQueryPanel
@@ -63,7 +63,11 @@ export default function LaunchProteinViewDialog({
         />
       </TabPanel>
       <TabPanel value={value} index={3}>
-        <MSALoader model={model} feature={feature} handleClose={handleClose} />
+        <ManualMSALoader
+          model={model}
+          feature={feature}
+          handleClose={handleClose}
+        />
       </TabPanel>
     </Dialog>
   )

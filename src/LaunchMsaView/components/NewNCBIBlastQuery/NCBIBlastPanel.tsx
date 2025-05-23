@@ -10,8 +10,8 @@ import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import { ncbiBlastLaunchView } from './blastLaunchView'
 import { getProteinSequence } from './calculateProteinSequence'
-import { ncbiBlastLaunchView } from './ncbiBlastLaunchView'
 import { useFeatureSequence } from './useFeatureSequence'
 import TextField2 from '../../../TextField2'
 import {

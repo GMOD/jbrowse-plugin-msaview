@@ -1,1 +1,1 @@
-export { default } from './NcbiBlastPanel'
+export { default } from './NCBIBlastPanel'
