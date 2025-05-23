@@ -39,7 +39,7 @@ export default function TranscriptSelector({
 
   return (
     <>
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'inline' }}>
         <TextField2
           variant="outlined"
           label={`Choose isoform of ${getGeneDisplayName2(feature)}`}
@@ -51,14 +51,17 @@ export default function TranscriptSelector({
           }}
         >
           {options
-            .toSorted((a, b) => getTranscriptLength(b) - getTranscriptLength(a))
+            .toSorted(
+              (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
+            )
             .map(val => {
               const inSet = validSet ? validSet.has(getId(val)) : true
+              const { len, mod } = getTranscriptLength(val)
               return (
                 <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                  {getTranscriptDisplayName(val)} ({getTranscriptLength(val)}{' '}
-                  aa)
-                  {validSet ? (inSet ? ' (has data)' : '') : ''}
+                  {getTranscriptDisplayName(val)} ({len} aa){' '}
+                  {mod ? ` (possible fragment)` : ''}
+                  {validSet ? (!inSet ? ' (no data)' : '') : ''}
                 </MenuItem>
               )
             })}

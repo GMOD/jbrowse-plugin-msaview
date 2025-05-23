@@ -15,14 +15,16 @@ export function getTranscriptFeatures(feature: Feature) {
 }
 
 export function getTranscriptLength(feature: Feature) {
-  return Math.floor(
-    sum(
-      feature
-        .get('subfeatures')
-        ?.filter(f => f.get('type').toLowerCase() === 'cds')
-        .map(s => s.get('end') - s.get('start')) ?? [],
-    ) / 3,
+  const cdsLen = sum(
+    feature
+      .get('subfeatures')
+      ?.filter(f => f.get('type').toLowerCase() === 'cds')
+      .map(s => s.get('end') - s.get('start')) ?? [],
   )
+  return {
+    len: Math.floor(cdsLen / 3),
+    mod: cdsLen % 3,
+  }
 }
 export function getId(val?: Feature): string {
   return val?.get('name') ?? val?.get('id') ?? ''

@@ -95,13 +95,13 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           {inputMethod === 'file' ? (
             <div style={{ maxWidth: 500 }}>
               <FileSelector
-                name="MSA File"
+                name="MSA File .aln (Clustal), .fa/.mfa (aligned FASTA), .stock (Stockholm), etc)"
                 inline
                 location={msaFileLocation}
                 setLocation={setMsaFileLocation}
               />
               <FileSelector
-                name="Tree file"
+                name="Tree file .nh (Newick) or .asn (NCBI COBALT ASN.1)"
                 inline
                 location={treeFileLocation}
                 setLocation={setTreeFileLocation}
