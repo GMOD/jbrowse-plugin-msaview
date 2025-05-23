@@ -4,8 +4,8 @@ import { getSession } from '@jbrowse/core/util'
 
 import { fetchSeq } from './fetchSeq'
 
-import type { Feature } from '@jbrowse/core/util'
 import type { SeqState } from './types'
+import type { Feature } from '@jbrowse/core/util'
 
 export interface ErrorState {
   error: string

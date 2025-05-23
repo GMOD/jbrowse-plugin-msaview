@@ -11,9 +11,9 @@ import {
   Button,
   DialogActions,
   DialogContent,
+  Link,
   MenuItem,
   TextField,
-  Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
@@ -32,6 +32,9 @@ import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
   },
 })
 
@@ -82,21 +85,34 @@ const EnsemblGeneTree = observer(function ({
       <DialogContent className={classes.dialogContent}>
         {e ? <ErrorMessage error={e} /> : null}
         {loadingMessage ? <LoadingEllipses message={loadingMessage} /> : null}
-        <Typography>Load data from Ensembl GeneTree</Typography>
-        <TextField
-          select
-          label="Choose isoform to view MSA for"
-          value={userSelection}
-          onChange={event => {
-            setUserSelection(event.target.value)
-          }}
-        >
-          {options.map(val => (
-            <MenuItem value={getId(val)} key={val.id()}>
-              {getTranscriptDisplayName(val)}
-            </MenuItem>
-          ))}
-        </TextField>
+        {treeData ? (
+          <div>
+            <div>Found Ensembl Compara GeneTree: {treeData.geneTreeId}</div>
+
+            <Link
+              target="_blank"
+              href={`https://useast.ensembl.org/Multi/GeneTree/Image?gt=${treeData.geneTreeId}`}
+            >
+              See {treeData.geneTreeId} at Ensembl
+            </Link>
+          </div>
+        ) : null}
+        <div>
+          <TextField
+            select
+            label="Choose isoform to view MSA for"
+            value={userSelection}
+            onChange={event => {
+              setUserSelection(event.target.value)
+            }}
+          >
+            {options.map(val => (
+              <MenuItem value={getId(val)} key={val.id()}>
+                {getTranscriptDisplayName(val)}
+              </MenuItem>
+            ))}
+          </TextField>
+        </div>
       </DialogContent>
 
       <DialogActions>
