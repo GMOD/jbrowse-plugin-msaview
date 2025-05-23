@@ -40,7 +40,7 @@ export function revlist(list: Feat[], seqlen: number) {
     .toSorted((a, b) => a.start - b.start)
 }
 
-export function getProteinSequence({
+export function getProteinSequenceFromFeature({
   selectedTranscript,
   seq,
 }: {
