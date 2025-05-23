@@ -20,6 +20,7 @@ import { makeStyles } from 'tss-react/mui'
 
 import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
+import ExternalLink from '../../../ExternalLink'
 import {
   getGeneDisplayName,
   getId,
@@ -28,7 +29,6 @@ import {
 } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import ExternalLink from '../../../ExternalLink'
 
 const useStyles = makeStyles()({
   dialogContent: {

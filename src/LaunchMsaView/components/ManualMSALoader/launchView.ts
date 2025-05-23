@@ -2,7 +2,7 @@ import { AbstractSessionModel, Feature, FileLocation } from '@jbrowse/core/util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
-export async function launchView({
+export function launchView({
   session,
   newViewTitle,
   view,

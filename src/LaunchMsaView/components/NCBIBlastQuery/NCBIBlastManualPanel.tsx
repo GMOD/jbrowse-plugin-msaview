@@ -2,23 +2,16 @@ import React, { useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { getContainingView, shorten2 } from '@jbrowse/core/util'
-import HelpIcon from '@mui/icons-material/Help'
 import {
   Button,
   DialogActions,
   DialogContent,
-  FormControl,
-  FormControlLabel,
-  IconButton,
   MenuItem,
-  Radio,
-  RadioGroup,
   Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import HelpDialog from './NCBIHelpDialog'
 import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { useFeatureSequence } from './useFeatureSequence'
 import TextField2 from '../../../TextField2'
@@ -35,23 +28,22 @@ import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
   },
   textAreaFont: {
     fontFamily: 'Courier New',
   },
 })
 
-const NCBIBlastPanel = observer(function ({
+const NCBIBlastManualPanel = observer(function ({
   handleClose,
   feature,
   model,
+  children,
 }: {
+  children: React.ReactNode
   model: AbstractTrackModel
   feature: Feature
-  handleClose: (arg: boolean) => void
+  handleClose: () => void
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
@@ -72,26 +64,19 @@ const NCBIBlastPanel = observer(function ({
 
   const link = `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${proteinSequence}`
   const link2 = `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(proteinSequence, 10)}`
-  const [blastMethod, setBlastMethod] = useState('direct')
-  const [helpDialogOpen, setHelpDialogOpen] = useState(false)
+  const [showSequence, setShowSequence] = useState(false)
 
-  return helpDialogOpen ? (
-    <HelpDialog
-      onClose={() => {
-        setHelpDialogOpen(false)
-      }}
-    />
-  ) : (
+  return (
     <>
       <DialogContent className={classes.dialogContent}>
+        {children}
         {error ? <ErrorMessage error={error} /> : null}
 
-        <Typography variant="subtitle1">
-          Choose isoform for gene "{getGeneDisplayName(feature)}" to retrieve
-          its protein coding sequence:{' '}
+        <div style={{ display: 'flex' }}>
           <TextField2
-            select
             variant="outlined"
+            label="Choose isoform to BLAST"
+            select
             value={userSelection}
             onChange={event => {
               setUserSelection(event.target.value)
@@ -99,34 +84,48 @@ const NCBIBlastPanel = observer(function ({
           >
             {options.map(val => (
               <MenuItem value={getId(val)} key={val.id()}>
-                {getTranscriptDisplayName(val)}
+                {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
               </MenuItem>
             ))}
           </TextField2>
-        </Typography>
+          <div style={{ alignContent: 'center', marginLeft: 20 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setShowSequence(!showSequence)
+              }}
+            >
+              {showSequence ? 'Hide sequence' : 'Show sequence'}
+            </Button>
+          </div>
+        </div>
 
-        <FormControl component="fieldset">
-          <RadioGroup
-            value={blastMethod}
-            onChange={event => {
-              setBlastMethod(event.target.value)
+        {showSequence && (
+          <TextField2
+            variant="outlined"
+            multiline
+            minRows={5}
+            maxRows={10}
+            fullWidth
+            value={
+              proteinSequence
+                ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
+                : 'Loading...'
+            }
+            slotProps={{
+              input: {
+                readOnly: true,
+                classes: {
+                  input: classes.textAreaFont,
+                },
+              },
             }}
-          >
-            <FormControlLabel
-              value="direct"
-              control={<Radio />}
-              label="Launch NCBI BLAST for this sequence"
-            />
-            <FormControlLabel
-              value="manual"
-              control={<Radio />}
-              label="Manually copy and paste sequence"
-            />
-          </RadioGroup>
-        </FormControl>
+          />
+        )}
 
-        {blastMethod === 'direct' && proteinSequence ? (
-          <div style={{ wordBreak: 'break-all' }}>
+        {proteinSequence ? (
+          <div style={{ wordBreak: 'break-all', margin: 30, maxWidth: 600 }}>
             Link to NCBI BLAST:{' '}
             <a target="_blank" href={link} rel="noreferrer">
               {link2}
@@ -134,44 +133,12 @@ const NCBIBlastPanel = observer(function ({
           </div>
         ) : null}
 
-        {blastMethod === 'manual' && (
-          <div>
-            <Typography variant="subtitle1">
-              Copy and paste the sequence below into the NCBI BLAST or similar
-              application:
-            </Typography>
-            <TextField2
-              variant="outlined"
-              multiline
-              minRows={5}
-              maxRows={10}
-              fullWidth
-              value={
-                proteinSequence
-                  ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
-                  : 'Loading...'
-              }
-              slotProps={{
-                input: {
-                  readOnly: true,
-                  classes: {
-                    input: classes.textAreaFont,
-                  },
-                },
-              }}
-            />
-          </div>
-        )}
-        <Typography>
-          After you have run NCBI BLAST, you can download .aln and/or newick
-          tree .nh file, and manually open them in the "Open MSA" tab{' '}
-          <IconButton
-            onClick={() => {
-              setHelpDialogOpen(true)
-            }}
-          >
-            <HelpIcon />
-          </IconButton>
+        <Typography style={{ marginTop: 20 }}>
+          Click the link above and run your BLAST query, and once you have
+          results, click "Multiple Alignment" at the top of the results page to
+          be redirected to COBALT, NCBI's multiple sequence aligner. Once COBALT
+          completes, you can download an MSA (.aln file) and optionally a Newick
+          tree (.nh) and paste the results into JBrowse
         </Typography>
       </DialogContent>
 
@@ -180,16 +147,16 @@ const NCBIBlastPanel = observer(function ({
           color="primary"
           variant="contained"
           onClick={() => {
-            handleClose(true)
+            handleClose()
           }}
         >
-          Proceed to the "Open MSA" tab
+          Submit
         </Button>
         <Button
           color="secondary"
           variant="contained"
           onClick={() => {
-            handleClose(false)
+            handleClose()
           }}
         >
           Close
@@ -199,4 +166,4 @@ const NCBIBlastPanel = observer(function ({
   )
 })
 
-export default NCBIBlastPanel
+export default NCBIBlastManualPanel

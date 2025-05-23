@@ -153,7 +153,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                   return
                 }
 
-                await launchView({
+                launchView({
                   session,
                   newViewTitle: getGeneDisplayName(ret),
                   view,

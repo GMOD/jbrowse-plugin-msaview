@@ -6,7 +6,7 @@ import { Tab, Tabs } from '@mui/material'
 
 import EnsemblGeneTree from './EnsemblGeneTree/EnsemblGeneTree'
 import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
-import NewNCBIBlastQueryPanel from './NewNCBIBlastQuery/NCBIBlastAutomaticApproachPanel'
+import NCBIBlastPanel from './NCBIBlastQuery/NCBIBlastPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import TabPanel from './TabPanel'
 
@@ -42,7 +42,7 @@ export default function LaunchProteinViewDialog({
         <Tab label="Manually open MSA/tree" value={3} />
       </Tabs>
       <TabPanel value={value} index={0}>
-        <NewNCBIBlastQueryPanel
+        <NCBIBlastPanel
           handleClose={handleClose}
           feature={feature}
           model={model}

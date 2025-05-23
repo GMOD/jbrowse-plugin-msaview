@@ -2,8 +2,8 @@ import React from 'react'
 
 import { Typography } from '@mui/material'
 
-import { BLAST_URL } from '../../utils/ncbiBlast'
 import ExternalLink from '../../ExternalLink'
+import { BLAST_URL } from '../../utils/ncbiBlast'
 
 function RIDLink({ rid }: { rid: string }) {
   return (
