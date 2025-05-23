@@ -42,8 +42,9 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
               style={{ left, width }}
             />
           )
+        } else {
+          return null
         }
-        return null
       })}
     </>
   ) : null

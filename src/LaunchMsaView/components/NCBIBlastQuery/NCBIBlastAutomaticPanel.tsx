@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import {
@@ -16,7 +16,7 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { ncbiBlastLaunchView } from './blastLaunchView'
+import { blastLaunchView } from './blastLaunchView'
 import TextField2 from '../../../TextField2'
 import {
   getGeneDisplayName,
@@ -51,12 +51,17 @@ const NCBIBlastAutomaticPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
-  const [blastDatabase, setBlastDatabase] = useState('nr')
-  const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
-
+  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const [selectedBlastDatabase, setSelectedBlastDatabase] = useState('nr')
+  const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] = useState('clustalo')
   const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const selectedTranscript = options.find(val => getId(val) === userSelection)!
+  const [selectedTranscriptId, setSelectedTranscriptId] = useState(
+    getId(options[0]),
+  )
+  const [selectedBlastProgram, setSelectedBlastProgram] = useState('blastp')
+  const selectedTranscript = options.find(
+    val => getId(val) === selectedTranscriptId,
+  )!
   const { error, proteinSequence } = useFeatureSequence({
     view,
     feature: selectedTranscript,
@@ -64,19 +69,29 @@ const NCBIBlastAutomaticPanel = observer(function ({
 
   const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
   const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
+  const blastPrograms =
+    selectedBlastDatabase === 'nr_cluster_seq'
+      ? ['blastp']
+      : ['blastp', 'quick-blastp']
+  useEffect(() => {
+    if (selectedBlastDatabase === 'nr_cluster_seq') {
+      setSelectedTranscriptId('blastp')
+    }
+  }, [selectedBlastDatabase])
+  const e = error ?? launchViewError
   return (
     <>
       <DialogContent className={classes.dialogContent}>
         {children}
-        {error ? <ErrorMessage error={error} /> : null}
+        {e ? <ErrorMessage error={e} /> : null}
         <TextField2
           variant="outlined"
           label="BLAST database"
-          style={{ width: 100 }}
+          style={{ width: 150 }}
           select
-          value={blastDatabase}
+          value={selectedBlastDatabase}
           onChange={event => {
-            setBlastDatabase(event.target.value)
+            setSelectedBlastDatabase(event.target.value)
           }}
         >
           {blastDatabaseOptions.map(val => (
@@ -89,11 +104,11 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="MSA Algorithm"
-          style={{ width: 100 }}
+          style={{ width: 150 }}
           select
-          value={msaAlgorithm}
+          value={selectedMsaAlgorithm}
           onChange={event => {
-            setMsaAlgorithm(event.target.value)
+            setSelectedMsaAlgorithm(event.target.value)
           }}
         >
           {msaAlgorithms.map(val => (
@@ -103,11 +118,28 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ))}
         </TextField2>
 
+        <TextField2
+          variant="outlined"
+          label="BLAST program"
+          style={{ width: 150 }}
+          select
+          value={selectedBlastProgram}
+          onChange={event => {
+            setSelectedBlastProgram(event.target.value)
+          }}
+        >
+          {blastPrograms.map(val => (
+            <MenuItem value={val} key={val}>
+              {val}
+            </MenuItem>
+          ))}
+        </TextField2>
+
         <TranscriptSelector
           feature={feature}
           options={options}
-          selectedTranscriptId={userSelection}
-          onTranscriptChange={setUserSelection}
+          selectedTranscriptId={selectedTranscriptId}
+          onTranscriptChange={setSelectedTranscriptId}
           proteinSequence={proteinSequence}
         />
 
@@ -126,18 +158,25 @@ const NCBIBlastAutomaticPanel = observer(function ({
           color="primary"
           variant="contained"
           onClick={() => {
-            const newView = ncbiBlastLaunchView({
-              feature: selectedTranscript,
-              view,
-              newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - ${msaAlgorithm}`,
-            })
-            newView.setBlastParams({
-              blastProgram: 'blastp',
-              blastDatabase,
-              msaAlgorithm,
-              selectedTranscript,
-              proteinSequence,
-            })
+            try {
+              setLaunchViewError(undefined)
+              blastLaunchView({
+                feature: selectedTranscript,
+                view,
+                newViewTitle: `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                blastParams: {
+                  blastProgram: selectedBlastProgram,
+                  blastDatabase: selectedBlastDatabase,
+                  msaAlgorithm: selectedMsaAlgorithm,
+                  selectedTranscript,
+                  proteinSequence,
+                },
+              })
+            } catch (e) {
+              console.error(e)
+              setLaunchViewError(e)
+            }
+
             handleClose()
           }}
           disabled={!proteinSequence}

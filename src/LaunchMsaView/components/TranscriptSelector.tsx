@@ -6,7 +6,7 @@ import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../TextField2'
 import {
-  getGeneDisplayName2,
+  getGeneDisplayName,
   getId,
   getTranscriptDisplayName,
   getTranscriptLength,
@@ -41,10 +41,10 @@ export default function TranscriptSelector({
 
   return (
     <>
-      <div style={{ display: 'inline' }}>
+      <div style={{ display: 'flex' }}>
         <TextField2
           variant="outlined"
-          label={`Choose isoform of ${getGeneDisplayName2(feature)}`}
+          label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
           style={{ minWidth: 300 }}
           value={selectedTranscriptId}

@@ -41,14 +41,6 @@ export function getTranscriptDisplayName(val?: Feature) {
 export function getGeneDisplayName(val?: Feature) {
   return val === undefined
     ? ''
-    : [val.get('gene_name') ?? val.get('name'), val.get('id')]
-        .filter(f => !!f)
-        .join(' ')
-}
-
-export function getGeneDisplayName2(val?: Feature) {
-  return val === undefined
-    ? ''
     : [
         val.get('gene_name') ?? val.get('name'),
         val.get('id') ? `(${val.get('id')})` : '',

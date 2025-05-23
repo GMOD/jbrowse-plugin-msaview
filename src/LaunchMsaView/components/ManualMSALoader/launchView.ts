@@ -25,10 +25,10 @@ export function launchView({
   session.addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
+    connectedViewId: view.id,
+    connectedFeature: feature.toJSON(),
     msaFileLocation,
     treeFileLocation,
     data,
-    connectedViewId: view.id,
-    connectedFeature: feature.toJSON(),
   })
 }

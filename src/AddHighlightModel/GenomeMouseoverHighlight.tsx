@@ -7,7 +7,7 @@ import { useStyles } from './util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
-const GenomeMouseoverHighlight = observer(function GenomeMouseoverHighlight2({
+const GenomeMouseoverHighlight = observer(function ({
   model,
 }: {
   model: LinearGenomeViewModel
@@ -16,11 +16,11 @@ const GenomeMouseoverHighlight = observer(function GenomeMouseoverHighlight2({
   return hovered &&
     typeof hovered === 'object' &&
     'hoverPosition' in hovered ? (
-    <HoverHighlight model={model} />
+    <GenomeMouseoverHighlightPostNullCheck model={model} />
   ) : null
 })
 
-const HoverHighlight = observer(function HoverHighlight2({
+const GenomeMouseoverHighlightPostNullCheck = observer(function ({
   model,
 }: {
   model: LinearGenomeViewModel
