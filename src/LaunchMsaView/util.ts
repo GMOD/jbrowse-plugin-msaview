@@ -1,4 +1,6 @@
-import { Feature } from '@jbrowse/core/util'
+import { sum } from '@jbrowse/core/util'
+
+import type { Feature } from '@jbrowse/core/util'
 
 export function getTranscriptFeatures(feature: Feature) {
   // check if we are looking at a 'two-level' or 'three-level' feature by
@@ -10,6 +12,17 @@ export function getTranscriptFeatures(feature: Feature) {
       subfeatures.filter(f =>
         f.get('subfeatures')?.some(f => f.get('type') === 'CDS'),
       )
+}
+
+export function getTranscriptLength(feature: Feature) {
+  return Math.floor(
+    sum(
+      feature
+        .get('subfeatures')
+        ?.filter(f => f.get('type').toLowerCase() === 'cds')
+        .map(s => s.get('end') - s.get('start')) ?? [],
+    ) / 3,
+  )
 }
 export function getId(val?: Feature): string {
   return val?.get('name') ?? val?.get('id') ?? ''
@@ -25,6 +38,17 @@ export function getGeneDisplayName(val?: Feature) {
   return val === undefined
     ? ''
     : [val.get('gene_name') ?? val.get('name'), val.get('id')]
+        .filter(f => !!f)
+        .join(' ')
+}
+
+export function getGeneDisplayName2(val?: Feature) {
+  return val === undefined
+    ? ''
+    : [
+        val.get('gene_name') ?? val.get('name'),
+        val.get('id') ? `(${val.get('id')})` : '',
+      ]
         .filter(f => !!f)
         .join(' ')
 }

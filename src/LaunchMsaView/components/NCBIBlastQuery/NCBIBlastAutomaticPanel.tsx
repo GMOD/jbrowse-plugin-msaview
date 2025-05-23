@@ -17,10 +17,9 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { ncbiBlastLaunchView } from './blastLaunchView'
-import { getProteinSequenceFromFeature } from './calculateProteinSequence'
-import { useFeatureSequence } from './useFeatureSequence'
+import { useFeatureSequence } from '../useFeatureSequence'
 import TextField2 from '../../../TextField2'
-import { TranscriptSelector } from '.'
+import TranscriptSelector from '../TranscriptSelector'
 import {
   getGeneDisplayName,
   getId,

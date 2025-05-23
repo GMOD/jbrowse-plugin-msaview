@@ -6,9 +6,8 @@ import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { getProteinSequenceFromFeature } from './calculateProteinSequence'
-import { useFeatureSequence } from './useFeatureSequence'
-import { TranscriptSelector } from '.'
+import { useFeatureSequence } from '../useFeatureSequence'
+import TranscriptSelector from '../TranscriptSelector'
 import { getId, getTranscriptFeatures } from '../../util'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'

@@ -7,31 +7,18 @@ import {
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  MenuItem,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import ExternalLink from '../../../ExternalLink'
-import {
-  getGeneDisplayName,
-  getId,
-  getTranscriptDisplayName,
-  getTranscriptFeatures,
-} from '../../util'
+import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { getProteinSequenceFromFeature } from '../NCBIBlastQuery/calculateProteinSequence'
-import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
-import { TranscriptSelector } from '../NCBIBlastQuery'
+import { useFeatureSequence } from '../useFeatureSequence'
+import TranscriptSelector from '../TranscriptSelector'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -71,9 +58,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
       }
     })()
   }, [feature])
-  const set = new Set(geneNameList)
+  const validSet = new Set(geneNameList)
   const options = getTranscriptFeatures(feature)
-  const ret = options.find(val => set.has(getId(val)))
+  const ret = options.find(val => validSet.has(getId(val)))
   const [userSelection, setUserSelection] = useState(getId(options[0]))
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
   const { proteinSequence, error: error2 } = useFeatureSequence({
@@ -102,6 +89,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
           selectedTranscriptId={userSelection}
           onTranscriptChange={setUserSelection}
           proteinSequence={proteinSequence}
+          validSet={validSet}
         />
       </DialogContent>
 

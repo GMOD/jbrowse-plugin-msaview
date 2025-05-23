@@ -2,7 +2,12 @@ import React, { useState } from 'react'
 import { Button, MenuItem } from '@mui/material'
 import TextField2 from '../../TextField2'
 import { Feature } from '@jbrowse/core/util'
-import { getGeneDisplayName, getId, getTranscriptDisplayName } from '../util'
+import {
+  getGeneDisplayName2,
+  getId,
+  getTranscriptDisplayName,
+  getTranscriptLength,
+} from '../util'
 import { makeStyles } from 'tss-react/mui'
 
 const useStyles = makeStyles()({
@@ -37,22 +42,26 @@ export default function TranscriptSelector({
       <div style={{ display: 'flex' }}>
         <TextField2
           variant="outlined"
-          label="Choose isoform to BLAST"
+          label={`Choose isoform of ${getGeneDisplayName2(feature)}`}
           select
+          style={{ minWidth: 300 }}
           value={selectedTranscriptId}
           onChange={event => {
             onTranscriptChange(event.target.value)
           }}
         >
-          {options.map(val => {
-            const inSet = validSet ? validSet.has(getId(val)) : true
-            return (
-              <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                {getGeneDisplayName(feature)} - {getTranscriptDisplayName(val)}
-                {validSet ? (inSet ? ' (has data)' : '') : ''}
-              </MenuItem>
-            )
-          })}
+          {options
+            .toSorted((a, b) => getTranscriptLength(b) - getTranscriptLength(a))
+            .map(val => {
+              const inSet = validSet ? validSet.has(getId(val)) : true
+              return (
+                <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
+                  {getTranscriptDisplayName(val)} ({getTranscriptLength(val)}{' '}
+                  aa)
+                  {validSet ? (inSet ? ' (has data)' : '') : ''}
+                </MenuItem>
+              )
+            })}
         </TextField2>
         <div style={{ alignContent: 'center', marginLeft: 20 }}>
           <Button

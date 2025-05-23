@@ -7,14 +7,7 @@ import {
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  Link,
-  MenuItem,
-  TextField,
-} from '@mui/material'
+import { Button, DialogActions, DialogContent, Link } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
@@ -23,8 +16,8 @@ import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import { useGeneTree } from './useGeneTree'
-import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
-import { TranscriptSelector } from '../NCBIBlastQuery'
+import { useFeatureSequence } from '../useFeatureSequence'
+import TranscriptSelector from '../TranscriptSelector'
 
 const useStyles = makeStyles()({
   dialogContent: {

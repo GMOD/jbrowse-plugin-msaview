@@ -24,10 +24,10 @@ import { makeStyles } from 'tss-react/mui'
 import { launchView } from './launchView'
 import TextField2 from '../../../TextField2'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
-import { useFeatureSequence } from '../NCBIBlastQuery/useFeatureSequence'
+import { useFeatureSequence } from '../useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { TranscriptSelector } from '../NCBIBlastQuery'
+import TranscriptSelector from '../TranscriptSelector'
 
 const useStyles = makeStyles()({
   dialogContent: {
