@@ -1,14 +1,16 @@
 import React, { useState } from 'react'
-import { Button, MenuItem } from '@mui/material'
-import TextField2 from '../../TextField2'
+
 import { Feature } from '@jbrowse/core/util'
+import { Button, MenuItem } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
+
+import TextField2 from '../../TextField2'
 import {
   getGeneDisplayName2,
   getId,
   getTranscriptDisplayName,
   getTranscriptLength,
 } from '../util'
-import { makeStyles } from 'tss-react/mui'
 
 const useStyles = makeStyles()({
   textAreaFont: {
@@ -61,7 +63,7 @@ export default function TranscriptSelector({
                 <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
                   {getTranscriptDisplayName(val)} ({len} aa){' '}
                   {mod ? ` (possible fragment)` : ''}
-                  {validSet ? (!inSet ? ' (no data)' : '') : ''}
+                  {validSet ? (inSet ? '' : ' (no data)') : ''}
                 </MenuItem>
               )
             })}
@@ -79,7 +81,7 @@ export default function TranscriptSelector({
         </div>
       </div>
 
-      {showSequence && selectedTranscript && (
+      {showSequence && (
         <TextField2
           variant="outlined"
           multiline

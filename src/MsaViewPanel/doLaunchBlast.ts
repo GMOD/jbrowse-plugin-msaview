@@ -1,5 +1,5 @@
 import { JBrowsePluginMsaViewModel } from './model'
-import { makeId, strip } from '../LaunchMsaView/components/NCBIBlastQuery/util'
+import { makeId, strip } from '../LaunchMsaView/components/util'
 import { launchMSA } from '../utils/msa'
 import { queryBlast } from '../utils/ncbiBlast'
 

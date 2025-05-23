@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 
-import { fetchSeq } from './NCBIBlastQuery/fetchSeq'
+import { getProteinSequenceFromFeature } from './calculateProteinSequence'
+import { fetchSeq } from './fetchSeq'
 
-import type { SeqState } from './NCBIBlastQuery/types'
+import type { SeqState } from './types'
 import type { Feature } from '@jbrowse/core/util'
-import { getProteinSequenceFromFeature } from './NCBIBlastQuery/calculateProteinSequence'
 
 export interface ErrorState {
   error: string

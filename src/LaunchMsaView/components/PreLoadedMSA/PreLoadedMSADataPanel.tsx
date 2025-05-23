@@ -15,10 +15,11 @@ import { fetchGeneList } from './fetchGeneList'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import ExternalLink from '../../../ExternalLink'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import TranscriptSelector from '../TranscriptSelector'
+import { useFeatureSequence } from '../useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { useFeatureSequence } from '../useFeatureSequence'
-import TranscriptSelector from '../TranscriptSelector'
+
 
 const useStyles = makeStyles()({
   dialogContent: {

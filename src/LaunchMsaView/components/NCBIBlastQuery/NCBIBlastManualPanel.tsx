@@ -6,9 +6,9 @@ import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { useFeatureSequence } from '../useFeatureSequence'
-import TranscriptSelector from '../TranscriptSelector'
 import { getId, getTranscriptFeatures } from '../../util'
+import TranscriptSelector from '../TranscriptSelector'
+import { useFeatureSequence } from '../useFeatureSequence'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'

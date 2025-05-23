@@ -17,15 +17,15 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { ncbiBlastLaunchView } from './blastLaunchView'
-import { useFeatureSequence } from '../useFeatureSequence'
 import TextField2 from '../../../TextField2'
-import TranscriptSelector from '../TranscriptSelector'
 import {
   getGeneDisplayName,
   getId,
   getTranscriptDisplayName,
   getTranscriptFeatures,
 } from '../../util'
+import TranscriptSelector from '../TranscriptSelector'
+import { useFeatureSequence } from '../useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 

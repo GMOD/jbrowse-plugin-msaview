@@ -12,12 +12,13 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
+import { useGeneTree } from './useGeneTree'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import TranscriptSelector from '../TranscriptSelector'
+import { useFeatureSequence } from '../useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { useGeneTree } from './useGeneTree'
-import { useFeatureSequence } from '../useFeatureSequence'
-import TranscriptSelector from '../TranscriptSelector'
+
 
 const useStyles = makeStyles()({
   dialogContent: {
