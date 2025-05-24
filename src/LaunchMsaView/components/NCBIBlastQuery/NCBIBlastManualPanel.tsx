@@ -6,6 +6,7 @@ import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import ExternalLink from '../../../ExternalLink'
 import { getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
@@ -20,6 +21,11 @@ const useStyles = makeStyles()({
   textAreaFont: {
     fontFamily: 'Courier New',
   },
+  ncbiLink: {
+    wordBreak: 'break-all',
+    margin: 30,
+    maxWidth: 600,
+  },
 })
 
 const NCBIBlastManualPanel = observer(function ({
@@ -27,10 +33,12 @@ const NCBIBlastManualPanel = observer(function ({
   feature,
   model,
   children,
+  baseUrl,
 }: {
   children: React.ReactNode
   model: AbstractTrackModel
   feature: Feature
+  baseUrl: string
   handleClose: () => void
 }) {
   const { classes } = useStyles()
@@ -43,8 +51,9 @@ const NCBIBlastManualPanel = observer(function ({
     feature: selectedTranscript,
   })
 
-  const link = `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${proteinSequence}`
-  const link2 = `https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(proteinSequence, 10)}`
+  const s2 = proteinSequence.replaceAll('*', '').replaceAll('&', '')
+  const link = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${s2}`
+  const link2 = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(s2, 10)}`
 
   return (
     <>
@@ -61,11 +70,8 @@ const NCBIBlastManualPanel = observer(function ({
         />
 
         {proteinSequence ? (
-          <div style={{ wordBreak: 'break-all', margin: 30, maxWidth: 600 }}>
-            Link to NCBI BLAST:{' '}
-            <a target="_blank" href={link} rel="noreferrer">
-              {link2}
-            </a>
+          <div className={classes.ncbiLink}>
+            Link to NCBI BLAST: <ExternalLink href={link}>{link2}</ExternalLink>
           </div>
         ) : null}
 

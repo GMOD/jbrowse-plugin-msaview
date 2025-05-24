@@ -103,6 +103,7 @@ export default tseslint.config(
       ],
 
       'unicorn/no-null': 'off',
+      'unicorn/no-nested-ternary': 'off',
 
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',

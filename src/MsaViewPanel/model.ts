@@ -24,6 +24,7 @@ export interface IRegion {
 }
 
 export interface BlastParams {
+  baseUrl: string
   blastDatabase: string
   msaAlgorithm: string
   blastProgram: string

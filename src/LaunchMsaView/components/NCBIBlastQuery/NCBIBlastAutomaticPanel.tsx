@@ -38,27 +38,40 @@ const useStyles = makeStyles()({
   },
 })
 
+const blastDatabaseOptions = ['nr', 'nr_cluster_seq'] as const
+const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft'] as const
+const blastPrograms = ['blastp', 'quick-blastp'] as const
+
+type blastDatabaseOptionsT = (typeof blastDatabaseOptions)[number]
+type msaAlgorithmsT = (typeof msaAlgorithms)[number]
+type blastProgramsT = (typeof blastPrograms)[number]
+
 const NCBIBlastAutomaticPanel = observer(function ({
   handleClose,
   feature,
   model,
   children,
+  baseUrl,
 }: {
   model: AbstractTrackModel
   feature: Feature
+  baseUrl: string
   handleClose: () => void
   children: React.ReactNode
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
   const [launchViewError, setLaunchViewError] = useState<unknown>()
-  const [selectedBlastDatabase, setSelectedBlastDatabase] = useState('nr')
-  const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] = useState('clustalo')
+  const [selectedBlastDatabase, setSelectedBlastDatabase] =
+    useState<blastDatabaseOptionsT>('nr')
+  const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
+    useState<msaAlgorithmsT>('clustalo')
   const options = getTranscriptFeatures(feature)
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(
     getId(options[0]),
   )
-  const [selectedBlastProgram, setSelectedBlastProgram] = useState('blastp')
+  const [selectedBlastProgram, setSelectedBlastProgram] =
+    useState<blastProgramsT>('blastp')
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,
   )!
@@ -67,15 +80,9 @@ const NCBIBlastAutomaticPanel = observer(function ({
     feature: selectedTranscript,
   })
 
-  const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
-  const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
-  const blastPrograms =
-    selectedBlastDatabase === 'nr_cluster_seq'
-      ? ['blastp']
-      : ['blastp', 'quick-blastp']
   useEffect(() => {
     if (selectedBlastDatabase === 'nr_cluster_seq') {
-      setSelectedTranscriptId('blastp')
+      setSelectedBlastProgram('blastp')
     }
   }, [selectedBlastDatabase])
   const e = error ?? launchViewError
@@ -91,7 +98,9 @@ const NCBIBlastAutomaticPanel = observer(function ({
           select
           value={selectedBlastDatabase}
           onChange={event => {
-            setSelectedBlastDatabase(event.target.value)
+            setSelectedBlastDatabase(
+              event.target.value as (typeof blastDatabaseOptions)[number],
+            )
           }}
         >
           {blastDatabaseOptions.map(val => (
@@ -108,7 +117,9 @@ const NCBIBlastAutomaticPanel = observer(function ({
           select
           value={selectedMsaAlgorithm}
           onChange={event => {
-            setSelectedMsaAlgorithm(event.target.value)
+            setSelectedMsaAlgorithm(
+              event.target.value as (typeof msaAlgorithms)[number],
+            )
           }}
         >
           {msaAlgorithms.map(val => (
@@ -118,22 +129,35 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ))}
         </TextField2>
 
-        <TextField2
-          variant="outlined"
-          label="BLAST program"
-          style={{ width: 150 }}
-          select
-          value={selectedBlastProgram}
-          onChange={event => {
-            setSelectedBlastProgram(event.target.value)
-          }}
-        >
-          {blastPrograms.map(val => (
-            <MenuItem value={val} key={val}>
-              {val}
-            </MenuItem>
-          ))}
-        </TextField2>
+        <div style={{ display: 'flex' }}>
+          <TextField2
+            variant="outlined"
+            label="BLAST program"
+            disabled={selectedBlastDatabase === 'nr_cluster_seq'}
+            style={{ width: 150 }}
+            select
+            value={selectedBlastProgram}
+            onChange={event => {
+              setSelectedBlastProgram(
+                event.target.value as (typeof blastPrograms)[number],
+              )
+            }}
+          >
+            {blastPrograms.map(val => (
+              <MenuItem value={val} key={val}>
+                {val}
+              </MenuItem>
+            ))}
+          </TextField2>
+          {selectedBlastDatabase === 'nr_cluster_seq' ? (
+            <Typography
+              variant="subtitle2"
+              style={{ marginLeft: 4, alignContent: 'center' }}
+            >
+              Can only use blastp on nr_cluster_seq
+            </Typography>
+          ) : null}
+        </div>
 
         <TranscriptSelector
           feature={feature}
@@ -165,6 +189,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
                 view,
                 newViewTitle: `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
                 blastParams: {
+                  baseUrl,
                   blastProgram: selectedBlastProgram,
                   blastDatabase: selectedBlastDatabase,
                   msaAlgorithm: selectedMsaAlgorithm,

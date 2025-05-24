@@ -14,7 +14,11 @@ const MsaViewPanel = observer(function MsaViewPanel2({
   const { blastParams } = model
   return (
     <div>
-      {blastParams ? <LoadingBLAST model={model} /> : <MSAView model={model} />}
+      {blastParams ? (
+        <LoadingBLAST model={model} baseUrl={blastParams.baseUrl} />
+      ) : (
+        <MSAView model={model} />
+      )}
     </div>
   )
 })
