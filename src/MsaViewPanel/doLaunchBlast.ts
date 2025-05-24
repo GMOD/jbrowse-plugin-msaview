@@ -8,13 +8,18 @@ export async function doLaunchBlast({
 }: {
   self: JBrowsePluginMsaViewModel
 }) {
-  const { blastDatabase, blastProgram, msaAlgorithm, proteinSequence } =
-    self.blastParams!
-  const query = proteinSequence.replaceAll('*', '').replaceAll('&', '')
-  const { hits } = await queryBlast({
-    query,
+  const {
+    baseUrl,
     blastDatabase,
     blastProgram,
+    msaAlgorithm,
+    proteinSequence,
+  } = self.blastParams!
+  const { hits } = await queryBlast({
+    query: proteinSequence.replaceAll('*', '').replaceAll('&', ''),
+    blastDatabase,
+    blastProgram,
+    baseUrl,
     onProgress: arg => {
       self.setProgress(arg)
     },
@@ -23,31 +28,28 @@ export async function doLaunchBlast({
     },
   })
 
-  const sequence = [
-    `>QUERY\n${query}`,
-    ...hits
-      .map(
-        h =>
-          [
-            makeId(
-              h.description[0] ?? {
-                accession: 'unknown',
-                id: 'unknown',
-                sciname: 'unknown',
-              },
-            ),
-            strip(h.hsps[0]?.hseq ?? ''),
-          ] as const,
-      )
-      .map(([id, seq]) => `>${id}\n${seq}`),
-  ].join('\n')
-
-  const data = await launchMSA({
+  return launchMSA({
     algorithm: msaAlgorithm,
-    sequence,
+    sequence: [
+      `>QUERY\n${proteinSequence.replaceAll('*', '').replaceAll('&', '')}`,
+      ...hits
+        .map(
+          h =>
+            [
+              makeId(
+                h.description[0] ?? {
+                  accession: 'unknown',
+                  id: 'unknown',
+                  sciname: 'unknown',
+                },
+              ),
+              strip(h.hsps[0]?.hseq ?? ''),
+            ] as const,
+        )
+        .map(([id, seq]) => `>${id}\n${seq}`),
+    ].join('\n'),
     onProgress: arg => {
       self.setProgress(arg)
     },
   })
-  return data
 }

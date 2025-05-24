@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import {
@@ -16,7 +16,7 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { ncbiBlastLaunchView } from './blastLaunchView'
+import { blastLaunchView } from './blastLaunchView'
 import TextField2 from '../../../TextField2'
 import {
   getGeneDisplayName,
@@ -38,45 +38,69 @@ const useStyles = makeStyles()({
   },
 })
 
+const blastDatabaseOptions = ['nr', 'nr_cluster_seq'] as const
+const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft'] as const
+const blastPrograms = ['blastp', 'quick-blastp'] as const
+
+type blastDatabaseOptionsT = (typeof blastDatabaseOptions)[number]
+type msaAlgorithmsT = (typeof msaAlgorithms)[number]
+type blastProgramsT = (typeof blastPrograms)[number]
+
 const NCBIBlastAutomaticPanel = observer(function ({
   handleClose,
   feature,
   model,
   children,
+  baseUrl,
 }: {
   model: AbstractTrackModel
   feature: Feature
+  baseUrl: string
   handleClose: () => void
   children: React.ReactNode
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
-  const [blastDatabase, setBlastDatabase] = useState('nr')
-  const [msaAlgorithm, setMsaAlgorithm] = useState('clustalo')
-
+  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const [selectedBlastDatabase, setSelectedBlastDatabase] =
+    useState<blastDatabaseOptionsT>('nr')
+  const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
+    useState<msaAlgorithmsT>('clustalo')
   const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const selectedTranscript = options.find(val => getId(val) === userSelection)!
+  const [selectedTranscriptId, setSelectedTranscriptId] = useState(
+    getId(options[0]),
+  )
+  const [selectedBlastProgram, setSelectedBlastProgram] =
+    useState<blastProgramsT>('blastp')
+  const selectedTranscript = options.find(
+    val => getId(val) === selectedTranscriptId,
+  )!
   const { error, proteinSequence } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
 
-  const blastDatabaseOptions = ['nr', 'nr_cluster_seq']
-  const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft']
+  useEffect(() => {
+    if (selectedBlastDatabase === 'nr_cluster_seq') {
+      setSelectedBlastProgram('blastp')
+    }
+  }, [selectedBlastDatabase])
+  const e = error ?? launchViewError
   return (
     <>
       <DialogContent className={classes.dialogContent}>
         {children}
-        {error ? <ErrorMessage error={error} /> : null}
+        {e ? <ErrorMessage error={e} /> : null}
         <TextField2
           variant="outlined"
           label="BLAST database"
-          style={{ width: 100 }}
+          style={{ width: 150 }}
           select
-          value={blastDatabase}
+          value={selectedBlastDatabase}
           onChange={event => {
-            setBlastDatabase(event.target.value)
+            setSelectedBlastDatabase(
+              event.target.value as (typeof blastDatabaseOptions)[number],
+            )
           }}
         >
           {blastDatabaseOptions.map(val => (
@@ -89,11 +113,13 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="MSA Algorithm"
-          style={{ width: 100 }}
+          style={{ width: 150 }}
           select
-          value={msaAlgorithm}
+          value={selectedMsaAlgorithm}
           onChange={event => {
-            setMsaAlgorithm(event.target.value)
+            setSelectedMsaAlgorithm(
+              event.target.value as (typeof msaAlgorithms)[number],
+            )
           }}
         >
           {msaAlgorithms.map(val => (
@@ -103,11 +129,41 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ))}
         </TextField2>
 
+        <div style={{ display: 'flex' }}>
+          <TextField2
+            variant="outlined"
+            label="BLAST program"
+            disabled={selectedBlastDatabase === 'nr_cluster_seq'}
+            style={{ width: 150 }}
+            select
+            value={selectedBlastProgram}
+            onChange={event => {
+              setSelectedBlastProgram(
+                event.target.value as (typeof blastPrograms)[number],
+              )
+            }}
+          >
+            {blastPrograms.map(val => (
+              <MenuItem value={val} key={val}>
+                {val}
+              </MenuItem>
+            ))}
+          </TextField2>
+          {selectedBlastDatabase === 'nr_cluster_seq' ? (
+            <Typography
+              variant="subtitle2"
+              style={{ marginLeft: 4, alignContent: 'center' }}
+            >
+              Can only use blastp on nr_cluster_seq
+            </Typography>
+          ) : null}
+        </div>
+
         <TranscriptSelector
           feature={feature}
           options={options}
-          selectedTranscriptId={userSelection}
-          onTranscriptChange={setUserSelection}
+          selectedTranscriptId={selectedTranscriptId}
+          onTranscriptChange={setSelectedTranscriptId}
           proteinSequence={proteinSequence}
         />
 
@@ -126,18 +182,26 @@ const NCBIBlastAutomaticPanel = observer(function ({
           color="primary"
           variant="contained"
           onClick={() => {
-            const newView = ncbiBlastLaunchView({
-              feature: selectedTranscript,
-              view,
-              newViewTitle: `NCBI BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)} - ${msaAlgorithm}`,
-            })
-            newView.setBlastParams({
-              blastProgram: 'blastp',
-              blastDatabase,
-              msaAlgorithm,
-              selectedTranscript,
-              proteinSequence,
-            })
+            try {
+              setLaunchViewError(undefined)
+              blastLaunchView({
+                feature: selectedTranscript,
+                view,
+                newViewTitle: `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                blastParams: {
+                  baseUrl,
+                  blastProgram: selectedBlastProgram,
+                  blastDatabase: selectedBlastDatabase,
+                  msaAlgorithm: selectedMsaAlgorithm,
+                  selectedTranscript,
+                  proteinSequence,
+                },
+              })
+            } catch (e) {
+              console.error(e)
+              setLaunchViewError(e)
+            }
+
             handleClose()
           }}
           disabled={!proteinSequence}

@@ -3,14 +3,13 @@ import React from 'react'
 import { Typography } from '@mui/material'
 
 import ExternalLink from '../../ExternalLink'
-import { BLAST_URL } from '../../utils/ncbiBlast'
 
-function RIDLink({ rid }: { rid: string }) {
+function RIDLink({ baseUrl, rid }: { rid: string; baseUrl: string }) {
   return (
     <Typography>
       RID {rid} (
-      <ExternalLink href={`${BLAST_URL}?CMD=Get&RID=${rid}`}>
-        see status at NCBI
+      <ExternalLink href={`${baseUrl}?CMD=Get&RID=${rid}`}>
+        see status
       </ExternalLink>
       )
     </Typography>

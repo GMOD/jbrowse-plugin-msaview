@@ -1,17 +1,18 @@
 import { jsonfetch, textfetch, timeout } from './fetch'
-
-export const BLAST_URL = `https://blast.ncbi.nlm.nih.gov/blast/Blast.cgi`
+import { BlastResults } from './types'
 
 export async function queryBlast({
   query,
   blastDatabase,
   blastProgram,
+  baseUrl,
   onProgress,
   onRid,
 }: {
   query: string
   blastDatabase: string
   blastProgram: string
+  baseUrl: string
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
 }) {
@@ -20,25 +21,17 @@ export async function queryBlast({
     query,
     blastDatabase,
     blastProgram,
+    baseUrl,
   })
   onRid(rid)
-  await waitForRid({ rid, onProgress })
-  const ret = (await jsonfetch(
-    `${BLAST_URL}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
-  )) as {
-    BlastOutput2: {
-      report: {
-        results: {
-          search: {
-            hits: {
-              description: { accession: string; id: string; sciname: string }[]
-              hsps: { hseq: string }[]
-            }[]
-          }
-        }
-      }
-    }[]
-  }
+  await waitForRid({
+    rid,
+    onProgress,
+    baseUrl,
+  })
+  const ret = await jsonfetch<BlastResults>(
+    `${baseUrl}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
+  )
   return {
     rid,
     hits: ret.BlastOutput2[0]?.report.results.search.hits ?? [],
@@ -49,16 +42,18 @@ async function initialQuery({
   query,
   blastProgram,
   blastDatabase,
+  baseUrl,
 }: {
   query: string
   blastProgram: string
   blastDatabase: string
+  baseUrl: string
 }) {
-  const res = await textfetch(BLAST_URL, {
+  const res = await textfetch(baseUrl, {
     method: 'POST',
     body: new URLSearchParams({
       CMD: 'Put',
-      PROGRAM: blastProgram,
+      PROGRAM: blastProgram === 'quick-blastp' ? 'blastp' : blastProgram,
       DATABASE: blastDatabase,
       QUERY: query,
       ...(blastDatabase === 'nr_clustered_seq'
@@ -66,6 +61,9 @@ async function initialQuery({
             CLUSTERED_DB: 'on',
             DB_TYPE: 'Experimental Databases',
           }
+        : {}),
+      ...(blastProgram === 'quick-blastp'
+        ? { BLAST_PROGRAMS: 'kmerBlastp' }
         : {}),
     }),
   })
@@ -79,15 +77,20 @@ async function initialQuery({
   if (!rid) {
     throw new Error('Failed to get RID from BLAST request')
   }
-  return { rid, rtoe }
+  return {
+    rid,
+    rtoe,
+  }
 }
 
 async function waitForRid({
   rid,
   onProgress,
+  baseUrl,
 }: {
   rid: string
   onProgress: (arg: string) => void
+  baseUrl: string
 }) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
@@ -98,16 +101,23 @@ async function waitForRid({
     }
 
     const res = await textfetch(
-      `${BLAST_URL}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
+      `${baseUrl}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
     )
-    if (/\s+Status=WAITING/m.test(res)) {
+    const isWaiting = /\s+Status=WAITING/m.test(res)
+    const isFailed = /\s+Status=FAILED/m.test(res)
+    const isReady = /\s+Status=READY/m.test(res)
+    const hasHits = /\s+ThereAreHits=yes/m.test(res)
+
+    if (isWaiting) {
       continue
-    } else if (/\s+Status=FAILED/m.test(res)) {
-      throw new Error(
-        `BLAST ${rid} failed; please report to blast-help@ncbi.nlm.nih.gov`,
-      )
-    } else if (/\s+Status=READY/m.test(res)) {
-      if (/\s+ThereAreHits=yes/m.test(res)) {
+    }
+
+    if (isFailed) {
+      throw new Error(`BLAST ${rid} failed`)
+    }
+
+    if (isReady) {
+      if (hasHits) {
         return true
       } else {
         throw new Error('No hits found')
