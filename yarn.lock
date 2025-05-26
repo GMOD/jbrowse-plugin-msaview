@@ -423,9 +423,9 @@
     "@floating-ui/dom" "^1.0.0"
 
 "@floating-ui/react@^0.27.0":
-  version "0.27.8"
-  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.27.8.tgz#6d7f4bf7bfe2065934ba18d54f7383b777f87dd5"
-  integrity sha512-EQJ4Th328y2wyHR3KzOUOoTW2UKjFk53fmyahfwExnFQ8vnsMYqKc+fFPOkeYtj5tcp1DUMiNJ7BFhed7e9ONw==
+  version "0.27.9"
+  resolved "https://registry.yarnpkg.com/@floating-ui/react/-/react-0.27.9.tgz#b3c445a85ead27b73715c978a19b5506532ff097"
+  integrity sha512-Y0aCJBNtfVF6ikI1kVzA0WzSAhVBz79vFWOhvb5MLCRNODZ1ylGSLTuncchR7JsLyn9QzV6JD44DyZhhOtvpRw==
   dependencies:
     "@floating-ui/react-dom" "^2.1.2"
     "@floating-ui/utils" "^0.2.9"
@@ -1852,9 +1852,9 @@ g2p_mapper@^1.0.4:
   integrity sha512-6jgkWZZ+vi08flXx6byllexAk7LUa/TWDFz8jVgWDC6V610xM8r2y4DWjCU0RPD0wnDhrptHZ263YRQCxnkz1Q==
 
 generic-filehandle2@^2.0.1:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/generic-filehandle2/-/generic-filehandle2-2.0.3.tgz#60019e61cf80685c51c2d140f14616aa4325a778"
-  integrity sha512-aHgkorzDtB5YOA/0g+vx7swz/sEf8coOrzSsHsbhWkXSJkHezx9XM+FBV6IWlEXGz+oeN2jb4ji8/fWlQLg/PA==
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/generic-filehandle2/-/generic-filehandle2-2.0.7.tgz#0165be9f09f181911c160d793fe2f1711bc947cf"
+  integrity sha512-CIH5A41LAy+swTaVxIOqY6B/gDulAUeDBFzc31E23BN/thgLK/Kum3E399KBqpe5D7Mo4oMZuKrhpqrefAZ1XA==
 
 get-intrinsic@^1.2.4, get-intrinsic@^1.2.5, get-intrinsic@^1.2.6, get-intrinsic@^1.2.7, get-intrinsic@^1.3.0:
   version "1.3.0"
@@ -1926,9 +1926,9 @@ globals@^14.0.0:
   integrity sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==
 
 globals@^16.0.0:
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-16.1.0.tgz#ee6ab147d41c64e9f2beaaaf66572d18df8e1e60"
-  integrity sha512-aibexHNbb/jiUSObBgpHLj+sIuUmJnYcgXBlrfsiDZ9rt4aF2TFRbyLgZ2iFQuVZ1K5Mx3FVkbKRSgKrbK3K2g==
+  version "16.2.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-16.2.0.tgz#19efcd1ddde2bd5efce128e5c2e441df1abc6f7c"
+  integrity sha512-O+7l9tPdHCU320IigZZPj5zmRCFG9xHmx9cU8FqU2Rp+JN714seHV+2S9+JslCpY4gJwU2vOGox0wzgae/MCEg==
 
 globalthis@^1.0.4:
   version "1.0.4"
