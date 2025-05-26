@@ -168,13 +168,14 @@ const NCBIBlastAutomaticPanel = observer(function ({
         />
 
         <Typography style={{ marginTop: 20 }}>
-          This panel will automatically submit a query to NCBI using blastp. The
-          process can 10+ minutes to run. After completion, all the hits will be
-          run through a multiple sequence alignment. Note: we are not able to
-          currently run NCBI COBALT automatically on the BLAST results, even
-          though that is the method NCBI uses on their website. If you need a
-          COBALT alignment, please use the manual approach of submitting BLAST
-          yourself and downloading the resulting files
+          This panel will automatically submit a query to NCBI. Using blastp can
+          take 10+ minutes to run, quick-blastp is generally a lot faster but is
+          not available for the clustered database. After completion, all the
+          hits will be run through a multiple sequence alignment. Note: we are
+          not able to currently run NCBI COBALT automatically on the BLAST
+          results, even though that is the method NCBI uses on their website. If
+          you need a COBALT alignment, please use the manual approach of
+          submitting BLAST yourself and downloading the resulting files
         </Typography>
       </DialogContent>
       <DialogActions>
