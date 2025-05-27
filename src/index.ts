@@ -7,6 +7,11 @@ import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
 import LaunchMsaViewF from './LaunchMsaView'
 import MsaViewF from './MsaViewPanel'
+import { types } from 'mobx-state-tree'
+import {
+  ConfigurationSchema,
+  readConfObject,
+} from '@jbrowse/core/configuration'
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'
@@ -20,6 +25,7 @@ export default class MsaViewPlugin extends Plugin {
 
   configure(pluginManager: PluginManager) {
     if (isAbstractMenuManager(pluginManager.rootModel)) {
+      console.log(readConfObject(pluginManager.rootModel.jbrowse.msa))
       pluginManager.rootModel.appendToSubMenu(['Add'], {
         label: 'Multiple sequence alignment view',
         icon: GridOn,
@@ -28,5 +34,20 @@ export default class MsaViewPlugin extends Plugin {
         },
       })
     }
+  }
+
+  rootConfigurationSchema = {
+    msa: ConfigurationSchema('MSA', {
+      datasets: types.maybe(
+        types.array(
+          ConfigurationSchema('MSAEntry', {
+            name: {
+              type: 'string',
+              defaultValue: '',
+            },
+          }),
+        ),
+      ),
+    }),
   }
 }

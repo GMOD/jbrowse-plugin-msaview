@@ -5,6 +5,17 @@
       "url": "http://localhost:9000/dist/out.js"
     }
   ],
+  "msa": {
+    "datasets": [
+      {
+        "name": "UCSC 100-way",
+        "adapter": {
+          "type": "BgzipFastaAdapter",
+          "uri": "knownGene.fa.gz"
+        }
+      }
+    ]
+  },
   "assemblies": [
     {
       "name": "hg38",
