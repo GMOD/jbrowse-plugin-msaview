@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 
 import { Feature } from '@jbrowse/core/util'
 import { Button, MenuItem } from '@mui/material'
-import { makeStyles } from 'tss-react/mui'
 
+import ReadOnlyTextField2 from '../../ReadOnlyTextField2'
 import TextField2 from '../../TextField2'
 import {
   getGeneDisplayName,
@@ -11,13 +11,6 @@ import {
   getTranscriptDisplayName,
   getTranscriptLength,
 } from '../util'
-import ReadOnlyTextField2 from '../../ReadOnlyTextField2'
-
-const useStyles = makeStyles()({
-  textAreaFont: {
-    fontFamily: 'Courier New',
-  },
-})
 
 export default function TranscriptSelector({
   feature,
@@ -34,7 +27,6 @@ export default function TranscriptSelector({
   proteinSequence: string | undefined
   validSet?: Set<string>
 }) {
-  const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,

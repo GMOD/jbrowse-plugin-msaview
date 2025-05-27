@@ -1,17 +1,14 @@
 import Plugin from '@jbrowse/core/Plugin'
 import PluginManager from '@jbrowse/core/PluginManager'
+import { ConfigurationSchema } from '@jbrowse/core/configuration'
 import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
 import GridOn from '@mui/icons-material/GridOn'
+import { types } from 'mobx-state-tree'
 
 import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
 import LaunchMsaViewF from './LaunchMsaView'
 import MsaViewF from './MsaViewPanel'
-import { types } from 'mobx-state-tree'
-import {
-  ConfigurationSchema,
-  readConfObject,
-} from '@jbrowse/core/configuration'
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'
@@ -25,7 +22,6 @@ export default class MsaViewPlugin extends Plugin {
 
   configure(pluginManager: PluginManager) {
     if (isAbstractMenuManager(pluginManager.rootModel)) {
-      console.log(readConfObject(pluginManager.rootModel.jbrowse.msa))
       pluginManager.rootModel.appendToSubMenu(['Add'], {
         label: 'Multiple sequence alignment view',
         icon: GridOn,
@@ -44,6 +40,12 @@ export default class MsaViewPlugin extends Plugin {
             name: {
               type: 'string',
               defaultValue: '',
+            },
+            adapter: {
+              type: 'frozen',
+              description:
+                'This can be a data adapter config for a IndexedFasta for example, which has a special way of being interpreted',
+              defaultValue: {},
             },
           }),
         ),
