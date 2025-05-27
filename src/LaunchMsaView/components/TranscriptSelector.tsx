@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { Feature } from '@jbrowse/core/util'
 import { Button, MenuItem } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
 
 import ReadOnlyTextField2 from '../../ReadOnlyTextField2'
 import TextField2 from '../../TextField2'
@@ -11,6 +12,15 @@ import {
   getTranscriptDisplayName,
   getTranscriptLength,
 } from '../util'
+
+const useStyles = makeStyles()({
+  flex: {
+    display: 'flex',
+  },
+  minWidth: {
+    minWidth: 300,
+  },
+})
 
 export default function TranscriptSelector({
   feature,
@@ -27,6 +37,7 @@ export default function TranscriptSelector({
   proteinSequence: string | undefined
   validSet?: Set<string>
 }) {
+  const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,
@@ -34,12 +45,12 @@ export default function TranscriptSelector({
 
   return (
     <>
-      <div style={{ display: 'flex' }}>
+      <div className={classes.flex}>
         <TextField2
           variant="outlined"
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
-          style={{ minWidth: 300 }}
+          className={classes.minWidth}
           value={selectedTranscriptId}
           onChange={event => {
             onTranscriptChange(event.target.value)
