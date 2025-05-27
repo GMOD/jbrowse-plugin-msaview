@@ -11,6 +11,7 @@ import {
   getTranscriptDisplayName,
   getTranscriptLength,
 } from '../util'
+import ReadOnlyTextField2 from '../../ReadOnlyTextField2'
 
 const useStyles = makeStyles()({
   textAreaFont: {
@@ -63,7 +64,7 @@ export default function TranscriptSelector({
                 <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
                   {getTranscriptDisplayName(val)} ({len} aa){' '}
                   {mod ? ` (possible fragment)` : ''}
-                  {validSet ? (inSet ? '' : ' (no data)') : ''}
+                  {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
                 </MenuItem>
               )
             })}
@@ -82,25 +83,12 @@ export default function TranscriptSelector({
       </div>
 
       {showSequence && (
-        <TextField2
-          variant="outlined"
-          multiline
-          minRows={5}
-          maxRows={10}
-          fullWidth
+        <ReadOnlyTextField2
           value={
             proteinSequence
               ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
               : 'Loading...'
           }
-          slotProps={{
-            input: {
-              readOnly: true,
-              classes: {
-                input: classes.textAreaFont,
-              },
-            },
-          }}
         />
       )}
     </>
