@@ -11,7 +11,7 @@
         "name": "UCSC 100-way",
         "adapter": {
           "type": "BgzipFastaAdapter",
-          "uri": "knownGene.fa.gz"
+          "uri": "https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz "
         }
       }
     ]
@@ -25,31 +25,19 @@
         "trackId": "P6R5xbRqRr",
         "adapter": {
           "type": "BgzipFastaAdapter",
-          "fastaLocation": {
-            "uri": "https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz"
-          },
-          "faiLocation": {
-            "uri": "https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz.fai"
-          },
-          "gziLocation": {
-            "uri": "https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz.gzi"
-          }
+          "uri": "https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz"
         }
       },
       "refNameAliases": {
         "adapter": {
           "type": "RefNameAliasAdapter",
-          "location": {
-            "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/hg38_aliases.txt"
-          }
+          "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/hg38_aliases.txt"
         }
       },
       "cytobands": {
         "adapter": {
           "type": "CytobandAdapter",
-          "cytobandLocation": {
-            "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/cytoBand.txt"
-          }
+          "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/cytoBand.txt"
         }
       }
     }
@@ -62,15 +50,7 @@
       "category": ["Annotation"],
       "adapter": {
         "type": "Gff3TabixAdapter",
-        "gffGzLocation": {
-          "uri": "https://jbrowse.org/demos/app/gencode.v44.annotation.sorted.gff3.gz"
-        },
-        "index": {
-          "location": {
-            "uri": "https://jbrowse.org/demos/app/gencode.v44.annotation.sorted.gff3.gz.tbi"
-          },
-          "indexType": "TBI"
-        }
+        "uri": "https://jbrowse.org/demos/app/gencode.v44.annotation.sorted.gff3.gz"
       },
       "assemblyNames": ["hg38"],
       "displays": [
@@ -96,15 +76,7 @@
       },
       "adapter": {
         "type": "VcfTabixAdapter",
-        "vcfGzLocation": {
-          "uri": "https://jbrowse.org/demos/app/clinvar.vcf.gz"
-        },
-        "index": {
-          "location": {
-            "uri": "https://jbrowse.org/demos/app/clinvar.vcf.gz.tbi"
-          },
-          "indexType": "TBI"
-        }
+        "uri": "https://jbrowse.org/demos/app/clinvar.vcf.gz"
       },
       "assemblyNames": ["hg38"],
       "displays": [
@@ -147,9 +119,7 @@
       "category": ["Conservation"],
       "adapter": {
         "type": "BigWigAdapter",
-        "bigWigLocation": {
-          "uri": "http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw"
-        }
+        "uri": "http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw"
       },
       "assemblyNames": ["hg38"]
     },
@@ -160,17 +130,7 @@
       "category": ["Annotation"],
       "adapter": {
         "type": "Gff3TabixAdapter",
-        "gffGzLocation": {
-          "uri": "https://jbrowse.org/demos/hg38/ncbi_refseq.gff.gz",
-          "locationType": "UriLocation"
-        },
-        "index": {
-          "location": {
-            "uri": "https://jbrowse.org/demos/hg38/ncbi_refseq.gff.gz.tbi",
-            "locationType": "UriLocation"
-          },
-          "indexType": "TBI"
-        }
+        "uri": "https://jbrowse.org/demos/hg38/ncbi_refseq.gff.gz"
       },
       "assemblyNames": ["hg38"]
     }
@@ -226,43 +186,11 @@
         "id": "GtqLhkJr8em0Jn4fbNzp9",
         "minimized": false,
         "type": "LinearGenomeView",
-        "offsetPx": 129602.25,
-        "bpPerPx": 371.7660859516264,
-        "displayedRegions": [
-          {
-            "refName": "1",
-            "start": 0,
-            "end": 248956422,
-            "reversed": false,
-            "assemblyName": "hg38"
-          }
-        ],
-        "tracks": [
-          {
-            "id": "c4EqglNoyxPty7PArlxop",
-            "type": "FeatureTrack",
-            "configuration": "gencode.v44.annotation.sorted.gff3",
-            "minimized": false,
-            "displays": [
-              {
-                "id": "9fZPQXnJXq3KTpKIgiDWJ",
-                "type": "LinearBasicDisplay",
-                "heightPreConfig": 285,
-                "configuration": "gencode_nclist_v36_hg38_linear"
-              }
-            ]
-          }
-        ],
-        "hideHeader": false,
-        "hideHeaderOverview": false,
-        "hideNoTracksActive": false,
-        "trackSelectorType": "hierarchical",
-        "showCenterLine": false,
-        "showCytobandsSetting": true,
-        "trackLabels": "offset",
-        "showGridlines": true,
-        "showBookmarkHighlights": true,
-        "showBookmarkLabels": true
+        "init": {
+          "loc": "1:48,201,333..48,742,623",
+          "assembly": "hg19",
+          "tracks": ["gencode.v44.annotation.sorted.gff3"]
+        }
       }
     ],
     "sessionTracks": [],
