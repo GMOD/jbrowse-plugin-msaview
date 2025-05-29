@@ -75,7 +75,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,
   )!
-  const { error, proteinSequence } = useFeatureSequence({
+  const { error: proteinSequenceError, proteinSequence } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
@@ -85,7 +85,8 @@ const NCBIBlastAutomaticPanel = observer(function ({
       setSelectedBlastProgram('blastp')
     }
   }, [selectedBlastDatabase])
-  const e = error ?? launchViewError
+  const e = proteinSequenceError ?? launchViewError
+  const style = { width: 150 }
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -94,7 +95,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="BLAST database"
-          style={{ width: 150 }}
+          style={style}
           select
           value={selectedBlastDatabase}
           onChange={event => {
@@ -113,7 +114,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="MSA Algorithm"
-          style={{ width: 150 }}
+          style={style}
           select
           value={selectedMsaAlgorithm}
           onChange={event => {
@@ -134,7 +135,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
             variant="outlined"
             label="BLAST program"
             disabled={selectedBlastDatabase === 'nr_cluster_seq'}
-            style={{ width: 150 }}
+            style={style}
             select
             value={selectedBlastProgram}
             onChange={event => {
@@ -152,7 +153,10 @@ const NCBIBlastAutomaticPanel = observer(function ({
           {selectedBlastDatabase === 'nr_cluster_seq' ? (
             <Typography
               variant="subtitle2"
-              style={{ marginLeft: 4, alignContent: 'center' }}
+              style={{
+                marginLeft: 4,
+                alignContent: 'center',
+              }}
             >
               Can only use blastp on nr_cluster_seq
             </Typography>
