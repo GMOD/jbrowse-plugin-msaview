@@ -188,17 +188,10 @@
         "type": "LinearGenomeView",
         "init": {
           "loc": "1:48,201,333..48,742,623",
-          "assembly": "hg19",
+          "assembly": "hg38",
           "tracks": ["gencode.v44.annotation.sorted.gff3"]
         }
       }
-    ],
-    "sessionTracks": [],
-    "sessionAssemblies": [],
-    "temporaryAssemblies": [],
-    "connectionInstances": [],
-    "sessionConnections": [],
-    "focusedViewId": "GtqLhkJr8em0Jn4fbNzp9",
-    "sessionPlugins": []
+    ]
   }
 }

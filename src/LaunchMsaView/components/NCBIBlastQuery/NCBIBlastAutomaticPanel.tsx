@@ -71,7 +71,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
     getId(options[0]),
   )
   const [selectedBlastProgram, setSelectedBlastProgram] =
-    useState<blastProgramsT>('blastp')
+    useState<blastProgramsT>('quick-blastp')
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,
   )!
