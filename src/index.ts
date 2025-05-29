@@ -1,9 +1,7 @@
 import Plugin from '@jbrowse/core/Plugin'
 import PluginManager from '@jbrowse/core/PluginManager'
-import { ConfigurationSchema } from '@jbrowse/core/configuration'
 import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
 import GridOn from '@mui/icons-material/GridOn'
-import { types } from 'mobx-state-tree'
 
 import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
@@ -30,26 +28,5 @@ export default class MsaViewPlugin extends Plugin {
         },
       })
     }
-  }
-
-  rootConfigurationSchema = {
-    msa: ConfigurationSchema('MSA', {
-      datasets: types.maybe(
-        types.array(
-          ConfigurationSchema('MSAEntry', {
-            name: {
-              type: 'string',
-              defaultValue: '',
-            },
-            adapter: {
-              type: 'frozen',
-              description:
-                'This can be a data adapter config for a IndexedFasta for example, which has a special way of being interpreted',
-              defaultValue: {},
-            },
-          }),
-        ),
-      ),
-    }),
   }
 }
