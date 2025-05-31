@@ -20,7 +20,7 @@ export function useFeatureSequence({
   forceLoad = true,
 }: {
   view: { assemblyNames?: string[] } | undefined
-  feature: Feature
+  feature?: Feature
   upDownBp?: number
   forceLoad?: boolean
 }) {
@@ -31,6 +31,9 @@ export function useFeatureSequence({
     if (view) {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       ;(async () => {
+        if (!feature) {
+          return
+        }
         try {
           setError(undefined)
           setSequence(undefined)
@@ -83,10 +86,10 @@ export function useFeatureSequence({
   }, [feature, view, upDownBp, assemblyName, forceLoad])
 
   const proteinSequence =
-    sequence && !('error' in sequence)
+    sequence && !('error' in sequence) && feature
       ? getProteinSequenceFromFeature({
           seq: sequence.seq,
-          selectedTranscript: feature,
+          feature,
         })
       : ''
 

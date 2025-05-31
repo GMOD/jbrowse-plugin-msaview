@@ -62,10 +62,10 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
         rows.push(refName)
       }
     }
-    const ret = await firstValueFrom(
+    return firstValueFrom(
       adapter
         .getFeaturesInMultipleRegions(
-          refNames.map(refName => ({
+          rows.map(refName => ({
             refName,
             start: 0,
             end: 1_000_000_000,
@@ -74,6 +74,5 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
         )
         .pipe(toArray()),
     )
-    return ret
   }
 }

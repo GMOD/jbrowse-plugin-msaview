@@ -41,13 +41,13 @@ export function revlist(list: Feat[], seqlen: number) {
 }
 
 export function getProteinSequenceFromFeature({
-  selectedTranscript,
+  feature,
   seq,
 }: {
   seq: string
-  selectedTranscript: Feature
+  feature: Feature
 }) {
-  const { subfeatures, start, strand } = selectedTranscript.toJSON()
+  const { subfeatures, start, strand } = feature.toJSON()
   const cds = dedupe(
     subfeatures
       ?.toSorted((a, b) => a.start - b.start)
