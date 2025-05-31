@@ -11,6 +11,7 @@ import {
 } from '@jbrowse/core/util'
 import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
+import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../TextField2'
@@ -21,7 +22,6 @@ import { fetchAdapterMSAList } from './fetchAdapterMSAList'
 import { Dataset } from './types'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import useSWR from 'swr'
 
 const useStyles = makeStyles()({
   dialogContent: {
