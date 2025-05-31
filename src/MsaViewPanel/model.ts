@@ -241,12 +241,12 @@ export default function stateModelFactory() {
             if (self.blastParams) {
               try {
                 self.setProgress('Submitting query')
+                self.setError(undefined)
                 const data = await doLaunchBlast({
-                  self: self as JBrowsePluginMsaViewModel,
+                  self,
                 })
                 self.setData(data)
                 self.setBlastParams(undefined)
-                self.setProgress('')
               } catch (e) {
                 self.setError(e)
                 console.error(e)
