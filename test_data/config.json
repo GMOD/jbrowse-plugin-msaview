@@ -8,10 +8,12 @@
   "msa": {
     "datasets": [
       {
+        "datasetId": "ucsc_100way",
         "name": "UCSC 100-way",
+        "description": "The source data for these multiple sequence alignments is from <a href=\"https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/\">knownCanonical.multiz100way.protAA.fa.gz</a>",
         "adapter": {
-          "type": "BgzipFastaAdapter",
-          "uri": "https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz "
+          "type": "BgzipFastaMsaAdapter",
+          "uri": "https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz"
         }
       }
     ]
@@ -152,39 +154,12 @@
     }
   ],
   "defaultSession": {
-    "drawerPosition": "right",
-    "drawerWidth": 384,
-    "widgets": {
-      "GridBookmark": {
-        "id": "GridBookmark",
-        "type": "GridBookmarkWidget"
-      },
-      "hierarchicalTrackSelector": {
-        "id": "hierarchicalTrackSelector",
-        "type": "HierarchicalTrackSelectorWidget",
-        "initialized": true,
-        "collapsed": {},
-        "view": "GtqLhkJr8em0Jn4fbNzp9",
-        "faceted": {
-          "filterText": "",
-          "showSparse": false,
-          "showFilters": true,
-          "showOptions": false,
-          "panelWidth": 400
-        }
-      }
-    },
-    "activeWidgets": {
-      "hierarchicalTrackSelector": "hierarchicalTrackSelector"
-    },
-    "minimized": false,
     "id": "-eefn3guGeAjmJ6Padgrz",
-    "name": "New session 1/23/2024, 11:18:35 AM",
+    "name": "New session",
     "margin": 0,
     "views": [
       {
         "id": "GtqLhkJr8em0Jn4fbNzp9",
-        "minimized": false,
         "type": "LinearGenomeView",
         "init": {
           "loc": "1:48,201,333..48,742,623",

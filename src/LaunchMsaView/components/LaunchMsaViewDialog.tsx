@@ -37,9 +37,9 @@ export default function LaunchProteinViewDialog({
         }}
       >
         <Tab label="NCBI BLAST query" value={0} />
-        <Tab label="UCSC 100-way dataset" value={1} />
+        <Tab label="Pre-loaded MSA datasets" value={1} />
         <Tab label="Ensembl GeneTree" value={2} />
-        <Tab label="Manually open MSA/tree" value={3} />
+        <Tab label="Manually open MSA dataset" value={3} />
       </Tabs>
       <TabPanel value={value} index={0}>
         <NCBIBlastPanel

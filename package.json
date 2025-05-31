@@ -39,7 +39,8 @@
     "@emotion/styled": "^11.14.0",
     "g2p_mapper": "^1.0.4",
     "pako": "^2.1.0",
-    "react-msaview": "^4.0.0"
+    "react-msaview": "^4.4.1",
+    "swr": "^2.3.3"
   },
   "devDependencies": {
     "@emotion/react": "^11.10.4",
@@ -56,7 +57,7 @@
     "@typescript-eslint/eslint-plugin": "^8.0.1",
     "@typescript-eslint/parser": "^8.0.1",
     "esbuild": "^0.25.5",
-    "eslint": "^9.0.0",
+    "eslint": "^9.28.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^5.0.0",
