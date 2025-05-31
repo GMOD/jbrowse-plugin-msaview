@@ -10,8 +10,8 @@ export async function fetchAdapterMSAList({
   config: AnyConfigurationModel
   pluginManager: PluginManager
 }) {
-  const adapter = (await getAdapter(pluginManager, 'msa', config)).dataAdapter
+  const result = await getAdapter(pluginManager, 'msa', config)
 
   // @ts-expect-error
-  return adapter.getMSAList()
+  return result.dataAdapter.getMSAList()
 }

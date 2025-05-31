@@ -52,7 +52,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   })
 
   const { jbrowse } = session
-  const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as Dataset[]
+  const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as
+    | Dataset[]
+    | undefined
   const [selection, setSelection] = useState(datasets?.[0]?.datasetId)
   const dataset = datasets?.find(d => d.datasetId === selection)
   const {
@@ -122,25 +124,23 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
           color="primary"
           variant="contained"
           onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ;(async () => {
-              try {
-                // if (!ret) {
-                //   return
-                // }
-                // await preCalculatedLaunchView({
-                //   userSelection,
-                //   session,
-                //   newViewTitle: getGeneDisplayName(ret),
-                //   view,
-                //   feature: ret,
-                // })
-                handleClose()
-              } catch (e) {
-                console.error(e)
-                setViewError(e)
-              }
-            })()
+             
+            try {
+              // if (!ret) {
+              //   return
+              // }
+              // await preCalculatedLaunchView({
+              //   userSelection,
+              //   session,
+              //   newViewTitle: getGeneDisplayName(ret),
+              //   view,
+              //   feature: ret,
+              // })
+              handleClose()
+            } catch (e) {
+              console.error(e)
+              setViewError(e)
+            }
           }}
         >
           Submit

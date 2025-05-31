@@ -17,9 +17,7 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
         ...readConfObject(this.config),
         type: 'BgzipFastaAdapter',
       })
-      if (!adapter) {
-        throw new Error('Error getting subadapter')
-      }
+
       return adapter.dataAdapter as BaseFeatureDataAdapter
     } else {
       throw new Error('no get subadapter')
@@ -34,15 +32,12 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
   }
 
   async getMSARefs() {
-    if (!this.refNamesP) {
-      console.log('wtf')
-      this.refNamesP = this.configure()
-        .then(adapter => adapter.getRefNames())
-        .catch((e: unknown) => {
-          this.refNamesP = undefined
-          throw e
-        })
-    }
+    this.refNamesP ??= this.configure()
+      .then(adapter => adapter.getRefNames())
+      .catch((e: unknown) => {
+        this.refNamesP = undefined
+        throw e
+      })
     return this.refNamesP
   }
 
@@ -59,7 +54,6 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
 
   async getMSA(id: string) {
     const adapter = await this.configure()
-    console.log('wtf2')
     const refNames = await adapter.getRefNames()
     const rows = []
     for (let i = 0, l = refNames.length; i < l; i++) {
