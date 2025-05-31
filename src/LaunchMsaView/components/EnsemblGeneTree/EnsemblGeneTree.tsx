@@ -19,7 +19,6 @@ import { useFeatureSequence } from '../useFeatureSequence'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
-
 const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
