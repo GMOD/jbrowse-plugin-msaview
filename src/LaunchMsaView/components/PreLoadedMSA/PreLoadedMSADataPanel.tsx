@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { readConfObject } from '@jbrowse/core/configuration'
 import { ErrorMessage, LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
@@ -23,20 +23,13 @@ import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import { Dataset } from './types'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import { swrFlags } from './consts'
 
 const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
   },
 })
-
-const swrFlags = {
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false,
-  refreshWhenHidden: false,
-  refreshWhenOffline: false,
-  shouldRetryOnError: false,
-}
 
 const PreLoadedMSA = observer(function PreLoadedMSA2({
   model,
@@ -51,18 +44,36 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
-  const options = getTranscriptFeatures(feature)
+  const transcripts = getTranscriptFeatures(feature)
+  const transcriptIds = transcripts.find(val => getId(val))
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(
-    getId(options[0]),
+    getId(transcripts[0]),
   )
   const [viewError, setViewError] = useState<unknown>()
   const selectedTranscript = selectedTranscriptId
-    ? options.find(val => getId(val) === selectedTranscriptId)
+    ? transcripts.find(val => getId(val) === selectedTranscriptId)
     : undefined
   const { proteinSequence, error: proteinSequenceError } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
+
+  // Function to find a valid transcript ID that exists in the MSA list
+  const findValidTranscriptId = (
+    transcriptsList: Feature[],
+    validMsaList?: string[],
+  ) => {
+    if (!validMsaList || validMsaList.length === 0) return null
+
+    // Try to find a transcript ID that exists in the MSA list
+    for (const transcript of transcriptsList) {
+      const id = getId(transcript)
+      if (id && validMsaList.includes(id)) {
+        return id
+      }
+    }
+    return null
+  }
 
   const { jbrowse } = session
   const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as
@@ -87,6 +98,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         : undefined,
     swrFlags,
   )
+  console.log({ selectedTranscriptId, selectedDatasetId })
   const {
     data: msaData,
     isLoading: msaDataLoading,
@@ -106,11 +118,26 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     swrFlags,
   )
 
+  const validSet = useMemo(() => new Set(msaList), [msaList])
+
+  // Update selectedTranscriptId when msaList changes
+  useEffect(() => {
+    if (msaList && msaList.length > 0) {
+      const validId = findValidTranscriptId(transcripts, msaList)
+      if (validId && validId !== selectedTranscriptId) {
+        console.log('here', { validId })
+        setSelectedTranscriptId(validId)
+      }
+    }
+  }, [msaList, transcripts])
+
   const e =
     msaListFetchError ?? msaDataFetchError ?? proteinSequenceError ?? viewError
   if (e) {
     console.error(e)
   }
+
+  console.log({ msaData, msaList })
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -155,11 +182,11 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                 <SanitizedHTML html={selectedDataset.description} />
                 <TranscriptSelector
                   feature={feature}
-                  options={options}
+                  options={transcripts}
                   selectedTranscriptId={selectedTranscriptId}
                   onTranscriptChange={setSelectedTranscriptId}
                   proteinSequence={proteinSequence}
-                  validSet={new Set(msaList)}
+                  validSet={validSet}
                 />
               </div>
             ) : null}
@@ -171,7 +198,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         <Button
           color="primary"
           variant="contained"
-          disabled={!selectedTranscript || !msaData}
+          disabled={!selectedTranscript || !msaData || !msaData.length}
           onClick={() => {
             try {
               if (!selectedTranscript || !msaData) {
