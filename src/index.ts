@@ -7,6 +7,7 @@ import { types } from 'mobx-state-tree'
 
 import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
+import BgzipFastaMsaAdapterF from './BgzipFastaMsaAdapter'
 import LaunchMsaViewF from './LaunchMsaView'
 import MsaViewF from './MsaViewPanel'
 
@@ -18,6 +19,7 @@ export default class MsaViewPlugin extends Plugin {
     MsaViewF(pluginManager)
     LaunchMsaViewF(pluginManager)
     AddHighlightModelF(pluginManager)
+    BgzipFastaMsaAdapterF(pluginManager)
   }
 
   configure(pluginManager: PluginManager) {

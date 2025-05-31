@@ -12,7 +12,7 @@
         "name": "UCSC 100-way",
         "description": "The source data for these multiple sequence alignments is from <a href=\"https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/\">knownCanonical.multiz100way.protAA.fa.gz</a>",
         "adapter": {
-          "type": "BgzipFastaAdapter",
+          "type": "BgzipFastaMsaAdapter",
           "uri": "https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz"
         }
       }
