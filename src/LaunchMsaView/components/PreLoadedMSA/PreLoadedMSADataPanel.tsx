@@ -18,12 +18,12 @@ import TextField2 from '../../../TextField2'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
+import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import { Dataset } from './types'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import { swrFlags } from './consts'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -45,7 +45,6 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
   const transcripts = getTranscriptFeatures(feature)
-  const transcriptIds = transcripts.find(val => getId(val))
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(
     getId(transcripts[0]),
   )
@@ -63,7 +62,9 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     transcriptsList: Feature[],
     validMsaList?: string[],
   ) => {
-    if (!validMsaList || validMsaList.length === 0) return null
+    if (!validMsaList || validMsaList.length === 0) {
+      return null
+    }
 
     // Try to find a transcript ID that exists in the MSA list
     for (const transcript of transcriptsList) {
@@ -98,7 +99,6 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         : undefined,
     swrFlags,
   )
-  console.log({ selectedTranscriptId, selectedDatasetId })
   const {
     data: msaData,
     isLoading: msaDataLoading,
@@ -125,19 +125,16 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     if (msaList && msaList.length > 0) {
       const validId = findValidTranscriptId(transcripts, msaList)
       if (validId && validId !== selectedTranscriptId) {
-        console.log('here', { validId })
         setSelectedTranscriptId(validId)
       }
     }
-  }, [msaList, transcripts])
+  }, [msaList, transcripts, selectedTranscriptId])
 
   const e =
     msaListFetchError ?? msaDataFetchError ?? proteinSequenceError ?? viewError
   if (e) {
     console.error(e)
   }
-
-  console.log({ msaData, msaList })
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -198,7 +195,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         <Button
           color="primary"
           variant="contained"
-          disabled={!selectedTranscript || !msaData || !msaData.length}
+          disabled={!selectedTranscript || !msaData?.length}
           onClick={() => {
             try {
               if (!selectedTranscript || !msaData) {
