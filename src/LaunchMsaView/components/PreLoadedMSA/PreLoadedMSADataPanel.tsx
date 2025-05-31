@@ -19,10 +19,9 @@ import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
 import { fetchAdapterMSAList } from './fetchAdapterMSAList'
 import { Dataset } from './types'
-import { useFetch } from './useFetch'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
+import useSWR from 'swr'
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -56,20 +55,27 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as Dataset[]
   const [selection, setSelection] = useState(datasets?.[0]?.datasetId)
   const dataset = datasets?.find(d => d.datasetId === selection)
-
   const {
     data: msaList,
     isLoading,
     error: fetchError,
-  } = useFetch(selection ?? 'none', () =>
-    dataset
-      ? fetchAdapterMSAList({
-          config: dataset.adapter,
-          pluginManager,
-        })
-      : undefined,
+  } = useSWR(
+    selection ?? 'none',
+    () =>
+      dataset
+        ? fetchAdapterMSAList({
+            config: dataset.adapter,
+            pluginManager,
+          })
+        : undefined,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      refreshWhenHidden: false,
+      refreshWhenOffline: false,
+      shouldRetryOnError: false,
+    },
   )
-  console.log({ msaList })
 
   const e = fetchError ?? proteinSequenceError ?? viewError
   return (
@@ -96,16 +102,16 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         </TextField2>
 
         {isLoading ? <LoadingEllipses /> : null}
-        {dataset ? (
+        {msaList && dataset ? (
           <div>
             <SanitizedHTML html={dataset.description} />
-
             <TranscriptSelector
               feature={feature}
               options={options}
               selectedTranscriptId={userSelection}
               onTranscriptChange={setUserSelection}
               proteinSequence={proteinSequence}
+              validSet={new Set(msaList)}
             />
           </div>
         ) : null}

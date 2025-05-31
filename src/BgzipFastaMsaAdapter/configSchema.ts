@@ -6,7 +6,7 @@ export default function configSchemaF(pluginManager: PluginManager) {
   return ConfigurationSchema(
     'BgzipFastaMsaAdapter',
     {
-      regex: {
+      msaRegex: {
         type: 'string',
         defaultValue: '_',
       },

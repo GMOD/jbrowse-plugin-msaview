@@ -1,7 +1,5 @@
 import { AnyConfigurationModel } from '@jbrowse/core/configuration'
-import { BaseAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { getAdapter } from '@jbrowse/core/data_adapters/dataAdapterCache'
-import { isStateTreeNode } from 'mobx-state-tree'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
 
@@ -13,8 +11,9 @@ export async function fetchAdapterMSAList({
   pluginManager: PluginManager
 }) {
   console.log('wtfPREEEE', config)
-  const adapter = await getAdapter(pluginManager, 'msa', config)
-  console.log('wtfPOSSTTTTT', config)
+  const adapter = (await getAdapter(pluginManager, 'msa', config)).dataAdapter
+
+  console.log('wtfPOSSTTTTT', adapter, config)
   // @ts-expect-error
   return adapter.getMSAList()
 }

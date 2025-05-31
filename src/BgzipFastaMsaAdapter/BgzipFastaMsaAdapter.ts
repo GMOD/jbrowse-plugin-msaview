@@ -47,17 +47,13 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
   }
 
   async getMSAList() {
-    console.log('getMSAList1')
     const refNames = await this.getMSARefs()
-    console.log('getMSAList2')
     const list = new Set<string>()
     const val = this.getConf('msaRegex')
     const re = new RegExp(val)
     for (let i = 0, l = refNames.length; i < l; i++) {
-      const refName = refNames[i]!
-      list.add(refName.split(re)[0]!)
+      list.add(refNames[i]!.split(re)[0]!)
     }
-    console.log('getMSAList3')
     return [...list]
   }
 
