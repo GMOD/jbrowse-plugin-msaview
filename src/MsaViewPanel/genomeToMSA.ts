@@ -5,7 +5,7 @@ import { checkHovered } from './util'
 
 export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   const { hovered } = getSession(model)
-  const { transcriptToMsaMap, connectedView } = model
+  const { querySeqName, transcriptToMsaMap, connectedView } = model
   if (
     connectedView?.initialized &&
     transcriptToMsaMap &&
@@ -15,7 +15,7 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
     const { g2p } = transcriptToMsaMap
     const ret = g2p[hoverCoord]
     if (ret !== undefined) {
-      return model.seqCoordToRowSpecificGlobalCoord('QUERY', ret + 1)
+      return model.seqCoordToRowSpecificGlobalCoord(querySeqName, ret + 1)
     }
   }
   return undefined

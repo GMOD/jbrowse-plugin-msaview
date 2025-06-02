@@ -8,17 +8,20 @@ export function preCalculatedLaunchView({
   view,
   feature,
   data,
+  querySeqName,
 }: {
   data: { msa: string }
   session: AbstractSessionModel
   newViewTitle: string
   view: LinearGenomeViewModel
   feature: Feature
+  querySeqName: string
 }) {
   session.addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
     treeAreaWidth: 200,
+    querySeqName,
     treeWidth: 100,
     drawNodeBubbles: false,
     labelsAlignRight: true,

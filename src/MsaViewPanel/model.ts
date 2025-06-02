@@ -65,6 +65,10 @@ export default function stateModelFactory() {
          * #property
          */
         blastParams: types.frozen<BlastParams | undefined>(),
+        /**
+         * #property
+         */
+        querySeqName: 'QUERY',
 
         /**
          * #property

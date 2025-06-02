@@ -20,6 +20,7 @@ import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
 import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
+import { findValidTranscriptId } from './findValidTranscriptId'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import { Dataset } from './types'
 
@@ -44,6 +45,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
+  const { assemblyNames } = view
   const transcripts = getTranscriptFeatures(feature)
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(
     getId(transcripts[0]),
@@ -56,25 +58,6 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     view,
     feature: selectedTranscript,
   })
-
-  // Function to find a valid transcript ID that exists in the MSA list
-  const findValidTranscriptId = (
-    transcriptsList: Feature[],
-    validMsaList?: string[],
-  ) => {
-    if (!validMsaList || validMsaList.length === 0) {
-      return null
-    }
-
-    // Try to find a transcript ID that exists in the MSA list
-    for (const transcript of transcriptsList) {
-      const id = getId(transcript)
-      if (id && validMsaList.includes(id)) {
-        return id
-      }
-    }
-    return null
-  }
 
   const { jbrowse } = session
   const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as
@@ -123,7 +106,10 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   // Update selectedTranscriptId when msaList changes
   useEffect(() => {
     if (msaList && msaList.length > 0) {
-      const validId = findValidTranscriptId(transcripts, msaList)
+      const validId = findValidTranscriptId({
+        transcriptsList: transcripts,
+        validMsaList: msaList,
+      })
       if (validId && validId !== selectedTranscriptId) {
         setSelectedTranscriptId(validId)
       }
@@ -201,10 +187,12 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
               if (!selectedTranscript || !msaData) {
                 return
               }
+              const querySeqName = `${selectedTranscriptId}_${assemblyNames[0]}`
               preCalculatedLaunchView({
                 session,
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
+                querySeqName,
                 feature: selectedTranscript,
                 data: {
                   msa: msaData
