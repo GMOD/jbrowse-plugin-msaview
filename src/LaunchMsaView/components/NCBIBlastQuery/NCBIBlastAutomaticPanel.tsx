@@ -17,7 +17,7 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchView } from './blastLaunchView'
-import TextField2 from '../../../TextField2'
+import TextField2 from '../../../components/TextField2'
 import {
   getGeneDisplayName,
   getId,

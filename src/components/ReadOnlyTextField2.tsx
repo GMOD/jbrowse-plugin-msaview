@@ -2,7 +2,7 @@ import React from 'react'
 
 import { makeStyles } from 'tss-react/mui'
 
-import TextField2 from '../TextField2'
+import TextField2 from './TextField2'
 
 const useStyles = makeStyles()({
   textAreaFont: {

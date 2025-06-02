@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Typography } from '@mui/material'
 
-import ExternalLink from '../../ExternalLink'
+import ExternalLink from '../../components/ExternalLink'
 
 function RIDLink({ baseUrl, rid }: { rid: string; baseUrl: string }) {
   return (

@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 
 import { BASE_BLAST_URL } from './consts'
-import TextField2 from '../../../TextField2'
+import TextField2 from '../../../components/TextField2'
 
 export default function NCBISettingsDialog({
   handleClose,

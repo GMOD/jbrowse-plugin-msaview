@@ -6,7 +6,7 @@ import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import ExternalLink from '../../../ExternalLink'
+import ExternalLink from '../../../components/ExternalLink'
 import { getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'

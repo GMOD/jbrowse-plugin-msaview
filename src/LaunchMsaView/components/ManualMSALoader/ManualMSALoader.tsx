@@ -22,7 +22,7 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
-import TextField2 from '../../../TextField2'
+import TextField2 from '../../../components/TextField2'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'

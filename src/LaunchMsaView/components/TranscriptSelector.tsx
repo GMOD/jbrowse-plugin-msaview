@@ -4,8 +4,8 @@ import { Feature } from '@jbrowse/core/util'
 import { Button, MenuItem } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
-import ReadOnlyTextField2 from '../../ReadOnlyTextField2'
-import TextField2 from '../../TextField2'
+import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
+import TextField2 from '../../components/TextField2'
 import {
   getGeneDisplayName,
   getId,
