@@ -88,10 +88,10 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     error: msaDataFetchError,
   } = useSWR(
     selectedTranscriptId && selectedDatasetId
-      ? `${selectedTranscriptId}-${selectedTranscriptId}-msa`
+      ? `${selectedTranscriptId}-${selectedTranscriptId}-${msaList?.length}-msa`
       : 'none-msa',
     () =>
-      selectedTranscriptId && selectedDataset
+      selectedTranscriptId && selectedDataset && msaList
         ? fetchMSA({
             msaId: selectedTranscriptId,
             config: selectedDataset.adapter,
