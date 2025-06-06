@@ -34,27 +34,30 @@ export default class MsaViewPlugin extends Plugin {
     }
   }
 
-  rootConfigurationSchema = (pluginManager: PluginManager) => ({
-    msa: ConfigurationSchema('MSA', {
-      datasets: types.maybe(
-        types.array(
-          ConfigurationSchema('MSAEntry', {
-            datasetId: {
-              type: 'string',
-              defaultValue: '',
-            },
-            description: {
-              type: 'string',
-              defaultValue: '',
-            },
-            name: {
-              type: 'string',
-              defaultValue: '',
-            },
-            adapter: pluginManager.pluggableConfigSchemaType('adapter'),
-          }),
+  // @ts-expect-error
+  rootConfigurationSchema(pluginManager: PluginManager) {
+    return {
+      msa: ConfigurationSchema('MSA', {
+        datasets: types.maybe(
+          types.array(
+            ConfigurationSchema('MSAEntry', {
+              datasetId: {
+                type: 'string',
+                defaultValue: '',
+              },
+              description: {
+                type: 'string',
+                defaultValue: '',
+              },
+              name: {
+                type: 'string',
+                defaultValue: '',
+              },
+              adapter: pluginManager.pluggableConfigSchemaType('adapter'),
+            }),
+          ),
         ),
-      ),
-    }),
-  })
+      }),
+    }
+  }
 }
