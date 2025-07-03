@@ -24,9 +24,12 @@ function extendStateModel(stateModel: IAnyModelType) {
         contextMenuItems() {
           const feature = self.contextMenuFeature
           const track = getContainingTrack(self)
+          const featureType = feature?.get('type')
+          const showMsaMenuItem =
+            feature && ['gene', 'mRNA', 'transcript'].includes(featureType)
           return [
             ...superContextMenuItems(),
-            ...(feature
+            ...(showMsaMenuItem
               ? [
                   {
                     label: 'Launch MSA view',
