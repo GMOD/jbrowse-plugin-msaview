@@ -5,8 +5,8 @@ export function checkHovered(hovered: unknown): hovered is {
   hoverPosition: { coord: number; refName: string }
 } {
   return (
-    !!hovered &&
-    typeof hovered == 'object' &&
+    typeof hovered === 'object' &&
+    hovered !== null &&
     'hoverFeature' in hovered &&
     'hoverPosition' in hovered
   )

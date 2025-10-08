@@ -28,50 +28,34 @@ export default function NCBIBlastPanel({
   )
   const [settingsOpen, setSettingsOpen] = useState(false)
 
+  const Panel =
+    lookupMethod === 'automatic'
+      ? NCBIBlastAutomaticPanel
+      : NCBIBlastManualPanel
+
   return (
     <>
       <IconButton
         style={{ float: 'right' }}
         size="small"
-        onClick={() => {
-          setSettingsOpen(true)
-        }}
+        onClick={() => setSettingsOpen(true)}
       >
         <SettingsIcon />
       </IconButton>
 
-      {lookupMethod === 'automatic' ? (
-        <NCBIBlastAutomaticPanel
-          model={model}
-          feature={feature}
-          handleClose={handleClose}
-          baseUrl={baseUrl}
-        >
-          <NCBIBlastMethodSelector
-            lookupMethod={lookupMethod}
-            setLookupMethod={setLookupMethod}
-          />
-        </NCBIBlastAutomaticPanel>
-      ) : null}
-      {lookupMethod === 'manual' ? (
-        <NCBIBlastManualPanel
-          model={model}
-          feature={feature}
-          handleClose={handleClose}
-          baseUrl={baseUrl}
-        >
-          <NCBIBlastMethodSelector
-            lookupMethod={lookupMethod}
-            setLookupMethod={setLookupMethod}
-          />
-        </NCBIBlastManualPanel>
-      ) : null}
+      <Panel model={model} feature={feature} handleClose={handleClose} baseUrl={baseUrl}>
+        <NCBIBlastMethodSelector
+          lookupMethod={lookupMethod}
+          setLookupMethod={setLookupMethod}
+        />
+      </Panel>
+
       {settingsOpen ? (
         <NCBISettingsDialog
           baseUrl={baseUrl}
-          handleClose={arg => {
-            if (arg) {
-              setBaseUrl(arg)
+          handleClose={newUrl => {
+            if (newUrl) {
+              setBaseUrl(newUrl)
             }
             setSettingsOpen(false)
           }}
