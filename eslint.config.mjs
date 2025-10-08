@@ -1,4 +1,5 @@
 import eslint from '@eslint/js'
+import { defineConfig } from 'eslint/config'
 import importPlugin from 'eslint-plugin-import'
 import eslintPluginReact from 'eslint-plugin-react'
 import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
@@ -6,7 +7,7 @@ import eslintPluginReactRefresh from 'eslint-plugin-react-refresh'
 import eslintPluginUnicorn from 'eslint-plugin-unicorn'
 import tseslint from 'typescript-eslint'
 
-export default tseslint.config(
+export default defineConfig(
   {
     ignores: [
       '**/dist/**/*',
@@ -37,12 +38,16 @@ export default tseslint.config(
   importPlugin.flatConfigs.recommended,
   eslintPluginReact.configs.flat.recommended,
   {
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
     plugins: {
       'react-hooks': eslintPluginReactHooks,
     },
-    rules: eslintPluginReactHooks.configs.recommended.rules,
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
   },
-  eslintPluginUnicorn.configs['flat/recommended'],
+  eslintPluginUnicorn.configs.recommended,
   {
     // in main config for TSX/JSX source files
     plugins: {
