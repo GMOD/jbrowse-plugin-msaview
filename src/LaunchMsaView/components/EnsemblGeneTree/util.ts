@@ -1,6 +1,6 @@
 export {
+  fetchWithLocalStorageCache,
   jsonfetch,
   textfetch,
-  fetchWithLocalStorageCache,
   unzipfetch,
-} from '../../../../utils/fetch'
+} from '../../../utils/fetch'

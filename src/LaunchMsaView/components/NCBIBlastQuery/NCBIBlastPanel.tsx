@@ -38,12 +38,19 @@ export default function NCBIBlastPanel({
       <IconButton
         style={{ float: 'right' }}
         size="small"
-        onClick={() => setSettingsOpen(true)}
+        onClick={() => {
+          setSettingsOpen(true)
+        }}
       >
         <SettingsIcon />
       </IconButton>
 
-      <Panel model={model} feature={feature} handleClose={handleClose} baseUrl={baseUrl}>
+      <Panel
+        model={model}
+        feature={feature}
+        handleClose={handleClose}
+        baseUrl={baseUrl}
+      >
         <NCBIBlastMethodSelector
           lookupMethod={lookupMethod}
           setLookupMethod={setLookupMethod}

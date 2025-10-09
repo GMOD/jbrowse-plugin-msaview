@@ -9,11 +9,16 @@ import {
   getEnv,
   getSession,
 } from '@jbrowse/core/util'
-import { Button, DialogActions, DialogContent, MenuItem, TextField } from '@mui/material'
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  MenuItem,
+  TextField,
+} from '@mui/material'
 import { observer } from 'mobx-react'
 import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
-
 
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'

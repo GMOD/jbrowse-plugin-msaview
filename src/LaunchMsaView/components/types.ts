@@ -5,7 +5,8 @@ export interface Feat {
 }
 
 export interface SeqState {
-  seq: string
+  seq?: string
   upstream?: string
   downstream?: string
+  error?: unknown
 }

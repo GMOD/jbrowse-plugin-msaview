@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 import { Feature } from '@jbrowse/core/util'
-import { Button, MenuItem, TextField, Box } from '@mui/material'
+import { Box, Button, MenuItem, TextField } from '@mui/material'
 
 import {
   getGeneDisplayName,
@@ -62,11 +62,15 @@ export default function TranscriptSelector({
           }}
         >
           {[...options]
-            .sort(
+            .toSorted(
               (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
             )
             .map(val => (
-              <TranscriptMenuItem key={val.id()} val={val} validSet={validSet} />
+              <TranscriptMenuItem
+                key={val.id()}
+                val={val}
+                validSet={validSet}
+              />
             ))}
         </TextField>
         <Box sx={{ marginLeft: 2.5 }}>
@@ -96,8 +100,8 @@ export default function TranscriptSelector({
                 )}\n${proteinSequence}`
               : 'Loading...'
           }
-          InputProps={{
-            readOnly: true,
+          slotProps={{
+            input: { readOnly: true },
           }}
           sx={{
             '.MuiInputBase-input': {

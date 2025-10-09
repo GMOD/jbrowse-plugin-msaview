@@ -1,8 +1,10 @@
-import useSWR from 'swr'
 import { getSession } from '@jbrowse/core/util'
+import useSWR from 'swr'
+
 import { fetchSeq } from './fetchSeq'
-import type { Feature } from '@jbrowse/core/util'
+
 import type { SeqState } from './types'
+import type { Feature } from '@jbrowse/core/util'
 
 const BPLIMIT = 500_000
 
@@ -73,26 +75,18 @@ export function useSWRFeatureSequence({
 }) {
   const assemblyName = view?.assemblyNames?.[0]
   const { data, error } = useSWR(
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    feature && assemblyName && view
+      ? [feature.id(), assemblyName, upDownBp, forceLoad, 'feature-sequence']
+      : null,
     () =>
-      feature && assemblyName && view
-        ? [
-            feature.id(),
-            assemblyName,
-            upDownBp,
-            forceLoad,
-            'feature-sequence',
-          ]
-        : null,
-    () =>
-      feature && assemblyName && view
-        ? featureSequenceFetcher({
-            feature,
-            assemblyName,
-            upDownBp,
-            view,
-            forceLoad,
-          })
-        : undefined,
+      featureSequenceFetcher({
+        feature: feature!,
+        assemblyName: assemblyName!,
+        upDownBp,
+        view: view!,
+        forceLoad,
+      }),
   )
 
   return {

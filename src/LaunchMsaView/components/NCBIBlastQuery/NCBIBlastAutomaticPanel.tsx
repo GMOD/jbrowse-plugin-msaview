@@ -7,6 +7,7 @@ import {
   getContainingView,
 } from '@jbrowse/core/util'
 import {
+  Box,
   Button,
   DialogActions,
   DialogContent,

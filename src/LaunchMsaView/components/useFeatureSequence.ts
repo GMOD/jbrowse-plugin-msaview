@@ -22,7 +22,7 @@ export function useFeatureSequence({
   })
 
   const proteinSequence =
-    sequence && !('error' in sequence) && feature
+    sequence && !('error' in sequence) && sequence.seq && feature
       ? getProteinSequenceFromFeature({
           seq: sequence.seq,
           feature,
