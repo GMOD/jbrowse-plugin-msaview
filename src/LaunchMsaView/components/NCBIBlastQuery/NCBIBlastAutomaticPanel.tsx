@@ -11,13 +11,13 @@ import {
   DialogActions,
   DialogContent,
   MenuItem,
+  TextField,
   Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchView } from './blastLaunchView'
-import TextField2 from '../../../components/TextField2'
 import {
   getGeneDisplayName,
   getId,
@@ -86,16 +86,15 @@ const NCBIBlastAutomaticPanel = observer(function ({
     }
   }, [selectedBlastDatabase])
   const e = proteinSequenceError ?? launchViewError
-  const style = { width: 150 }
   return (
     <>
       <DialogContent className={classes.dialogContent}>
         {children}
         {e ? <ErrorMessage error={e} /> : null}
-        <TextField2
+        <TextField
           variant="outlined"
           label="BLAST database"
-          style={style}
+          sx={{ width: 150 }}
           select
           value={selectedBlastDatabase}
           onChange={event => {
@@ -109,12 +108,12 @@ const NCBIBlastAutomaticPanel = observer(function ({
               {val}
             </MenuItem>
           ))}
-        </TextField2>
+        </TextField>
 
-        <TextField2
+        <TextField
           variant="outlined"
           label="MSA Algorithm"
-          style={style}
+          sx={{ width: 150 }}
           select
           value={selectedMsaAlgorithm}
           onChange={event => {
@@ -128,14 +127,14 @@ const NCBIBlastAutomaticPanel = observer(function ({
               {val}
             </MenuItem>
           ))}
-        </TextField2>
+        </TextField>
 
-        <div style={{ display: 'flex' }}>
-          <TextField2
+        <Box sx={{ display: 'flex' }}>
+          <TextField
             variant="outlined"
             label="BLAST program"
             disabled={selectedBlastDatabase === 'nr_cluster_seq'}
-            style={style}
+            sx={{ width: 150 }}
             select
             value={selectedBlastProgram}
             onChange={event => {
@@ -149,19 +148,19 @@ const NCBIBlastAutomaticPanel = observer(function ({
                 {val}
               </MenuItem>
             ))}
-          </TextField2>
+          </TextField>
           {selectedBlastDatabase === 'nr_cluster_seq' ? (
             <Typography
               variant="subtitle2"
-              style={{
-                marginLeft: 4,
+              sx={{
+                marginLeft: 0.5,
                 alignContent: 'center',
               }}
             >
               Can only use blastp on nr_cluster_seq
             </Typography>
           ) : null}
-        </div>
+        </Box>
 
         <TranscriptSelector
           feature={feature}

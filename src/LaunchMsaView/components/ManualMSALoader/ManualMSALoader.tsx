@@ -17,12 +17,12 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
+  TextField,
 } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
-import TextField2 from '../../../components/TextField2'
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
@@ -109,12 +109,12 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             </div>
           ) : (
             <>
-              <TextField2
+              <TextField
                 variant="outlined"
                 name="MSA"
                 multiline
                 minRows={5}
-                style={{ marginBottom: '20px' }}
+                sx={{ marginBottom: 2.5 }}
                 maxRows={10}
                 fullWidth
                 placeholder="Paste MSA here"
@@ -123,7 +123,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                   setMsaText(event.target.value)
                 }}
               />
-              <TextField2
+              <TextField
                 variant="outlined"
                 name="Tree"
                 multiline

@@ -9,12 +9,12 @@ import {
   getEnv,
   getSession,
 } from '@jbrowse/core/util'
-import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
+import { Button, DialogActions, DialogContent, MenuItem, TextField } from '@mui/material'
 import { observer } from 'mobx-react'
 import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
 
-import TextField2 from '../../../components/TextField2'
+
 import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
@@ -126,7 +126,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
       <DialogContent className={classes.dialogContent}>
         {e ? <ErrorMessage error={e} /> : null}
 
-        <TextField2
+        <TextField
           select
           label="Select MSA dataset"
           value={selectedDatasetId}
@@ -143,7 +143,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
           ) : (
             <MenuItem>No MSA datasets found</MenuItem>
           )}
-        </TextField2>
+        </TextField>
 
         {selectedDataset ? (
           <div style={{ marginTop: 50 }}>

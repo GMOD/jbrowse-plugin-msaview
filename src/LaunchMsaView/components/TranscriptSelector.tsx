@@ -1,11 +1,8 @@
 import React, { useState } from 'react'
 
 import { Feature } from '@jbrowse/core/util'
-import { Button, MenuItem } from '@mui/material'
-import { makeStyles } from 'tss-react/mui'
+import { Button, MenuItem, TextField, Box } from '@mui/material'
 
-import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
-import TextField2 from '../../components/TextField2'
 import {
   getGeneDisplayName,
   getId,
@@ -13,14 +10,23 @@ import {
   getTranscriptLength,
 } from '../util'
 
-const useStyles = makeStyles()({
-  flex: {
-    display: 'flex',
-  },
-  minWidth: {
-    minWidth: 300,
-  },
-})
+function TranscriptMenuItem({
+  val,
+  validSet,
+}: {
+  val: Feature
+  validSet?: Set<string>
+}) {
+  const inSet = validSet ? validSet.has(getId(val)) : true
+  const { len, mod } = getTranscriptLength(val)
+  return (
+    <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
+      {getTranscriptDisplayName(val)} ({len} aa){' '}
+      {mod ? ` (possible fragment)` : ''}
+      {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
+    </MenuItem>
+  )
+}
 
 export default function TranscriptSelector({
   feature,
@@ -37,42 +43,33 @@ export default function TranscriptSelector({
   proteinSequence: string | undefined
   validSet?: Set<string>
 }) {
-  const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,
-  )!
+  )
 
   return (
     <>
-      <div className={classes.flex}>
-        <TextField2
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <TextField
           variant="outlined"
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
-          className={classes.minWidth}
+          sx={{ minWidth: 300 }}
           value={selectedTranscriptId}
           onChange={event => {
             onTranscriptChange(event.target.value)
           }}
         >
-          {options
-            .toSorted(
+          {[...options]
+            .sort(
               (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
             )
-            .map(val => {
-              const inSet = validSet ? validSet.has(getId(val)) : true
-              const { len, mod } = getTranscriptLength(val)
-              return (
-                <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                  {getTranscriptDisplayName(val)} ({len} aa){' '}
-                  {mod ? ` (possible fragment)` : ''}
-                  {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
-                </MenuItem>
-              )
-            })}
-        </TextField2>
-        <div style={{ alignContent: 'center', marginLeft: 20 }}>
+            .map(val => (
+              <TranscriptMenuItem key={val.id()} val={val} validSet={validSet} />
+            ))}
+        </TextField>
+        <Box sx={{ marginLeft: 2.5 }}>
           <Button
             variant="contained"
             color="primary"
@@ -82,16 +79,31 @@ export default function TranscriptSelector({
           >
             {showSequence ? 'Hide sequence' : 'Show sequence'}
           </Button>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {showSequence && (
-        <ReadOnlyTextField2
+      {showSequence && selectedTranscript && (
+        <TextField
+          variant="outlined"
+          multiline
+          minRows={5}
+          maxRows={10}
+          fullWidth
           value={
             proteinSequence
-              ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
+              ? `>${getTranscriptDisplayName(
+                  selectedTranscript,
+                )}\n${proteinSequence}`
               : 'Loading...'
           }
+          InputProps={{
+            readOnly: true,
+          }}
+          sx={{
+            '.MuiInputBase-input': {
+              fontFamily: 'Courier New',
+            },
+          }}
         />
       )}
     </>
