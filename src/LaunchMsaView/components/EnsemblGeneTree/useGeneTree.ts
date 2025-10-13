@@ -1,5 +1,4 @@
 import useSWR from 'swr'
-
 import { geneTreeFetcher } from './ensemblGeneTreeUtils'
 
 export function useGeneTree(geneId: string) {

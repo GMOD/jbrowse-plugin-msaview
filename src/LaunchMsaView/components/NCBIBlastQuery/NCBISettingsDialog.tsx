@@ -6,10 +6,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
 } from '@mui/material'
 
 import { BASE_BLAST_URL } from './consts'
+import TextField2 from '../../../components/TextField2'
 
 export default function NCBISettingsDialog({
   handleClose,
@@ -29,14 +29,14 @@ export default function NCBISettingsDialog({
     >
       <DialogTitle>BLAST Settings</DialogTitle>
       <DialogContent>
-        <TextField
+        <TextField2
           autoFocus
           margin="dense"
           label="BLAST Base URL"
           fullWidth
           variant="outlined"
           value={tempBaseUrl}
-          sx={{ minWidth: 300 }}
+          style={{ minWidth: '300px' }}
           onChange={e => {
             setTempBaseUrl(e.target.value)
           }}

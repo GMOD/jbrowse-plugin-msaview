@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
 
 import { Feature } from '@jbrowse/core/util'
-import { Box, Button, MenuItem, TextField } from '@mui/material'
+import { Button, MenuItem } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
 
+import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
+import TextField2 from '../../components/TextField2'
 import {
   getGeneDisplayName,
   getId,
@@ -10,23 +13,14 @@ import {
   getTranscriptLength,
 } from '../util'
 
-function TranscriptMenuItem({
-  val,
-  validSet,
-}: {
-  val: Feature
-  validSet?: Set<string>
-}) {
-  const inSet = validSet ? validSet.has(getId(val)) : true
-  const { len, mod } = getTranscriptLength(val)
-  return (
-    <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-      {getTranscriptDisplayName(val)} ({len} aa){' '}
-      {mod ? ` (possible fragment)` : ''}
-      {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
-    </MenuItem>
-  )
-}
+const useStyles = makeStyles()({
+  flex: {
+    display: 'flex',
+  },
+  minWidth: {
+    minWidth: 300,
+  },
+})
 
 export default function TranscriptSelector({
   feature,
@@ -43,37 +37,42 @@ export default function TranscriptSelector({
   proteinSequence: string | undefined
   validSet?: Set<string>
 }) {
+  const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
   const selectedTranscript = options.find(
     val => getId(val) === selectedTranscriptId,
-  )
+  )!
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <TextField
+      <div className={classes.flex}>
+        <TextField2
           variant="outlined"
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
-          sx={{ minWidth: 300 }}
+          className={classes.minWidth}
           value={selectedTranscriptId}
           onChange={event => {
             onTranscriptChange(event.target.value)
           }}
         >
-          {[...options]
+          {options
             .toSorted(
               (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
             )
-            .map(val => (
-              <TranscriptMenuItem
-                key={val.id()}
-                val={val}
-                validSet={validSet}
-              />
-            ))}
-        </TextField>
-        <Box sx={{ marginLeft: 2.5 }}>
+            .map(val => {
+              const inSet = validSet ? validSet.has(getId(val)) : true
+              const { len, mod } = getTranscriptLength(val)
+              return (
+                <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
+                  {getTranscriptDisplayName(val)} ({len} aa){' '}
+                  {mod ? ` (possible fragment)` : ''}
+                  {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
+                </MenuItem>
+              )
+            })}
+        </TextField2>
+        <div style={{ alignContent: 'center', marginLeft: 20 }}>
           <Button
             variant="contained"
             color="primary"
@@ -83,31 +82,16 @@ export default function TranscriptSelector({
           >
             {showSequence ? 'Hide sequence' : 'Show sequence'}
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {showSequence && selectedTranscript && (
-        <TextField
-          variant="outlined"
-          multiline
-          minRows={5}
-          maxRows={10}
-          fullWidth
+      {showSequence && (
+        <ReadOnlyTextField2
           value={
             proteinSequence
-              ? `>${getTranscriptDisplayName(
-                  selectedTranscript,
-                )}\n${proteinSequence}`
+              ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
               : 'Loading...'
           }
-          slotProps={{
-            input: { readOnly: true },
-          }}
-          sx={{
-            '.MuiInputBase-input': {
-              fontFamily: 'Courier New',
-            },
-          }}
         />
       )}
     </>
