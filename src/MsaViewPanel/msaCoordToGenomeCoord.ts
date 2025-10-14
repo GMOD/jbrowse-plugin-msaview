@@ -1,5 +1,3 @@
-import { JBrowsePluginMsaViewModel } from './model'
-
 /**
  * Convert gapped MSA column coordinate to ungapped sequence coordinate
  * This is the inverse of ungappedCoordMap
@@ -18,7 +16,7 @@ export function msaCoordToGenomeCoord({
   model,
   coord: mouseCol,
 }: {
-  model: JBrowsePluginMsaViewModel
+  model: { querySeqName: string; transcriptToMsaMap: any; rows: string[][] }
   coord: number
 }) {
   const { querySeqName, transcriptToMsaMap } = model
