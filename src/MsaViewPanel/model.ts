@@ -202,7 +202,46 @@ export default function stateModelFactory() {
       setBlastParams(args?: BlastParams) {
         self.blastParams = args
       },
+      /**
+       * #action
+       */
+      handleMsaClick(coord: number) {
+        const { connectedView, zoomToBaseLevel } = self
+        const { assemblyManager } = getSession(self)
+        const r2 = msaCoordToGenomeCoord({ model: self, coord })
+
+        if (!r2 || !connectedView) {
+          return
+        }
+
+        if (zoomToBaseLevel) {
+          connectedView.navTo(r2)
+        } else {
+          const r =
+            assemblyManager
+              .get(connectedView.assemblyNames[0]!)
+              ?.getCanonicalRefName(r2.refName) ?? r2.refName
+          connectedView.centerAt(r2.start, r)
+        }
+      },
     }))
+    .actions(self => {
+      // store reference to the original action from react-msaview
+      const superSetMouseClickPos = self.setMouseClickPos
+
+      return {
+        /**
+         * #action
+         * overrides base setMouseClickPos to trigger navigation
+         */
+        setMouseClickPos(col?: number, row?: number) {
+          superSetMouseClickPos(col, row)
+          if (col !== undefined) {
+            self.handleMsaClick(col)
+          }
+        },
+      }
+    })
 
     .views(self => ({
       /**
@@ -275,33 +314,6 @@ export default function stateModelFactory() {
                 ? undefined
                 : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
             self.setConnectedHighlights([r1, r2].filter(f => !!f))
-          }),
-        )
-
-        // nav to genome position after click
-        addDisposer(
-          self,
-          autorun(() => {
-            const { connectedView, zoomToBaseLevel, mouseClickCol } = self
-            const { assemblyManager } = getSession(self)
-            const r2 =
-              mouseClickCol === undefined
-                ? undefined
-                : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
-
-            if (!r2 || !connectedView) {
-              return
-            }
-
-            if (zoomToBaseLevel) {
-              connectedView.navTo(r2)
-            } else {
-              const r =
-                assemblyManager
-                  .get(connectedView.assemblyNames[0]!)
-                  ?.getCanonicalRefName(r2.refName) ?? r2.refName
-              connectedView.centerAt(r2.start, r)
-            }
           }),
         )
       },
