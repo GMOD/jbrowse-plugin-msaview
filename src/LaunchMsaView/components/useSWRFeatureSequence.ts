@@ -28,12 +28,6 @@ async function featureSequenceFetcher({
     refName: string
   }
 
-  if (!forceLoad && end - start > BPLIMIT) {
-    return {
-      error: `Genomic sequence larger than ${BPLIMIT}bp, use "force load" button to display`,
-    }
-  }
-
   const b = start - upDownBp
   const e = end + upDownBp
   const [seq, upstream, downstream] = await Promise.all([
