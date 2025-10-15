@@ -81,6 +81,11 @@ export function useSWRFeatureSequence({
         view: view!,
         forceLoad,
       }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
   )
 
   return {
