@@ -6,20 +6,16 @@ import { fetchSeq } from './fetchSeq'
 import type { SeqState } from './types'
 import type { Feature } from '@jbrowse/core/util'
 
-const BPLIMIT = 500_000
-
 async function featureSequenceFetcher({
   feature,
   assemblyName,
   upDownBp,
   view,
-  forceLoad,
 }: {
   feature: Feature
   assemblyName: string
   upDownBp: number
   view: { assemblyNames?: string[] }
-  forceLoad: boolean
 }): Promise<SeqState | undefined> {
   const session = getSession(view)
   const { start, end, refName } = feature.toJSON() as {

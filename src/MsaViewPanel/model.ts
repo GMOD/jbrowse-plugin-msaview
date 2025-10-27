@@ -227,7 +227,7 @@ export default function stateModelFactory() {
     }))
     .actions(self => {
       // store reference to the original action from react-msaview
-      const superSetMouseClickPos = self.setMouseClickPos
+      const superSetMouseClickPos = self.setMouseClickPos.bind(self)
 
       return {
         /**

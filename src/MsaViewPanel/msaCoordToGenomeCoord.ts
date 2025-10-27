@@ -11,12 +11,20 @@ function gappedToUngappedCoord(seq: string, gappedPos: number): number {
   }
   return ungappedPos
 }
-
 export function msaCoordToGenomeCoord({
   model,
   coord: mouseCol,
 }: {
-  model: { querySeqName: string; transcriptToMsaMap: any; rows: string[][] }
+  model: {
+    querySeqName: string
+    transcriptToMsaMap:
+      | {
+          refName: string
+          p2g: Record<number, number>
+        }
+      | undefined
+    rows: string[][]
+  }
   coord: number
 }) {
   const { querySeqName, transcriptToMsaMap } = model
