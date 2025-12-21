@@ -4,8 +4,7 @@ import http from 'node:http'
 import path from 'node:path'
 import puppeteer, { type Browser, type Page } from 'puppeteer'
 
-export const JBROWSE_PORT = 9000
-export const PLUGIN_PORT = 9001
+export const JBROWSE_PORT = 9876
 const TEST_JBROWSE_DIR = path.join(process.cwd(), '.test-jbrowse')
 
 export async function waitForServer(
@@ -39,23 +38,17 @@ export async function waitForServer(
 }
 
 /**
- * Set up a local JBrowse instance for testing
+ * Set up a local JBrowse instance for testing.
+ * Assumes `jbrowse create .test-jbrowse` was already run by the pretest script.
  */
 export async function setupJBrowse(): Promise<void> {
   console.log('Setting up JBrowse test instance...')
 
-  // Remove old test directory if exists
-  if (fs.existsSync(TEST_JBROWSE_DIR)) {
-    console.log('Removing existing test JBrowse directory...')
-    fs.rmSync(TEST_JBROWSE_DIR, { recursive: true })
+  if (!fs.existsSync(TEST_JBROWSE_DIR)) {
+    throw new Error(
+      `JBrowse directory not found at ${TEST_JBROWSE_DIR}. Run "yarn pretest" first.`,
+    )
   }
-
-  // Create JBrowse instance
-  console.log('Creating JBrowse instance...')
-  execSync(`jbrowse create ${TEST_JBROWSE_DIR}`, {
-    stdio: 'inherit',
-    timeout: 120000,
-  })
 
   // Build the plugin
   console.log('Building plugin...')
@@ -156,32 +149,85 @@ function createTestConfig() {
 
 let jbrowseServer: ChildProcess | undefined
 
+function killProcessOnPort(port: number): void {
+  try {
+    // Find and kill any process using the port
+    execSync(`lsof -ti:${port} | xargs -r kill -9 2>/dev/null || true`, {
+      stdio: 'ignore',
+    })
+    console.log(`Killed any existing process on port ${port}`)
+  } catch {
+    // Ignore errors - port might not be in use
+  }
+}
+
 export async function startJBrowseServer(): Promise<ChildProcess> {
   console.log(`Starting JBrowse server on port ${JBROWSE_PORT}...`)
 
-  // Use npx serve or python http.server to serve the JBrowse directory
-  const proc = spawn('npx', ['serve', '-l', String(JBROWSE_PORT), '-s'], {
-    cwd: TEST_JBROWSE_DIR,
-    stdio: ['ignore', 'pipe', 'pipe'],
-    shell: true,
-  })
+  // Kill any existing process on the port
+  killProcessOnPort(JBROWSE_PORT)
 
-  proc.stdout?.on('data', data => {
-    console.log(`[jbrowse-server] ${data}`)
-  })
+  return new Promise((resolve, reject) => {
+    const proc = spawn(
+      'npx',
+      ['serve', '-p', String(JBROWSE_PORT), '-s', TEST_JBROWSE_DIR],
+      {
+        stdio: ['ignore', 'pipe', 'pipe'],
+      },
+    )
 
-  proc.stderr?.on('data', data => {
-    // serve outputs to stderr
-    const str = data.toString()
-    if (!str.includes('Accepting connections')) {
+    const timeout = setTimeout(() => {
+      proc.kill()
+      reject(new Error(`Server did not start within 30000ms`))
+    }, 30000)
+
+    const onData = (data: Buffer) => {
+      const str = data.toString()
       console.log(`[jbrowse-server] ${str}`)
-    }
-  })
 
-  await waitForServer(JBROWSE_PORT, '/index.html')
-  jbrowseServer = proc
-  console.log('JBrowse server started!')
-  return proc
+      // Extract port from message like "Accepting connections at http://localhost:9876"
+      const match = str.match(/Accepting connections at http:\/\/localhost:(\d+)/)
+      if (match) {
+        const actualPort = parseInt(match[1], 10)
+        console.log(`Server reported port: ${actualPort}, expected: ${JBROWSE_PORT}`)
+
+        if (actualPort !== JBROWSE_PORT) {
+          clearTimeout(timeout)
+          proc.kill()
+          reject(
+            new Error(
+              `Server started on wrong port ${actualPort}, expected ${JBROWSE_PORT}`,
+            ),
+          )
+          return
+        }
+
+        clearTimeout(timeout)
+        jbrowseServer = proc
+
+        // Give server a moment to be fully ready, then resolve
+        setTimeout(() => {
+          console.log('JBrowse server started!')
+          resolve(proc)
+        }, 500)
+      }
+    }
+
+    proc.stdout?.on('data', onData)
+    proc.stderr?.on('data', onData)
+
+    proc.on('error', err => {
+      clearTimeout(timeout)
+      reject(err)
+    })
+
+    proc.on('exit', code => {
+      if (code !== 0 && code !== null) {
+        clearTimeout(timeout)
+        reject(new Error(`Server exited with code ${code}`))
+      }
+    })
+  })
 }
 
 export async function stopServer(proc: ChildProcess): Promise<void> {

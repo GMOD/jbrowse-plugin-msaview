@@ -75,7 +75,6 @@ export function useSWRFeatureSequence({
         assemblyName: assemblyName!,
         upDownBp,
         view: view!,
-        forceLoad,
       }),
     {
       revalidateOnFocus: false,
