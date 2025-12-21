@@ -46,7 +46,7 @@
 
 # v1.0.7
 
-- Move npm run build script to prepare script in package.jsom
+- Move yarn build script to prepare script in package.jsom
 
 # v1.0.6
 
