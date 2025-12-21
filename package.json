@@ -29,7 +29,7 @@
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
     "prebuild": "yarn clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
-    "pretest": "test -d .test-jbrowse || jbrowse create .test-jbrowse",
+    "pretest": "test -d .test-jbrowse || jbrowse create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepack": "yarn build",

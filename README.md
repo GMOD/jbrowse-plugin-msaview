@@ -42,29 +42,28 @@ https://jbrowse.org/code/jb2/main/index.html?config=https://unpkg.com/jbrowse-pl
 ## LaunchView-MsaView extension point
 
 This plugin registers a `LaunchView-MsaView` extension point that allows
-programmatic launching of an MsaView. This can be used via the JBrowse 2
-session spec URL parameters (see
-https://jbrowse.org/jb2/docs/urlparams/#session-spec).
+programmatic launching of an MsaView. This can be used via the JBrowse 2 session
+spec URL parameters (see https://jbrowse.org/jb2/docs/urlparams/#session-spec).
 
 ### Parameters
 
-| Parameter          | Required                      | Description                              |
-| ------------------ | ----------------------------- | ---------------------------------------- |
-| `data`             | One of data/msaFileLocation   | `{ msa: string, tree?: string }`         |
-| `msaFileLocation`  | One of data/msaFileLocation   | `{ uri: string }` for MSA file           |
-| `treeFileLocation` | No                            | `{ uri: string }` for tree file          |
-| `connectedViewId`  | No                            | ID of connected LinearGenomeView         |
-| `connectedFeature` | No                            | Feature for cross-linking                |
-| `displayName`      | No                            | Custom view display name                 |
-| `colorSchemeName`  | No                            | Color scheme (e.g., 'percent_identity_dynamic') |
-| `colWidth`         | No                            | Column width in pixels                   |
-| `rowHeight`        | No                            | Row height in pixels                     |
-| `treeAreaWidth`    | No                            | Tree area width                          |
-| `treeWidth`        | No                            | Tree width                               |
-| `drawNodeBubbles`  | No                            | Show node bubbles on tree                |
-| `labelsAlignRight` | No                            | Align labels to the right                |
-| `showBranchLen`    | No                            | Show branch lengths                      |
-| `querySeqName`     | No                            | Name for query sequence                  |
+| Parameter          | Required                    | Description                                     |
+| ------------------ | --------------------------- | ----------------------------------------------- |
+| `data`             | One of data/msaFileLocation | `{ msa: string, tree?: string }`                |
+| `msaFileLocation`  | One of data/msaFileLocation | `{ uri: string }` for MSA file                  |
+| `treeFileLocation` | No                          | `{ uri: string }` for tree file                 |
+| `connectedViewId`  | No                          | ID of connected LinearGenomeView                |
+| `connectedFeature` | No                          | Feature for cross-linking                       |
+| `displayName`      | No                          | Custom view display name                        |
+| `colorSchemeName`  | No                          | Color scheme (e.g., 'percent_identity_dynamic') |
+| `colWidth`         | No                          | Column width in pixels                          |
+| `rowHeight`        | No                          | Row height in pixels                            |
+| `treeAreaWidth`    | No                          | Tree area width                                 |
+| `treeWidth`        | No                          | Tree width                                      |
+| `drawNodeBubbles`  | No                          | Show node bubbles on tree                       |
+| `labelsAlignRight` | No                          | Align labels to the right                       |
+| `showBranchLen`    | No                          | Show branch lengths                             |
+| `querySeqName`     | No                          | Name for query sequence                         |
 
 ### URL example
 

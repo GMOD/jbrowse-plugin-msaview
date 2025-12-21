@@ -7,7 +7,7 @@ export default function LaunchMsaViewExtensionPointF(
   pluginManager.addToExtensionPoint(
     'LaunchView-MsaView',
     // @ts-expect-error
-    async ({
+    ({
       session,
       data,
       msaFileLocation,
@@ -51,9 +51,6 @@ export default function LaunchMsaViewExtensionPointF(
       session.addView('MsaView', {
         type: 'MsaView',
         displayName,
-        data,
-        msaFileLocation,
-        treeFileLocation,
         connectedViewId,
         connectedFeature,
         colorSchemeName,
@@ -64,7 +61,13 @@ export default function LaunchMsaViewExtensionPointF(
         drawNodeBubbles,
         labelsAlignRight,
         showBranchLen,
-        querySeqName,
+        init: {
+          msaData: data?.msa,
+          treeData: data?.tree,
+          msaUrl: msaFileLocation?.uri,
+          treeUrl: treeFileLocation?.uri,
+          querySeqName,
+        },
       })
     },
   )

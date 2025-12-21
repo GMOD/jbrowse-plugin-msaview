@@ -126,4 +126,5 @@ cypress/videos
 cypress/screenshots
 
 # Ignore code editor
+debug-*.png
 .vscode
