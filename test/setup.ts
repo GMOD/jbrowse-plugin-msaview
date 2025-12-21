@@ -80,7 +80,7 @@ function createTestConfig() {
     plugins: [
       {
         name: 'MsaView',
-        url: `http://localhost:${JBROWSE_PORT}/plugin/out.js`,
+        url: `http://localhost:${JBROWSE_PORT}/plugin/jbrowse-plugin-msaview.umd.production.min.js`,
       },
     ],
     msa: {
@@ -134,13 +134,13 @@ function createTestConfig() {
       name: 'Test session',
       views: [
         {
+          id: 'test_lgv',
           type: 'LinearGenomeView',
-          tracks: [
-            {
-              type: 'FeatureTrack',
-              configuration: 'gencode.v44.annotation.sorted.gff3',
-            },
-          ],
+          init: {
+            loc: 'chr1:114,704,469-114,716,894',
+            assembly: 'hg38',
+            tracks: ['gencode.v44.annotation.sorted.gff3'],
+          },
         },
       ],
     },
@@ -271,8 +271,8 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
   // Enable console logging from the page
   page.on('console', msg => {
     const type = msg.type()
-    if (type === 'error') {
-      console.log(`[browser error] ${msg.text()}`)
+    if (type === 'error' || type === 'warning') {
+      console.log(`[browser ${type}] ${msg.text()}`)
     }
   })
 
@@ -280,7 +280,11 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
     console.log(`[browser page error] ${err.message}`)
   })
 
-  const jbrowseUrl = `http://localhost:${JBROWSE_PORT}/?loc=chr1:114,704,469-114,716,894&assembly=hg38`
+  page.on('requestfailed', request => {
+    console.log(`[request failed] ${request.url()}: ${request.failure()?.errorText}`)
+  })
+
+  const jbrowseUrl = `http://localhost:${JBROWSE_PORT}/`
   console.log(`Navigating to: ${jbrowseUrl}`)
   await page.goto(jbrowseUrl, { waitUntil: 'networkidle2', timeout: 60000 })
 
@@ -288,10 +292,31 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
 }
 
 export async function waitForJBrowseLoad(page: Page): Promise<void> {
-  // Wait for the main view container
-  await page.waitForSelector('[data-testid="lgv"]', { timeout: 30000 })
-  // Give some time for tracks to load
-  await new Promise(r => setTimeout(r, 3000))
+  try {
+    // First wait for React app to mount - look for root div with content
+    await page.waitForFunction(
+      () => {
+        const root = document.getElementById('root')
+        return root && root.children.length > 0
+      },
+      { timeout: 30000 },
+    )
+    console.log('React app mounted')
+
+    // Wait for tracks to render (canvas elements)
+    await page.waitForSelector('canvas', { timeout: 60000 })
+    console.log('Canvas found')
+
+    // Give additional time for track data to load
+    await new Promise(r => setTimeout(r, 5000))
+  } catch (e) {
+    // Capture debug info on failure
+    const html = await page.content()
+    console.log('Page HTML (first 2000 chars):', html.slice(0, 2000))
+    console.log('Screenshot saved to debug-screenshot.png')
+    await page.screenshot({ path: 'debug-screenshot.png' })
+    throw e
+  }
 }
 
 export async function waitForTrackLoad(page: Page): Promise<void> {
