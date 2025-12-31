@@ -8,10 +8,17 @@ import { MSAModelF } from 'react-msaview'
 import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
+import { runPairwiseAlignment, buildAlignmentMaps } from './pairwiseAlignment'
+import {
+  gappedToUngappedPosition,
+  ungappedToGappedPosition,
+  mapToRecord,
+} from './structureConnection'
 
 import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import type { Instance } from 'mobx-state-tree'
+import type { StructureConnection } from './structureConnection'
 
 type LGV = LinearGenomeViewModel
 
@@ -96,6 +103,12 @@ export default function stateModelFactory() {
          * }
          */
         init: types.frozen<MsaViewInitState | undefined>(),
+
+        /**
+         * #property
+         * connections to protein 3D structure views for synchronized highlighting
+         */
+        connectedStructures: types.array(types.frozen<StructureConnection>()),
       }),
     )
 
@@ -143,23 +156,7 @@ export default function stateModelFactory() {
           ? genomeToTranscriptSeqMapping(self.connectedFeature)
           : undefined
       },
-    }))
-    .views(self => ({
-      /**
-       * #getter
-       */
-      get mouseCol2(): number | undefined {
-        return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
-      },
-      /**
-       * #getter
-       */
-      get clickCol2() {
-        return undefined
-      },
-    }))
 
-    .views(self => ({
       /**
        * #getter
        */
@@ -174,7 +171,73 @@ export default function stateModelFactory() {
         const { views } = getSession(self)
         return views.find(f => f.id === self.connectedViewId) as MaybeLGV
       },
+
+      /**
+       * #getter
+       * Get connected protein views with their full model references
+       */
+      get connectedProteinViews() {
+        const { views } = getSession(self)
+        return self.connectedStructures
+          .map(conn => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const proteinView = views.find((v: any) => v.id === conn.proteinViewId) as any
+            return proteinView ? { ...conn, proteinView } : undefined
+          })
+          .filter((c): c is StructureConnection & { proteinView: any } => !!c)
+      },
     }))
+
+    .views(self => ({
+      /**
+       * #getter
+       * Get the MSA column that corresponds to the currently hovered structure position
+       * Returns the first match from any connected structure
+       */
+      get structureHoverCol(): number | undefined {
+        for (const conn of self.connectedProteinViews) {
+          const structure = conn.proteinView?.structures?.[conn.structureIdx]
+          const structurePos = structure?.hoverPosition?.structureSeqPos
+          if (structurePos !== undefined) {
+            const msaUngapped = conn.structureToMsa[structurePos]
+            if (msaUngapped !== undefined) {
+              // Get the MSA row sequence
+              const row = self.rows.find(r => r[0] === conn.msaRowName)
+              if (row) {
+                const gappedPos = ungappedToGappedPosition(row[1], msaUngapped)
+                return gappedPos
+              }
+            }
+          }
+        }
+        return undefined
+      },
+    }))
+
+    .views(self => ({
+      /**
+       * #getter
+       * Returns a secondary highlight column from either:
+       * 1. Structure hover (from connected protein 3D view)
+       * 2. Genome hover (from connected linear genome view)
+       */
+      get mouseCol2(): number | undefined {
+        // Check structure hover first
+        const structureCol = self.structureHoverCol
+        if (structureCol !== undefined) {
+          return structureCol
+        }
+        // Fall back to genome hover
+        return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
+      },
+      /**
+       * #getter
+       */
+      get clickCol2() {
+        return undefined
+      },
+    }))
+
     .actions(self => ({
       /**
        * #action
@@ -258,6 +321,76 @@ export default function stateModelFactory() {
           connectedView.centerAt(r2.start, r)
         }
       },
+
+      /**
+       * #action
+       * Connect to a protein structure for synchronized highlighting
+       */
+      connectToStructure(
+        proteinViewId: string,
+        structureIdx: number,
+        msaRowName?: string,
+      ) {
+        const rowName = msaRowName ?? self.querySeqName
+        const msaRow = self.rows.find(r => r[0] === rowName)
+        if (!msaRow) {
+          throw new Error(`MSA row "${rowName}" not found`)
+        }
+
+        const msaSequence = msaRow[1].replace(/-/g, '')
+
+        const { views } = getSession(self)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const proteinView = views.find((v: any) => v.id === proteinViewId) as any
+        if (!proteinView) {
+          throw new Error(`ProteinView "${proteinViewId}" not found`)
+        }
+
+        const structure = proteinView.structures?.[structureIdx]
+        if (!structure) {
+          throw new Error(`Structure at index ${structureIdx} not found`)
+        }
+
+        const structureSequence = structure.structureSequences?.[0]
+        if (!structureSequence) {
+          throw new Error('Structure sequence not available')
+        }
+
+        const alignment = runPairwiseAlignment(msaSequence, structureSequence)
+        const { seq1ToSeq2, seq2ToSeq1 } = buildAlignmentMaps(alignment)
+
+        const connection: StructureConnection = {
+          proteinViewId,
+          structureIdx,
+          msaRowName: rowName,
+          alignment,
+          msaToStructure: mapToRecord(seq1ToSeq2),
+          structureToMsa: mapToRecord(seq2ToSeq1),
+        }
+
+        self.connectedStructures.push(connection)
+      },
+
+      /**
+       * #action
+       * Disconnect from a protein structure
+       */
+      disconnectFromStructure(proteinViewId: string, structureIdx: number) {
+        const idx = self.connectedStructures.findIndex(
+          c => c.proteinViewId === proteinViewId && c.structureIdx === structureIdx,
+        )
+        if (idx !== -1) {
+          self.connectedStructures.splice(idx, 1)
+        }
+      },
+
+      /**
+       * #action
+       * Disconnect from all protein structures
+       */
+      disconnectAllStructures() {
+        self.connectedStructures.clear()
+      },
     }))
     .actions(self => {
       // store reference to the original action from react-msaview
@@ -292,21 +425,31 @@ export default function stateModelFactory() {
               self.setZoomToBaseLevel(!self.zoomToBaseLevel)
             },
           },
+          {
+            label: 'Connect to protein structure...',
+            onClick: () => {
+              const session = getSession(self)
+              import('./components/ConnectStructureDialog').then(
+                ({ default: ConnectStructureDialog }) => {
+                  session.queueDialog(handleClose => [
+                    ConnectStructureDialog,
+                    { model: self, handleClose },
+                  ])
+                },
+              )
+            },
+          },
+          ...(self.connectedStructures.length > 0
+            ? [
+                {
+                  label: 'Disconnect from protein structures',
+                  onClick: () => {
+                    self.disconnectAllStructures()
+                  },
+                },
+              ]
+            : []),
         ]
-      },
-      /**
-       * #getter
-       */
-      get processing() {
-        return !!self.progress
-      },
-
-      /**
-       * #getter
-       */
-      get connectedView() {
-        const { views } = getSession(self)
-        return views.find(f => f.id === self.connectedViewId) as MaybeLGV
       },
     }))
 
@@ -394,6 +537,41 @@ export default function stateModelFactory() {
                 ? undefined
                 : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
             self.setConnectedHighlights([r1, r2].filter(f => !!f))
+          }),
+        )
+
+        // this highlights residues in connected protein structures when mousing over the MSA
+        addDisposer(
+          self,
+          autorun(() => {
+            const { mouseCol, connectedProteinViews } = self
+            if (mouseCol === undefined || connectedProteinViews.length === 0) {
+              return
+            }
+
+            for (const conn of connectedProteinViews) {
+              const structure = conn.proteinView?.structures?.[conn.structureIdx]
+              if (!structure) {
+                continue
+              }
+
+              // Get the MSA row sequence to convert gapped to ungapped
+              const row = self.rows.find(r => r[0] === conn.msaRowName)
+              if (!row) {
+                continue
+              }
+
+              const msaUngapped = gappedToUngappedPosition(row[1], mouseCol)
+              if (msaUngapped === undefined) {
+                continue
+              }
+
+              const structurePos = conn.msaToStructure[msaUngapped]
+              if (structurePos !== undefined) {
+                // Call the highlight method on the structure
+                structure.highlightFromExternal?.(structurePos)
+              }
+            }
           }),
         )
       },
