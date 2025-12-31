@@ -119,10 +119,12 @@ dist
 
 # Ignore the directory with the JBrowse 2 build
 .jbrowse
+.test-jbrowse
 
 # Cypress specific files
 cypress/videos
 cypress/screenshots
 
 # Ignore code editor
+debug-*.png
 .vscode

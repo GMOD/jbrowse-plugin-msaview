@@ -103,15 +103,19 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
 
   const validSet = useMemo(() => new Set(msaList), [msaList])
 
-  // Update selectedTranscriptId when msaList changes
+  // Update selectedTranscriptId when msaList changes, but only if current
+  // selection is not valid
   useEffect(() => {
     if (msaList && msaList.length > 0) {
-      const validId = findValidTranscriptId({
-        transcriptsList: transcripts,
-        validMsaList: msaList,
-      })
-      if (validId && validId !== selectedTranscriptId) {
-        setSelectedTranscriptId(validId)
+      const currentIsValid = msaList.includes(selectedTranscriptId)
+      if (!currentIsValid) {
+        const validId = findValidTranscriptId({
+          transcriptsList: transcripts,
+          validMsaList: msaList,
+        })
+        if (validId) {
+          setSelectedTranscriptId(validId)
+        }
       }
     }
   }, [msaList, transcripts, selectedTranscriptId])

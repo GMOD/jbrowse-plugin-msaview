@@ -32,6 +32,14 @@ export interface BlastParams {
   proteinSequence: string
 }
 
+export interface MsaViewInitState {
+  msaData?: string
+  msaUrl?: string
+  treeData?: string
+  treeUrl?: string
+  querySeqName?: string
+}
+
 /**
  * #stateModel MsaViewPlugin
  * extends
@@ -74,6 +82,20 @@ export default function stateModelFactory() {
          * #property
          */
         zoomToBaseLevel: false,
+
+        /**
+         * #property
+         * used for loading the MSA view via session snapshots, e.g.
+         * {
+         *   "type": "MsaView",
+         *   "init": {
+         *     "msaUrl": "https://example.com/alignment.fa",
+         *     "treeUrl": "https://example.com/tree.nh",
+         *     "querySeqName": "ENST00000123_hg38"
+         *   }
+         * }
+         */
+        init: types.frozen<MsaViewInitState | undefined>(),
       }),
     )
 
@@ -205,6 +227,18 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setInit(arg?: MsaViewInitState) {
+        self.init = arg
+      },
+      /**
+       * #action
+       */
+      setQuerySeqName(arg: string) {
+        self.querySeqName = arg
+      },
+      /**
+       * #action
+       */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
         const { assemblyManager } = getSession(self)
@@ -295,6 +329,52 @@ export default function stateModelFactory() {
                 console.error(e)
               } finally {
                 self.setProgress('')
+              }
+            }
+          }),
+        )
+
+        // process init parameter for loading MSA from session snapshots
+        addDisposer(
+          self,
+          autorun(async () => {
+            const { init } = self
+            if (init) {
+              try {
+                self.setError(undefined)
+                const { msaData, msaUrl, treeData, treeUrl, querySeqName } =
+                  init
+
+                if (querySeqName) {
+                  self.setQuerySeqName(querySeqName)
+                }
+
+                if (msaData) {
+                  self.setMSA(msaData)
+                } else if (msaUrl) {
+                  const response = await fetch(msaUrl)
+                  if (!response.ok) {
+                    throw new Error(`Failed to fetch MSA: ${response.status}`)
+                  }
+                  const data = await response.text()
+                  self.setMSA(data)
+                }
+
+                if (treeData) {
+                  self.setTree(treeData)
+                } else if (treeUrl) {
+                  const response = await fetch(treeUrl)
+                  if (!response.ok) {
+                    throw new Error(`Failed to fetch tree: ${response.status}`)
+                  }
+                  const data = await response.text()
+                  self.setTree(data)
+                }
+
+                self.setInit(undefined)
+              } catch (e) {
+                self.setError(e)
+                console.error(e)
               }
             }
           }),

@@ -9,6 +9,7 @@ import { version } from '../package.json'
 import AddHighlightModelF from './AddHighlightModel'
 import BgzipFastaMsaAdapterF from './BgzipFastaMsaAdapter'
 import LaunchMsaViewF from './LaunchMsaView'
+import LaunchMsaViewExtensionPointF from './LaunchMsaViewExtensionPoint'
 import MsaViewF from './MsaViewPanel'
 
 export default class MsaViewPlugin extends Plugin {
@@ -18,6 +19,7 @@ export default class MsaViewPlugin extends Plugin {
   install(pluginManager: PluginManager) {
     MsaViewF(pluginManager)
     LaunchMsaViewF(pluginManager)
+    LaunchMsaViewExtensionPointF(pluginManager)
     AddHighlightModelF(pluginManager)
     BgzipFastaMsaAdapterF(pluginManager)
   }

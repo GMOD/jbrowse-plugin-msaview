@@ -15,12 +15,13 @@ export default defineConfig(
       'esbuild-watch.mjs',
       'eslint.config.mjs',
       'ucsc/*',
+      '.test-jbrowse/*',
     ],
   },
   {
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.lint.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },

@@ -27,9 +27,12 @@
     "start": "node esbuild-watch.mjs",
     "format": "prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
-    "prebuild": "npm run clean",
+    "prebuild": "yarn clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
-    "prepack": "npm run build",
+    "pretest": "test -d .test-jbrowse || jbrowse create .test-jbrowse --nightly",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepack": "yarn build",
     "postversion": "git push --follow-tags"
   },
   "jbrowse-plugin": {
@@ -37,7 +40,7 @@
   },
   "dependencies": {
     "@emotion/styled": "^11.14.0",
-    "g2p_mapper": "^1.0.4",
+    "g2p_mapper": "^2.0.0",
     "pako": "^2.1.0",
     "react-msaview": "^4.4.1",
     "swr": "^2.3.3"
@@ -56,7 +59,7 @@
     "@types/react": "^19.1.6",
     "@typescript-eslint/eslint-plugin": "^8.0.1",
     "@typescript-eslint/parser": "^8.0.1",
-    "esbuild": "^0.25.5",
+    "esbuild": "^0.27.2",
     "eslint": "^9.28.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.20.3",
@@ -68,12 +71,15 @@
     "mobx-state-tree": "^5.3.0",
     "prettier": "^3.0.3",
     "pretty-bytes": "^7.0.0",
+    "puppeteer": "^24.34.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "rimraf": "^6.0.0",
     "rxjs": "^7.8.1",
+    "serve": "^14.2.5",
     "tss-react": "^4.9.2",
     "typescript": "^5.2.2",
-    "typescript-eslint": "^8.1.0"
+    "typescript-eslint": "^8.1.0",
+    "vitest": "^4.0.16"
   }
 }
