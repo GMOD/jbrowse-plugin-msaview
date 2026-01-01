@@ -24,6 +24,49 @@ type LGV = LinearGenomeViewModel
 
 type MaybeLGV = LGV | undefined
 
+/**
+ * Highlights residues in connected protein structures based on current MSA hover position
+ */
+function highlightConnectedStructures(self: JBrowsePluginMsaViewModel) {
+  const { mouseCol, connectedProteinViews } = self
+  if (connectedProteinViews.length === 0) {
+    return
+  }
+
+  for (const conn of connectedProteinViews) {
+    const structure = conn.proteinView?.structures?.[conn.structureIdx]
+    if (!structure) {
+      continue
+    }
+
+    // Clear highlight if mouse left MSA
+    if (mouseCol === undefined) {
+      structure.clearHighlightFromExternal?.()
+      continue
+    }
+
+    const seq = self.getSequenceByRowName(conn.msaRowName)
+    if (!seq) {
+      continue
+    }
+
+    // Convert gapped MSA column to ungapped position
+    const msaUngapped = gappedToUngappedPosition(seq, mouseCol)
+    if (msaUngapped === undefined) {
+      structure.clearHighlightFromExternal?.()
+      continue
+    }
+
+    // Map to structure position and highlight
+    const structurePos = conn.msaToStructure[msaUngapped]
+    if (structurePos !== undefined) {
+      structure.highlightFromExternal?.(structurePos)
+    } else {
+      structure.clearHighlightFromExternal?.()
+    }
+  }
+}
+
 export interface IRegion {
   refName: string
   start: number
@@ -130,23 +173,21 @@ export default function stateModelFactory() {
     .views(self => ({
       /**
        * #method
+       * Get a row by name, returns [name, sequence] or undefined
        */
-      ungappedToGappedPosition(rowName: string, position: number) {
-        const row = self.rows.find(f => f[0] === rowName)
-        const seq = row?.[1]
-        if (seq && position < seq.length) {
-          let i = 0
-          let j = 0
-          for (; j < position; j++, i++) {
-            while (seq[i] === '-') {
-              i++
-            }
-          }
-          return i
-        }
-        return undefined
+      getRowByName(rowName: string) {
+        return self.rows.find(r => r[0] === rowName)
+      },
+
+      /**
+       * #method
+       * Get the sequence for a row by name
+       */
+      getSequenceByRowName(rowName: string) {
+        return self.rows.find(r => r[0] === rowName)?.[1]
       },
     }))
+
     .views(self => ({
       /**
        * #getter
@@ -201,11 +242,9 @@ export default function stateModelFactory() {
           if (structurePos !== undefined) {
             const msaUngapped = conn.structureToMsa[structurePos]
             if (msaUngapped !== undefined) {
-              // Get the MSA row sequence
-              const row = self.rows.find(r => r[0] === conn.msaRowName)
-              if (row) {
-                const gappedPos = ungappedToGappedPosition(row[1], msaUngapped)
-                return gappedPos
+              const seq = self.getSequenceByRowName(conn.msaRowName)
+              if (seq) {
+                return ungappedToGappedPosition(seq, msaUngapped)
               }
             }
           }
@@ -332,12 +371,12 @@ export default function stateModelFactory() {
         msaRowName?: string,
       ) {
         const rowName = msaRowName ?? self.querySeqName
-        const msaRow = self.rows.find(r => r[0] === rowName)
-        if (!msaRow) {
+        const msaSequence = self.getSequenceByRowName(rowName)
+        if (!msaSequence) {
           throw new Error(`MSA row "${rowName}" not found`)
         }
 
-        const msaSequence = msaRow[1].replace(/-/g, '')
+        const ungappedMsaSequence = msaSequence.replace(/-/g, '')
 
         const { views } = getSession(self)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -356,7 +395,7 @@ export default function stateModelFactory() {
           throw new Error('Structure sequence not available')
         }
 
-        const alignment = runPairwiseAlignment(msaSequence, structureSequence)
+        const alignment = runPairwiseAlignment(ungappedMsaSequence, structureSequence)
         const { seq1ToSeq2, seq2ToSeq1 } = buildAlignmentMaps(alignment)
 
         const connection: StructureConnection = {
@@ -542,44 +581,7 @@ export default function stateModelFactory() {
         // this highlights residues in connected protein structures when mousing over the MSA
         addDisposer(
           self,
-          autorun(() => {
-            const { mouseCol, connectedProteinViews } = self
-            if (connectedProteinViews.length === 0) {
-              return
-            }
-
-            for (const conn of connectedProteinViews) {
-              const structure = conn.proteinView?.structures?.[conn.structureIdx]
-              if (!structure) {
-                continue
-              }
-
-              // Clear highlight if mouse left MSA or is on a gap
-              if (mouseCol === undefined) {
-                structure.clearHighlightFromExternal?.()
-                continue
-              }
-
-              // Get the MSA row sequence to convert gapped to ungapped
-              const row = self.rows.find(r => r[0] === conn.msaRowName)
-              if (!row) {
-                continue
-              }
-
-              const msaUngapped = gappedToUngappedPosition(row[1], mouseCol)
-              if (msaUngapped === undefined) {
-                structure.clearHighlightFromExternal?.()
-                continue
-              }
-
-              const structurePos = conn.msaToStructure[msaUngapped]
-              if (structurePos !== undefined) {
-                structure.highlightFromExternal?.(structurePos)
-              } else {
-                structure.clearHighlightFromExternal?.()
-              }
-            }
-          }),
+          autorun(() => highlightConnectedStructures(self)),
         )
       },
     }))
