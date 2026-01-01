@@ -1,5 +1,3 @@
-import type { PairwiseAlignment } from './pairwiseAlignment'
-
 /**
  * Represents a connection between the MSA view and a protein structure
  */
@@ -10,8 +8,6 @@ export interface StructureConnection {
   structureIdx: number
   /** Name of the MSA row that corresponds to this structure */
   msaRowName: string
-  /** Pairwise alignment between MSA row sequence and structure sequence */
-  alignment: PairwiseAlignment
   /** Map from MSA ungapped position to structure sequence position */
   msaToStructure: Record<number, number>
   /** Map from structure sequence position to MSA ungapped position */

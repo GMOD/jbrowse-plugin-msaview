@@ -131,7 +131,7 @@ export default function stateModelFactory() {
       /**
        * #method
        */
-      ungappedCoordMap(rowName: string, position: number) {
+      ungappedToGappedPosition(rowName: string, position: number) {
         const row = self.rows.find(f => f[0] === rowName)
         const seq = row?.[1]
         if (seq && position < seq.length) {
@@ -363,7 +363,6 @@ export default function stateModelFactory() {
           proteinViewId,
           structureIdx,
           msaRowName: rowName,
-          alignment,
           msaToStructure: mapToRecord(seq1ToSeq2),
           structureToMsa: mapToRecord(seq2ToSeq1),
         }
@@ -545,13 +544,19 @@ export default function stateModelFactory() {
           self,
           autorun(() => {
             const { mouseCol, connectedProteinViews } = self
-            if (mouseCol === undefined || connectedProteinViews.length === 0) {
+            if (connectedProteinViews.length === 0) {
               return
             }
 
             for (const conn of connectedProteinViews) {
               const structure = conn.proteinView?.structures?.[conn.structureIdx]
               if (!structure) {
+                continue
+              }
+
+              // Clear highlight if mouse left MSA or is on a gap
+              if (mouseCol === undefined) {
+                structure.clearHighlightFromExternal?.()
                 continue
               }
 
@@ -563,13 +568,15 @@ export default function stateModelFactory() {
 
               const msaUngapped = gappedToUngappedPosition(row[1], mouseCol)
               if (msaUngapped === undefined) {
+                structure.clearHighlightFromExternal?.()
                 continue
               }
 
               const structurePos = conn.msaToStructure[msaUngapped]
               if (structurePos !== undefined) {
-                // Call the highlight method on the structure
                 structure.highlightFromExternal?.(structurePos)
+              } else {
+                structure.clearHighlightFromExternal?.()
               }
             }
           }),

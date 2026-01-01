@@ -1,16 +1,4 @@
-/**
- * Convert gapped MSA column coordinate to ungapped sequence coordinate
- * This is the inverse of ungappedCoordMap
- */
-function gappedToUngappedCoord(seq: string, gappedPos: number): number {
-  let ungappedPos = 0
-  for (let i = 0; i < gappedPos && i < seq.length; i++) {
-    if (seq[i] !== '-') {
-      ungappedPos++
-    }
-  }
-  return ungappedPos
-}
+import { gappedToUngappedPosition } from './structureConnection'
 export function msaCoordToGenomeCoord({
   model,
   coord: mouseCol,
@@ -38,13 +26,12 @@ export function msaCoordToGenomeCoord({
       return undefined
     }
 
-    // Check if the position in the query sequence is a gap
-    if (querySeq[mouseCol] === '-') {
+    // Convert gapped MSA column to ungapped sequence coordinate
+    // Returns undefined if the position is a gap
+    const ungappedPos = gappedToUngappedPosition(querySeq, mouseCol)
+    if (ungappedPos === undefined) {
       return undefined
     }
-
-    // Convert gapped MSA column to ungapped sequence coordinate
-    const ungappedPos = gappedToUngappedCoord(querySeq, mouseCol)
 
     // Use the ungapped position to look up in the p2g map
     const { refName, p2g } = transcriptToMsaMap
