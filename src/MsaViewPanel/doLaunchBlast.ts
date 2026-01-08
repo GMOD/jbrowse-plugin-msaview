@@ -1,5 +1,6 @@
 import { JBrowsePluginMsaViewModel } from './model'
 import { makeId, strip } from '../LaunchMsaView/components/util'
+import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { launchMSA } from '../utils/msa'
 import { queryBlast } from '../utils/ncbiBlast'
 
@@ -15,8 +16,9 @@ export async function doLaunchBlast({
     msaAlgorithm,
     proteinSequence,
   } = self.blastParams!
+  const cleanedSeq = cleanProteinSequence(proteinSequence)
   const { hits } = await queryBlast({
-    query: proteinSequence.replaceAll('*', '').replaceAll('&', ''),
+    query: cleanedSeq,
     blastDatabase,
     blastProgram,
     baseUrl,
@@ -31,7 +33,7 @@ export async function doLaunchBlast({
   return launchMSA({
     algorithm: msaAlgorithm,
     sequence: [
-      `>QUERY\n${proteinSequence.replaceAll('*', '').replaceAll('&', '')}`,
+      `>QUERY\n${cleanedSeq}`,
       ...hits
         .map(
           h =>

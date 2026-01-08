@@ -13,9 +13,9 @@ import { makeStyles } from 'tss-react/mui'
 
 import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
 import { useGeneTree } from './useGeneTree'
-import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import { getGeneDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
-import { useFeatureSequence } from '../useFeatureSequence'
+import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -41,15 +41,15 @@ const EnsemblGeneTree = observer(function ({
   const view = getContainingView(model) as LinearGenomeViewModel
   const { classes } = useStyles()
   const [launchViewError, setLaunchViewError] = useState<unknown>()
-  const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
-  const { treeData, isTreeLoading, treeError } = useGeneTree(userSelection)
-  const selectedTranscript = options.find(val => getId(val) === userSelection)!
-
-  const { proteinSequence, error: featureSequenceError } = useFeatureSequence({
-    view,
-    feature: selectedTranscript,
-  })
+  const {
+    options,
+    selectedId,
+    setSelectedId,
+    selectedTranscript,
+    proteinSequence,
+    error: featureSequenceError,
+  } = useTranscriptSelection({ feature, view })
+  const { treeData, isTreeLoading, treeError } = useGeneTree(selectedId)
 
   const loadingMessage = isTreeLoading
     ? 'Loading tree data from Ensembl GeneTree'
@@ -76,8 +76,8 @@ const EnsemblGeneTree = observer(function ({
         <TranscriptSelector
           feature={feature}
           options={options}
-          selectedTranscriptId={userSelection}
-          onTranscriptChange={setUserSelection}
+          selectedTranscript={selectedTranscript}
+          onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}
         />
       </DialogContent>

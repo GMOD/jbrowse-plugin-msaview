@@ -6,12 +6,21 @@ export function getTranscriptFeatures(feature: Feature) {
   // check if we are looking at a 'two-level' or 'three-level' feature by
   // finding exon/CDS subfeatures. we want to select from transcript names
   const subfeatures = feature.get('subfeatures') ?? []
-  return subfeatures.some(f => f.get('type') === 'CDS')
-    ? [feature]
-    : // filter out non-coding by finding subfeatures with CDS subfeatures
-      subfeatures.filter(f =>
-        f.get('subfeatures')?.some(f => f.get('type') === 'CDS'),
-      )
+
+  // Check for mRNA/transcript subfeatures (three-level: gene → mRNA → CDS)
+  // Filter to only those that have CDS subfeatures (i.e. are coding)
+  const transcripts = subfeatures.filter(
+    (f: Feature) =>
+      (f.get('type') === 'mRNA' || f.get('type') === 'transcript') &&
+      f.get('subfeatures')?.some((s: Feature) => s.get('type') === 'CDS'),
+  )
+  if (transcripts.length > 0) {
+    return transcripts
+  }
+
+  // Has direct CDS children, treat feature itself as the transcript
+  // (two-level: gene → CDS or mRNA → CDS)
+  return [feature]
 }
 
 export function getTranscriptLength(feature: Feature) {
@@ -47,4 +56,14 @@ export function getGeneDisplayName(val?: Feature) {
       ]
         .filter(f => !!f)
         .join(' ')
+}
+
+export function getSortedTranscriptFeatures(feature: Feature) {
+  return getTranscriptFeatures(feature).toSorted(
+    (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
+  )
+}
+
+export function cleanProteinSequence(seq: string) {
+  return seq.replaceAll('*', '').replaceAll('&', '')
 }

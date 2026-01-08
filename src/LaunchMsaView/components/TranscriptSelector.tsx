@@ -25,23 +25,20 @@ const useStyles = makeStyles()({
 export default function TranscriptSelector({
   feature,
   options,
-  selectedTranscriptId,
+  selectedTranscript,
   onTranscriptChange,
   proteinSequence,
   validSet,
 }: {
   feature: Feature
   options: Feature[]
-  selectedTranscriptId: string
+  selectedTranscript: Feature | undefined
   onTranscriptChange: (transcriptId: string) => void
   proteinSequence: string | undefined
   validSet?: Set<string>
 }) {
   const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
-  const selectedTranscript = options.find(
-    val => getId(val) === selectedTranscriptId,
-  )!
 
   return (
     <>
@@ -51,26 +48,22 @@ export default function TranscriptSelector({
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
           className={classes.minWidth}
-          value={selectedTranscriptId}
+          value={getId(selectedTranscript)}
           onChange={event => {
             onTranscriptChange(event.target.value)
           }}
         >
-          {options
-            .toSorted(
-              (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
+          {options.map(val => {
+            const inSet = validSet ? validSet.has(getId(val)) : true
+            const { len, mod } = getTranscriptLength(val)
+            return (
+              <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
+                {getTranscriptDisplayName(val)} ({len} aa){' '}
+                {mod ? ` (possible fragment)` : ''}
+                {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
+              </MenuItem>
             )
-            .map(val => {
-              const inSet = validSet ? validSet.has(getId(val)) : true
-              const { len, mod } = getTranscriptLength(val)
-              return (
-                <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
-                  {getTranscriptDisplayName(val)} ({len} aa){' '}
-                  {mod ? ` (possible fragment)` : ''}
-                  {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
-                </MenuItem>
-              )
-            })}
+          })}
         </TextField2>
         <div style={{ alignContent: 'center', marginLeft: 20 }}>
           <Button

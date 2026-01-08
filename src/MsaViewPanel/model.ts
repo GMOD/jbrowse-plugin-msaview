@@ -1,3 +1,5 @@
+import { lazy } from 'react'
+
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
@@ -8,14 +10,69 @@ import { MSAModelF } from 'react-msaview'
 import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
+import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
+import {
+  gappedToUngappedPosition,
+  mapToRecord,
+  ungappedToGappedPosition,
+} from './structureConnection'
+import { getUniprotIdFromAlphaFoldUrl } from './util'
 
+import type { StructureConnection } from './structureConnection'
 import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import type { Instance } from 'mobx-state-tree'
 
+const ConnectStructureDialog = lazy(
+  () => import('./components/ConnectStructureDialog'),
+)
+
 type LGV = LinearGenomeViewModel
 
 type MaybeLGV = LGV | undefined
+
+/**
+ * Highlights residues in connected protein structures based on current MSA hover position
+ */
+function highlightConnectedStructures(self: JBrowsePluginMsaViewModel) {
+  const { mouseCol, connectedProteinViews } = self
+  if (connectedProteinViews.length === 0) {
+    return
+  }
+
+  for (const conn of connectedProteinViews) {
+    const structure = conn.proteinView?.structures?.[conn.structureIdx]
+    if (!structure) {
+      continue
+    }
+
+    // Clear highlight if mouse left MSA
+    if (mouseCol === undefined) {
+      structure.clearHighlightFromExternal?.()
+      continue
+    }
+
+    const seq = self.getSequenceByRowName(conn.msaRowName)
+    if (!seq) {
+      continue
+    }
+
+    // Convert gapped MSA column to ungapped position
+    const msaUngapped = gappedToUngappedPosition(seq, mouseCol)
+    if (msaUngapped === undefined) {
+      structure.clearHighlightFromExternal?.()
+      continue
+    }
+
+    // Map to structure position and highlight
+    const structurePos = conn.msaToStructure[msaUngapped]
+    if (structurePos === undefined) {
+      structure.clearHighlightFromExternal?.()
+    } else {
+      structure.highlightFromExternal?.(structurePos)
+    }
+  }
+}
 
 export interface IRegion {
   refName: string
@@ -80,6 +137,12 @@ export default function stateModelFactory() {
 
         /**
          * #property
+         * UniProt ID extracted from AlphaFold MSA URL
+         */
+        uniprotId: types.maybe(types.string),
+
+        /**
+         * #property
          */
         zoomToBaseLevel: false,
 
@@ -96,6 +159,12 @@ export default function stateModelFactory() {
          * }
          */
         init: types.frozen<MsaViewInitState | undefined>(),
+
+        /**
+         * #property
+         * connections to protein 3D structure views for synchronized highlighting
+         */
+        connectedStructures: types.array(types.frozen<StructureConnection>()),
       }),
     )
 
@@ -117,23 +186,21 @@ export default function stateModelFactory() {
     .views(self => ({
       /**
        * #method
+       * Get a row by name, returns [name, sequence] or undefined
        */
-      ungappedCoordMap(rowName: string, position: number) {
-        const row = self.rows.find(f => f[0] === rowName)
-        const seq = row?.[1]
-        if (seq && position < seq.length) {
-          let i = 0
-          let j = 0
-          for (; j < position; j++, i++) {
-            while (seq[i] === '-') {
-              i++
-            }
-          }
-          return i
-        }
-        return undefined
+      getRowByName(rowName: string) {
+        return self.rows.find(r => r[0] === rowName)
+      },
+
+      /**
+       * #method
+       * Get the sequence for a row by name
+       */
+      getSequenceByRowName(rowName: string) {
+        return self.rows.find(r => r[0] === rowName)?.[1]
       },
     }))
+
     .views(self => ({
       /**
        * #getter
@@ -143,23 +210,7 @@ export default function stateModelFactory() {
           ? genomeToTranscriptSeqMapping(self.connectedFeature)
           : undefined
       },
-    }))
-    .views(self => ({
-      /**
-       * #getter
-       */
-      get mouseCol2(): number | undefined {
-        return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
-      },
-      /**
-       * #getter
-       */
-      get clickCol2() {
-        return undefined
-      },
-    }))
 
-    .views(self => ({
       /**
        * #getter
        */
@@ -174,7 +225,72 @@ export default function stateModelFactory() {
         const { views } = getSession(self)
         return views.find(f => f.id === self.connectedViewId) as MaybeLGV
       },
+
+      /**
+       * #getter
+       * Get connected protein views with their full model references
+       */
+      get connectedProteinViews() {
+        const { views } = getSession(self)
+        return self.connectedStructures
+          .map(conn => {
+            const proteinView = views.find(
+              (v: any) => v.id === conn.proteinViewId,
+            ) as any
+            return proteinView ? { ...conn, proteinView } : undefined
+          })
+          .filter((c): c is StructureConnection & { proteinView: any } => !!c)
+      },
     }))
+
+    .views(self => ({
+      /**
+       * #getter
+       * Get the MSA column that corresponds to the currently hovered structure position
+       * Returns the first match from any connected structure
+       */
+      get structureHoverCol(): number | undefined {
+        for (const conn of self.connectedProteinViews) {
+          const structure = conn.proteinView?.structures?.[conn.structureIdx]
+          const structurePos = structure?.hoverPosition?.structureSeqPos
+          if (structurePos !== undefined) {
+            const msaUngapped = conn.structureToMsa[structurePos]
+            if (msaUngapped !== undefined) {
+              const seq = self.getSequenceByRowName(conn.msaRowName)
+              if (seq) {
+                return ungappedToGappedPosition(seq, msaUngapped)
+              }
+            }
+          }
+        }
+        return undefined
+      },
+    }))
+
+    .views(self => ({
+      /**
+       * #getter
+       * Returns a secondary highlight column from either:
+       * 1. Structure hover (from connected protein 3D view)
+       * 2. Genome hover (from connected linear genome view)
+       */
+      get mouseCol2(): number | undefined {
+        // Check structure hover first
+        const structureCol = self.structureHoverCol
+        if (structureCol !== undefined) {
+          return structureCol
+        }
+        // Fall back to genome hover
+        return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
+      },
+      /**
+       * #getter
+       */
+      get clickCol2() {
+        return undefined
+      },
+    }))
+
     .actions(self => ({
       /**
        * #action
@@ -239,6 +355,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setUniprotId(arg?: string) {
+        self.uniprotId = arg
+      },
+      /**
+       * #action
+       */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
         const { assemblyManager } = getSession(self)
@@ -257,6 +379,82 @@ export default function stateModelFactory() {
               ?.getCanonicalRefName(r2.refName) ?? r2.refName
           connectedView.centerAt(r2.start, r)
         }
+      },
+
+      /**
+       * #action
+       * Connect to a protein structure for synchronized highlighting
+       */
+      connectToStructure(
+        proteinViewId: string,
+        structureIdx: number,
+        msaRowName?: string,
+      ) {
+        const rowName = msaRowName ?? self.querySeqName
+        const msaSequence = self.getSequenceByRowName(rowName)
+        if (!msaSequence) {
+          throw new Error(`MSA row "${rowName}" not found`)
+        }
+
+        const ungappedMsaSequence = msaSequence.replaceAll('-', '')
+
+        const { views } = getSession(self)
+
+        const proteinView = views.find(
+          (v: any) => v.id === proteinViewId,
+        ) as any
+        if (!proteinView) {
+          throw new Error(`ProteinView "${proteinViewId}" not found`)
+        }
+
+        const structure = proteinView.structures?.[structureIdx]
+        if (!structure) {
+          throw new Error(`Structure at index ${structureIdx} not found`)
+        }
+
+        const structureSequence = structure.structureSequences?.[0]
+        if (!structureSequence) {
+          throw new Error('Structure sequence not available')
+        }
+
+        const alignment = runPairwiseAlignment(
+          ungappedMsaSequence,
+          structureSequence,
+        )
+        const { seq1ToSeq2, seq2ToSeq1 } = buildAlignmentMaps(alignment)
+
+        const connection: StructureConnection = {
+          proteinViewId,
+          structureIdx,
+          msaRowName: rowName,
+          msaToStructure: mapToRecord(seq1ToSeq2),
+          structureToMsa: mapToRecord(seq2ToSeq1),
+        }
+
+        self.connectedStructures.push(connection)
+      },
+
+      /**
+       * #action
+       * Disconnect from a protein structure
+       */
+      disconnectFromStructure(proteinViewId: string, structureIdx: number) {
+        const idx = self.connectedStructures.findIndex(
+          c =>
+            c.proteinViewId === proteinViewId &&
+            c.structureIdx === structureIdx,
+        )
+        if (idx !== -1) {
+          self.connectedStructures.splice(idx, 1)
+        }
+      },
+
+      /**
+       * #action
+       * Disconnect from all protein structures
+       */
+      disconnectAllStructures() {
+        self.connectedStructures.clear()
       },
     }))
     .actions(self => {
@@ -292,21 +490,29 @@ export default function stateModelFactory() {
               self.setZoomToBaseLevel(!self.zoomToBaseLevel)
             },
           },
+          {
+            label: 'Connect to protein structure...',
+            onClick: () => {
+              getSession(self).queueDialog(handleClose => [
+                ConnectStructureDialog,
+                {
+                  model: self,
+                  handleClose,
+                },
+              ])
+            },
+          },
+          ...(self.connectedStructures.length > 0
+            ? [
+                {
+                  label: 'Disconnect from protein structures',
+                  onClick: () => {
+                    self.disconnectAllStructures()
+                  },
+                },
+              ]
+            : []),
         ]
-      },
-      /**
-       * #getter
-       */
-      get processing() {
-        return !!self.progress
-      },
-
-      /**
-       * #getter
-       */
-      get connectedView() {
-        const { views } = getSession(self)
-        return views.find(f => f.id === self.connectedViewId) as MaybeLGV
       },
     }))
 
@@ -345,6 +551,17 @@ export default function stateModelFactory() {
                 const { msaData, msaUrl, treeData, treeUrl, querySeqName } =
                   init
 
+                // Extract uniprotId from AlphaFold MSA URL and set querySeqName
+                if (msaUrl) {
+                  const id = getUniprotIdFromAlphaFoldUrl(msaUrl)
+                  if (id) {
+                    self.setUniprotId(id)
+                    // AlphaFold MSA files use 'query' as the row name
+                    self.setQuerySeqName('query')
+                  }
+                }
+
+                // User-provided querySeqName takes precedence
                 if (querySeqName) {
                   self.setQuerySeqName(querySeqName)
                 }
@@ -394,6 +611,76 @@ export default function stateModelFactory() {
                 ? undefined
                 : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
             self.setConnectedHighlights([r1, r2].filter(f => !!f))
+          }),
+        )
+
+        // this highlights residues in connected protein structures when mousing over the MSA
+        addDisposer(
+          self,
+          autorun(() => {
+            highlightConnectedStructures(self)
+          }),
+        )
+
+        // auto-connect to compatible ProteinViews
+        addDisposer(
+          self,
+          autorun(() => {
+            const { views } = getSession(self)
+            const { connectedViewId, uniprotId, rows, connectedStructures } =
+              self
+
+            // Need MSA loaded and a uniprotId to auto-connect
+            if (!uniprotId || rows.length === 0) {
+              return
+            }
+
+            // Find ProteinViews that share the same connectedViewId
+            for (const view of views) {
+              const v = view as any
+              if (v.type !== 'ProteinView' || !v.structures) {
+                continue
+              }
+
+              for (
+                let structureIdx = 0;
+                structureIdx < v.structures.length;
+                structureIdx++
+              ) {
+                const structure = v.structures[structureIdx]
+
+                // Check if structure shares the same genome view connection
+                if (structure.connectedViewId !== connectedViewId) {
+                  continue
+                }
+
+                // Check if structure has matching uniprotId
+                if (structure.uniprotId !== uniprotId) {
+                  continue
+                }
+
+                // Check if already connected
+                const alreadyConnected = connectedStructures.some(
+                  c =>
+                    c.proteinViewId === v.id && c.structureIdx === structureIdx,
+                )
+                if (alreadyConnected) {
+                  continue
+                }
+
+                // Check if structure sequence is available
+                if (!structure.structureSequences?.[0]) {
+                  continue
+                }
+
+                // Auto-connect
+                try {
+                  self.connectToStructure(v.id, structureIdx)
+                } catch (e) {
+                  console.error('Failed to auto-connect to ProteinView:', e)
+                }
+              }
+            }
           }),
         )
       },
