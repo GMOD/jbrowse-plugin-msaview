@@ -42,7 +42,7 @@
     "@emotion/styled": "^11.14.0",
     "g2p_mapper": "^2.0.0",
     "pako": "^2.1.0",
-    "react-msaview": "^4.4.1",
+    "react-msaview": "^4.5.0",
     "swr": "^2.3.3"
   },
   "devDependencies": {
