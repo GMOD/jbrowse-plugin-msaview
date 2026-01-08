@@ -21,6 +21,7 @@ import TextField2 from '../../../components/TextField2'
 import {
   getGeneDisplayName,
   getId,
+  getLongestTranscript,
   getTranscriptDisplayName,
   getTranscriptFeatures,
 } from '../../util'
@@ -68,7 +69,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
     useState<msaAlgorithmsT>('clustalo')
   const options = getTranscriptFeatures(feature)
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(
-    getId(options[0]),
+    getId(getLongestTranscript(options)),
   )
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')

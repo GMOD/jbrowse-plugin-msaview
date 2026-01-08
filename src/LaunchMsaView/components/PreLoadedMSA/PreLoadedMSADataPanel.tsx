@@ -15,7 +15,12 @@ import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
-import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import {
+  getGeneDisplayName,
+  getId,
+  getLongestTranscript,
+  getTranscriptFeatures,
+} from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
 import { swrFlags } from './consts'
@@ -48,7 +53,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const { assemblyNames } = view
   const transcripts = getTranscriptFeatures(feature)
   const [selectedTranscriptId, setSelectedTranscriptId] = useState(
-    getId(transcripts[0]),
+    getId(getLongestTranscript(transcripts)),
   )
   const [viewError, setViewError] = useState<unknown>()
   const selectedTranscript = selectedTranscriptId

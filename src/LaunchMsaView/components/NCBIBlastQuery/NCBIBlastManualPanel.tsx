@@ -7,7 +7,7 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import ExternalLink from '../../../components/ExternalLink'
-import { getId, getTranscriptFeatures } from '../../util'
+import { getId, getLongestTranscript, getTranscriptFeatures } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
 
@@ -44,7 +44,9 @@ const NCBIBlastManualPanel = observer(function ({
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
   const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const [userSelection, setUserSelection] = useState(
+    getId(getLongestTranscript(options)),
+  )
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
   const { proteinSequence, error } = useFeatureSequence({
     view,

@@ -13,7 +13,12 @@ import { makeStyles } from 'tss-react/mui'
 
 import { ensemblGeneTreeLaunchView } from './ensemblGeneTreeLaunchView'
 import { useGeneTree } from './useGeneTree'
-import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import {
+  getGeneDisplayName,
+  getId,
+  getLongestTranscript,
+  getTranscriptFeatures,
+} from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
 
@@ -42,7 +47,9 @@ const EnsemblGeneTree = observer(function ({
   const { classes } = useStyles()
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const [userSelection, setUserSelection] = useState(
+    getId(getLongestTranscript(options)),
+  )
   const { treeData, isTreeLoading, treeError } = useGeneTree(userSelection)
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
 

@@ -57,3 +57,16 @@ export function getGeneDisplayName(val?: Feature) {
         .filter(f => !!f)
         .join(' ')
 }
+
+export function getLongestTranscript(options: Feature[]) {
+  let longest = options[0]
+  let longestLen = 0
+  for (const opt of options) {
+    const { len } = getTranscriptLength(opt)
+    if (len > longestLen) {
+      longestLen = len
+      longest = opt
+    }
+  }
+  return longest
+}

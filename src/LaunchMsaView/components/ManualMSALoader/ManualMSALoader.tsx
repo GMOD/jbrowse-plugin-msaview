@@ -23,7 +23,12 @@ import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
 import TextField2 from '../../../components/TextField2'
-import { getGeneDisplayName, getId, getTranscriptFeatures } from '../../util'
+import {
+  getGeneDisplayName,
+  getId,
+  getLongestTranscript,
+  getTranscriptFeatures,
+} from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useFeatureSequence } from '../useFeatureSequence'
 
@@ -57,7 +62,9 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
   const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(getId(options[0]))
+  const [userSelection, setUserSelection] = useState(
+    getId(getLongestTranscript(options)),
+  )
   const ret = options.find(val => userSelection === getId(val))
   const selectedTranscript = options.find(val => getId(val) === userSelection)!
   const { proteinSequence, error: error2 } = useFeatureSequence({
