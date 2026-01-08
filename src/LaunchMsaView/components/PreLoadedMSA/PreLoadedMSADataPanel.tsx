@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import { readConfObject } from '@jbrowse/core/configuration'
 import { ErrorMessage, LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
@@ -15,17 +15,11 @@ import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
-import {
-  getGeneDisplayName,
-  getId,
-  getLongestTranscript,
-  getTranscriptFeatures,
-} from '../../util'
+import { getGeneDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
-import { useFeatureSequence } from '../useFeatureSequence'
+import { useTranscriptSelection } from '../useTranscriptSelection'
 import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
-import { findValidTranscriptId } from './findValidTranscriptId'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import { Dataset } from './types'
 
@@ -51,18 +45,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
   const { assemblyNames } = view
-  const transcripts = getTranscriptFeatures(feature)
-  const [selectedTranscriptId, setSelectedTranscriptId] = useState(
-    getId(getLongestTranscript(transcripts)),
-  )
   const [viewError, setViewError] = useState<unknown>()
-  const selectedTranscript = selectedTranscriptId
-    ? transcripts.find(val => getId(val) === selectedTranscriptId)
-    : undefined
-  const { proteinSequence, error: proteinSequenceError } = useFeatureSequence({
-    view,
-    feature: selectedTranscript,
-  })
 
   const { jbrowse } = session
   const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as
@@ -87,43 +70,35 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         : undefined,
     swrFlags,
   )
+
+  const {
+    options: transcripts,
+    selectedId,
+    setSelectedId,
+    selectedTranscript,
+    proteinSequence,
+    error: proteinSequenceError,
+    validSet,
+  } = useTranscriptSelection({ feature, view, validIds: msaList })
+
   const {
     data: msaData,
     isLoading: msaDataLoading,
     error: msaDataFetchError,
   } = useSWR(
-    selectedTranscriptId && selectedDatasetId
-      ? `${selectedTranscriptId}-${selectedTranscriptId}-${msaList?.length}-msa`
+    selectedId && selectedDatasetId
+      ? `${selectedId}-${selectedId}-${msaList?.length}-msa`
       : 'none-msa',
     () =>
-      selectedTranscriptId && selectedDataset && msaList
+      selectedId && selectedDataset && msaList
         ? fetchMSA({
-            msaId: selectedTranscriptId,
+            msaId: selectedId,
             config: selectedDataset.adapter,
             pluginManager,
           })
         : undefined,
     swrFlags,
   )
-
-  const validSet = useMemo(() => new Set(msaList), [msaList])
-
-  // Update selectedTranscriptId when msaList changes, but only if current
-  // selection is not valid
-  useEffect(() => {
-    if (msaList && msaList.length > 0) {
-      const currentIsValid = msaList.includes(selectedTranscriptId)
-      if (!currentIsValid) {
-        const validId = findValidTranscriptId({
-          transcriptsList: transcripts,
-          validMsaList: msaList,
-        })
-        if (validId) {
-          setSelectedTranscriptId(validId)
-        }
-      }
-    }
-  }, [msaList, transcripts, selectedTranscriptId])
 
   const e =
     msaListFetchError ?? msaDataFetchError ?? proteinSequenceError ?? viewError
@@ -159,7 +134,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
             {!msaListLoading && msaDataLoading ? (
               <LoadingEllipses
                 variant="h6"
-                message={`Loading MSA for (${selectedTranscriptId})`}
+                message={`Loading MSA for (${selectedId})`}
               />
             ) : null}
             {msaListLoading ? (
@@ -175,8 +150,8 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                 <TranscriptSelector
                   feature={feature}
                   options={transcripts}
-                  selectedTranscriptId={selectedTranscriptId}
-                  onTranscriptChange={setSelectedTranscriptId}
+                  selectedTranscript={selectedTranscript}
+                  onTranscriptChange={setSelectedId}
                   proteinSequence={proteinSequence}
                   validSet={validSet}
                 />
@@ -196,7 +171,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
               if (!selectedTranscript || !msaData) {
                 return
               }
-              const querySeqName = `${selectedTranscriptId}_${assemblyNames[0]}`
+              const querySeqName = `${selectedId}_${assemblyNames[0]}`
               preCalculatedLaunchView({
                 session,
                 newViewTitle: getGeneDisplayName(selectedTranscript),

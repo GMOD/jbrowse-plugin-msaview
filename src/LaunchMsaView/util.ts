@@ -58,15 +58,12 @@ export function getGeneDisplayName(val?: Feature) {
         .join(' ')
 }
 
-export function getLongestTranscript(options: Feature[]) {
-  let longest = options[0]
-  let longestLen = 0
-  for (const opt of options) {
-    const { len } = getTranscriptLength(opt)
-    if (len > longestLen) {
-      longestLen = len
-      longest = opt
-    }
-  }
-  return longest
+export function getSortedTranscriptFeatures(feature: Feature) {
+  return getTranscriptFeatures(feature).toSorted(
+    (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
+  )
+}
+
+export function cleanProteinSequence(seq: string) {
+  return seq.replaceAll('*', '').replaceAll('&', '')
 }

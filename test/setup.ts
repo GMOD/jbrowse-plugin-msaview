@@ -1,8 +1,11 @@
-import { execSync, spawn, type ChildProcess } from 'node:child_process'
+import { type ChildProcess, execSync, spawn } from 'node:child_process'
 import fs from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
-import puppeteer, { type Browser, type Page } from 'puppeteer'
+
+import { launch } from 'puppeteer'
+
+import type { Browser, Page } from 'puppeteer'
 
 export const JBROWSE_PORT = 9876
 const TEST_JBROWSE_DIR = path.join(process.cwd(), '.test-jbrowse')
@@ -10,7 +13,7 @@ const TEST_JBROWSE_DIR = path.join(process.cwd(), '.test-jbrowse')
 export async function waitForServer(
   port: number,
   pathToCheck = '/',
-  timeout = 30000,
+  timeout = 30_000,
 ): Promise<void> {
   const start = Date.now()
   while (Date.now() - start < timeout) {
@@ -41,7 +44,7 @@ export async function waitForServer(
  * Set up a local JBrowse instance for testing.
  * Assumes `jbrowse create .test-jbrowse` was already run by the pretest script.
  */
-export async function setupJBrowse(): Promise<void> {
+export function setupJBrowse() {
   console.log('Setting up JBrowse test instance...')
 
   if (!fs.existsSync(TEST_JBROWSE_DIR)) {
@@ -55,7 +58,7 @@ export async function setupJBrowse(): Promise<void> {
   execSync('yarn build', {
     cwd: process.cwd(),
     stdio: 'inherit',
-    timeout: 60000,
+    timeout: 60_000,
   })
 
   // Copy the distconfig.json to JBrowse directory as config.json
@@ -192,18 +195,18 @@ export async function startJBrowseServer(): Promise<ChildProcess> {
     const timeout = setTimeout(() => {
       proc.kill()
       reject(new Error(`Server did not start within 30000ms`))
-    }, 30000)
+    }, 30_000)
 
     const onData = (data: Buffer) => {
       const str = data.toString()
       console.log(`[jbrowse-server] ${str}`)
 
       // Extract port from message like "Accepting connections at http://localhost:9876"
-      const match = str.match(
-        /Accepting connections at http:\/\/localhost:(\d+)/,
+      const match = /Accepting connections at http:\/\/localhost:(\d+)/.exec(
+        str,
       )
       if (match) {
-        const actualPort = parseInt(match[1], 10)
+        const actualPort = Number.parseInt(match[1], 10)
         console.log(
           `Server reported port: ${actualPort}, expected: ${JBROWSE_PORT}`,
         )
@@ -230,8 +233,8 @@ export async function startJBrowseServer(): Promise<ChildProcess> {
       }
     }
 
-    proc.stdout?.on('data', onData)
-    proc.stderr?.on('data', onData)
+    proc.stdout.on('data', onData)
+    proc.stderr.on('data', onData)
 
     proc.on('error', err => {
       clearTimeout(timeout)
@@ -249,11 +252,13 @@ export async function startJBrowseServer(): Promise<ChildProcess> {
 
 export async function stopServer(proc: ChildProcess): Promise<void> {
   return new Promise(resolve => {
-    if (!proc || proc.killed) {
+    if (proc.killed) {
       resolve()
       return
     }
-    proc.on('close', () => resolve())
+    proc.on('close', () => {
+      resolve()
+    })
     proc.kill('SIGTERM')
     setTimeout(() => {
       if (!proc.killed) {
@@ -275,7 +280,7 @@ export async function cleanupJBrowse(): Promise<void> {
 }
 
 export async function launchBrowser(headless = true): Promise<Browser> {
-  return puppeteer.launch({
+  return launch({
     headless,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   })
@@ -305,7 +310,7 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
 
   const jbrowseUrl = `http://localhost:${JBROWSE_PORT}/`
   console.log(`Navigating to: ${jbrowseUrl}`)
-  await page.goto(jbrowseUrl, { waitUntil: 'networkidle2', timeout: 60000 })
+  await page.goto(jbrowseUrl, { waitUntil: 'networkidle2', timeout: 60_000 })
 
   return page
 }
@@ -314,10 +319,10 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
   // First wait for React app to mount - look for root div with content
   await page.waitForFunction(
     () => {
-      const root = document.getElementById('root')
+      const root = document.querySelector('#root')
       return root && root.children.length > 0
     },
-    { timeout: 30000 },
+    { timeout: 30_000 },
   )
   console.log('React app mounted')
 
@@ -326,7 +331,7 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
 
   // Try to wait for canvas, but don't fail if not found
   try {
-    await page.waitForSelector('canvas', { timeout: 30000 })
+    await page.waitForSelector('canvas', { timeout: 30_000 })
     console.log('Canvas found')
   } catch {
     console.log('No canvas found after 30s, continuing anyway...')
@@ -340,7 +345,7 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
 export async function waitForTrackLoad(page: Page): Promise<void> {
   // Wait for feature track to have rendered content
   try {
-    await page.waitForSelector('canvas', { timeout: 30000 })
+    await page.waitForSelector('canvas', { timeout: 30_000 })
     console.log('Track canvas found')
   } catch {
     console.log('No track canvas found, continuing...')

@@ -36,10 +36,10 @@ describe('TranscriptSelector logic', () => {
     // - Current selection is 'transcript2' (invalid)
     // - The code should find and set 'transcript1' (first valid)
 
-    const msaList = ['transcript1', 'transcript3']
+    const msaList = new Set(['transcript1', 'transcript3'])
     const currentSelectedTranscriptId = 'transcript2'
 
-    const currentIsValid = msaList.includes(currentSelectedTranscriptId)
+    const currentIsValid = msaList.has(currentSelectedTranscriptId)
 
     expect(currentIsValid).toBe(false)
     // Since currentIsValid is false, we should find a valid transcript
@@ -50,13 +50,12 @@ describe('TranscriptSelector logic', () => {
       { id: 'transcript2' },
       { id: 'transcript3' },
     ]
-    const validId = transcriptsList.find(t => msaList.includes(t.id))?.id
+    const validId = transcriptsList.find(t => msaList.has(t.id))?.id
     expect(validId).toBe('transcript1')
   })
 
   it('should handle empty msaList gracefully', () => {
     const msaList: string[] = []
-    const userSelectedTranscriptId = 'transcript1'
 
     // When msaList is empty, the condition msaList.length > 0 fails
     // so no update should happen
@@ -66,7 +65,7 @@ describe('TranscriptSelector logic', () => {
   })
 
   it('should handle case where no valid transcript exists', () => {
-    const msaList = ['transcriptA', 'transcriptB']
+    const msaList = new Set(['transcriptA', 'transcriptB'])
     const transcriptsList = [
       { id: 'transcript1' },
       { id: 'transcript2' },
@@ -75,11 +74,11 @@ describe('TranscriptSelector logic', () => {
 
     // Current selection is invalid
     const currentSelectedTranscriptId = 'transcript1'
-    const currentIsValid = msaList.includes(currentSelectedTranscriptId)
+    const currentIsValid = msaList.has(currentSelectedTranscriptId)
     expect(currentIsValid).toBe(false)
 
     // Try to find a valid one
-    const validId = transcriptsList.find(t => msaList.includes(t.id))?.id
+    const validId = transcriptsList.find(t => msaList.has(t.id))?.id
     expect(validId).toBeUndefined()
 
     // In this case, the code should not call setSelectedTranscriptId

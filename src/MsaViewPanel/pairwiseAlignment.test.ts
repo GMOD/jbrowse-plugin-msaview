@@ -1,9 +1,9 @@
-import { expect, test, describe } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import {
+  buildAlignmentMaps,
   needlemanWunsch,
   runPairwiseAlignment,
-  buildAlignmentMaps,
 } from './pairwiseAlignment'
 
 describe('needlemanWunsch', () => {
@@ -23,8 +23,8 @@ describe('needlemanWunsch', () => {
     const seq1 = 'MKAAYLSMFG'
     const seq2 = 'MKAYLSMFG'
     const result = needlemanWunsch(seq1, seq2)
-    expect(result.alignedSeq1.replace(/-/g, '')).toBe(seq1)
-    expect(result.alignedSeq2.replace(/-/g, '')).toBe(seq2)
+    expect(result.alignedSeq1.replaceAll('-', '')).toBe(seq1)
+    expect(result.alignedSeq2.replaceAll('-', '')).toBe(seq2)
   })
 
   test('handles empty sequences', () => {
@@ -35,8 +35,8 @@ describe('needlemanWunsch', () => {
 
   test('handles one empty sequence', () => {
     const result = needlemanWunsch('MKA', '')
-    expect(result.alignedSeq1.replace(/-/g, '')).toBe('MKA')
-    expect(result.alignedSeq2.replace(/-/g, '')).toBe('')
+    expect(result.alignedSeq1.replaceAll('-', '')).toBe('MKA')
+    expect(result.alignedSeq2.replaceAll('-', '')).toBe('')
     expect(result.alignedSeq1.length).toBe(result.alignedSeq2.length)
   })
 })
@@ -126,7 +126,7 @@ describe('buildAlignmentMaps', () => {
     const structureSeq = 'MKAYLSMFG'
 
     const alignment = runPairwiseAlignment(msaSeq, structureSeq)
-    const { seq1ToSeq2, seq2ToSeq1 } = buildAlignmentMaps(alignment)
+    const { seq1ToSeq2 } = buildAlignmentMaps(alignment)
 
     // Positions before the insertion should map correctly
     expect(seq1ToSeq2.get(0)).toBe(0) // M

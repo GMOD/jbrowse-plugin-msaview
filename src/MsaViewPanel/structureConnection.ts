@@ -49,7 +49,8 @@ export function ungappedToGappedPosition(
 ): number | undefined {
   let ungapped = 0
   for (let i = 0; i < sequence.length; i++) {
-    if (sequence[i] !== '-') {
+    const element = sequence[i]
+    if (element !== '-') {
       if (ungapped === ungappedPosition) {
         return i
       }

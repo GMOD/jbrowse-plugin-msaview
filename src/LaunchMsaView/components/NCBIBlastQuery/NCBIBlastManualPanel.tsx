@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { getContainingView, shorten2 } from '@jbrowse/core/util'
@@ -7,9 +7,9 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import ExternalLink from '../../../components/ExternalLink'
-import { getId, getLongestTranscript, getTranscriptFeatures } from '../../util'
+import { cleanProteinSequence } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
-import { useFeatureSequence } from '../useFeatureSequence'
+import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -43,17 +43,10 @@ const NCBIBlastManualPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
-  const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(
-    getId(getLongestTranscript(options)),
-  )
-  const selectedTranscript = options.find(val => getId(val) === userSelection)!
-  const { proteinSequence, error } = useFeatureSequence({
-    view,
-    feature: selectedTranscript,
-  })
+  const { options, setSelectedId, selectedTranscript, proteinSequence, error } =
+    useTranscriptSelection({ feature, view })
 
-  const s2 = proteinSequence.replaceAll('*', '').replaceAll('&', '')
+  const s2 = cleanProteinSequence(proteinSequence)
   const link = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${s2}`
   const link2 = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(s2, 10)}`
 
@@ -66,8 +59,8 @@ const NCBIBlastManualPanel = observer(function ({
         <TranscriptSelector
           feature={feature}
           options={options}
-          selectedTranscriptId={userSelection}
-          onTranscriptChange={setUserSelection}
+          selectedTranscript={selectedTranscript}
+          onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}
         />
 

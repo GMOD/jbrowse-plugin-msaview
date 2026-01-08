@@ -1,9 +1,9 @@
-import { expect, test, describe } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import {
   gappedToUngappedPosition,
-  ungappedToGappedPosition,
   mapToRecord,
+  ungappedToGappedPosition,
 } from './structureConnection'
 
 describe('gappedToUngappedPosition', () => {

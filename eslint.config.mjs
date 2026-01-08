@@ -110,7 +110,12 @@ export default defineConfig(
 
       'unicorn/no-null': 'off',
       'unicorn/no-nested-ternary': 'off',
+      'unicorn/no-for-loop': 'off',
 
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-confusing-non-null-assertion': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/restrict-plus-operands': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
@@ -133,6 +138,12 @@ export default defineConfig(
           caughtErrors: 'none',
         },
       ],
+    },
+  },
+  {
+    files: ['test/**/*.{js,ts,tsx}', 'src/**/*.test.{js,ts,tsx}'],
+    rules: {
+      'no-console': 'off',
     },
   },
 )

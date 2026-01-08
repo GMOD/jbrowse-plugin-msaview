@@ -1,3 +1,5 @@
+import { lazy } from 'react'
+
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
@@ -8,17 +10,22 @@ import { MSAModelF } from 'react-msaview'
 import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
-import { runPairwiseAlignment, buildAlignmentMaps } from './pairwiseAlignment'
+import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
 import {
   gappedToUngappedPosition,
-  ungappedToGappedPosition,
   mapToRecord,
+  ungappedToGappedPosition,
 } from './structureConnection'
+import { getUniprotIdFromAlphaFoldUrl } from './util'
 
+import type { StructureConnection } from './structureConnection'
 import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 import type { Instance } from 'mobx-state-tree'
-import type { StructureConnection } from './structureConnection'
+
+const ConnectStructureDialog = lazy(
+  () => import('./components/ConnectStructureDialog'),
+)
 
 type LGV = LinearGenomeViewModel
 
@@ -59,10 +66,10 @@ function highlightConnectedStructures(self: JBrowsePluginMsaViewModel) {
 
     // Map to structure position and highlight
     const structurePos = conn.msaToStructure[msaUngapped]
-    if (structurePos !== undefined) {
-      structure.highlightFromExternal?.(structurePos)
-    } else {
+    if (structurePos === undefined) {
       structure.clearHighlightFromExternal?.()
+    } else {
+      structure.highlightFromExternal?.(structurePos)
     }
   }
 }
@@ -127,6 +134,12 @@ export default function stateModelFactory() {
          * #property
          */
         querySeqName: 'QUERY',
+
+        /**
+         * #property
+         * UniProt ID extracted from AlphaFold MSA URL
+         */
+        uniprotId: types.maybe(types.string),
 
         /**
          * #property
@@ -221,8 +234,9 @@ export default function stateModelFactory() {
         const { views } = getSession(self)
         return self.connectedStructures
           .map(conn => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const proteinView = views.find((v: any) => v.id === conn.proteinViewId) as any
+            const proteinView = views.find(
+              (v: any) => v.id === conn.proteinViewId,
+            ) as any
             return proteinView ? { ...conn, proteinView } : undefined
           })
           .filter((c): c is StructureConnection & { proteinView: any } => !!c)
@@ -341,6 +355,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setUniprotId(arg?: string) {
+        self.uniprotId = arg
+      },
+      /**
+       * #action
+       */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
         const { assemblyManager } = getSession(self)
@@ -376,11 +396,13 @@ export default function stateModelFactory() {
           throw new Error(`MSA row "${rowName}" not found`)
         }
 
-        const ungappedMsaSequence = msaSequence.replace(/-/g, '')
+        const ungappedMsaSequence = msaSequence.replaceAll('-', '')
 
         const { views } = getSession(self)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const proteinView = views.find((v: any) => v.id === proteinViewId) as any
+
+        const proteinView = views.find(
+          (v: any) => v.id === proteinViewId,
+        ) as any
         if (!proteinView) {
           throw new Error(`ProteinView "${proteinViewId}" not found`)
         }
@@ -395,7 +417,10 @@ export default function stateModelFactory() {
           throw new Error('Structure sequence not available')
         }
 
-        const alignment = runPairwiseAlignment(ungappedMsaSequence, structureSequence)
+        const alignment = runPairwiseAlignment(
+          ungappedMsaSequence,
+          structureSequence,
+        )
         const { seq1ToSeq2, seq2ToSeq1 } = buildAlignmentMaps(alignment)
 
         const connection: StructureConnection = {
@@ -415,7 +440,9 @@ export default function stateModelFactory() {
        */
       disconnectFromStructure(proteinViewId: string, structureIdx: number) {
         const idx = self.connectedStructures.findIndex(
-          c => c.proteinViewId === proteinViewId && c.structureIdx === structureIdx,
+          c =>
+            c.proteinViewId === proteinViewId &&
+            c.structureIdx === structureIdx,
         )
         if (idx !== -1) {
           self.connectedStructures.splice(idx, 1)
@@ -466,15 +493,13 @@ export default function stateModelFactory() {
           {
             label: 'Connect to protein structure...',
             onClick: () => {
-              const session = getSession(self)
-              import('./components/ConnectStructureDialog').then(
-                ({ default: ConnectStructureDialog }) => {
-                  session.queueDialog(handleClose => [
-                    ConnectStructureDialog,
-                    { model: self, handleClose },
-                  ])
+              getSession(self).queueDialog(handleClose => [
+                ConnectStructureDialog,
+                {
+                  model: self,
+                  handleClose,
                 },
-              )
+              ])
             },
           },
           ...(self.connectedStructures.length > 0
@@ -526,6 +551,17 @@ export default function stateModelFactory() {
                 const { msaData, msaUrl, treeData, treeUrl, querySeqName } =
                   init
 
+                // Extract uniprotId from AlphaFold MSA URL and set querySeqName
+                if (msaUrl) {
+                  const id = getUniprotIdFromAlphaFoldUrl(msaUrl)
+                  if (id) {
+                    self.setUniprotId(id)
+                    // AlphaFold MSA files use 'query' as the row name
+                    self.setQuerySeqName('query')
+                  }
+                }
+
+                // User-provided querySeqName takes precedence
                 if (querySeqName) {
                   self.setQuerySeqName(querySeqName)
                 }
@@ -581,7 +617,71 @@ export default function stateModelFactory() {
         // this highlights residues in connected protein structures when mousing over the MSA
         addDisposer(
           self,
-          autorun(() => highlightConnectedStructures(self)),
+          autorun(() => {
+            highlightConnectedStructures(self)
+          }),
+        )
+
+        // auto-connect to compatible ProteinViews
+        addDisposer(
+          self,
+          autorun(() => {
+            const { views } = getSession(self)
+            const { connectedViewId, uniprotId, rows, connectedStructures } =
+              self
+
+            // Need MSA loaded and a uniprotId to auto-connect
+            if (!uniprotId || rows.length === 0) {
+              return
+            }
+
+            // Find ProteinViews that share the same connectedViewId
+            for (const view of views) {
+              const v = view as any
+              if (v.type !== 'ProteinView' || !v.structures) {
+                continue
+              }
+
+              for (
+                let structureIdx = 0;
+                structureIdx < v.structures.length;
+                structureIdx++
+              ) {
+                const structure = v.structures[structureIdx]
+
+                // Check if structure shares the same genome view connection
+                if (structure.connectedViewId !== connectedViewId) {
+                  continue
+                }
+
+                // Check if structure has matching uniprotId
+                if (structure.uniprotId !== uniprotId) {
+                  continue
+                }
+
+                // Check if already connected
+                const alreadyConnected = connectedStructures.some(
+                  c =>
+                    c.proteinViewId === v.id && c.structureIdx === structureIdx,
+                )
+                if (alreadyConnected) {
+                  continue
+                }
+
+                // Check if structure sequence is available
+                if (!structure.structureSequences?.[0]) {
+                  continue
+                }
+
+                // Auto-connect
+                try {
+                  self.connectToStructure(v.id, structureIdx)
+                } catch (e) {
+                  console.error('Failed to auto-connect to ProteinView:', e)
+                }
+              }
+            }
+          }),
         )
       },
     }))

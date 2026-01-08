@@ -23,14 +23,9 @@ import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
 import TextField2 from '../../../components/TextField2'
-import {
-  getGeneDisplayName,
-  getId,
-  getLongestTranscript,
-  getTranscriptFeatures,
-} from '../../util'
+import { getGeneDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
-import { useFeatureSequence } from '../useFeatureSequence'
+import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -61,16 +56,13 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [treeText, setTreeText] = useState('')
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
-  const options = getTranscriptFeatures(feature)
-  const [userSelection, setUserSelection] = useState(
-    getId(getLongestTranscript(options)),
-  )
-  const ret = options.find(val => userSelection === getId(val))
-  const selectedTranscript = options.find(val => getId(val) === userSelection)!
-  const { proteinSequence, error: error2 } = useFeatureSequence({
-    view,
-    feature: selectedTranscript,
-  })
+  const {
+    options,
+    setSelectedId,
+    selectedTranscript,
+    proteinSequence,
+    error: error2,
+  } = useTranscriptSelection({ feature, view })
 
   const e = launchViewError ?? error2
   return (
@@ -150,8 +142,8 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
         <TranscriptSelector
           feature={feature}
           options={options}
-          selectedTranscriptId={userSelection}
-          onTranscriptChange={setUserSelection}
+          selectedTranscript={selectedTranscript}
+          onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}
         />
       </DialogContent>
@@ -161,7 +153,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           color="primary"
           variant="contained"
           disabled={
-            !ret ||
+            !selectedTranscript ||
             (inputMethod === 'file' && !msaFileLocation) ||
             (inputMethod === 'text' && !msaText.trim())
           }
@@ -169,16 +161,16 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
-                if (!ret) {
+                if (!selectedTranscript) {
                   return
                 }
 
                 setLaunchViewError(undefined)
                 launchView({
                   session,
-                  newViewTitle: getGeneDisplayName(ret),
+                  newViewTitle: getGeneDisplayName(selectedTranscript),
                   view,
-                  feature: ret,
+                  feature: selectedTranscript,
                   data:
                     inputMethod === 'file'
                       ? {

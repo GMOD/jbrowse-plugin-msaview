@@ -1,6 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import type { ChildProcess } from 'node:child_process'
-import type { Browser, Page } from 'puppeteer'
 
 import {
   cleanupJBrowse,
@@ -12,6 +10,9 @@ import {
   waitForJBrowseLoad,
   waitForTrackLoad,
 } from './setup'
+
+import type { ChildProcess } from 'node:child_process'
+import type { Browser, Page } from 'puppeteer'
 
 /**
  * End-to-end test for the TranscriptSelector component.
@@ -29,13 +30,13 @@ describe('TranscriptSelector E2E', () => {
   let page: Page | undefined
 
   beforeAll(async () => {
-    await setupJBrowse()
+    setupJBrowse()
     server = await startJBrowseServer()
     browser = await launchBrowser()
     page = await createJBrowsePage(browser)
     await waitForJBrowseLoad(page)
     await waitForTrackLoad(page)
-  }, 180000)
+  }, 180_000)
 
   afterAll(async () => {
     if (browser) {
@@ -56,7 +57,7 @@ describe('TranscriptSelector E2E', () => {
 
     // Take a screenshot for debugging
     await page!.screenshot({ path: 'debug-test-start.png' })
-  }, 30000)
+  }, 30_000)
 
   it('should open MSA dialog when right-clicking on a gene feature', async () => {
     expect(page).toBeDefined()
@@ -64,15 +65,14 @@ describe('TranscriptSelector E2E', () => {
     // Wait for canvas to be ready - might not exist if track didn't load
     let canvas
     try {
-      canvas = await page!.waitForSelector('canvas', { timeout: 10000 })
+      canvas = await page!.waitForSelector('canvas', { timeout: 10_000 })
     } catch {
-      console.log('No canvas found, skipping this test')
       await page!.screenshot({ path: 'debug-no-canvas-test.png' })
       return
     }
     expect(canvas).not.toBeNull()
 
-    const box = await canvas!.boundingBox()
+    const box = await canvas.boundingBox()
     expect(box).not.toBeNull()
 
     // Right-click on the track area to trigger context menu
@@ -89,7 +89,6 @@ describe('TranscriptSelector E2E', () => {
 
     // There should be some menu items if we clicked on a feature
     // If not, the click might have missed a feature
-    console.log(`Found ${menuItems.length} menu items`)
 
     if (menuItems.length > 0) {
       // Look for MSA-related menu option
@@ -98,20 +97,16 @@ describe('TranscriptSelector E2E', () => {
           el => (el as HTMLElement).textContent,
           item,
         )
-        console.log(`Menu item: ${text}`)
 
-        if (text?.toLowerCase().includes('msa') || text?.includes('Multiple')) {
+        if (text.toLowerCase().includes('msa') || text.includes('Multiple')) {
           await item.click()
           await new Promise(r => setTimeout(r, 2000))
 
           // Dialog should be open - look for TranscriptSelector
           const dialog = await page!.$('[role="dialog"]')
           if (dialog) {
-            console.log('MSA dialog opened!')
-
             // Look for the transcript selector dropdown
             const selects = await page!.$$('[role="combobox"]')
-            console.log(`Found ${selects.length} combobox elements`)
 
             if (selects.length > 0) {
               // Get the transcript selector (usually the one with "isoform" label)
@@ -120,18 +115,15 @@ describe('TranscriptSelector E2E', () => {
                   const label = el
                     .closest('.MuiFormControl-root')
                     ?.querySelector('label')
-                  return label?.textContent || ''
+                  return label?.textContent ?? ''
                 }, select)
 
                 if (labelText.toLowerCase().includes('isoform')) {
-                  console.log('Found transcript selector!')
-
                   // Get initial value
                   const initialValue = await page!.evaluate(
                     el => (el as HTMLElement).textContent,
                     select,
                   )
-                  console.log(`Initial selection: ${initialValue}`)
 
                   // Click to open dropdown
                   await select.click()
@@ -139,16 +131,14 @@ describe('TranscriptSelector E2E', () => {
 
                   // Find dropdown options
                   const options = await page!.$$('[role="option"]')
-                  console.log(`Found ${options.length} options`)
 
                   if (options.length > 1) {
                     // Select a different option
                     const secondOption = options[1]
-                    const secondOptionText = await page!.evaluate(
-                      el => (el as HTMLElement).textContent,
-                      secondOption,
-                    )
-                    console.log(`Selecting: ${secondOptionText}`)
+                    // const secondOptionText = await page!.evaluate(
+                    //   el => (el as HTMLElement).textContent,
+                    //   secondOption,
+                    // )
 
                     await secondOption.click()
                     await new Promise(r => setTimeout(r, 1000))
@@ -158,7 +148,6 @@ describe('TranscriptSelector E2E', () => {
                       el => (el as HTMLElement).textContent,
                       select,
                     )
-                    console.log(`New selection: ${newValue}`)
 
                     // THE KEY TEST: Selection should have changed
                     expect(newValue).not.toBe(initialValue)
@@ -170,7 +159,6 @@ describe('TranscriptSelector E2E', () => {
                       el => (el as HTMLElement).textContent,
                       select,
                     )
-                    console.log(`Final selection (after wait): ${finalValue}`)
 
                     // Selection should still be the new value, not reset
                     expect(finalValue).toBe(newValue)
@@ -184,7 +172,7 @@ describe('TranscriptSelector E2E', () => {
         }
       }
     }
-  }, 60000)
+  }, 60_000)
 
   it('should maintain transcript selection after changing it', async () => {
     // This test verifies the specific bug fix
@@ -197,5 +185,5 @@ describe('TranscriptSelector E2E', () => {
     // For now, just verify the page is still responsive
     const body = await page!.$('body')
     expect(body).not.toBeNull()
-  }, 10000)
+  }, 10_000)
 })

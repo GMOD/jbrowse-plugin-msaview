@@ -18,15 +18,9 @@ import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchView } from './blastLaunchView'
 import TextField2 from '../../../components/TextField2'
-import {
-  getGeneDisplayName,
-  getId,
-  getLongestTranscript,
-  getTranscriptDisplayName,
-  getTranscriptFeatures,
-} from '../../util'
+import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
-import { useFeatureSequence } from '../useFeatureSequence'
+import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -67,19 +61,15 @@ const NCBIBlastAutomaticPanel = observer(function ({
     useState<blastDatabaseOptionsT>('nr')
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
     useState<msaAlgorithmsT>('clustalo')
-  const options = getTranscriptFeatures(feature)
-  const [selectedTranscriptId, setSelectedTranscriptId] = useState(
-    getId(getLongestTranscript(options)),
-  )
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')
-  const selectedTranscript = options.find(
-    val => getId(val) === selectedTranscriptId,
-  )!
-  const { error: proteinSequenceError, proteinSequence } = useFeatureSequence({
-    view,
-    feature: selectedTranscript,
-  })
+  const {
+    options,
+    setSelectedId,
+    selectedTranscript,
+    proteinSequence,
+    error: proteinSequenceError,
+  } = useTranscriptSelection({ feature, view })
 
   useEffect(() => {
     if (selectedBlastDatabase === 'nr_cluster_seq') {
@@ -167,8 +157,8 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TranscriptSelector
           feature={feature}
           options={options}
-          selectedTranscriptId={selectedTranscriptId}
-          onTranscriptChange={setSelectedTranscriptId}
+          selectedTranscript={selectedTranscript}
+          onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}
         />
 
@@ -189,6 +179,9 @@ const NCBIBlastAutomaticPanel = observer(function ({
           variant="contained"
           onClick={() => {
             try {
+              if (!selectedTranscript) {
+                return
+              }
               setLaunchViewError(undefined)
               blastLaunchView({
                 feature: selectedTranscript,

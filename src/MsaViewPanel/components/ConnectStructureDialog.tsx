@@ -30,8 +30,10 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
   const [error, setError] = useState<string>()
 
   // Find all ProteinViews in the session
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const proteinViews = session.views.filter((v: any) => v.type === 'ProteinView') as any[]
+
+  const proteinViews = session.views.filter(
+    (v: any) => v.type === 'ProteinView',
+  ) as any[]
 
   // Get structures for the selected view
   const selectedView = proteinViews.find(v => v.id === selectedViewId)
@@ -47,7 +49,11 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
     }
 
     try {
-      model.connectToStructure(selectedViewId, selectedStructureIdx, selectedMsaRow)
+      model.connectToStructure(
+        selectedViewId,
+        selectedStructureIdx,
+        selectedMsaRow,
+      )
       handleClose()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -81,7 +87,7 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
               >
                 {proteinViews.map(view => (
                   <MenuItem key={view.id} value={view.id}>
-                    {view.displayName || `ProteinView ${view.id}`}
+                    {view.displayName ?? `ProteinView ${view.id}`}
                   </MenuItem>
                 ))}
               </Select>
@@ -93,13 +99,17 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
                 <Select
                   value={selectedStructureIdx}
                   label="Structure"
-                  onChange={e => setSelectedStructureIdx(Number(e.target.value))}
+                  onChange={e => {
+                    setSelectedStructureIdx(e.target.value)
+                  }}
                 >
-                  {structures.map((structure: { url?: string }, idx: number) => (
-                    <MenuItem key={idx} value={idx}>
-                      {structure.url || `Structure ${idx + 1}`}
-                    </MenuItem>
-                  ))}
+                  {structures.map(
+                    (structure: { url?: string }, idx: number) => (
+                      <MenuItem key={idx} value={idx}>
+                        {structure.url ?? `Structure ${idx + 1}`}
+                      </MenuItem>
+                    ),
+                  )}
                 </Select>
               </FormControl>
             )}
@@ -109,7 +119,9 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
               <Select
                 value={selectedMsaRow}
                 label="MSA Row"
-                onChange={e => setSelectedMsaRow(e.target.value)}
+                onChange={e => {
+                  setSelectedMsaRow(e.target.value)
+                }}
               >
                 {msaRowNames.map(name => (
                   <MenuItem key={name} value={name}>
