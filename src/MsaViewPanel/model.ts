@@ -10,6 +10,12 @@ import { MSAModelF } from 'react-msaview'
 import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
+import {
+  cleanupOldData,
+  generateDataStoreId,
+  retrieveMsaData,
+  storeMsaData,
+} from './msaDataStore'
 import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
 import {
   gappedToUngappedPosition,
@@ -165,6 +171,12 @@ export default function stateModelFactory() {
          * connections to protein 3D structure views for synchronized highlighting
          */
         connectedStructures: types.array(types.frozen<StructureConnection>()),
+
+        /**
+         * #property
+         * Reference ID for MSA data stored in IndexedDB (for large datasets)
+         */
+        dataStoreId: types.maybe(types.string),
       }),
     )
 
@@ -361,6 +373,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setDataStoreId(arg?: string) {
+        self.dataStoreId = arg
+      },
+      /**
+       * #action
+       */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
         const { assemblyManager } = getSession(self)
@@ -518,6 +536,64 @@ export default function stateModelFactory() {
 
     .actions(self => ({
       afterCreate() {
+        // Clean up old IndexedDB entries on startup
+        cleanupOldData().catch(e => {
+          console.error('Failed to cleanup old MSA data:', e)
+        })
+
+        // Load MSA data from IndexedDB if dataStoreId exists and no data loaded
+        addDisposer(
+          self,
+          autorun(async () => {
+            const { dataStoreId, rows } = self
+            if (dataStoreId && rows.length === 0) {
+              try {
+                const storedData = await retrieveMsaData(dataStoreId)
+                if (storedData) {
+                  if (storedData.msa) {
+                    self.setMSA(storedData.msa)
+                  }
+                  if (storedData.tree) {
+                    self.setTree(storedData.tree)
+                  }
+                }
+              } catch (e) {
+                console.error('Failed to load MSA data from IndexedDB:', e)
+              }
+            }
+          }),
+        )
+
+        // Store large MSA data to IndexedDB when loaded
+        addDisposer(
+          self,
+          autorun(async () => {
+            const { rows, dataStoreId } = self
+            // Only store if we have data and don't already have a dataStoreId
+            if (rows.length > 0 && !dataStoreId) {
+              // Check if data is large enough to warrant IndexedDB storage
+              // react-msaview strips data > 50k chars, so store anything > 40k
+              const msaData = self.data?.msa
+              const treeData = self.data?.tree
+              const totalSize = (msaData?.length ?? 0) + (treeData?.length ?? 0)
+
+              if (totalSize > 40_000) {
+                try {
+                  const newId = generateDataStoreId()
+                  await storeMsaData(newId, {
+                    msa: msaData,
+                    tree: treeData,
+                    treeMetadata: self.data?.treeMetadata,
+                  })
+                  self.setDataStoreId(newId)
+                } catch (e) {
+                  console.error('Failed to store MSA data to IndexedDB:', e)
+                }
+              }
+            }
+          }),
+        )
+
         addDisposer(
           self,
           autorun(async () => {
@@ -681,6 +757,96 @@ export default function stateModelFactory() {
                 }
               }
             }
+          }),
+        )
+
+        // Observe protein3d genome highlights and update MSA highlighted columns
+        // This enables communication via the linear genome view coordinates
+        addDisposer(
+          self,
+          autorun(() => {
+            const { views } = getSession(self)
+            const { connectedViewId, transcriptToMsaMap, querySeqName } = self
+
+            if (!connectedViewId || !transcriptToMsaMap) {
+              return
+            }
+
+            const columns: number[] = []
+
+            // Find ProteinViews that share the same connected genome view
+            for (const view of views) {
+              const v = view as any
+              if (v.type !== 'ProteinView' || !v.structures) {
+                continue
+              }
+
+              for (const structure of v.structures) {
+                // Check if structure is connected to same genome view
+                if (structure.connectedViewId !== connectedViewId) {
+                  continue
+                }
+
+                // Check if structure has hover genome highlights
+                const highlights = structure.hoverGenomeHighlights
+                if (!highlights || highlights.length === 0) {
+                  continue
+                }
+
+                // Map genome coordinates to MSA columns
+                const { g2p } = transcriptToMsaMap
+                for (const highlight of highlights) {
+                  console.log('protein3d highlight:', {
+                    refName: highlight.refName,
+                    start: highlight.start,
+                    end: highlight.end,
+                  })
+                  // Iterate through the full range of the highlight
+                  for (
+                    let coord = highlight.start;
+                    coord < highlight.end;
+                    coord++
+                  ) {
+                    const proteinPos = g2p[coord]
+                    console.log(
+                      '  genome coord:',
+                      coord,
+                      '-> protein pos:',
+                      proteinPos,
+                    )
+                    if (proteinPos !== undefined) {
+                      const col = self.seqCoordToRowSpecificGlobalCoord(
+                        querySeqName,
+                        proteinPos,
+                      )
+                      console.log(
+                        '    protein pos:',
+                        proteinPos,
+                        '-> MSA col:',
+                        col,
+                      )
+                      if (col !== undefined && !columns.includes(col)) {
+                        columns.push(col)
+                      }
+                    }
+                  }
+                }
+                console.log('protein3d->MSA final columns (global):', columns)
+              }
+            }
+
+            // Convert global column indices to visible column indices
+            const visibleColumns = columns
+              .map(col => self.globalCoordToVisibleCoord(col))
+              .filter((col): col is number => col !== undefined)
+            console.log(
+              'protein3d->MSA final columns (visible):',
+              visibleColumns,
+            )
+
+            self.setHighlightedColumns(
+              visibleColumns.length > 0 ? visibleColumns : undefined,
+            )
           }),
         )
       },

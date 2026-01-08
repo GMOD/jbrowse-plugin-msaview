@@ -8,7 +8,6 @@ import {
   getContainingView,
   getSession,
 } from '@jbrowse/core/util'
-import { openLocation } from '@jbrowse/core/util/io'
 import {
   Button,
   DialogActions,
@@ -56,6 +55,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [treeText, setTreeText] = useState('')
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
+  const [querySeqName, setQuerySeqName] = useState('')
   const {
     options,
     setSelectedId,
@@ -146,6 +146,19 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}
         />
+
+        <TextField2
+          variant="outlined"
+          name="MSA row name"
+          fullWidth
+          style={{ marginTop: 20 }}
+          placeholder="Row name in MSA that corresponds to the selected transcript"
+          helperText="Specify the name of the row in your MSA that should be aligned with the selected transcript"
+          value={querySeqName}
+          onChange={event => {
+            setQuerySeqName(event.target.value)
+          }}
+        />
       </DialogContent>
 
       <DialogActions>
@@ -158,45 +171,36 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             (inputMethod === 'text' && !msaText.trim())
           }
           onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ;(async () => {
-              try {
-                if (!selectedTranscript) {
-                  return
-                }
-
-                setLaunchViewError(undefined)
-                launchView({
-                  session,
-                  newViewTitle: getGeneDisplayName(selectedTranscript),
-                  view,
-                  feature: selectedTranscript,
-                  data:
-                    inputMethod === 'file'
-                      ? {
-                          msa: msaFileLocation
-                            ? await openLocation(msaFileLocation).readFile(
-                                'utf8',
-                              )
-                            : '',
-                          tree: treeFileLocation
-                            ? await openLocation(treeFileLocation).readFile(
-                                'utf8',
-                              )
-                            : undefined,
-                        }
-                      : {
-                          msa: msaText,
-                          tree: treeText,
-                        },
-                })
-
-                handleClose()
-              } catch (e) {
-                console.error(e)
-                setLaunchViewError(e)
+            try {
+              if (!selectedTranscript) {
+                return
               }
-            })()
+
+              setLaunchViewError(undefined)
+              launchView({
+                session,
+                newViewTitle: getGeneDisplayName(selectedTranscript),
+                view,
+                feature: selectedTranscript,
+                querySeqName: querySeqName.trim() || undefined,
+                ...(inputMethod === 'file'
+                  ? {
+                      msaFilehandle: msaFileLocation,
+                      treeFilehandle: treeFileLocation,
+                    }
+                  : {
+                      data: {
+                        msa: msaText,
+                        tree: treeText || undefined,
+                      },
+                    }),
+              })
+
+              handleClose()
+            } catch (e) {
+              console.error(e)
+              setLaunchViewError(e)
+            }
           }}
         >
           Submit
