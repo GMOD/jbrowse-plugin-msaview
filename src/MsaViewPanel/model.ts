@@ -836,7 +836,7 @@ export default function stateModelFactory() {
                         querySeqName,
                         proteinPos,
                       )
-                      if (col !== undefined && !columns.includes(col)) {
+                      if (!columns.includes(col)) {
                         columns.push(col)
                       }
                     }

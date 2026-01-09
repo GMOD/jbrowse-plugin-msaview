@@ -42,7 +42,7 @@
     "@emotion/styled": "^11.14.0",
     "g2p_mapper": "^2.0.0",
     "pako": "^2.1.0",
-    "react-msaview": "^4.6.0",
+    "react-msaview": "^4.8.1",
     "swr": "^2.3.3"
   },
   "devDependencies": {
@@ -77,7 +77,7 @@
     "rxjs": "^7.8.1",
     "serve": "^14.2.5",
     "tss-react": "^4.9.2",
-    "typescript": "^5.2.2",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0",
     "vitest": "^4.0.16"
   }
