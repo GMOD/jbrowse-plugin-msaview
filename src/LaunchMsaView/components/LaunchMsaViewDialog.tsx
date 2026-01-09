@@ -38,7 +38,7 @@ export default function LaunchMsaViewDialog({
         <Tab label="NCBI BLAST query" value={TABS.NCBI_BLAST} />
         <Tab label="Pre-loaded MSA datasets" value={TABS.PRELOADED_MSA} />
         <Tab label="Ensembl GeneTree" value={TABS.ENSEMBL_GENETREE} />
-        <Tab label="Manually open MSA dataset" value={TABS.MANUAL_MSA} />
+        <Tab label="Manual upload" value={TABS.MANUAL_MSA} />
       </Tabs>
       <TabPanel value={value} index={TABS.NCBI_BLAST}>
         <NCBIBlastPanel

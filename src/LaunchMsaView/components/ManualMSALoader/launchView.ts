@@ -7,16 +7,18 @@ export function launchView({
   newViewTitle,
   view,
   feature,
-  msaFileLocation,
-  treeFileLocation,
+  msaFilehandle,
+  treeFilehandle,
+  querySeqName,
   data,
 }: {
   session: AbstractSessionModel
   newViewTitle: string
   view: LinearGenomeViewModel
   feature: Feature
-  msaFileLocation?: FileLocation
-  treeFileLocation?: FileLocation
+  msaFilehandle?: FileLocation
+  treeFilehandle?: FileLocation
+  querySeqName?: string
   data?: {
     msa: string
     tree?: string
@@ -27,8 +29,9 @@ export function launchView({
     displayName: newViewTitle,
     connectedViewId: view.id,
     connectedFeature: feature.toJSON(),
-    msaFileLocation,
-    treeFileLocation,
+    msaFilehandle,
+    treeFilehandle,
+    querySeqName,
     data,
   })
 }
