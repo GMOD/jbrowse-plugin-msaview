@@ -193,6 +193,11 @@ export default function stateModelFactory() {
        * #volatile
        */
       error: undefined as unknown,
+      /**
+       * #volatile
+       * True when loading MSA data from IndexedDB
+       */
+      loadingStoredData: false,
     }))
 
     .views(self => ({
@@ -270,7 +275,11 @@ export default function stateModelFactory() {
             if (msaUngapped !== undefined) {
               const seq = self.getSequenceByRowName(conn.msaRowName)
               if (seq) {
-                return ungappedToGappedPosition(seq, msaUngapped)
+                // Convert ungapped position to global column, then to visible column
+                const globalCol = ungappedToGappedPosition(seq, msaUngapped)
+                if (globalCol !== undefined) {
+                  return self.globalColToVisibleCol(globalCol)
+                }
               }
             }
           }
@@ -375,6 +384,12 @@ export default function stateModelFactory() {
        */
       setDataStoreId(arg?: string) {
         self.dataStoreId = arg
+      },
+      /**
+       * #action
+       */
+      setLoadingStoredData(arg: boolean) {
+        self.loadingStoredData = arg
       },
       /**
        * #action
@@ -537,7 +552,7 @@ export default function stateModelFactory() {
     .actions(self => ({
       afterCreate() {
         // Clean up old IndexedDB entries on startup
-        cleanupOldData().catch(e => {
+        cleanupOldData().catch((e: unknown) => {
           console.error('Failed to cleanup old MSA data:', e)
         })
 
@@ -548,6 +563,7 @@ export default function stateModelFactory() {
             const { dataStoreId, rows } = self
             if (dataStoreId && rows.length === 0) {
               try {
+                self.setLoadingStoredData(true)
                 const storedData = await retrieveMsaData(dataStoreId)
                 if (storedData) {
                   if (storedData.msa) {
@@ -559,33 +575,46 @@ export default function stateModelFactory() {
                 }
               } catch (e) {
                 console.error('Failed to load MSA data from IndexedDB:', e)
+              } finally {
+                self.setLoadingStoredData(false)
               }
             }
           }),
         )
 
-        // Store large MSA data to IndexedDB when loaded
+        // Store MSA data to IndexedDB when loaded from inline data (no filehandle)
+        // This ensures data persists across page refreshes even when
+        // react-msaview's postProcessSnapshot would strip it
         addDisposer(
           self,
           autorun(async () => {
             const { rows, dataStoreId } = self
             // Only store if we have data and don't already have a dataStoreId
             if (rows.length > 0 && !dataStoreId) {
-              // Check if data is large enough to warrant IndexedDB storage
-              // react-msaview strips data > 50k chars, so store anything > 40k
-              const msaData = self.data?.msa
-              const treeData = self.data?.tree
-              const totalSize = (msaData?.length ?? 0) + (treeData?.length ?? 0)
+              // Only store if there's no filehandle (filehandles can reload from source)
+              const hasFilehandle = !!(
+                self.msaFilehandle ?? self.treeFilehandle
+              )
+              if (hasFilehandle) {
+                return
+              }
 
-              if (totalSize > 40_000) {
+              const msaData = self.data.msa
+              const treeData = self.data.tree
+
+              // Only store if we have actual data
+              if (msaData || treeData) {
                 try {
                   const newId = generateDataStoreId()
-                  await storeMsaData(newId, {
+                  const success = await storeMsaData(newId, {
                     msa: msaData,
                     tree: treeData,
-                    treeMetadata: self.data?.treeMetadata,
+                    treeMetadata: self.data.treeMetadata,
                   })
-                  self.setDataStoreId(newId)
+                  // Only set dataStoreId if storage was successful
+                  if (success) {
+                    self.setDataStoreId(newId)
+                  }
                 } catch (e) {
                   console.error('Failed to store MSA data to IndexedDB:', e)
                 }
@@ -796,34 +825,16 @@ export default function stateModelFactory() {
                 // Map genome coordinates to MSA columns
                 const { g2p } = transcriptToMsaMap
                 for (const highlight of highlights) {
-                  console.log('protein3d highlight:', {
-                    refName: highlight.refName,
-                    start: highlight.start,
-                    end: highlight.end,
-                  })
-                  // Iterate through the full range of the highlight
                   for (
                     let coord = highlight.start;
                     coord < highlight.end;
                     coord++
                   ) {
                     const proteinPos = g2p[coord]
-                    console.log(
-                      '  genome coord:',
-                      coord,
-                      '-> protein pos:',
-                      proteinPos,
-                    )
                     if (proteinPos !== undefined) {
-                      const col = self.seqCoordToRowSpecificGlobalCoord(
+                      const col = self.seqPosToGlobalCol(
                         querySeqName,
                         proteinPos,
-                      )
-                      console.log(
-                        '    protein pos:',
-                        proteinPos,
-                        '-> MSA col:',
-                        col,
                       )
                       if (col !== undefined && !columns.includes(col)) {
                         columns.push(col)
@@ -831,18 +842,13 @@ export default function stateModelFactory() {
                     }
                   }
                 }
-                console.log('protein3d->MSA final columns (global):', columns)
               }
             }
 
             // Convert global column indices to visible column indices
             const visibleColumns = columns
-              .map(col => self.globalCoordToVisibleCoord(col))
+              .map(col => self.globalColToVisibleCol(col))
               .filter((col): col is number => col !== undefined)
-            console.log(
-              'protein3d->MSA final columns (visible):',
-              visibleColumns,
-            )
 
             self.setHighlightedColumns(
               visibleColumns.length > 0 ? visibleColumns : undefined,

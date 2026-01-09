@@ -10,30 +10,68 @@ interface StoredMsaData {
   timestamp: number
 }
 
-let dbPromise: Promise<IDBDatabase> | undefined
+let dbPromise: Promise<IDBDatabase | undefined> | undefined
+let indexedDBAvailable: boolean | undefined
 
-function openDB(): Promise<IDBDatabase> {
+function checkIndexedDBAvailable(): boolean {
+  if (indexedDBAvailable !== undefined) {
+    return indexedDBAvailable
+  }
+
+  try {
+    // Check if indexedDB exists and is accessible
+    if (typeof indexedDB === 'undefined') {
+      indexedDBAvailable = false
+      return false
+    }
+
+    // Try to open a test database to verify IndexedDB is working
+    // This can fail in private browsing mode in some browsers
+    indexedDBAvailable = true
+    return true
+  } catch {
+    indexedDBAvailable = false
+    return false
+  }
+}
+
+async function openDB(): Promise<IDBDatabase | undefined> {
+  if (!checkIndexedDBAvailable()) {
+    return undefined
+  }
+
   if (dbPromise) {
     return dbPromise
   }
 
-  dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
+  dbPromise = new Promise(resolve => {
+    try {
+      const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onerror = () => {
-      reject(request.error)
-    }
+      request.addEventListener('error', () => {
+        // IndexedDB may be blocked in private browsing mode
+        console.warn(
+          'IndexedDB unavailable - MSA data will not persist across page refreshes',
+        )
+        indexedDBAvailable = false
+        resolve(undefined)
+      })
 
-    request.onsuccess = () => {
-      resolve(request.result)
-    }
-
-    request.onupgradeneeded = event => {
-      const db = (event.target as IDBOpenDBRequest).result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-        store.createIndex('timestamp', 'timestamp', { unique: false })
+      request.onsuccess = () => {
+        resolve(request.result)
       }
+
+      request.onupgradeneeded = event => {
+        const db = (event.target as IDBOpenDBRequest).result
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+          store.createIndex('timestamp', 'timestamp', { unique: false })
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to open IndexedDB:', e)
+      indexedDBAvailable = false
+      resolve(undefined)
     }
   })
 
@@ -47,28 +85,40 @@ export function generateDataStoreId() {
 export async function storeMsaData(
   id: string,
   data: { msa?: string; tree?: string; treeMetadata?: string },
-) {
+): Promise<boolean> {
   const db = await openDB()
-  return new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite')
-    const store = transaction.objectStore(STORE_NAME)
+  if (!db) {
+    // IndexedDB not available, silently skip storage
+    return false
+  }
 
-    const storedData: StoredMsaData = {
-      id,
-      msa: data.msa,
-      tree: data.tree,
-      treeMetadata: data.treeMetadata,
-      timestamp: Date.now(),
-    }
+  return new Promise<boolean>(resolve => {
+    try {
+      const transaction = db.transaction(STORE_NAME, 'readwrite')
+      const store = transaction.objectStore(STORE_NAME)
 
-    const request = store.put(storedData)
+      const storedData: StoredMsaData = {
+        id,
+        msa: data.msa,
+        tree: data.tree,
+        treeMetadata: data.treeMetadata,
+        timestamp: Date.now(),
+      }
 
-    request.onerror = () => {
-      reject(request.error)
-    }
+      const request = store.put(storedData)
 
-    request.onsuccess = () => {
-      resolve()
+      request.addEventListener('error', () => {
+        // Log but don't fail - storage is best-effort
+        console.warn('Failed to store MSA data:', request.error)
+        resolve(false)
+      })
+
+      request.onsuccess = () => {
+        resolve(true)
+      }
+    } catch (e) {
+      console.warn('Failed to store MSA data:', e)
+      resolve(false)
     }
   })
 }
@@ -77,42 +127,62 @@ export async function retrieveMsaData(
   id: string,
 ): Promise<{ msa?: string; tree?: string; treeMetadata?: string } | undefined> {
   const db = await openDB()
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readonly')
-    const store = transaction.objectStore(STORE_NAME)
-    const request = store.get(id)
+  if (!db) {
+    return undefined
+  }
 
-    request.onerror = () => {
-      reject(request.error)
-    }
+  return new Promise(resolve => {
+    try {
+      const transaction = db.transaction(STORE_NAME, 'readonly')
+      const store = transaction.objectStore(STORE_NAME)
+      const request = store.get(id)
 
-    request.onsuccess = () => {
-      const result = request.result as StoredMsaData | undefined
-      if (result) {
-        resolve({
-          msa: result.msa,
-          tree: result.tree,
-          treeMetadata: result.treeMetadata,
-        })
-      } else {
+      request.addEventListener('error', () => {
+        console.warn('Failed to retrieve MSA data:', request.error)
         resolve(undefined)
+      })
+
+      request.onsuccess = () => {
+        const result = request.result as StoredMsaData | undefined
+        if (result) {
+          resolve({
+            msa: result.msa,
+            tree: result.tree,
+            treeMetadata: result.treeMetadata,
+          })
+        } else {
+          resolve(undefined)
+        }
       }
+    } catch (e) {
+      console.warn('Failed to retrieve MSA data:', e)
+      resolve(undefined)
     }
   })
 }
 
 export async function deleteMsaData(id: string) {
   const db = await openDB()
-  return new Promise<void>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite')
-    const store = transaction.objectStore(STORE_NAME)
-    const request = store.delete(id)
+  if (!db) {
+    return
+  }
 
-    request.onerror = () => {
-      reject(request.error)
-    }
+  return new Promise<void>(resolve => {
+    try {
+      const transaction = db.transaction(STORE_NAME, 'readwrite')
+      const store = transaction.objectStore(STORE_NAME)
+      const request = store.delete(id)
 
-    request.onsuccess = () => {
+      request.addEventListener('error', () => {
+        console.warn('Failed to delete MSA data:', request.error)
+        resolve()
+      })
+
+      request.onsuccess = () => {
+        resolve()
+      }
+    } catch (e) {
+      console.warn('Failed to delete MSA data:', e)
       resolve()
     }
   })
@@ -121,30 +191,46 @@ export async function deleteMsaData(id: string) {
 // Clean up entries older than the specified age (default 7 days)
 export async function cleanupOldData(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
   const db = await openDB()
+  if (!db) {
+    return 0
+  }
+
   const cutoffTime = Date.now() - maxAgeMs
 
-  return new Promise<number>((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite')
-    const store = transaction.objectStore(STORE_NAME)
-    const index = store.index('timestamp')
-    const range = IDBKeyRange.upperBound(cutoffTime)
-    const request = index.openCursor(range)
+  return new Promise<number>(resolve => {
+    try {
+      const transaction = db.transaction(STORE_NAME, 'readwrite')
+      const store = transaction.objectStore(STORE_NAME)
+      const index = store.index('timestamp')
+      const range = IDBKeyRange.upperBound(cutoffTime)
+      const request = index.openCursor(range)
 
-    let deletedCount = 0
+      let deletedCount = 0
 
-    request.onerror = () => {
-      reject(request.error)
-    }
-
-    request.onsuccess = event => {
-      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
-      if (cursor) {
-        cursor.delete()
-        deletedCount++
-        cursor.continue()
-      } else {
+      request.addEventListener('error', () => {
+        console.warn('Failed to cleanup old MSA data:', request.error)
         resolve(deletedCount)
+      })
+
+      request.onsuccess = event => {
+        const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>)
+          .result
+        if (cursor) {
+          cursor.delete()
+          deletedCount++
+          cursor.continue()
+        } else {
+          resolve(deletedCount)
+        }
       }
+    } catch (e) {
+      console.warn('Failed to cleanup old MSA data:', e)
+      resolve(0)
     }
   })
+}
+
+// Check if IndexedDB storage is available
+export function isIndexedDBAvailable() {
+  return checkIndexedDBAvailable()
 }

@@ -39,6 +39,34 @@ https://jbrowse.org/code/jb2/main/index.html?config=https://unpkg.com/jbrowse-pl
 - Clustal files (e.g. .aln file, uses clustal-js parser)
 - Newick (tree can be loaded separately as a .nh file)
 
+## Data persistence
+
+MSA datasets loaded from inline data (pasted text, local file uploads) are
+automatically stored in the browser's IndexedDB to enable persistence across
+page refreshes. This works around a limitation in react-msaview that strips
+large data from session snapshots.
+
+### How it works
+
+1. When MSA data is loaded from inline sources (not URL-based files), it is
+   automatically stored in IndexedDB
+2. A reference ID (`dataStoreId`) is saved in the session snapshot instead of
+   the raw data
+3. On page reload, the plugin detects the `dataStoreId` and retrieves the data
+   from IndexedDB
+4. Old IndexedDB entries are automatically cleaned up after 7 days
+
+Note: URL-based files (loaded via file selector with a URL) don't need IndexedDB
+storage as they can be reloaded directly from the URL.
+
+### Storage details
+
+- Database name: `jbrowse-msaview-data`
+- Stored data includes: MSA alignment, tree, and tree metadata
+- Each entry is timestamped for cleanup purposes
+
+This mechanism is transparent to users and requires no configuration.
+
 ## LaunchView-MsaView extension point
 
 This plugin registers a `LaunchView-MsaView` extension point that allows

@@ -9,6 +9,7 @@ import {
   getSession,
 } from '@jbrowse/core/util'
 import {
+  Alert,
   Button,
   DialogActions,
   DialogContent,
@@ -151,14 +152,23 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           variant="outlined"
           name="MSA row name"
           fullWidth
+          required
           style={{ marginTop: 20 }}
           placeholder="Row name in MSA that corresponds to the selected transcript"
-          helperText="Specify the name of the row in your MSA that should be aligned with the selected transcript"
+          helperText="Required: Specify the name of the row in your MSA that should be aligned with the selected transcript"
           value={querySeqName}
           onChange={event => {
             setQuerySeqName(event.target.value)
           }}
         />
+
+        {!querySeqName.trim() && (
+          <Alert severity="warning" style={{ marginTop: 10 }}>
+            Without specifying the MSA row name, clicking on the MSA will not
+            navigate to the corresponding genome position, and hovering
+            highlights will not work.
+          </Alert>
+        )}
       </DialogContent>
 
       <DialogActions>
