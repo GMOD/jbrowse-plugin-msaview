@@ -93,6 +93,22 @@ export function setupJBrowse() {
     },
   ]
 
+  // Override defaultSession - use the original wide view to see more gene labels
+  testConfig.defaultSession = {
+    name: 'Test session',
+    views: [
+      {
+        id: 'test_lgv',
+        type: 'LinearGenomeView',
+        init: {
+          loc: '1:48,201,333..48,742,623',
+          assembly: 'hg38',
+          tracks: ['gencode.v44.annotation.sorted.gff3'],
+        },
+      },
+    ],
+  }
+
   fs.writeFileSync(
     path.join(TEST_JBROWSE_DIR, 'config.json'),
     JSON.stringify(testConfig, null, 2),

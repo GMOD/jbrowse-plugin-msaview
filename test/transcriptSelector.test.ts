@@ -77,27 +77,14 @@ describe('TranscriptSelector E2E', () => {
   it('should open MSA dialog when right-clicking on SPATA6 gene', async () => {
     expect(page).toBeDefined()
 
-    // Wait for canvas to be ready
-    let canvas
-    try {
-      canvas = await page!.waitForSelector('canvas', { timeout: 10_000 })
-    } catch {
-      await page!.screenshot({ path: getScreenshotPath('02-error-no-canvas') })
-      console.log(
-        `ERROR: No canvas found. Screenshot: ${getScreenshotPath('02-error-no-canvas')}`,
-      )
-      return
-    }
-    expect(canvas).not.toBeNull()
+    // Wait for page to stabilize and features to render
+    await new Promise(r => setTimeout(r, 5000))
 
-    // Wait a bit for features to render
-    await new Promise(r => setTimeout(r, 3000))
+    // Screenshot: Initial state (should show SPATA6 region)
+    await page!.screenshot({ path: getScreenshotPath('02-spata6-region') })
+    console.log(`Screenshot saved: ${getScreenshotPath('02-spata6-region')}`)
 
-    // Screenshot: Canvas ready
-    await page!.screenshot({ path: getScreenshotPath('02-canvas-ready') })
-    console.log(`Screenshot saved: ${getScreenshotPath('02-canvas-ready')}`)
-
-    // Find SPATA6 text element on the page
+    // Find SPATA6 text element on the page (gene label in the track)
     const spata6Element = await page!.evaluateHandle(() => {
       const walker = document.createTreeWalker(
         document.body,
