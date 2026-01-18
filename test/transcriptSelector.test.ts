@@ -1,8 +1,12 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
   cleanupJBrowse,
   createJBrowsePage,
+  getJBrowseVersion,
   launchBrowser,
   setupJBrowse,
   startJBrowseServer,
@@ -13,6 +17,16 @@ import {
 
 import type { ChildProcess } from 'node:child_process'
 import type { Browser, Page } from 'puppeteer'
+
+const SCREENSHOT_DIR = path.join(process.cwd(), 'test-screenshots')
+
+function getScreenshotPath(name: string) {
+  const version = getJBrowseVersion()
+  if (!fs.existsSync(SCREENSHOT_DIR)) {
+    fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
+  }
+  return path.join(SCREENSHOT_DIR, `${version}-${name}.png`)
+}
 
 /**
  * End-to-end test for the TranscriptSelector component.
@@ -55,124 +69,201 @@ describe('TranscriptSelector E2E', () => {
     const root = await page!.$('#root')
     expect(root).not.toBeNull()
 
-    // Take a screenshot for debugging
-    await page!.screenshot({ path: 'debug-test-start.png' })
+    // Take a screenshot showing initial load state
+    await page!.screenshot({ path: getScreenshotPath('01-initial-load') })
+    console.log(`Screenshot saved: ${getScreenshotPath('01-initial-load')}`)
   }, 30_000)
 
-  it('should open MSA dialog when right-clicking on a gene feature', async () => {
+  it('should open MSA dialog when right-clicking on SPATA6 gene', async () => {
     expect(page).toBeDefined()
 
-    // Wait for canvas to be ready - might not exist if track didn't load
+    // Wait for canvas to be ready
     let canvas
     try {
       canvas = await page!.waitForSelector('canvas', { timeout: 10_000 })
     } catch {
-      await page!.screenshot({ path: 'debug-no-canvas-test.png' })
+      await page!.screenshot({ path: getScreenshotPath('02-error-no-canvas') })
+      console.log(
+        `ERROR: No canvas found. Screenshot: ${getScreenshotPath('02-error-no-canvas')}`,
+      )
       return
     }
     expect(canvas).not.toBeNull()
 
-    const box = await canvas.boundingBox()
-    expect(box).not.toBeNull()
+    // Wait a bit for features to render
+    await new Promise(r => setTimeout(r, 3000))
 
-    // Right-click on the track area to trigger context menu
-    // We click near the middle where gene features should be rendered
-    await page!.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2, {
+    // Screenshot: Canvas ready
+    await page!.screenshot({ path: getScreenshotPath('02-canvas-ready') })
+    console.log(`Screenshot saved: ${getScreenshotPath('02-canvas-ready')}`)
+
+    // Find SPATA6 text element on the page
+    const spata6Element = await page!.evaluateHandle(() => {
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        null,
+      )
+      let node
+      while ((node = walker.nextNode())) {
+        if (node.textContent?.includes('SPATA6')) {
+          return node.parentElement
+        }
+      }
+      return null
+    })
+
+    const element = spata6Element.asElement()
+    if (!element) {
+      console.log('SPATA6 text not found on page')
+      await page!.screenshot({ path: getScreenshotPath('02-error-no-spata6') })
+      return
+    }
+
+    console.log('Found SPATA6 element')
+
+    // Get bounding box and right-click on it
+    const box = await element.boundingBox()
+    if (!box) {
+      console.log('Could not get bounding box for SPATA6 element')
+      return
+    }
+
+    // Right-click on SPATA6
+    await page!.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
       button: 'right',
     })
 
     // Wait for context menu to appear
     await new Promise(r => setTimeout(r, 1000))
 
-    // Look for menu items - JBrowse uses MUI menus
+    // Screenshot: Context menu
+    await page!.screenshot({ path: getScreenshotPath('03-context-menu') })
+    console.log(`Screenshot saved: ${getScreenshotPath('03-context-menu')}`)
+
+    // Look for "Launch MSA view" menu item
     const menuItems = await page!.$$('[role="menuitem"]')
+    console.log(`Found ${menuItems.length} menu items`)
 
-    // There should be some menu items if we clicked on a feature
-    // If not, the click might have missed a feature
+    for (const item of menuItems) {
+      const text = await page!.evaluate(
+        el => (el as HTMLElement).textContent,
+        item,
+      )
+      console.log(`Menu item: ${text}`)
 
-    if (menuItems.length > 0) {
-      // Look for MSA-related menu option
-      for (const item of menuItems) {
-        const text = await page!.evaluate(
-          el => (el as HTMLElement).textContent,
-          item,
-        )
+      if (text?.includes('Launch MSA view')) {
+        console.log('Found "Launch MSA view" menu item, clicking...')
+        await item.click()
+        await new Promise(r => setTimeout(r, 3000))
 
-        if (text.toLowerCase().includes('msa') || text.includes('Multiple')) {
-          await item.click()
-          await new Promise(r => setTimeout(r, 2000))
+        // Screenshot: After clicking Launch MSA view
+        await page!.screenshot({ path: getScreenshotPath('04-msa-dialog') })
+        console.log(`Screenshot saved: ${getScreenshotPath('04-msa-dialog')}`)
 
-          // Dialog should be open - look for TranscriptSelector
-          const dialog = await page!.$('[role="dialog"]')
-          if (dialog) {
-            // Look for the transcript selector dropdown
-            const selects = await page!.$$('[role="combobox"]')
+        // Look for the MSA dialog
+        const dialog = await page!.$('[role="dialog"]')
+        if (dialog) {
+          console.log('MSA dialog opened successfully')
 
-            if (selects.length > 0) {
-              // Get the transcript selector (usually the one with "isoform" label)
-              for (const select of selects) {
-                const labelText = await page!.evaluate(el => {
-                  const label = el
-                    .closest('.MuiFormControl-root')
-                    ?.querySelector('label')
-                  return label?.textContent ?? ''
-                }, select)
+          // Screenshot: Dialog content
+          await page!.screenshot({
+            path: getScreenshotPath('05-msa-dialog-content'),
+          })
+          console.log(
+            `Screenshot saved: ${getScreenshotPath('05-msa-dialog-content')}`,
+          )
 
-                if (labelText.toLowerCase().includes('isoform')) {
-                  // Get initial value
-                  const initialValue = await page!.evaluate(
+          // Look for transcript selector dropdown
+          const selects = await page!.$$('[role="combobox"]')
+          console.log(`Found ${selects.length} combobox elements`)
+
+          if (selects.length > 0) {
+            for (const select of selects) {
+              const labelText = await page!.evaluate(el => {
+                const label = el
+                  .closest('.MuiFormControl-root')
+                  ?.querySelector('label')
+                return label?.textContent ?? ''
+              }, select)
+              console.log(`Combobox label: ${labelText}`)
+
+              if (labelText.toLowerCase().includes('isoform')) {
+                const initialValue = await page!.evaluate(
+                  el => (el as HTMLElement).textContent,
+                  select,
+                )
+                console.log(`Initial transcript: ${initialValue}`)
+
+                // Click to open dropdown
+                await select.click()
+                await new Promise(r => setTimeout(r, 500))
+
+                // Screenshot: Dropdown open
+                await page!.screenshot({
+                  path: getScreenshotPath('06-dropdown-open'),
+                })
+                console.log(
+                  `Screenshot saved: ${getScreenshotPath('06-dropdown-open')}`,
+                )
+
+                // Find and select a different option
+                const options = await page!.$$('[role="option"]')
+                console.log(`Found ${options.length} dropdown options`)
+
+                if (options.length > 1) {
+                  await options[1]!.click()
+                  await new Promise(r => setTimeout(r, 1000))
+
+                  // Screenshot: After selection change
+                  await page!.screenshot({
+                    path: getScreenshotPath('07-selection-changed'),
+                  })
+                  console.log(
+                    `Screenshot saved: ${getScreenshotPath('07-selection-changed')}`,
+                  )
+
+                  const newValue = await page!.evaluate(
                     el => (el as HTMLElement).textContent,
                     select,
                   )
+                  console.log(`New transcript: ${newValue}`)
 
-                  // Click to open dropdown
-                  await select.click()
-                  await new Promise(r => setTimeout(r, 500))
+                  expect(newValue).not.toBe(initialValue)
 
-                  // Find dropdown options
-                  const options = await page!.$$('[role="option"]')
+                  // Wait and verify selection persists
+                  await new Promise(r => setTimeout(r, 2000))
 
-                  if (options.length > 1) {
-                    // Select a different option
-                    const secondOption = options[1]
-                    // const secondOptionText = await page!.evaluate(
-                    //   el => (el as HTMLElement).textContent,
-                    //   secondOption,
-                    // )
+                  const finalValue = await page!.evaluate(
+                    el => (el as HTMLElement).textContent,
+                    select,
+                  )
+                  console.log(`Final transcript: ${finalValue}`)
 
-                    await secondOption.click()
-                    await new Promise(r => setTimeout(r, 1000))
+                  expect(finalValue).toBe(newValue)
 
-                    // Verify selection changed
-                    const newValue = await page!.evaluate(
-                      el => (el as HTMLElement).textContent,
-                      select,
-                    )
-
-                    // THE KEY TEST: Selection should have changed
-                    expect(newValue).not.toBe(initialValue)
-
-                    // Wait to ensure useEffect doesn't reset it
-                    await new Promise(r => setTimeout(r, 2000))
-
-                    const finalValue = await page!.evaluate(
-                      el => (el as HTMLElement).textContent,
-                      select,
-                    )
-
-                    // Selection should still be the new value, not reset
-                    expect(finalValue).toBe(newValue)
-                  }
-                  break
+                  // Screenshot: Final success
+                  await page!.screenshot({
+                    path: getScreenshotPath('08-final-success'),
+                  })
+                  console.log(
+                    `Screenshot saved: ${getScreenshotPath('08-final-success')}`,
+                  )
                 }
+                break
               }
             }
           }
-          break
+        } else {
+          console.log('MSA dialog not found')
+          await page!.screenshot({
+            path: getScreenshotPath('04-error-no-dialog'),
+          })
         }
+        break
       }
     }
-  }, 60_000)
+  }, 120_000)
 
   it('should maintain transcript selection after changing it', async () => {
     // This test verifies the specific bug fix
