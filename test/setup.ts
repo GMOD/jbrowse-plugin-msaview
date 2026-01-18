@@ -8,7 +8,23 @@ import { launch } from 'puppeteer'
 import type { Browser, Page } from 'puppeteer'
 
 export const JBROWSE_PORT = 9876
-const TEST_JBROWSE_DIR = path.join(process.cwd(), '.test-jbrowse')
+
+// Support testing against multiple JBrowse versions via environment variable
+// e.g., TEST_JBROWSE_VERSION=v3.7.0 or TEST_JBROWSE_VERSION=nightly
+const JBROWSE_VERSION = process.env.TEST_JBROWSE_VERSION || 'nightly'
+const VERSION_SUFFIX = JBROWSE_VERSION === 'nightly' ? '' : `-${JBROWSE_VERSION}`
+const TEST_JBROWSE_DIR = path.join(
+  process.cwd(),
+  `.test-jbrowse${VERSION_SUFFIX}`,
+)
+
+export function getTestJBrowseDir() {
+  return TEST_JBROWSE_DIR
+}
+
+export function getJBrowseVersion() {
+  return JBROWSE_VERSION
+}
 
 export async function waitForServer(
   port: number,
@@ -42,14 +58,17 @@ export async function waitForServer(
 
 /**
  * Set up a local JBrowse instance for testing.
- * Assumes `jbrowse create .test-jbrowse` was already run by the pretest script.
+ * Assumes the JBrowse instance was created via the setup script.
  */
 export function setupJBrowse() {
-  console.log('Setting up JBrowse test instance...')
+  console.log(
+    `Setting up JBrowse test instance (version: ${JBROWSE_VERSION})...`,
+  )
+  console.log(`Test directory: ${TEST_JBROWSE_DIR}`)
 
   if (!fs.existsSync(TEST_JBROWSE_DIR)) {
     throw new Error(
-      `JBrowse directory not found at ${TEST_JBROWSE_DIR}. Run "yarn pretest" first.`,
+      `JBrowse directory not found at ${TEST_JBROWSE_DIR}. Run "yarn test:setup" or "yarn test:setup:version ${JBROWSE_VERSION}" first.`,
     )
   }
 
@@ -61,9 +80,19 @@ export function setupJBrowse() {
     timeout: 60_000,
   })
 
-  // Copy the distconfig.json to JBrowse directory as config.json
+  // Load config from test_data/config.json and update plugin URL
   console.log('Setting up config...')
-  const testConfig = createTestConfig()
+  const testConfigPath = path.join(process.cwd(), 'test_data', 'config.json')
+  const testConfig = JSON.parse(fs.readFileSync(testConfigPath, 'utf8'))
+
+  // Update plugin URL to point to the test server
+  testConfig.plugins = [
+    {
+      name: 'MsaView',
+      url: `http://localhost:${JBROWSE_PORT}/plugin/jbrowse-plugin-msaview.umd.production.min.js`,
+    },
+  ]
+
   fs.writeFileSync(
     path.join(TEST_JBROWSE_DIR, 'config.json'),
     JSON.stringify(testConfig, null, 2),

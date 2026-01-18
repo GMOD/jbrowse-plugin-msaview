@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild'
 import http from 'node:http'
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
-import JBrowseReExports from '@jbrowse/core/ReExports/list.js'
+import JBrowseReExports from '@jbrowse/core/ReExports/list'
 import prettyBytes from 'pretty-bytes'
 
 const PORT = process.env.PORT ? +process.env.PORT : 9000
