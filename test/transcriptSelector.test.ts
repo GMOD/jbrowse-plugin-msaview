@@ -74,18 +74,37 @@ describe('TranscriptSelector E2E', () => {
     console.log(`Screenshot saved: ${getScreenshotPath('01-initial-load')}`)
   }, 30_000)
 
-  it('should open MSA dialog when right-clicking on SPATA6 gene', async () => {
+  it('should open MSA dialog when right-clicking on a gene', async () => {
     expect(page).toBeDefined()
 
     // Wait for page to stabilize and features to render
     await new Promise(r => setTimeout(r, 5000))
 
-    // Screenshot: Initial state (should show SPATA6 region)
-    await page!.screenshot({ path: getScreenshotPath('02-spata6-region') })
-    console.log(`Screenshot saved: ${getScreenshotPath('02-spata6-region')}`)
+    // Screenshot: Initial state
+    await page!.screenshot({ path: getScreenshotPath('02-gene-region') })
+    console.log(`Screenshot saved: ${getScreenshotPath('02-gene-region')}`)
 
-    // Find SPATA6 text element on the page (gene label in the track)
-    const spata6Element = await page!.evaluateHandle(() => {
+    // Find a visible gene label in the track (AGBL4 is visible in the view)
+    // Try multiple approaches: SVG text elements, or DOM text nodes
+    const geneElement = await page!.evaluateHandle(() => {
+      // First try SVG text elements
+      const textElements = document.querySelectorAll('text')
+      for (const el of textElements) {
+        const text = el.textContent || ''
+        if (text.includes('AGBL4')) {
+          return el
+        }
+      }
+
+      // Also try looking in div/span elements with the gene name
+      const allElements = document.querySelectorAll('div, span, tspan')
+      for (const el of allElements) {
+        if (el.textContent === 'AGBL4') {
+          return el
+        }
+      }
+
+      // Try walking the DOM for text nodes
       const walker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT,
@@ -93,21 +112,47 @@ describe('TranscriptSelector E2E', () => {
       )
       let node
       while ((node = walker.nextNode())) {
-        if (node.textContent?.includes('SPATA6')) {
+        if (node.textContent?.trim() === 'AGBL4') {
           return node.parentElement
         }
       }
+
       return null
     })
 
-    const element = spata6Element.asElement()
+    const element = geneElement.asElement()
     if (!element) {
-      console.log('SPATA6 text not found on page')
-      await page!.screenshot({ path: getScreenshotPath('02-error-no-spata6') })
+      console.log('Gene label not found on page')
+      // List what we can find for debugging
+      const debugInfo = await page!.evaluate(() => {
+        const info: string[] = []
+        document.querySelectorAll('text').forEach(el => {
+          if (el.textContent) {
+            info.push(`text: ${el.textContent}`)
+          }
+        })
+        const walker = document.createTreeWalker(
+          document.body,
+          NodeFilter.SHOW_TEXT,
+          null,
+        )
+        let node
+        let count = 0
+        while ((node = walker.nextNode()) && count < 30) {
+          const text = node.textContent?.trim()
+          if (text && text.length > 2 && text.length < 30) {
+            info.push(`dom: ${text}`)
+            count++
+          }
+        }
+        return info.slice(0, 30)
+      })
+      console.log('Debug info:', debugInfo)
+      await page!.screenshot({ path: getScreenshotPath('02-error-no-gene') })
       return
     }
 
-    console.log('Found SPATA6 element')
+    console.log('Found gene element')
 
     // Get bounding box and right-click on it
     const box = await element.boundingBox()
