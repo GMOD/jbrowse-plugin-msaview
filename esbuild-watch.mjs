@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild'
 import http from 'node:http'
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
-import JBrowseReExports from '@jbrowse/core/ReExports/list.js'
+import JBrowseReExports from '@jbrowse/core/ReExports/list'
 import prettyBytes from 'pretty-bytes'
 
 const PORT = process.env.PORT ? +process.env.PORT : 9000
@@ -9,12 +9,21 @@ const PORT2 = PORT + 400
 
 function createGlobalMap(jbrowseGlobals) {
   const globalMap = {}
-  for (const global of [...jbrowseGlobals, 'react-dom/client']) {
+  for (const global of jbrowseGlobals) {
     globalMap[global] = {
       varName: `JBrowseExports["${global}"]`,
       type: 'cjs',
     }
   }
+
+  // Support both mobx-state-tree and @jbrowse/mobx-state-tree
+  // They have the same API, so map @jbrowse/mobx-state-tree to mobx-state-tree
+  // for backwards compatibility with older JBrowse versions
+  globalMap['@jbrowse/mobx-state-tree'] = {
+    varName: `JBrowseExports["mobx-state-tree"]`,
+    type: 'cjs',
+  }
+
   return globalMap
 }
 
@@ -25,7 +34,7 @@ let ctx = await esbuild.context({
   outfile: 'dist/out.js',
   metafile: true,
   plugins: [
-    globalExternals(createGlobalMap(JBrowseReExports.default)),
+    globalExternals(createGlobalMap(JBrowseReExports)),
     {
       name: 'rebuild-log',
       setup({ onStart, onEnd }) {

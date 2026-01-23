@@ -15,7 +15,9 @@ export default defineConfig(
       'esbuild-watch.mjs',
       'eslint.config.mjs',
       'ucsc/*',
-      '.test-jbrowse/*',
+      '.test-jbrowse/**/*',
+      '.test-jbrowse-*/**/*',
+      'scripts/**/*',
     ],
   },
   {

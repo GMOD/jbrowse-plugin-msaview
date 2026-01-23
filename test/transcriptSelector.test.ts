@@ -90,7 +90,7 @@ describe('TranscriptSelector E2E', () => {
       // First try SVG text elements
       const textElements = document.querySelectorAll('text')
       for (const el of textElements) {
-        const text = el.textContent || ''
+        const text = el.textContent ?? ''
         if (text.includes('AGBL4')) {
           return el
         }
@@ -126,11 +126,11 @@ describe('TranscriptSelector E2E', () => {
       // List what we can find for debugging
       const debugInfo = await page!.evaluate(() => {
         const info: string[] = []
-        document.querySelectorAll('text').forEach(el => {
+        for (const el of document.querySelectorAll('text')) {
           if (el.textContent) {
             info.push(`text: ${el.textContent}`)
           }
-        })
+        }
         const walker = document.createTreeWalker(
           document.body,
           NodeFilter.SHOW_TEXT,
@@ -178,10 +178,10 @@ describe('TranscriptSelector E2E', () => {
     console.log(`Found ${menuItems.length} menu items`)
 
     for (const item of menuItems) {
-      const text = await page!.evaluate(
+      const text = (await page!.evaluate(
         el => (el as HTMLElement).textContent,
         item,
-      )
+      )) as string | null
       console.log(`Menu item: ${text}`)
 
       if (text?.includes('Launch MSA view')) {
