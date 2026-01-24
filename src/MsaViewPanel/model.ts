@@ -2,9 +2,9 @@ import { lazy } from 'react'
 
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
+import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { autorun } from 'mobx'
-import { addDisposer, cast, types } from 'mobx-state-tree'
 import { MSAModelF } from 'react-msaview'
 
 import { doLaunchBlast } from './doLaunchBlast'
@@ -26,8 +26,8 @@ import { getUniprotIdFromAlphaFoldUrl } from './util'
 
 import type { StructureConnection } from './structureConnection'
 import type { Feature } from '@jbrowse/core/util'
+import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import type { Instance } from 'mobx-state-tree'
 
 const ConnectStructureDialog = lazy(
   () => import('./components/ConnectStructureDialog'),
@@ -697,11 +697,6 @@ export default function stateModelFactory() {
                   self.setQuerySeqName(querySeqName)
                 }
 
-                // Set color scheme if provided
-                if (colorSchemeName) {
-                  self.setColorSchemeName(colorSchemeName)
-                }
-
                 if (msaData) {
                   self.setMSA(msaData)
                 } else if (msaUrl) {
@@ -722,6 +717,12 @@ export default function stateModelFactory() {
                   }
                   const data = await response.text()
                   self.setTree(data)
+                }
+
+                // Set color scheme after MSA data is loaded
+                // (color scheme calculation may depend on MSA data)
+                if (colorSchemeName) {
+                  self.setColorSchemeName(colorSchemeName)
                 }
 
                 self.setInit(undefined)
