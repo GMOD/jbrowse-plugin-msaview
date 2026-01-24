@@ -3,10 +3,11 @@ import { describe, expect, test } from 'vitest'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 
 describe('msaCoordToGenomeCoord', () => {
-  test('returns undefined when transcriptToMsaMap is undefined', () => {
+  test('returns undefined when neither transcriptToMsaMap nor mafRegion is defined', () => {
     const model = {
       querySeqName: 'QUERY',
       transcriptToMsaMap: undefined,
+      mafRegion: undefined,
       rows: [['QUERY', 'MKAA']],
     }
     const result = msaCoordToGenomeCoord({ model, coord: 0 })
@@ -150,6 +151,106 @@ describe('msaCoordToGenomeCoord', () => {
       refName: 'chr1',
       start: 200,
       end: 203,
+    })
+  })
+
+  // MAF region tests
+  describe('mafRegion', () => {
+    test('returns genome position for mafRegion mapping', () => {
+      const model = {
+        querySeqName: 'hg38.chr1',
+        transcriptToMsaMap: undefined,
+        mafRegion: {
+          refName: 'chr1',
+          start: 1000,
+          end: 1010,
+          assemblyName: 'hg38',
+        },
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
+      }
+      // Position 0 should map to genome 1000
+      const result = msaCoordToGenomeCoord({ model, coord: 0 })
+      expect(result).toEqual({
+        refName: 'chr1',
+        start: 1000,
+        end: 1001,
+      })
+
+      // Position 5 should map to genome 1005
+      const result2 = msaCoordToGenomeCoord({ model, coord: 5 })
+      expect(result2).toEqual({
+        refName: 'chr1',
+        start: 1005,
+        end: 1006,
+      })
+    })
+
+    test('handles gaps in mafRegion sequence', () => {
+      const model = {
+        querySeqName: 'hg38.chr1',
+        transcriptToMsaMap: undefined,
+        mafRegion: {
+          refName: 'chr1',
+          start: 1000,
+          end: 1008,
+          assemblyName: 'hg38',
+        },
+        rows: [['hg38.chr1', 'AC--GTAC']],
+        // Gapped positions: 0  1  2  3  4  5  6  7
+        // Ungapped:         0  1        2  3  4  5
+      }
+      // Position 2 is a gap, should return undefined
+      const result = msaCoordToGenomeCoord({ model, coord: 2 })
+      expect(result).toBeUndefined()
+
+      // Position 4 (G) = ungapped 2 = genome 1002
+      const result2 = msaCoordToGenomeCoord({ model, coord: 4 })
+      expect(result2).toEqual({
+        refName: 'chr1',
+        start: 1002,
+        end: 1003,
+      })
+    })
+
+    test('returns undefined when position exceeds mafRegion end', () => {
+      const model = {
+        querySeqName: 'hg38.chr1',
+        transcriptToMsaMap: undefined,
+        mafRegion: {
+          refName: 'chr1',
+          start: 1000,
+          end: 1005,
+          assemblyName: 'hg38',
+        },
+        rows: [['hg38.chr1', 'ACGTACGTAC']], // 10 chars but region is only 5bp
+      }
+      // Position 8 would be ungapped 8 = genome 1008, but region ends at 1005
+      const result = msaCoordToGenomeCoord({ model, coord: 8 })
+      expect(result).toBeUndefined()
+    })
+
+    test('mafRegion takes precedence over transcriptToMsaMap', () => {
+      const model = {
+        querySeqName: 'hg38.chr1',
+        transcriptToMsaMap: {
+          refName: 'chr2',
+          p2g: { 0: 5000, 1: 5003 },
+        },
+        mafRegion: {
+          refName: 'chr1',
+          start: 1000,
+          end: 1010,
+          assemblyName: 'hg38',
+        },
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
+      }
+      // Should use mafRegion, not transcriptToMsaMap
+      const result = msaCoordToGenomeCoord({ model, coord: 0 })
+      expect(result).toEqual({
+        refName: 'chr1',
+        start: 1000,
+        end: 1001,
+      })
     })
   })
 })

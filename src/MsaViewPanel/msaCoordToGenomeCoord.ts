@@ -1,4 +1,7 @@
 import { gappedToUngappedPosition } from './structureConnection'
+
+import type { MafRegion } from './model'
+
 export function msaCoordToGenomeCoord({
   model,
   coord: mouseCol,
@@ -11,29 +14,43 @@ export function msaCoordToGenomeCoord({
           p2g: Record<number, number>
         }
       | undefined
+    mafRegion?: MafRegion
     rows: string[][]
   }
   coord: number
 }) {
-  const { querySeqName, transcriptToMsaMap } = model
-  if (transcriptToMsaMap === undefined) {
+  const { querySeqName, transcriptToMsaMap, mafRegion } = model
+
+  // Get the query sequence
+  const queryRow = model.rows.find(f => f[0] === querySeqName)
+  const querySeq = queryRow?.[1]
+  if (!querySeq) {
     return undefined
-  } else {
-    // Get the query sequence
-    const queryRow = model.rows.find(f => f[0] === querySeqName)
-    const querySeq = queryRow?.[1]
-    if (!querySeq) {
+  }
+
+  // Convert gapped MSA column to ungapped sequence coordinate
+  // Returns undefined if the position is a gap
+  const ungappedPos = gappedToUngappedPosition(querySeq, mouseCol)
+  if (ungappedPos === undefined) {
+    return undefined
+  }
+
+  // Handle MAF region mapping
+  if (mafRegion) {
+    const genomePos = mafRegion.start + ungappedPos
+    // Check if position is within the region
+    if (genomePos >= mafRegion.end) {
       return undefined
     }
-
-    // Convert gapped MSA column to ungapped sequence coordinate
-    // Returns undefined if the position is a gap
-    const ungappedPos = gappedToUngappedPosition(querySeq, mouseCol)
-    if (ungappedPos === undefined) {
-      return undefined
+    return {
+      refName: mafRegion.refName,
+      start: genomePos,
+      end: genomePos + 1,
     }
+  }
 
-    // Use the ungapped position to look up in the p2g map
+  // Handle transcript mapping (original behavior)
+  if (transcriptToMsaMap) {
     const { refName, p2g } = transcriptToMsaMap
     const s = p2g[ungappedPos]
     const e = p2g[ungappedPos + 1]
@@ -45,4 +62,6 @@ export function msaCoordToGenomeCoord({
         }
       : undefined
   }
+
+  return undefined
 }
