@@ -11,8 +11,9 @@ export const JBROWSE_PORT = 9876
 
 // Support testing against multiple JBrowse versions via environment variable
 // e.g., TEST_JBROWSE_VERSION=v3.7.0 or TEST_JBROWSE_VERSION=nightly
-const JBROWSE_VERSION = process.env.TEST_JBROWSE_VERSION || 'nightly'
-const VERSION_SUFFIX = JBROWSE_VERSION === 'nightly' ? '' : `-${JBROWSE_VERSION}`
+const JBROWSE_VERSION = process.env.TEST_JBROWSE_VERSION ?? 'nightly'
+const VERSION_SUFFIX =
+  JBROWSE_VERSION === 'nightly' ? '' : `-${JBROWSE_VERSION}`
 const TEST_JBROWSE_DIR = path.join(
   process.cwd(),
   `.test-jbrowse${VERSION_SUFFIX}`,
@@ -105,91 +106,6 @@ export function setupJBrowse() {
   fs.cpSync(path.join(process.cwd(), 'dist'), pluginDir, { recursive: true })
 
   console.log('JBrowse test instance ready!')
-}
-
-function createTestConfig() {
-  return {
-    plugins: [
-      {
-        name: 'MsaView',
-        url: `http://localhost:${JBROWSE_PORT}/plugin/jbrowse-plugin-msaview.umd.production.min.js`,
-      },
-    ],
-    msa: {
-      datasets: [
-        {
-          datasetId: 'ucsc_100way',
-          name: 'UCSC 100-way',
-          description:
-            'The source data for these multiple sequence alignments is from <a href="https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/">knownCanonical.multiz100way.protAA.fa.gz</a>',
-          adapter: {
-            type: 'BgzipFastaMsaAdapter',
-            uri: 'https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz',
-          },
-        },
-      ],
-    },
-    assemblies: [
-      {
-        name: 'hg38',
-        aliases: ['GRCh38'],
-        sequence: {
-          type: 'ReferenceSequenceTrack',
-          trackId: 'P6R5xbRqRr',
-          adapter: {
-            type: 'BgzipFastaAdapter',
-            uri: 'https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz',
-          },
-        },
-        refNameAliases: {
-          adapter: {
-            type: 'RefNameAliasAdapter',
-            uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/hg38_aliases.txt',
-          },
-        },
-      },
-    ],
-    tracks: [
-      {
-        type: 'FeatureTrack',
-        trackId: 'gencode.v44.annotation.sorted.gff3',
-        name: 'GENCODE v44',
-        category: ['Annotation'],
-        adapter: {
-          type: 'Gff3TabixAdapter',
-          uri: 'https://jbrowse.org/demos/app/gencode.v44.annotation.sorted.gff3.gz',
-        },
-        assemblyNames: ['hg38'],
-      },
-    ],
-    defaultSession: {
-      name: 'Test session',
-      views: [
-        {
-          id: 'test_lgv',
-          type: 'LinearGenomeView',
-          init: {
-            loc: 'chr1:114,704,469-114,716,894',
-            assembly: 'hg38',
-            tracks: ['gencode.v44.annotation.sorted.gff3'],
-          },
-        },
-        {
-          id: 'test_msa',
-          type: 'MsaView',
-          init: {
-            msaData: `>seq1
-MKVLWAALLVTFLAGCQAKVEQAVETEPEPELRQQTEWQSGQRWELALGRFWDYLRWVQT
->seq2
-MKVLWAALLVTFLAGCQAKVEQAVETEPEPELRQQTEWQSGQRWELALGRFWDYLRWVQT
->seq3
-MKVLWAALLVTFLAGCQA-VEQAVETEPEPELRQQTEWQSGQRWELALGRFWDYLRWVQT`,
-            querySeqName: 'seq1',
-          },
-        },
-      ],
-    },
-  }
 }
 
 let jbrowseServer: ChildProcess | undefined

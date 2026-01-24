@@ -11,20 +11,9 @@
     "dist",
     "src"
   ],
-  "config": {
-    "port": 9000,
-    "browse": {
-      "port": 8999
-    },
-    "jbrowse": {
-      "plugin": {
-        "name": "MsaView"
-      }
-    }
-  },
   "scripts": {
     "clean": "rimraf dist",
-    "start": "node esbuild-watch.mjs",
+    "start": "node esbuild.mjs --watch",
     "format": "prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
     "prebuild": "yarn clean",
@@ -38,9 +27,6 @@
     "test:version": "node scripts/test-versions.mjs run",
     "prepack": "yarn build",
     "postversion": "git push --follow-tags"
-  },
-  "jbrowse-plugin": {
-    "name": "MsaView"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",

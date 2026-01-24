@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* global process, console */
+/* eslint-disable no-console */
 import { execSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -12,7 +14,9 @@ function getTestDir(version) {
 function setupVersion(version) {
   const testDir = getTestDir(version)
   if (fs.existsSync(testDir)) {
-    console.log(`JBrowse ${version} already exists at ${testDir}, skipping setup`)
+    console.log(
+      `JBrowse ${version} already exists at ${testDir}, skipping setup`,
+    )
     return true
   }
   console.log(`Creating JBrowse ${version} at ${testDir}...`)
@@ -90,7 +94,7 @@ function main() {
       }
       console.log(`\n${'='.repeat(60)}`)
       console.log('Test Results Summary')
-      console.log(`${'='.repeat(60)}`)
+      console.log('='.repeat(60))
       for (const r of results) {
         const status = r.passed ? '✓ PASSED' : '✗ FAILED'
         const reason = r.reason ? ` (${r.reason})` : ''

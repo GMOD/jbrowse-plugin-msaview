@@ -152,7 +152,7 @@ describe('TranscriptSelector E2E', () => {
       )
       console.log(`Menu item: ${text}`)
 
-      if (text?.includes('Launch MSA view')) {
+      if (text.includes('Launch MSA view')) {
         console.log('Found "Launch MSA view" menu item, clicking...')
         await item.click()
         await new Promise(r => setTimeout(r, 3000))

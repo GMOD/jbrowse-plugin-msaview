@@ -207,7 +207,6 @@ describe('genomeToMSA', () => {
       const result = genomeToMSA({ model })
       expect(result).toBeUndefined()
     })
-
   })
 
   describe('transcriptToMsaMap mapping (original behavior)', () => {
