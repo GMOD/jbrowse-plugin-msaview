@@ -1,6 +1,6 @@
 import { gappedToUngappedPosition } from './structureConnection'
 
-import type { MafRegion } from './model'
+import type { MafRegion } from './types'
 
 export function msaCoordToGenomeCoord({
   model,

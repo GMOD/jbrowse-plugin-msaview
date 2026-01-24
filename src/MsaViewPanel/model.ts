@@ -95,21 +95,9 @@ export interface BlastParams {
   proteinSequence: string
 }
 
-export interface MsaViewInitState {
-  msaData?: string
-  msaUrl?: string
-  treeData?: string
-  treeUrl?: string
-  querySeqName?: string
-  colorSchemeName?: string
-}
+import type { MafRegion, MsaViewInitState } from './types'
 
-export interface MafRegion {
-  refName: string
-  start: number
-  end: number
-  assemblyName: string
-}
+export type { MafRegion, MsaViewInitState }
 
 /**
  * #stateModel MsaViewPlugin
@@ -673,14 +661,7 @@ export default function stateModelFactory() {
             if (init) {
               try {
                 self.setError(undefined)
-                const {
-                  msaData,
-                  msaUrl,
-                  treeData,
-                  treeUrl,
-                  querySeqName,
-                  colorSchemeName,
-                } = init
+                const { msaData, msaUrl, treeData, treeUrl, querySeqName } = init
 
                 // Extract uniprotId from AlphaFold MSA URL and set querySeqName
                 if (msaUrl) {
@@ -717,12 +698,6 @@ export default function stateModelFactory() {
                   }
                   const data = await response.text()
                   self.setTree(data)
-                }
-
-                // Set color scheme after MSA data is loaded
-                // (color scheme calculation may depend on MSA data)
-                if (colorSchemeName) {
-                  self.setColorSchemeName(colorSchemeName)
                 }
 
                 self.setInit(undefined)

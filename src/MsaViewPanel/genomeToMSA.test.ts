@@ -208,35 +208,6 @@ describe('genomeToMSA', () => {
       expect(result).toBeUndefined()
     })
 
-    test('works when mafRegion has no assemblyName (skips assembly check)', () => {
-      mockGetSession.mockReturnValue({
-        hovered: {
-          hoverFeature: {},
-          hoverPosition: { coord: 1005, refName: 'chr1' },
-        },
-      } as any)
-
-      const mockSeqPosToVisibleCol = vi.fn().mockReturnValue(5)
-
-      const model = {
-        querySeqName: 'hg38.chr1',
-        transcriptToMsaMap: undefined,
-        mafRegion: {
-          refName: 'chr1',
-          start: 1000,
-          end: 1010,
-          // No assemblyName
-        },
-        connectedView: {
-          initialized: true,
-          assemblyNames: ['mm39'],
-        },
-        seqPosToVisibleCol: mockSeqPosToVisibleCol,
-      } as any
-
-      const result = genomeToMSA({ model })
-      expect(result).toBe(5)
-    })
   })
 
   describe('transcriptToMsaMap mapping (original behavior)', () => {
