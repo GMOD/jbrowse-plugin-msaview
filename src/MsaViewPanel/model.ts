@@ -101,6 +101,14 @@ export interface MsaViewInitState {
   treeData?: string
   treeUrl?: string
   querySeqName?: string
+  colorSchemeName?: string
+}
+
+export interface MafRegion {
+  refName: string
+  start: number
+  end: number
+  assemblyName: string
 }
 
 /**
@@ -177,6 +185,12 @@ export default function stateModelFactory() {
          * Reference ID for MSA data stored in IndexedDB (for large datasets)
          */
         dataStoreId: types.maybe(types.string),
+
+        /**
+         * #property
+         * MAF region for coordinate mapping (used when launched from MAF viewer)
+         */
+        mafRegion: types.frozen<MafRegion | undefined>(),
       }),
     )
 
@@ -384,6 +398,12 @@ export default function stateModelFactory() {
        */
       setDataStoreId(arg?: string) {
         self.dataStoreId = arg
+      },
+      /**
+       * #action
+       */
+      setMafRegion(arg?: MafRegion) {
+        self.mafRegion = arg
       },
       /**
        * #action
@@ -653,8 +673,14 @@ export default function stateModelFactory() {
             if (init) {
               try {
                 self.setError(undefined)
-                const { msaData, msaUrl, treeData, treeUrl, querySeqName } =
-                  init
+                const {
+                  msaData,
+                  msaUrl,
+                  treeData,
+                  treeUrl,
+                  querySeqName,
+                  colorSchemeName,
+                } = init
 
                 // Extract uniprotId from AlphaFold MSA URL and set querySeqName
                 if (msaUrl) {
@@ -669,6 +695,11 @@ export default function stateModelFactory() {
                 // User-provided querySeqName takes precedence
                 if (querySeqName) {
                   self.setQuerySeqName(querySeqName)
+                }
+
+                // Set color scheme if provided
+                if (colorSchemeName) {
+                  self.setColorSchemeName(colorSchemeName)
                 }
 
                 if (msaData) {
