@@ -25,6 +25,11 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
     if (refName !== mafRegion.refName) {
       return undefined
     }
+    // Check if we're on the same assembly (if assembly info is available)
+    const viewAssemblies = connectedView.assemblyNames
+    if (!viewAssemblies.includes(mafRegion.assemblyName)) {
+      return undefined
+    }
     // Check if the hover coordinate is within the MAF region
     if (hoverCoord < mafRegion.start || hoverCoord >= mafRegion.end) {
       return undefined
