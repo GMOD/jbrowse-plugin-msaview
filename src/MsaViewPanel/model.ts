@@ -25,6 +25,7 @@ import {
 import { getUniprotIdFromAlphaFoldUrl } from './util'
 
 import type { StructureConnection } from './structureConnection'
+import type { MafRegion, MsaViewInitState } from './types'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -94,10 +95,6 @@ export interface BlastParams {
   selectedTranscript: Feature
   proteinSequence: string
 }
-
-import type { MafRegion, MsaViewInitState } from './types'
-
-export type { MafRegion, MsaViewInitState }
 
 /**
  * #stateModel MsaViewPlugin
@@ -661,7 +658,8 @@ export default function stateModelFactory() {
             if (init) {
               try {
                 self.setError(undefined)
-                const { msaData, msaUrl, treeData, treeUrl, querySeqName } = init
+                const { msaData, msaUrl, treeData, treeUrl, querySeqName } =
+                  init
 
                 // Extract uniprotId from AlphaFold MSA URL and set querySeqName
                 if (msaUrl) {
@@ -870,3 +868,5 @@ export type JBrowsePluginMsaViewStateModel = ReturnType<
   typeof stateModelFactory
 >
 export type JBrowsePluginMsaViewModel = Instance<JBrowsePluginMsaViewStateModel>
+
+export { type MafRegion, type MsaViewInitState } from './types'

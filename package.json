@@ -11,38 +11,28 @@
     "dist",
     "src"
   ],
-  "config": {
-    "port": 9000,
-    "browse": {
-      "port": 8999
-    },
-    "jbrowse": {
-      "plugin": {
-        "name": "MsaView"
-      }
-    }
-  },
   "scripts": {
     "clean": "rimraf dist",
-    "start": "node esbuild-watch.mjs",
+    "start": "node esbuild.mjs --watch",
     "format": "prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
     "prebuild": "yarn clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
-    "pretest": "test -d .test-jbrowse || jbrowse create .test-jbrowse --nightly",
+    "pretest": "test -d .test-jbrowse || npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:setup": "node scripts/test-versions.mjs setup",
+    "test:setup:version": "node scripts/test-versions.mjs setup",
+    "test:versions": "node scripts/test-versions.mjs run",
+    "test:version": "node scripts/test-versions.mjs run",
     "prepack": "yarn build",
     "postversion": "git push --follow-tags"
-  },
-  "jbrowse-plugin": {
-    "name": "MsaView"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",
     "g2p_mapper": "^2.0.0",
     "pako": "^2.1.0",
-    "react-msaview": "^5.0.1",
+    "react-msaview": "^5.0.3",
     "swr": "^2.3.8"
   },
   "devDependencies": {
@@ -68,6 +58,7 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "mobx": "^6.15.0",
     "mobx-react": "^9.2.1",
+    "msa-parsers": "^5.0.3",
     "prettier": "^3.7.4",
     "pretty-bytes": "^7.1.0",
     "puppeteer": "^24.34.0",
