@@ -1,4 +1,4 @@
-import { ungzip } from 'pako'
+import { ungzip } from 'pako-esm2'
 
 export async function handleFetch(url: string, args?: RequestInit) {
   const response = await fetch(url, args)

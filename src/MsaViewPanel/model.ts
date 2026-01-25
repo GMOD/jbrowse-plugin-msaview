@@ -92,7 +92,7 @@ export interface BlastParams {
   blastDatabase: string
   msaAlgorithm: string
   blastProgram: string
-  selectedTranscript: Feature
+  selectedTranscript?: Feature
   proteinSequence: string
 }
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 
+import { readConfObject } from '@jbrowse/core/configuration'
 import { Dialog } from '@jbrowse/core/ui'
-import { AbstractTrackModel, Feature } from '@jbrowse/core/util'
+import { AbstractTrackModel, Feature, getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 
 import EnsemblGeneTree from './EnsemblGeneTree/EnsemblGeneTree'
@@ -10,12 +11,7 @@ import NCBIBlastPanel from './NCBIBlastQuery/NCBIBlastPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import TabPanel from './TabPanel'
 
-const TABS = {
-  NCBI_BLAST: 0,
-  PRELOADED_MSA: 1,
-  ENSEMBL_GENETREE: 2,
-  MANUAL_MSA: 3,
-}
+import type { Dataset } from './PreLoadedMSA/types'
 
 export default function LaunchMsaViewDialog({
   handleClose,
@@ -26,42 +22,53 @@ export default function LaunchMsaViewDialog({
   feature: Feature
   model: AbstractTrackModel
 }) {
-  const [value, setValue] = useState(TABS.NCBI_BLAST)
+  const session = getSession(model)
+  const { jbrowse } = session
+  const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as
+    | Dataset[]
+    | undefined
+  const hasPreloadedDatasets = datasets && datasets.length > 0
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+  const [value, setValue] = useState('ncbi_blast')
+
+  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue)
   }
 
   return (
     <Dialog maxWidth="xl" title="Launch MSA view" open onClose={handleClose}>
       <Tabs value={value} onChange={handleChange}>
-        <Tab label="NCBI BLAST query" value={TABS.NCBI_BLAST} />
-        <Tab label="Pre-loaded MSA datasets" value={TABS.PRELOADED_MSA} />
-        <Tab label="Ensembl GeneTree" value={TABS.ENSEMBL_GENETREE} />
-        <Tab label="Manual upload" value={TABS.MANUAL_MSA} />
+        <Tab label="NCBI BLAST query" value="ncbi_blast" />
+        {hasPreloadedDatasets ? (
+          <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
+        ) : null}
+        <Tab label="Ensembl GeneTree" value="ensembl_genetree" />
+        <Tab label="Manual upload" value="manual_msa" />
       </Tabs>
-      <TabPanel value={value} index={TABS.NCBI_BLAST}>
+      <TabPanel value={value} index="ncbi_blast">
         <NCBIBlastPanel
           handleClose={handleClose}
           feature={feature}
           model={model}
         />
       </TabPanel>
-      <TabPanel value={value} index={TABS.PRELOADED_MSA}>
-        <PreLoadedMSA
-          model={model}
-          feature={feature}
-          handleClose={handleClose}
-        />
-      </TabPanel>
-      <TabPanel value={value} index={TABS.ENSEMBL_GENETREE}>
+      {hasPreloadedDatasets ? (
+        <TabPanel value={value} index="preloaded_msa">
+          <PreLoadedMSA
+            model={model}
+            feature={feature}
+            handleClose={handleClose}
+          />
+        </TabPanel>
+      ) : null}
+      <TabPanel value={value} index="ensembl_genetree">
         <EnsemblGeneTree
           model={model}
           feature={feature}
           handleClose={handleClose}
         />
       </TabPanel>
-      <TabPanel value={value} index={TABS.MANUAL_MSA}>
+      <TabPanel value={value} index="manual_msa">
         <ManualMSALoader
           model={model}
           feature={feature}

@@ -6,7 +6,11 @@ import {
   Feature,
   getContainingView,
 } from '@jbrowse/core/util'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   DialogActions,
   DialogContent,
@@ -17,6 +21,7 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchView } from './blastLaunchView'
+import CachedBlastResults from './CachedBlastResults'
 import TextField2 from '../../../components/TextField2'
 import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
@@ -172,6 +177,15 @@ const NCBIBlastAutomaticPanel = observer(function ({
           you need a COBALT alignment, please use the manual approach of
           submitting BLAST yourself and downloading the resulting files
         </Typography>
+
+        <Accordion style={{ marginTop: 20 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography>Previous BLAST Results</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <CachedBlastResults model={model} handleClose={handleClose} />
+          </AccordionDetails>
+        </Accordion>
       </DialogContent>
       <DialogActions>
         <Button
