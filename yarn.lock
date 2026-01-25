@@ -631,10 +631,10 @@
   resolved "https://registry.yarnpkg.com/@jbrowse/quick-lru/-/quick-lru-7.3.5.tgz#8625677d7e22050acfdefe5afa23b3eca701955b"
   integrity sha512-DPEtODWKt+QGmCg+EO36sSmKOmdjJOwtxeV/4PBnf+7jqC/P7R4YIz+/yohtqh9UZ38dbLtXIlmigPlkZy8SAA==
 
-"@jbrowse/svgcanvas@5.0.5":
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/@jbrowse/svgcanvas/-/svgcanvas-5.0.5.tgz#a74c97f6463b71c19b1150ab52b886d2ec1f3bb4"
-  integrity sha512-dq9wDZ2LgHQ8/5xG8gWL+E0FRM2SVPktlRTiRM+5lLcjJnpJCAISa9qG6R9iRmS0ezo3ULd/L5gpO6gUsUeXCA==
+"@jbrowse/svgcanvas@5.0.6":
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/@jbrowse/svgcanvas/-/svgcanvas-5.0.6.tgz#02e62ad2068bba935cb394ba5434cf7c020b9cec"
+  integrity sha512-+i6eOVzqcDehSBXkQAhCuAH++SxNuBSQxlvaKOxnldcH+SzhP7hTc5t1B9rffQ9ZeWazGOrlssspj6/xkqahGw==
 
 "@jridgewell/gen-mapping@^0.3.12", "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"
@@ -982,17 +982,10 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
-"@types/node@*":
+"@types/node@*", "@types/node@^25.0.10":
   version "25.0.10"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-25.0.10.tgz#4864459c3c9459376b8b75fd051315071c8213e7"
   integrity sha512-zWW5KPngR/yvakJgGOmZ5vTBemDoSqF3AcV/LrO5u5wTWyEAVVh+IT39G4gtyAkh3CtTZs8aX/yRM82OfzHJRg==
-  dependencies:
-    undici-types "~7.16.0"
-
-"@types/node@^24.10.4":
-  version "24.10.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.9.tgz#1aeb5142e4a92957489cac12b07f9c7fe26057d0"
-  integrity sha512-ne4A0IpG3+2ETuREInjPNhUGis1SFjv1d5asp8MzEAGtOZeTeHVDOYqOgqfhvseqg/iXty2hjBf1zAOb7RNiNw==
   dependencies:
     undici-types "~7.16.0"
 
@@ -3247,10 +3240,10 @@ ms@^2.1.1, ms@^2.1.3:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-msa-parsers@5.0.5:
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/msa-parsers/-/msa-parsers-5.0.5.tgz#bb10f3296e644797afa00eb6d308f32b15102e4e"
-  integrity sha512-6pol2kAG2TjW0Yuaw8gZwQUNQ5nqcF/6fux6DexiDBVEA+ET3QGX1tO+Qgy7JEHgt2zkdUDMf0o5RXQpme1N+A==
+msa-parsers@5.0.6:
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/msa-parsers/-/msa-parsers-5.0.6.tgz#3cbc7c0c864b1914fb29c601767d2ce296deed10"
+  integrity sha512-GbXcu2WOuWM5qBKTBvqKGy67fNzkToqmtVHpTtAYNv6ynLBlkuqf9NiQCpqwrh4q7PpWdx0NQ5hTpqK9pWWYvg==
   dependencies:
     clustal-js "^2.0.13"
     emf-js "^2.0.0"
@@ -3443,11 +3436,6 @@ pako-esm2@^2.0.0, pako-esm2@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/pako-esm2/-/pako-esm2-2.0.2.tgz#495108895ed70fc7caaf5faa99ec375d1cc307eb"
   integrity sha512-bm+PwddAyroj8Ny8tNuLepGW28OUdI2b/PkvhaW2jHBVZ5fgcR1xsrLPiOKwk8LoXyc1az2NdHlvICBN2BjR6Q==
-
-pako@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
-  integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
 
 parent-module@^1.0.0:
   version "1.0.1"
@@ -3669,20 +3657,19 @@ react-is@^19.2.3:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-19.2.3.tgz#eec2feb69c7fb31f77d0b5c08c10ae1c88886b29"
   integrity sha512-qJNJfu81ByyabuG7hPFEbXqNcWSU3+eVus+KJs+0ncpGfMyYdvSmxiJxbWR65lYi1I+/0HBcliO029gc4F+PnA==
 
-react-msaview@^5.0.5:
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-5.0.5.tgz#37dae25c5ab594cc6d96a926bf9f0f5abf4588e0"
-  integrity sha512-7BRgPSqUpdC2ePS4pgL1ZtRCsgJsNK01ADwOpuWgNZheXE+/n/TPT9t5zr05PhO9sEnTJaB2Z2vkyIBbWPoGvA==
+react-msaview@^5.0.6:
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-5.0.6.tgz#210294cde67442dcc73daebdec4ff0a86536f8e4"
+  integrity sha512-Zg9l4qHK3aIxk8LWMiEZnwpClvUfZkyV7dIqLPPo3KIl4Anp5A6i9kNe2hThJasBqhkEOOZbEO3HESj2jOh2Uw==
   dependencies:
-    "@jbrowse/svgcanvas" "5.0.5"
+    "@jbrowse/svgcanvas" "5.0.6"
     "@mui/icons-material" "^7.0.1"
     "@mui/material" "^7.0.1"
     colord "^2.9.3"
     d3-array "^3.2.3"
     d3-hierarchy "^3.1.2"
     flatbush "^4.4.0"
-    msa-parsers "5.0.5"
-    pako "^2.1.0"
+    msa-parsers "5.0.6"
 
 react-transition-group@^4.4.5:
   version "4.4.5"
