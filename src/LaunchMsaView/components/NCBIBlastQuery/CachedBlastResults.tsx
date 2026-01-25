@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import { getContainingView } from '@jbrowse/core/util'
+import { Feature, getContainingView } from '@jbrowse/core/util'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Button,
@@ -14,6 +14,11 @@ import {
 import { observer } from 'mobx-react'
 
 import { blastLaunchViewFromCache } from './blastLaunchView'
+import {
+  clearAllCachedResults,
+  deleteCachedResult,
+  getAllCachedResults,
+} from '../../../utils/blastCache'
 
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -22,56 +27,47 @@ import type { CachedBlastResult } from '../../../utils/blastCache'
 const CachedBlastResults = observer(function ({
   model,
   handleClose,
-  onSelect,
+  feature,
 }: {
   model: AbstractTrackModel
   handleClose: () => void
-  onSelect?: (cached: CachedBlastResult) => void
+  feature: Feature
 }) {
   const [results, setResults] = useState<CachedBlastResult[]>([])
   const [loading, setLoading] = useState(true)
+  const view = getContainingView(model) as LinearGenomeViewModel
 
+  const geneId = feature.get('id')
   useEffect(() => {
     let cancelled = false
-    const loadResults = async () => {
-      const { getAllCachedResults } = await import('../../../utils/blastCache')
-      const cached = await getAllCachedResults()
+    getAllCachedResults().then(cached => {
       if (!cancelled) {
-        setResults(cached)
+        setResults(cached.filter(r => r.geneId === geneId))
         setLoading(false)
       }
-    }
-    loadResults()
+    })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [geneId])
 
   const handleDelete = async (id: string) => {
-    const { deleteCachedResult } = await import('../../../utils/blastCache')
     await deleteCachedResult(id)
     setResults(r => r.filter(result => result.id !== id))
   }
 
   const handleClearAll = async () => {
-    const { clearAllCachedResults } = await import('../../../utils/blastCache')
     await clearAllCachedResults()
     setResults([])
   }
 
-  const view = getContainingView(model) as LinearGenomeViewModel
-
   const handleUseCached = (cached: CachedBlastResult) => {
-    if (onSelect) {
-      onSelect(cached)
-    } else {
-      blastLaunchViewFromCache({
-        view,
-        cached,
-        newViewTitle: `BLAST (cached) - ${cached.geneId ?? 'Unknown gene'}`,
-      })
-      handleClose()
-    }
+    blastLaunchViewFromCache({
+      view,
+      cached,
+      newViewTitle: `BLAST - ${cached.geneId ?? cached.transcriptId ?? 'Unknown gene'}`,
+    })
+    handleClose()
   }
 
   if (loading) {
@@ -81,7 +77,8 @@ const CachedBlastResults = observer(function ({
   if (results.length === 0) {
     return (
       <Typography color="textSecondary">
-        No cached BLAST results found. Run a BLAST query to cache results.
+        No cached BLAST results found for this gene. Run a BLAST query to cache
+        results.
       </Typography>
     )
   }
@@ -120,8 +117,8 @@ const CachedBlastResults = observer(function ({
               }}
             >
               <ListItemText
-                primary={`${result.geneId ?? result.transcriptId ?? 'Unknown'} - ${result.blastDatabase}/${result.blastProgram}`}
-                secondary={`${result.hits.length} hits - ${new Date(result.timestamp).toLocaleString()} - Seq: ${result.proteinSequence.slice(0, 30)}...`}
+                primary={`${result.geneId ?? result.transcriptId ?? 'Unknown'} - ${result.blastDatabase}/${result.blastProgram} (${result.msaAlgorithm})`}
+                secondary={`${new Date(result.timestamp).toLocaleString()} - Seq: ${result.proteinSequence.slice(0, 30)}...`}
               />
             </ListItemButton>
           </ListItem>

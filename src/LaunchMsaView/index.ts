@@ -54,7 +54,13 @@ function extendStateModel(stateModel: IAnyModelType) {
   )
 }
 
-export default function LaunchMsaViewF(pluginManager: PluginManager) {
+export default function LaunchMsaViewF(_pluginManager: PluginManager) {
+  // TEMPORARILY DISABLED - testing scroll performance
+  // This extends LinearBasicDisplay stateModel which might affect rendering
+  console.log('[MSA-DEBUG] LaunchMsaViewF extension DISABLED for testing')
+  return
+
+  /*
   pluginManager.addToExtensionPoint(
     'Core-extendPluggableElement',
     (elt: PluggableElementType) => {
@@ -64,4 +70,5 @@ export default function LaunchMsaViewF(pluginManager: PluginManager) {
       return elt
     },
   )
+  */
 }

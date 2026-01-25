@@ -1,14 +1,18 @@
+import type { TaxonomyInfo } from '../../utils/taxonomyNames'
+
 export function makeId(
   h: { accession: string; sciname: string; taxid?: number },
-  commonNames?: Map<number, string>,
+  taxonomyInfo?: Map<number, TaxonomyInfo>,
 ) {
   let speciesName = h.sciname.replaceAll(' ', '_')
-  if (h.taxid && commonNames?.has(h.taxid)) {
-    const common = commonNames.get(h.taxid)!
-    speciesName = common
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join('_')
+  if (h.taxid && taxonomyInfo?.has(h.taxid)) {
+    const info = taxonomyInfo.get(h.taxid)!
+    if (info.commonName) {
+      speciesName = info.commonName
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join('_')
+    }
   }
   return `${h.accession}-${speciesName}`
 }

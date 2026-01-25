@@ -8,7 +8,6 @@ interface CachedTaxonomy {
   taxid: number
   sciname: string
   commonName?: string
-  timestamp: number
 }
 
 async function getDB() {
@@ -35,17 +34,22 @@ async function saveTaxonomyCache(entries: CachedTaxonomy[]) {
   await tx.done
 }
 
-export async function fetchCommonNames(
+export interface TaxonomyInfo {
+  sciname: string
+  commonName?: string
+}
+
+export async function fetchTaxonomyInfo(
   taxids: number[],
-): Promise<Map<number, string>> {
-  const result = new Map<number, string>()
+): Promise<Map<number, TaxonomyInfo>> {
+  const result = new Map<number, TaxonomyInfo>()
   const uncachedTaxids: number[] = []
 
   for (const taxid of taxids) {
     const cached = await getCachedCommonName(taxid)
-    if (cached?.commonName) {
-      result.set(taxid, cached.commonName)
-    } else if (cached === undefined) {
+    if (cached) {
+      result.set(taxid, { sciname: cached.sciname, commonName: cached.commonName })
+    } else {
       uncachedTaxids.push(taxid)
     }
   }
@@ -79,26 +83,13 @@ export async function fetchCommonNames(
           const genbankCommon = /<GenbankCommonName>(.*?)<\/GenbankCommonName>/.exec(taxonXml)
           const commonName = /<CommonName>(.*?)<\/CommonName>/.exec(taxonXml)
           const sciName = /<ScientificName>(.*?)<\/ScientificName>/.exec(taxonXml)
-
           const name = genbankCommon?.[1] ?? commonName?.[1]
 
-          if (name) {
-            result.set(taxid, name)
-          }
-
-          toCache.push({
-            taxid,
-            sciname: sciName?.[1] ?? '',
-            commonName: name,
-            timestamp: Date.now(),
-          })
+          const sci = sciName?.[1] ?? ''
+          result.set(taxid, { sciname: sci, commonName: name })
+          toCache.push({ taxid, sciname: sci, commonName: name })
         } else {
-          toCache.push({
-            taxid,
-            sciname: '',
-            commonName: undefined,
-            timestamp: Date.now(),
-          })
+          toCache.push({ taxid, sciname: '', commonName: undefined })
         }
       }
     } catch (error) {
@@ -111,17 +102,4 @@ export async function fetchCommonNames(
   }
 
   return result
-}
-
-export function formatSpeciesName(
-  sciname: string,
-  commonName?: string,
-): string {
-  if (commonName) {
-    return commonName
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join('_')
-  }
-  return sciname.replaceAll(' ', '_')
 }

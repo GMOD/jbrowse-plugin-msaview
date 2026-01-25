@@ -295,6 +295,13 @@ export default function stateModelFactory() {
        * 2. Genome hover (from connected linear genome view)
        */
       get mouseCol2(): number | undefined {
+        // TEMPORARILY DISABLED - testing scroll performance
+        // This getter accesses session.hovered which changes on every mouse move
+        // and may be causing cascading updates
+        console.log('[MSA-DEBUG] mouseCol2 getter called')
+        return undefined
+
+        /*
         // Check structure hover first
         const structureCol = self.structureHoverCol
         if (structureCol !== undefined) {
@@ -302,6 +309,7 @@ export default function stateModelFactory() {
         }
         // Fall back to genome hover
         return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
+        */
       },
       /**
        * #getter
@@ -707,10 +715,17 @@ export default function stateModelFactory() {
           }),
         )
 
+        // TEMPORARILY DISABLED - testing scroll performance
         // this adds highlights to the genome view when mouse-ing over the MSA
+        /*
+        let lastAutorunCall = 0
         addDisposer(
           self,
           autorun(() => {
+            const now = performance.now()
+            const delta = now - lastAutorunCall
+            lastAutorunCall = now
+
             const { mouseCol, mouseClickCol } = self
             const r1 =
               mouseCol === undefined
@@ -720,19 +735,35 @@ export default function stateModelFactory() {
               mouseClickCol === undefined
                 ? undefined
                 : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
+
+            if (delta < 100) {
+              console.log(
+                '[MSA-DEBUG] setConnectedHighlights autorun',
+                `delta=${delta.toFixed(1)}ms`,
+                `mouseCol=${mouseCol}`,
+                `highlights=${[r1, r2].filter(f => !!f).length}`,
+              )
+            }
+
             self.setConnectedHighlights([r1, r2].filter(f => !!f))
           }),
         )
+        */
 
+        // TEMPORARILY DISABLED - testing scroll performance
         // this highlights residues in connected protein structures when mousing over the MSA
+        /*
         addDisposer(
           self,
           autorun(() => {
             highlightConnectedStructures(self)
           }),
         )
+        */
 
+        // TEMPORARILY DISABLED - testing scroll performance
         // auto-connect to compatible ProteinViews
+        /*
         addDisposer(
           self,
           autorun(() => {
@@ -793,9 +824,12 @@ export default function stateModelFactory() {
             }
           }),
         )
+        */
 
+        // TEMPORARILY DISABLED - testing scroll performance
         // Observe protein3d genome highlights and update MSA highlighted columns
         // This enables communication via the linear genome view coordinates
+        /*
         addDisposer(
           self,
           autorun(() => {
@@ -860,6 +894,7 @@ export default function stateModelFactory() {
             )
           }),
         )
+        */
       },
     }))
 }

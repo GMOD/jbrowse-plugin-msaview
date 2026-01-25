@@ -1,10 +1,8 @@
 import { openDB } from 'idb'
 
-import type { BlastResults } from './types'
-
 const DB_NAME = 'jbrowse-msaview-blast-cache'
 const STORE_NAME = 'blast-results'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 export interface CachedBlastResult {
   id: string
@@ -12,7 +10,9 @@ export interface CachedBlastResult {
   blastDatabase: string
   blastProgram: string
   msaAlgorithm: string
-  hits: BlastResults['BlastOutput2'][0]['report']['results']['search']['hits']
+  msa: string
+  tree: string
+  treeMetadata: string
   rid: string
   timestamp: number
   geneId?: string
@@ -21,12 +21,14 @@ export interface CachedBlastResult {
 
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 2) {
+        if (db.objectStoreNames.contains(STORE_NAME)) {
+          db.deleteObjectStore(STORE_NAME)
+        }
+      }
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-        store.createIndex('by-sequence', 'proteinSequence')
-        store.createIndex('by-timestamp', 'timestamp')
-        store.createIndex('by-gene', 'geneId')
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' })
       }
     },
   })
@@ -59,7 +61,9 @@ export async function saveBlastResult({
   blastDatabase,
   blastProgram,
   msaAlgorithm,
-  hits,
+  msa,
+  tree,
+  treeMetadata,
   rid,
   geneId,
   transcriptId,
@@ -68,7 +72,9 @@ export async function saveBlastResult({
   blastDatabase: string
   blastProgram: string
   msaAlgorithm: string
-  hits: CachedBlastResult['hits']
+  msa: string
+  tree: string
+  treeMetadata: string
   rid: string
   geneId?: string
   transcriptId?: string
@@ -81,7 +87,9 @@ export async function saveBlastResult({
     blastDatabase,
     blastProgram,
     msaAlgorithm,
-    hits,
+    msa,
+    tree,
+    treeMetadata,
     rid,
     timestamp: Date.now(),
     geneId,

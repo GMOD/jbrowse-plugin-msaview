@@ -18,7 +18,7 @@
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
     "prebuild": "yarn clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
-    "pretest": "test -d .test-jbrowse || npx @jbrowse/cli create .test-jbrowse --nightly",
+    "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:setup": "node scripts/test-versions.mjs setup",

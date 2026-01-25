@@ -22,6 +22,7 @@ import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchView } from './blastLaunchView'
 import CachedBlastResults from './CachedBlastResults'
+import { getAllCachedResults } from '../../../utils/blastCache'
 import TextField2 from '../../../components/TextField2'
 import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
@@ -68,6 +69,15 @@ const NCBIBlastAutomaticPanel = observer(function ({
     useState<msaAlgorithmsT>('clustalo')
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')
+  const [hasCachedResults, setHasCachedResults] = useState(false)
+
+  const geneId = feature.get('id')
+  useEffect(() => {
+    getAllCachedResults().then(results => {
+      setHasCachedResults(results.some(r => r.geneId === geneId))
+    })
+  }, [geneId])
+
   const {
     options,
     setSelectedId,
@@ -178,14 +188,16 @@ const NCBIBlastAutomaticPanel = observer(function ({
           submitting BLAST yourself and downloading the resulting files
         </Typography>
 
-        <Accordion style={{ marginTop: 20 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>Previous BLAST Results</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <CachedBlastResults model={model} handleClose={handleClose} />
-          </AccordionDetails>
-        </Accordion>
+        {hasCachedResults ? (
+          <Accordion style={{ marginTop: 20 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>Previous BLAST Results</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <CachedBlastResults model={model} handleClose={handleClose} feature={feature} />
+            </AccordionDetails>
+          </Accordion>
+        ) : null}
       </DialogContent>
       <DialogActions>
         <Button
