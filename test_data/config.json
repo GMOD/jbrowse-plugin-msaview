@@ -162,7 +162,7 @@
         "id": "GtqLhkJr8em0Jn4fbNzp9",
         "type": "LinearGenomeView",
         "init": {
-          "loc": "1:48,201,333..48,742,623",
+          "loc": "chr1:114,690,000-114,730,000",
           "assembly": "hg38",
           "tracks": ["gencode.v44.annotation.sorted.gff3"]
         }

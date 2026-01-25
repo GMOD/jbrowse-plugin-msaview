@@ -77,56 +77,83 @@ describe('TranscriptSelector E2E', () => {
   it('should open MSA dialog when right-clicking on SPATA6 gene', async () => {
     expect(page).toBeDefined()
 
-    // Wait for canvas to be ready
-    let canvas
-    try {
-      canvas = await page!.waitForSelector('canvas', { timeout: 10_000 })
-    } catch {
-      await page!.screenshot({ path: getScreenshotPath('02-error-no-canvas') })
-      console.log(
-        `ERROR: No canvas found. Screenshot: ${getScreenshotPath('02-error-no-canvas')}`,
-      )
-      return
+    // Use the search box to find SPATA6
+    // This works regardless of whether labels are visible at the current zoom
+    console.log('Looking for search input...')
+    const searchInput = await page!.waitForSelector('input[placeholder*="Search"]', {
+      timeout: 10_000,
+    })
+    if (!searchInput) {
+      await page!.screenshot({ path: getScreenshotPath('02-error-no-search') })
+      throw new Error('Could not find search input')
     }
-    expect(canvas).not.toBeNull()
 
-    // Wait a bit for features to render
+    // Type SPATA6 in search
+    await searchInput.click()
+    await searchInput.type('SPATA6')
+    console.log('Typed SPATA6 in search box')
+
+    // Wait for search results dropdown
+    await new Promise(r => setTimeout(r, 2000))
+    await page!.screenshot({ path: getScreenshotPath('02-search-results') })
+    console.log(`Screenshot saved: ${getScreenshotPath('02-search-results')}`)
+
+    // Click on the first search result (listbox option)
+    const searchResult = await page!.$('[role="listbox"] [role="option"]')
+    if (!searchResult) {
+      // Try alternative selector
+      const anyResult = await page!.$('[role="option"]')
+      if (anyResult) {
+        await anyResult.click()
+      } else {
+        await page!.screenshot({ path: getScreenshotPath('02-error-no-results') })
+        throw new Error('No search results found for SPATA6')
+      }
+    } else {
+      await searchResult.click()
+    }
+
+    console.log('Clicked on search result')
     await new Promise(r => setTimeout(r, 3000))
 
-    // Screenshot: Canvas ready
-    await page!.screenshot({ path: getScreenshotPath('02-canvas-ready') })
-    console.log(`Screenshot saved: ${getScreenshotPath('02-canvas-ready')}`)
+    // Screenshot after navigation
+    await page!.screenshot({ path: getScreenshotPath('03-after-search') })
+    console.log(`Screenshot saved: ${getScreenshotPath('03-after-search')}`)
 
-    // Find SPATA6 text element on the page
-    const spata6Element = await page!.evaluateHandle(() => {
-      const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        null,
-      )
-      let node
-      while ((node = walker.nextNode())) {
-        if (node.textContent?.includes('SPATA6')) {
-          return node.parentElement
+    // Find the track container and right-click on a feature
+    // The search navigates to the gene location, so features should be visible
+    // We'll find an SVG rect element in the track (gene features are rendered as rects)
+    const featureElement = await page!.evaluateHandle(() => {
+      // Find a feature rect in the track - these are typically the gene boxes
+      const rects = document.querySelectorAll('svg rect[fill]')
+      for (const rect of rects) {
+        const bbox = rect.getBoundingClientRect()
+        // Filter for reasonable sized elements that are visible
+        if (bbox.width > 5 && bbox.height > 5 && bbox.y > 100 && bbox.y < 400) {
+          return rect
         }
       }
       return null
     })
 
-    const element = spata6Element.asElement()
+    const element = featureElement.asElement()
     if (!element) {
-      console.log('SPATA6 text not found on page')
-      await page!.screenshot({ path: getScreenshotPath('02-error-no-spata6') })
-      return
+      await page!.screenshot({ path: getScreenshotPath('03-error-no-feature') })
+      throw new Error(
+        `No gene feature found in track. Screenshot: ${getScreenshotPath('03-error-no-feature')}`,
+      )
     }
 
-    console.log('Found SPATA6 element')
+    console.log('Found gene feature element')
+
+    // Screenshot: Feature found
+    await page!.screenshot({ path: getScreenshotPath('04-feature-found') })
+    console.log(`Screenshot saved: ${getScreenshotPath('04-feature-found')}`)
 
     // Get bounding box and right-click on it
     const box = await element.boundingBox()
     if (!box) {
-      console.log('Could not get bounding box for SPATA6 element')
-      return
+      throw new Error('Could not get bounding box for feature element')
     }
 
     // Right-click on SPATA6
@@ -138,8 +165,8 @@ describe('TranscriptSelector E2E', () => {
     await new Promise(r => setTimeout(r, 1000))
 
     // Screenshot: Context menu
-    await page!.screenshot({ path: getScreenshotPath('03-context-menu') })
-    console.log(`Screenshot saved: ${getScreenshotPath('03-context-menu')}`)
+    await page!.screenshot({ path: getScreenshotPath('05-context-menu') })
+    console.log(`Screenshot saved: ${getScreenshotPath('05-context-menu')}`)
 
     // Look for "Launch MSA view" menu item
     const menuItems = await page!.$$('[role="menuitem"]')
@@ -158,8 +185,8 @@ describe('TranscriptSelector E2E', () => {
         await new Promise(r => setTimeout(r, 3000))
 
         // Screenshot: After clicking Launch MSA view
-        await page!.screenshot({ path: getScreenshotPath('04-msa-dialog') })
-        console.log(`Screenshot saved: ${getScreenshotPath('04-msa-dialog')}`)
+        await page!.screenshot({ path: getScreenshotPath('06-msa-dialog') })
+        console.log(`Screenshot saved: ${getScreenshotPath('06-msa-dialog')}`)
 
         // Look for the MSA dialog
         const dialog = await page!.$('[role="dialog"]')
@@ -168,10 +195,10 @@ describe('TranscriptSelector E2E', () => {
 
           // Screenshot: Dialog content
           await page!.screenshot({
-            path: getScreenshotPath('05-msa-dialog-content'),
+            path: getScreenshotPath('07-msa-dialog-content'),
           })
           console.log(
-            `Screenshot saved: ${getScreenshotPath('05-msa-dialog-content')}`,
+            `Screenshot saved: ${getScreenshotPath('07-msa-dialog-content')}`,
           )
 
           // Look for transcript selector dropdown
@@ -201,10 +228,10 @@ describe('TranscriptSelector E2E', () => {
 
                 // Screenshot: Dropdown open
                 await page!.screenshot({
-                  path: getScreenshotPath('06-dropdown-open'),
+                  path: getScreenshotPath('08-dropdown-open'),
                 })
                 console.log(
-                  `Screenshot saved: ${getScreenshotPath('06-dropdown-open')}`,
+                  `Screenshot saved: ${getScreenshotPath('08-dropdown-open')}`,
                 )
 
                 // Find and select a different option
@@ -217,10 +244,10 @@ describe('TranscriptSelector E2E', () => {
 
                   // Screenshot: After selection change
                   await page!.screenshot({
-                    path: getScreenshotPath('07-selection-changed'),
+                    path: getScreenshotPath('09-selection-changed'),
                   })
                   console.log(
-                    `Screenshot saved: ${getScreenshotPath('07-selection-changed')}`,
+                    `Screenshot saved: ${getScreenshotPath('09-selection-changed')}`,
                   )
 
                   const newValue = await page!.evaluate(
@@ -244,10 +271,10 @@ describe('TranscriptSelector E2E', () => {
 
                   // Screenshot: Final success
                   await page!.screenshot({
-                    path: getScreenshotPath('08-final-success'),
+                    path: getScreenshotPath('10-final-success'),
                   })
                   console.log(
-                    `Screenshot saved: ${getScreenshotPath('08-final-success')}`,
+                    `Screenshot saved: ${getScreenshotPath('10-final-success')}`,
                   )
                 }
                 break
@@ -257,7 +284,7 @@ describe('TranscriptSelector E2E', () => {
         } else {
           console.log('MSA dialog not found')
           await page!.screenshot({
-            path: getScreenshotPath('04-error-no-dialog'),
+            path: getScreenshotPath('06-error-no-dialog'),
           })
         }
         break

@@ -16,6 +16,13 @@ function createGlobalMap(jbrowseGlobals) {
       type: 'cjs',
     }
   }
+  // Map @jbrowse/mobx-state-tree to mobx-state-tree for backwards compatibility
+  // In v4.0.0+, JBrowse uses @jbrowse/mobx-state-tree but exports it as 'mobx-state-tree'
+  // In v3.x, JBrowse used mobx-state-tree directly
+  globalMap['@jbrowse/mobx-state-tree'] = {
+    varName: `JBrowseExports["mobx-state-tree"]`,
+    type: 'cjs',
+  }
   return globalMap
 }
 
