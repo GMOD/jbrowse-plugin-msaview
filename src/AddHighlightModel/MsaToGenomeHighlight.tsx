@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
@@ -16,22 +16,6 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
 }: {
   model: LGV
 }) {
-  const renderCount = useRef(0)
-  const lastRender = useRef(performance.now())
-
-  renderCount.current++
-  const now = performance.now()
-  const delta = now - lastRender.current
-  lastRender.current = now
-
-  if (delta < 50) {
-    console.log(
-      '[MSA-DEBUG] MsaToGenomeHighlight outer render',
-      `#${renderCount.current}`,
-      `delta=${delta.toFixed(1)}ms`,
-    )
-  }
-
   const { views } = getSession(model)
   const msaView = views.find(f => f.type === 'MsaView') as
     | JBrowsePluginMsaViewModel
@@ -55,28 +39,10 @@ const MsaToGenomeHighlightRenderer = observer(function ({
   model: LGV
   highlights: { refName: string; start: number; end: number }[]
 }) {
-  const renderCount = useRef(0)
-  const lastRender = useRef(performance.now())
-
-  renderCount.current++
-  const now = performance.now()
-  const delta = now - lastRender.current
-  lastRender.current = now
-
   const { classes } = useStyles()
   const { assemblyManager } = getSession(model)
   const assembly = assemblyManager.get(model.assemblyNames[0]!)
   const { offsetPx } = model
-
-  if (delta < 50) {
-    console.log(
-      '[MSA-DEBUG] MsaToGenomeHighlightRenderer render',
-      `#${renderCount.current}`,
-      `delta=${delta.toFixed(1)}ms`,
-      `offsetPx=${offsetPx}`,
-      `highlights=${highlights.length}`,
-    )
-  }
 
   if (!assembly) {
     return null

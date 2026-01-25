@@ -20,10 +20,10 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { blastLaunchView } from './blastLaunchView'
 import CachedBlastResults from './CachedBlastResults'
-import { getAllCachedResults } from '../../../utils/blastCache'
+import { blastLaunchView } from './blastLaunchView'
 import TextField2 from '../../../components/TextField2'
+import { getAllCachedResults } from '../../../utils/blastCache'
 import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -70,12 +70,20 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')
   const [hasCachedResults, setHasCachedResults] = useState(false)
+  const [error, setError] = useState<unknown>()
 
   const geneId = feature.get('id')
   useEffect(() => {
-    getAllCachedResults().then(results => {
-      setHasCachedResults(results.some(r => r.geneId === geneId))
-    })
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      try {
+        const results = await getAllCachedResults()
+        setHasCachedResults(results.some(r => r.geneId === geneId))
+      } catch (e) {
+        console.error(e)
+        setError(e)
+      }
+    })()
   }, [geneId])
 
   const {
@@ -91,7 +99,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
       setSelectedBlastProgram('blastp')
     }
   }, [selectedBlastDatabase])
-  const e = proteinSequenceError ?? launchViewError
+  const e = proteinSequenceError ?? launchViewError ?? error
   const style = { width: 150 }
   return (
     <>
@@ -194,7 +202,11 @@ const NCBIBlastAutomaticPanel = observer(function ({
               <Typography>Previous BLAST Results</Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <CachedBlastResults model={model} handleClose={handleClose} feature={feature} />
+              <CachedBlastResults
+                model={model}
+                handleClose={handleClose}
+                feature={feature}
+              />
             </AccordionDetails>
           </Accordion>
         ) : null}

@@ -6,8 +6,8 @@ import { launchMSA } from '../utils/msa'
 import { queryBlast } from '../utils/ncbiBlast'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
-import type { BlastHitDescription } from '../utils/types'
 import type { TaxonomyInfo } from '../utils/taxonomyNames'
+import type { BlastHitDescription } from '../utils/types'
 
 export async function doLaunchBlast({
   self,
@@ -38,7 +38,9 @@ export async function doLaunchBlast({
   })
 
   self.setProgress('Fetching species taxonomy info...')
-  const taxids = hits.map(h => h.description[0]?.taxid).filter((t): t is number => t !== undefined)
+  const taxids = hits
+    .map(h => h.description[0]?.taxid)
+    .filter((t): t is number => t !== undefined)
   const taxonomyInfo = await fetchTaxonomyInfo(taxids)
 
   const treeMetadata: Record<string, Record<string, string>> = {}
@@ -100,13 +102,13 @@ function buildRowMetadata(
     metadata['Common name'] = taxInfo.commonName
   }
   if (desc.accession) {
-    metadata['Accession'] = desc.accession
+    metadata.Accession = desc.accession
   }
   if (desc.id) {
-    metadata['ID'] = desc.id
+    metadata.ID = desc.id
   }
   if (desc.title) {
-    metadata['Description'] = desc.title
+    metadata.Description = desc.title
   }
 
   return metadata

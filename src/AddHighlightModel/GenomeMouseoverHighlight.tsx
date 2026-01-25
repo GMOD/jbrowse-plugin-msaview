@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
@@ -12,22 +12,6 @@ const GenomeMouseoverHighlight = observer(function ({
 }: {
   model: LinearGenomeViewModel
 }) {
-  const renderCount = useRef(0)
-  const lastRender = useRef(performance.now())
-
-  renderCount.current++
-  const now = performance.now()
-  const delta = now - lastRender.current
-  lastRender.current = now
-
-  if (delta < 50) {
-    console.log(
-      '[MSA-DEBUG] GenomeMouseoverHighlight outer render',
-      `#${renderCount.current}`,
-      `delta=${delta.toFixed(1)}ms`,
-    )
-  }
-
   const session = getSession(model)
   const { hovered, views } = session
 
@@ -54,32 +38,14 @@ const GenomeMouseoverHighlightRenderer = observer(function ({
   hovered,
 }: {
   model: LinearGenomeViewModel
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   hovered: any
 }) {
-  const renderCount = useRef(0)
-  const lastRender = useRef(performance.now())
-
-  renderCount.current++
-  const now = performance.now()
-  const delta = now - lastRender.current
-  lastRender.current = now
-
   const { classes } = useStyles()
   const { offsetPx } = model
   const { coord, refName } = hovered.hoverPosition as {
     coord: number
     refName: string
-  }
-
-  if (delta < 50) {
-    console.log(
-      '[MSA-DEBUG] GenomeMouseoverHighlightRenderer render',
-      `#${renderCount.current}`,
-      `delta=${delta.toFixed(1)}ms`,
-      `offsetPx=${offsetPx}`,
-      `coord=${coord}`,
-    )
   }
 
   const s = model.bpToPx({ refName, coord: coord - 1 })

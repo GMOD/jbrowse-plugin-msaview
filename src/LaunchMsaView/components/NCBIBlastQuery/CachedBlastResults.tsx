@@ -20,9 +20,9 @@ import {
   getAllCachedResults,
 } from '../../../utils/blastCache'
 
+import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-import type { CachedBlastResult } from '../../../utils/blastCache'
 
 const CachedBlastResults = observer(function ({
   model,
@@ -39,16 +39,16 @@ const CachedBlastResults = observer(function ({
 
   const geneId = feature.get('id')
   useEffect(() => {
-    let cancelled = false
-    getAllCachedResults().then(cached => {
-      if (!cancelled) {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      try {
+        const cached = await getAllCachedResults()
         setResults(cached.filter(r => r.geneId === geneId))
         setLoading(false)
+      } catch (e) {
+        console.error(e)
       }
-    })
-    return () => {
-      cancelled = true
-    }
+    })()
   }, [geneId])
 
   const handleDelete = async (id: string) => {
@@ -85,11 +85,25 @@ const CachedBlastResults = observer(function ({
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 8,
+        }}
+      >
         <Typography variant="subtitle1">
           Cached BLAST Results ({results.length})
         </Typography>
-        <Button size="small" color="error" onClick={handleClearAll}>
+        <Button
+          size="small"
+          color="error"
+          onClick={() => {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            handleClearAll()
+          }}
+        >
           Clear All
         </Button>
       </div>
@@ -104,6 +118,7 @@ const CachedBlastResults = observer(function ({
                 size="small"
                 onClick={e => {
                   e.stopPropagation()
+                  // eslint-disable-next-line @typescript-eslint/no-floating-promises
                   handleDelete(result.id)
                 }}
               >

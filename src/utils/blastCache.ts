@@ -22,10 +22,8 @@ export interface CachedBlastResult {
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
-      if (oldVersion < 2) {
-        if (db.objectStoreNames.contains(STORE_NAME)) {
-          db.deleteObjectStore(STORE_NAME)
-        }
+      if (oldVersion < 2 && db.objectStoreNames.contains(STORE_NAME)) {
+        db.deleteObjectStore(STORE_NAME)
       }
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' })
@@ -102,7 +100,7 @@ export async function saveBlastResult({
 export async function getAllCachedResults() {
   const db = await getDB()
   const results = await db.getAll(STORE_NAME)
-  return results.sort((a, b) => b.timestamp - a.timestamp)
+  return results.toSorted((a, b) => b.timestamp - a.timestamp)
 }
 
 export async function deleteCachedResult(id: string) {

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React from 'react'
 
 import { observer } from 'mobx-react'
 
@@ -14,29 +14,10 @@ const HighlightComponents = observer(function HighlightComponents2({
 }: {
   model: LGV
 }) {
-  const renderCount = useRef(0)
-  const lastRender = useRef(performance.now())
-
-  renderCount.current++
-  const now = performance.now()
-  const delta = now - lastRender.current
-  lastRender.current = now
-
-  // Log if rendering more frequently than 50ms
-  if (delta < 50) {
-    console.log(
-      '[MSA-DEBUG] HighlightComponents render',
-      `#${renderCount.current}`,
-      `delta=${delta.toFixed(1)}ms`,
-      `offsetPx=${model.offsetPx}`,
-    )
-  }
-
-  // TEMPORARILY DISABLED GenomeMouseoverHighlight to test scroll performance
   return (
     <>
       <MsaToGenomeHighlight model={model} />
-      {/* <GenomeMouseoverHighlight model={model} /> */}
+      <GenomeMouseoverHighlight model={model} />
     </>
   )
 })

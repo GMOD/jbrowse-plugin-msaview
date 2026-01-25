@@ -29,7 +29,7 @@ async function saveTaxonomyCache(entries: CachedTaxonomy[]) {
   const db = await getDB()
   const tx = db.transaction(STORE_NAME, 'readwrite')
   for (const entry of entries) {
-    tx.store.put(entry)
+    await tx.store.put(entry)
   }
   await tx.done
 }
@@ -48,7 +48,10 @@ export async function fetchTaxonomyInfo(
   for (const taxid of taxids) {
     const cached = await getCachedCommonName(taxid)
     if (cached) {
-      result.set(taxid, { sciname: cached.sciname, commonName: cached.commonName })
+      result.set(taxid, {
+        sciname: cached.sciname,
+        commonName: cached.commonName,
+      })
     } else {
       uncachedTaxids.push(taxid)
     }
@@ -80,9 +83,12 @@ export async function fetchTaxonomyInfo(
 
         if (taxonMatch) {
           const taxonXml = taxonMatch[0]
-          const genbankCommon = /<GenbankCommonName>(.*?)<\/GenbankCommonName>/.exec(taxonXml)
+          const genbankCommon =
+            /<GenbankCommonName>(.*?)<\/GenbankCommonName>/.exec(taxonXml)
           const commonName = /<CommonName>(.*?)<\/CommonName>/.exec(taxonXml)
-          const sciName = /<ScientificName>(.*?)<\/ScientificName>/.exec(taxonXml)
+          const sciName = /<ScientificName>(.*?)<\/ScientificName>/.exec(
+            taxonXml,
+          )
           const name = genbankCommon?.[1] ?? commonName?.[1]
 
           const sci = sciName?.[1] ?? ''

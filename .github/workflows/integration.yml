@@ -25,7 +25,7 @@ jobs:
           path: dist/
 
   test:
-    name: Test (${{ matrix.jbrowse-version }})
+    name: Test production builds
     needs: build-and-lint
     runs-on: ubuntu-latest
     strategy:
