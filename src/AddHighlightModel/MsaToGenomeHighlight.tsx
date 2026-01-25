@@ -1,53 +1,74 @@
 import React from 'react'
 
-import { Assembly } from '@jbrowse/core/assemblyManager/assembly'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
 import { useStyles } from './util'
-import { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 
+import type { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 type LGV = LinearGenomeViewModel
 
-function getCanonicalName(assembly: Assembly, s: string) {
-  return assembly.getCanonicalRefName(s) ?? s
-}
-
+// Outer component: only re-renders when MSA view or highlights change
 const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   model,
 }: {
   model: LGV
 }) {
-  const { classes } = useStyles()
-  const { assemblyManager, views } = getSession(model)
-  const p = views.find(f => f.type === 'MsaView') as
+  const { views } = getSession(model)
+  const msaView = views.find(f => f.type === 'MsaView') as
     | JBrowsePluginMsaViewModel
     | undefined
+
+  const highlights = msaView?.connectedHighlights
+
+  // Early return if no highlights - avoid all other work
+  if (!highlights || highlights.length === 0) {
+    return null
+  }
+
+  return <MsaToGenomeHighlightRenderer model={model} highlights={highlights} />
+})
+
+// Inner component: handles the scroll-dependent rendering
+const MsaToGenomeHighlightRenderer = observer(function ({
+  model,
+  highlights,
+}: {
+  model: LGV
+  highlights: { refName: string; start: number; end: number }[]
+}) {
+  const { classes } = useStyles()
+  const { assemblyManager } = getSession(model)
   const assembly = assemblyManager.get(model.assemblyNames[0]!)
-  return assembly ? (
+  const { offsetPx } = model
+
+  if (!assembly) {
+    return null
+  }
+
+  return (
     <>
-      {p?.connectedHighlights.map((r, idx) => {
-        const refName = getCanonicalName(assembly, r.refName)
+      {highlights.map((r, idx) => {
+        const refName = assembly.getCanonicalRefName(r.refName) ?? r.refName
         const s = model.bpToPx({ refName, coord: r.start })
         const e = model.bpToPx({ refName, coord: r.end })
         if (s && e) {
           const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
-          const left = Math.min(s.offsetPx, e.offsetPx) - model.offsetPx
+          const left = Math.min(s.offsetPx, e.offsetPx) - offsetPx
           return (
             <div
-              key={`${JSON.stringify(r)}-${idx}`}
+              key={`${r.refName}-${r.start}-${r.end}-${idx}`}
               className={classes.highlight}
               style={{ left, width }}
             />
           )
-        } else {
-          return null
         }
+        return null
       })}
     </>
-  ) : null
+  )
 })
 
 export default MsaToGenomeHighlight

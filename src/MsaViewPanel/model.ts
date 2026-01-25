@@ -92,7 +92,7 @@ export interface BlastParams {
   blastDatabase: string
   msaAlgorithm: string
   blastProgram: string
-  selectedTranscript: Feature
+  selectedTranscript?: Feature
   proteinSequence: string
 }
 
@@ -720,6 +720,7 @@ export default function stateModelFactory() {
               mouseClickCol === undefined
                 ? undefined
                 : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
+
             self.setConnectedHighlights([r1, r2].filter(f => !!f))
           }),
         )

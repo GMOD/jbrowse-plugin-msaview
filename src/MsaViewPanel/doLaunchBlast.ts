@@ -1,8 +1,13 @@
 import { JBrowsePluginMsaViewModel } from './model'
 import { makeId, strip } from '../LaunchMsaView/components/util'
 import { cleanProteinSequence } from '../LaunchMsaView/util'
+import { saveBlastResult } from '../utils/blastCache'
 import { launchMSA } from '../utils/msa'
 import { queryBlast } from '../utils/ncbiBlast'
+import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
+
+import type { TaxonomyInfo } from '../utils/taxonomyNames'
+import type { BlastHitDescription } from '../utils/types'
 
 export async function doLaunchBlast({
   self,
@@ -15,9 +20,11 @@ export async function doLaunchBlast({
     blastProgram,
     msaAlgorithm,
     proteinSequence,
+    selectedTranscript,
   } = self.blastParams!
   const cleanedSeq = cleanProteinSequence(proteinSequence)
-  const { hits } = await queryBlast({
+
+  const { hits, rid } = await queryBlast({
     query: cleanedSeq,
     blastDatabase,
     blastProgram,
@@ -25,33 +32,84 @@ export async function doLaunchBlast({
     onProgress: arg => {
       self.setProgress(arg)
     },
-    onRid: rid => {
-      self.setRid(rid)
+    onRid: r => {
+      self.setRid(r)
     },
   })
 
-  return launchMSA({
+  self.setProgress('Fetching species taxonomy info...')
+  const taxids = hits
+    .map(h => h.description[0]?.taxid)
+    .filter((t): t is number => t !== undefined)
+  const taxonomyInfo = await fetchTaxonomyInfo(taxids)
+
+  const treeMetadata: Record<string, Record<string, string>> = {}
+
+  const sequences = hits.map(h => {
+    const desc = h.description[0] ?? {
+      accession: 'unknown',
+      id: 'unknown',
+      sciname: 'unknown',
+    }
+    const rowName = makeId(desc, taxonomyInfo)
+    const seq = strip(h.hsps[0]?.hseq ?? '')
+
+    treeMetadata[rowName] = buildRowMetadata(desc, taxonomyInfo)
+
+    return `>${rowName}\n${seq}`
+  })
+
+  const result = await launchMSA({
     algorithm: msaAlgorithm,
-    sequence: [
-      `>QUERY\n${cleanedSeq}`,
-      ...hits
-        .map(
-          h =>
-            [
-              makeId(
-                h.description[0] ?? {
-                  accession: 'unknown',
-                  id: 'unknown',
-                  sciname: 'unknown',
-                },
-              ),
-              strip(h.hsps[0]?.hseq ?? ''),
-            ] as const,
-        )
-        .map(([id, seq]) => `>${id}\n${seq}`),
-    ].join('\n'),
+    sequence: [`>QUERY\n${cleanedSeq}`, ...sequences].join('\n'),
     onProgress: arg => {
       self.setProgress(arg)
     },
   })
+
+  const treeMetadataJson = JSON.stringify(treeMetadata)
+
+  await saveBlastResult({
+    proteinSequence: cleanedSeq,
+    blastDatabase,
+    blastProgram,
+    msaAlgorithm,
+    msa: result.msa,
+    tree: result.tree,
+    treeMetadata: treeMetadataJson,
+    rid,
+    geneId: selectedTranscript?.get('parentId'),
+    transcriptId: selectedTranscript?.get('id'),
+  })
+
+  return {
+    ...result,
+    treeMetadata: treeMetadataJson,
+  }
+}
+
+function buildRowMetadata(
+  desc: BlastHitDescription,
+  taxonomyInfo: Map<number, TaxonomyInfo>,
+) {
+  const metadata: Record<string, string> = {}
+  const taxInfo = desc.taxid ? taxonomyInfo.get(desc.taxid) : undefined
+
+  if (taxInfo?.sciname) {
+    metadata['Scientific name'] = taxInfo.sciname
+  }
+  if (taxInfo?.commonName) {
+    metadata['Common name'] = taxInfo.commonName
+  }
+  if (desc.accession) {
+    metadata.Accession = desc.accession
+  }
+  if (desc.id) {
+    metadata.ID = desc.id
+  }
+  if (desc.title) {
+    metadata.Description = desc.title
+  }
+
+  return metadata
 }

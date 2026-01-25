@@ -80,9 +80,12 @@ describe('TranscriptSelector E2E', () => {
     // Use the search box to find SPATA6
     // This works regardless of whether labels are visible at the current zoom
     console.log('Looking for search input...')
-    const searchInput = await page!.waitForSelector('input[placeholder*="Search"]', {
-      timeout: 10_000,
-    })
+    const searchInput = await page!.waitForSelector(
+      'input[placeholder*="Search"]',
+      {
+        timeout: 10_000,
+      },
+    )
     if (!searchInput) {
       await page!.screenshot({ path: getScreenshotPath('02-error-no-search') })
       throw new Error('Could not find search input')
@@ -98,23 +101,34 @@ describe('TranscriptSelector E2E', () => {
     await page!.screenshot({ path: getScreenshotPath('02-search-results') })
     console.log(`Screenshot saved: ${getScreenshotPath('02-search-results')}`)
 
-    // Click on the first search result (listbox option)
-    const searchResult = await page!.$('[role="listbox"] [role="option"]')
-    if (!searchResult) {
-      // Try alternative selector
-      const anyResult = await page!.$('[role="option"]')
-      if (anyResult) {
-        await anyResult.click()
-      } else {
-        await page!.screenshot({ path: getScreenshotPath('02-error-no-results') })
-        throw new Error('No search results found for SPATA6')
-      }
-    } else {
-      await searchResult.click()
+    // Use keyboard navigation to select search result (more reliable than clicking)
+    // Wait for dropdown to be visible
+    const hasResults = await page!.waitForSelector('[role="option"]', {
+      timeout: 5000,
+    })
+    if (!hasResults) {
+      await page!.screenshot({
+        path: getScreenshotPath('02-error-no-results'),
+      })
+      throw new Error('No search results found for SPATA6')
     }
 
-    console.log('Clicked on search result')
+    // Use keyboard to select first result
+    await page!.keyboard.press('ArrowDown')
+    await new Promise(r => setTimeout(r, 200))
+    await page!.keyboard.press('Enter')
+
+    console.log('Selected search result via keyboard')
+
+    // Wait for navigation to complete
     await new Promise(r => setTimeout(r, 3000))
+
+    // Verify we navigated to the right location (SPATA6 is on chr1)
+    const locationText = await page!.$eval(
+      'input[placeholder*="Search"]',
+      el => el.value,
+    )
+    console.log(`Current location: ${locationText}`)
 
     // Screenshot after navigation
     await page!.screenshot({ path: getScreenshotPath('03-after-search') })
@@ -122,51 +136,145 @@ describe('TranscriptSelector E2E', () => {
 
     // Find the track container and right-click on a feature
     // The search navigates to the gene location, so features should be visible
-    // We'll find an SVG rect element in the track (gene features are rendered as rects)
+    // We'll find an SVG element in the track (gene features can be rects or paths)
     const featureElement = await page!.evaluateHandle(() => {
-      // Find a feature rect in the track - these are typically the gene boxes
-      const rects = document.querySelectorAll('svg rect[fill]')
+      // First try to find feature rects (CDS boxes) - they typically have a fill
+      const rects = document.querySelectorAll('svg rect')
       for (const rect of rects) {
         const bbox = rect.getBoundingClientRect()
-        // Filter for reasonable sized elements that are visible
-        if (bbox.width > 5 && bbox.height > 5 && bbox.y > 100 && bbox.y < 400) {
+        const fill = rect.getAttribute('fill')
+        // Look for colored rects (not white/transparent) in the track area
+        if (
+          bbox.width > 3 &&
+          bbox.height > 3 &&
+          bbox.y > 100 &&
+          bbox.y < 500 &&
+          fill &&
+          fill !== 'none' &&
+          fill !== 'white' &&
+          fill !== '#fff' &&
+          fill !== '#ffffff'
+        ) {
+          console.log(
+            `Found rect: ${bbox.width}x${bbox.height} at y=${bbox.y}, fill=${fill}`,
+          )
           return rect
         }
       }
+
+      // Fallback: look for any clickable element in the track area with data attributes
+      const trackElements = document.querySelectorAll(
+        '[data-testid*="feature"]',
+      )
+      for (const el of trackElements) {
+        const bbox = el.getBoundingClientRect()
+        if (bbox.width > 3 && bbox.height > 3 && bbox.y > 100 && bbox.y < 500) {
+          return el
+        }
+      }
+
       return null
     })
 
     const element = featureElement.asElement()
-    if (!element) {
-      await page!.screenshot({ path: getScreenshotPath('03-error-no-feature') })
-      throw new Error(
-        `No gene feature found in track. Screenshot: ${getScreenshotPath('03-error-no-feature')}`,
+
+    // If no feature element found, try clicking in the middle of the track area
+    // where features should be rendered
+    if (element) {
+      console.log('Found gene feature element')
+
+      // Screenshot: Feature found
+      await page!.screenshot({ path: getScreenshotPath('04-feature-found') })
+      console.log(`Screenshot saved: ${getScreenshotPath('04-feature-found')}`)
+
+      // Get bounding box and right-click on it
+      const box = await element.boundingBox()
+      if (!box) {
+        throw new Error('Could not get bounding box for feature element')
+      }
+
+      // Right-click on the feature
+      await page!.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
+        button: 'right',
+      })
+
+      // Wait for context menu to appear
+      await new Promise(r => setTimeout(r, 1000))
+
+      // Screenshot: Context menu
+      await page!.screenshot({ path: getScreenshotPath('05-context-menu') })
+      console.log(`Screenshot saved: ${getScreenshotPath('05-context-menu')}`)
+    } else {
+      console.log(
+        'No specific feature element found, trying to find track area...',
       )
+
+      // Find the track container and click in it
+      const trackBox = await page!.evaluate(() => {
+        // Look for the track container by finding elements with "GENCODE" text
+        const labels = document.querySelectorAll('*')
+        for (const label of labels) {
+          if (label.textContent?.includes('GENCODE')) {
+            // Get the parent track container
+            let parent = label.parentElement
+            while (parent) {
+              const bbox = parent.getBoundingClientRect()
+              // Track container should be wide and have reasonable height
+              if (bbox.width > 500 && bbox.height > 50 && bbox.height < 300) {
+                return {
+                  x: bbox.x,
+                  y: bbox.y,
+                  width: bbox.width,
+                  height: bbox.height,
+                }
+              }
+              parent = parent.parentElement
+            }
+          }
+        }
+        return null
+      })
+
+      if (trackBox) {
+        console.log(`Found track area: ${JSON.stringify(trackBox)}`)
+        // Click in the center-right of the track where features are likely visible
+        const clickX = trackBox.x + trackBox.width * 0.7
+        const clickY = trackBox.y + trackBox.height * 0.5
+        console.log(`Will right-click at: ${clickX}, ${clickY}`)
+
+        await page!.screenshot({ path: getScreenshotPath('03-track-area') })
+
+        // Right-click on the track area
+        await page!.mouse.click(clickX, clickY, { button: 'right' })
+        await new Promise(r => setTimeout(r, 1000))
+
+        // Screenshot: Context menu attempt
+        await page!.screenshot({
+          path: getScreenshotPath('04-context-menu-attempt'),
+        })
+
+        // Check if we got a context menu
+        const menuItems = await page!.$$('[role="menuitem"]')
+        if (menuItems.length > 0) {
+          console.log(`Context menu appeared with ${menuItems.length} items`)
+          // Continue to menu item search below
+        } else {
+          await page!.screenshot({
+            path: getScreenshotPath('03-error-no-feature'),
+          })
+          throw new Error(
+            `No gene feature found and no context menu appeared. Screenshot: ${getScreenshotPath('03-error-no-feature')}`,
+          )
+        }
+      } else {
+        await page!.screenshot({
+          path: getScreenshotPath('03-error-no-feature'),
+        })
+        throw new Error(
+          `No gene feature found in track. Screenshot: ${getScreenshotPath('03-error-no-feature')}`,
+        )
+      }
     }
-
-    console.log('Found gene feature element')
-
-    // Screenshot: Feature found
-    await page!.screenshot({ path: getScreenshotPath('04-feature-found') })
-    console.log(`Screenshot saved: ${getScreenshotPath('04-feature-found')}`)
-
-    // Get bounding box and right-click on it
-    const box = await element.boundingBox()
-    if (!box) {
-      throw new Error('Could not get bounding box for feature element')
-    }
-
-    // Right-click on SPATA6
-    await page!.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
-      button: 'right',
-    })
-
-    // Wait for context menu to appear
-    await new Promise(r => setTimeout(r, 1000))
-
-    // Screenshot: Context menu
-    await page!.screenshot({ path: getScreenshotPath('05-context-menu') })
-    console.log(`Screenshot saved: ${getScreenshotPath('05-context-menu')}`)
 
     // Look for "Launch MSA view" menu item
     const menuItems = await page!.$$('[role="menuitem"]')

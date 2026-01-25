@@ -6,7 +6,11 @@ import {
   Feature,
   getContainingView,
 } from '@jbrowse/core/util'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   DialogActions,
   DialogContent,
@@ -16,8 +20,10 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import CachedBlastResults from './CachedBlastResults'
 import { blastLaunchView } from './blastLaunchView'
 import TextField2 from '../../../components/TextField2'
+import { getAllCachedResults } from '../../../utils/blastCache'
 import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -63,6 +69,23 @@ const NCBIBlastAutomaticPanel = observer(function ({
     useState<msaAlgorithmsT>('clustalo')
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')
+  const [hasCachedResults, setHasCachedResults] = useState(false)
+  const [error, setError] = useState<unknown>()
+
+  const geneId = feature.get('id')
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      try {
+        const results = await getAllCachedResults()
+        setHasCachedResults(results.some(r => r.geneId === geneId))
+      } catch (e) {
+        console.error(e)
+        setError(e)
+      }
+    })()
+  }, [geneId])
+
   const {
     options,
     setSelectedId,
@@ -76,7 +99,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
       setSelectedBlastProgram('blastp')
     }
   }, [selectedBlastDatabase])
-  const e = proteinSequenceError ?? launchViewError
+  const e = proteinSequenceError ?? launchViewError ?? error
   const style = { width: 150 }
   return (
     <>
@@ -172,6 +195,21 @@ const NCBIBlastAutomaticPanel = observer(function ({
           you need a COBALT alignment, please use the manual approach of
           submitting BLAST yourself and downloading the resulting files
         </Typography>
+
+        {hasCachedResults ? (
+          <Accordion style={{ marginTop: 20 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>Previous BLAST Results</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <CachedBlastResults
+                model={model}
+                handleClose={handleClose}
+                feature={feature}
+              />
+            </AccordionDetails>
+          </Accordion>
+        ) : null}
       </DialogContent>
       <DialogActions>
         <Button

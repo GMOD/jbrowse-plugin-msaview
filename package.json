@@ -18,7 +18,7 @@
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
     "prebuild": "yarn clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
-    "pretest": "test -d .test-jbrowse || npx @jbrowse/cli create .test-jbrowse --nightly",
+    "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:setup": "node scripts/test-versions.mjs setup",
@@ -31,8 +31,9 @@
   "dependencies": {
     "@emotion/styled": "^11.14.1",
     "g2p_mapper": "^2.0.0",
-    "pako": "^2.1.0",
-    "react-msaview": "^5.0.3",
+    "idb": "^8.0.3",
+    "pako-esm2": "^2.0.0",
+    "react-msaview": "^5.0.5",
     "swr": "^2.3.8"
   },
   "devDependencies": {
@@ -58,7 +59,6 @@
     "eslint-plugin-unicorn": "^62.0.0",
     "mobx": "^6.15.0",
     "mobx-react": "^9.2.1",
-    "msa-parsers": "^5.0.3",
     "prettier": "^3.7.4",
     "pretty-bytes": "^7.1.0",
     "puppeteer": "^24.34.0",

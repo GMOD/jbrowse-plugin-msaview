@@ -118,15 +118,11 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
             setSelectedDatasetId(event.target.value)
           }}
         >
-          {datasets && datasets.length > 0 ? (
-            datasets.map(d => (
-              <MenuItem key={d.datasetId} value={d.datasetId}>
-                {d.name}
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem>No MSA datasets found</MenuItem>
-          )}
+          {datasets?.map(d => (
+            <MenuItem key={d.datasetId} value={d.datasetId}>
+              {d.name}
+            </MenuItem>
+          ))}
         </TextField2>
 
         {selectedDataset ? (

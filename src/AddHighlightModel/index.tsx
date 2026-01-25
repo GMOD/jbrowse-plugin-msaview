@@ -1,6 +1,7 @@
 import React from 'react'
 
 import PluginManager from '@jbrowse/core/PluginManager'
+import { getSession } from '@jbrowse/core/util'
 
 import HighlightComponents from './HighlightComponents'
 
@@ -13,6 +14,13 @@ export default function AddHighlightComponentsModelF(
     'LinearGenomeView-TracksContainerComponent',
     // @ts-expect-error
     (rest: React.ReactNode[], { model }: { model: LinearGenomeViewModel }) => {
+      // Quick check: don't add any components if no MSA view exists
+      const { views } = getSession(model)
+      const hasMsaView = views.some(v => v.type === 'MsaView')
+      if (!hasMsaView) {
+        return rest
+      }
+
       return [
         ...rest,
         <HighlightComponents

@@ -8,8 +8,8 @@ export default function TabPanel({
   ...other
 }: {
   children?: React.ReactNode
-  index: number
-  value: number
+  index: number | string
+  value: number | string
 }) {
   return (
     <div role="tabpanel" hidden={value !== index} {...other}>
