@@ -26,6 +26,7 @@
     "test:versions": "node scripts/test-versions.mjs run",
     "test:version": "node scripts/test-versions.mjs run",
     "prepack": "yarn build",
+    "prepublishOnly": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add -A src && git diff --cached --quiet || git commit -m '[skip ci] Bump version.ts'",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {

@@ -5,7 +5,7 @@ import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
 import { types } from '@jbrowse/mobx-state-tree'
 import GridOn from '@mui/icons-material/GridOn'
 
-import { version } from '../package.json'
+import { version } from './version'
 import AddHighlightModelF from './AddHighlightModel'
 import BgzipFastaMsaAdapterF from './BgzipFastaMsaAdapter'
 import LaunchMsaViewF from './LaunchMsaView'
