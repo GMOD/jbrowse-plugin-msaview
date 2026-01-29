@@ -5,12 +5,12 @@ import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
 import { types } from '@jbrowse/mobx-state-tree'
 import GridOn from '@mui/icons-material/GridOn'
 
-import { version } from './version'
 import AddHighlightModelF from './AddHighlightModel'
 import BgzipFastaMsaAdapterF from './BgzipFastaMsaAdapter'
 import LaunchMsaViewF from './LaunchMsaView'
 import LaunchMsaViewExtensionPointF from './LaunchMsaViewExtensionPoint'
 import MsaViewF from './MsaViewPanel'
+import { version } from './version'
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'
