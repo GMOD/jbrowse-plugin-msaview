@@ -8,9 +8,9 @@ import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
 import TextField2 from '../../components/TextField2'
 import {
   getGeneDisplayName,
-  getId,
   getTranscriptDisplayName,
   getTranscriptLength,
+  getId,
 } from '../util'
 
 const useStyles = makeStyles()({
@@ -25,6 +25,7 @@ const useStyles = makeStyles()({
 export default function TranscriptSelector({
   feature,
   options,
+  selectedId,
   selectedTranscript,
   onTranscriptChange,
   proteinSequence,
@@ -32,6 +33,7 @@ export default function TranscriptSelector({
 }: {
   feature: Feature
   options: Feature[]
+  selectedId: string
   selectedTranscript: Feature | undefined
   onTranscriptChange: (transcriptId: string) => void
   proteinSequence: string | undefined
@@ -48,7 +50,7 @@ export default function TranscriptSelector({
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
           className={classes.minWidth}
-          value={getId(selectedTranscript)}
+          value={selectedId}
           onChange={event => {
             onTranscriptChange(event.target.value)
           }}

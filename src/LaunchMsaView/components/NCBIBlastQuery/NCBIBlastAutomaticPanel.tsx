@@ -88,6 +88,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
 
   const {
     options,
+    selectedId,
     setSelectedId,
     selectedTranscript,
     proteinSequence,
@@ -180,6 +181,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TranscriptSelector
           feature={feature}
           options={options}
+          selectedId={selectedId}
           selectedTranscript={selectedTranscript}
           onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}

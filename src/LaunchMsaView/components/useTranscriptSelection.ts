@@ -14,8 +14,8 @@ export function useTranscriptSelection({
   view: { assemblyNames?: string[] } | undefined
   validIds?: string[]
 }) {
-  const options = getSortedTranscriptFeatures(feature)
-  const [selectedId, setSelectedId] = useState(getId(options[0]))
+  const options = useMemo(() => getSortedTranscriptFeatures(feature), [feature])
+  const [selectedId, setSelectedId] = useState(() => getId(options[0]))
   const selectedTranscript = options.find(val => getId(val) === selectedId)
   const { proteinSequence, error } = useFeatureSequence({
     view,

@@ -43,8 +43,14 @@ const NCBIBlastManualPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
-  const { options, setSelectedId, selectedTranscript, proteinSequence, error } =
-    useTranscriptSelection({ feature, view })
+  const {
+    options,
+    selectedId,
+    setSelectedId,
+    selectedTranscript,
+    proteinSequence,
+    error,
+  } = useTranscriptSelection({ feature, view })
 
   const s2 = cleanProteinSequence(proteinSequence)
   const link = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${s2}`
@@ -59,6 +65,7 @@ const NCBIBlastManualPanel = observer(function ({
         <TranscriptSelector
           feature={feature}
           options={options}
+          selectedId={selectedId}
           selectedTranscript={selectedTranscript}
           onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}

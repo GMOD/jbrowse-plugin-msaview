@@ -59,6 +59,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [querySeqName, setQuerySeqName] = useState('')
   const {
     options,
+    selectedId,
     setSelectedId,
     selectedTranscript,
     proteinSequence,
@@ -143,6 +144,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
         <TranscriptSelector
           feature={feature}
           options={options}
+          selectedId={selectedId}
           selectedTranscript={selectedTranscript}
           onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}

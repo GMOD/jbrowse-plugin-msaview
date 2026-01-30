@@ -76,6 +76,7 @@ const EnsemblGeneTree = observer(function ({
         <TranscriptSelector
           feature={feature}
           options={options}
+          selectedId={selectedId}
           selectedTranscript={selectedTranscript}
           onTranscriptChange={setSelectedId}
           proteinSequence={proteinSequence}

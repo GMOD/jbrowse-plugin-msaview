@@ -146,6 +146,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                 <TranscriptSelector
                   feature={feature}
                   options={transcripts}
+                  selectedId={selectedId}
                   selectedTranscript={selectedTranscript}
                   onTranscriptChange={setSelectedId}
                   proteinSequence={proteinSequence}
