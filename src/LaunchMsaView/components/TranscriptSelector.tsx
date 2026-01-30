@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 
 import { Feature } from '@jbrowse/core/util'
-import { Button, MenuItem } from '@mui/material'
+import { Button, MenuItem, TextField } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
-import TextField2 from '../../components/TextField2'
 import {
+  featureMatchesId,
   getGeneDisplayName,
+  getId,
   getTranscriptDisplayName,
   getTranscriptLength,
-  getId,
 } from '../util'
 
 const useStyles = makeStyles()({
@@ -45,7 +45,7 @@ export default function TranscriptSelector({
   return (
     <>
       <div className={classes.flex}>
-        <TextField2
+        <TextField
           variant="outlined"
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
           select
@@ -56,7 +56,9 @@ export default function TranscriptSelector({
           }}
         >
           {options.map(val => {
-            const inSet = validSet ? validSet.has(getId(val)) : true
+            const inSet = validSet
+              ? [...validSet].some(id => featureMatchesId(val, id))
+              : true
             const { len, mod } = getTranscriptLength(val)
             return (
               <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
@@ -66,7 +68,7 @@ export default function TranscriptSelector({
               </MenuItem>
             )
           })}
-        </TextField2>
+        </TextField>
         <div style={{ alignContent: 'center', marginLeft: 20 }}>
           <Button
             variant="contained"

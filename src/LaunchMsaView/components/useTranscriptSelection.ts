@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { getId, getSortedTranscriptFeatures } from '../util'
+import { featureMatchesId, getId, getSortedTranscriptFeatures } from '../util'
 import { useFeatureSequence } from './useFeatureSequence'
 
 import type { Feature } from '@jbrowse/core/util'
+
+function featureInValidIds(feature: Feature, validIds: string[]): boolean {
+  return validIds.some(id => featureMatchesId(feature, id))
+}
 
 export function useTranscriptSelection({
   feature,
@@ -28,10 +32,15 @@ export function useTranscriptSelection({
   )
 
   useEffect(() => {
-    if (validIds && validIds.length > 0 && !validIds.includes(selectedId)) {
-      const validOption = options.find(opt => validIds.includes(getId(opt)))
-      if (validOption) {
-        setSelectedId(getId(validOption))
+    if (validIds && validIds.length > 0) {
+      const currentFeature = options.find(opt => getId(opt) === selectedId)
+      if (currentFeature && !featureInValidIds(currentFeature, validIds)) {
+        const validOption = options.find(opt =>
+          featureInValidIds(opt, validIds),
+        )
+        if (validOption) {
+          setSelectedId(getId(validOption))
+        }
       }
     }
   }, [validIds, options, selectedId])

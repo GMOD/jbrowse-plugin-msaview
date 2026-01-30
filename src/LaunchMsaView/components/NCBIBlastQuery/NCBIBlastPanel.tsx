@@ -7,10 +7,17 @@ import { IconButton } from '@mui/material'
 import NCBIBlastAutomaticPanel from './NCBIBlastAutomaticPanel'
 import NCBIBlastManualPanel from './NCBIBlastManualPanel'
 import NCBIBlastMethodSelector from './NCBIBlastMethodSelector'
+import NCBIBlastRIDPanel from './NCBIBlastRIDPanel'
 import NCBISettingsDialog from './NCBISettingsDialog'
 import { BASE_BLAST_URL } from './consts'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
+
+const panelMap = {
+  automatic: NCBIBlastAutomaticPanel,
+  rid: NCBIBlastRIDPanel,
+  manual: NCBIBlastManualPanel,
+} as const
 
 export default function NCBIBlastPanel({
   handleClose,
@@ -28,10 +35,7 @@ export default function NCBIBlastPanel({
   )
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  const Panel =
-    lookupMethod === 'automatic'
-      ? NCBIBlastAutomaticPanel
-      : NCBIBlastManualPanel
+  const Panel = panelMap[lookupMethod as keyof typeof panelMap]
 
   return (
     <>

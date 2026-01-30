@@ -1,6 +1,30 @@
 import { jsonfetch, textfetch, timeout } from './fetch'
 import { BlastResults } from './types'
 
+export async function queryBlastFromRid({
+  rid,
+  baseUrl,
+  onProgress,
+}: {
+  rid: string
+  baseUrl: string
+  onProgress: (arg: string) => void
+}) {
+  onProgress(`Checking BLAST status for RID: ${rid}...`)
+  await waitForRid({
+    rid,
+    onProgress,
+    baseUrl,
+  })
+  const ret = await jsonfetch<BlastResults>(
+    `${baseUrl}?CMD=Get&RID=${rid}&FORMAT_TYPE=JSON2_S&FORMAT_OBJECT=Alignment`,
+  )
+  return {
+    rid,
+    hits: ret.BlastOutput2[0]?.report.results.search.hits ?? [],
+  }
+}
+
 export async function queryBlast({
   query,
   blastDatabase,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import {
@@ -29,6 +29,17 @@ import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+
+function getGeneIdentifiers(feature: Feature): string[] {
+  const ids = [
+    feature.id(),
+    feature.get('id'),
+    feature.get('name'),
+    feature.get('gene_id'),
+    feature.get('gene_name'),
+  ].filter((id): id is string => !!id)
+  return [...new Set(ids)]
+}
 
 const useStyles = makeStyles()({
   dialogContent: {
@@ -72,19 +83,21 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const [hasCachedResults, setHasCachedResults] = useState(false)
   const [error, setError] = useState<unknown>()
 
-  const geneId = feature.get('id')
+  const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
         const results = await getAllCachedResults()
-        setHasCachedResults(results.some(r => r.geneId === geneId))
+        setHasCachedResults(
+          results.some(r => r.geneId && geneIds.includes(r.geneId)),
+        )
       } catch (e) {
         console.error(e)
         setError(e)
       }
     })()
-  }, [geneId])
+  }, [geneIds])
 
   const {
     options,

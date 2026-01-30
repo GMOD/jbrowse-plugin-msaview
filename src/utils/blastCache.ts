@@ -17,6 +17,8 @@ export interface CachedBlastResult {
   timestamp: number
   geneId?: string
   transcriptId?: string
+  transcriptName?: string
+  geneName?: string
 }
 
 async function getDB() {
@@ -36,21 +38,33 @@ function createCacheKey(
   proteinSequence: string,
   blastDatabase: string,
   blastProgram: string,
+  transcriptId?: string,
 ) {
-  return `${blastDatabase}:${blastProgram}:${proteinSequence.slice(0, 100)}`
+  const seqKey = proteinSequence.slice(0, 100)
+  if (transcriptId) {
+    return `${blastDatabase}:${blastProgram}:${transcriptId}:${seqKey}`
+  }
+  return `${blastDatabase}:${blastProgram}:${seqKey}`
 }
 
 export async function getCachedBlastResult({
   proteinSequence,
   blastDatabase,
   blastProgram,
+  transcriptId,
 }: {
   proteinSequence: string
   blastDatabase: string
   blastProgram: string
+  transcriptId?: string
 }) {
   const db = await getDB()
-  const id = createCacheKey(proteinSequence, blastDatabase, blastProgram)
+  const id = createCacheKey(
+    proteinSequence,
+    blastDatabase,
+    blastProgram,
+    transcriptId,
+  )
   return db.get(STORE_NAME, id)
 }
 
@@ -65,6 +79,8 @@ export async function saveBlastResult({
   rid,
   geneId,
   transcriptId,
+  transcriptName,
+  geneName,
 }: {
   proteinSequence: string
   blastDatabase: string
@@ -76,9 +92,16 @@ export async function saveBlastResult({
   rid: string
   geneId?: string
   transcriptId?: string
+  transcriptName?: string
+  geneName?: string
 }) {
   const db = await getDB()
-  const id = createCacheKey(proteinSequence, blastDatabase, blastProgram)
+  const id = createCacheKey(
+    proteinSequence,
+    blastDatabase,
+    blastProgram,
+    transcriptId,
+  )
   const entry: CachedBlastResult = {
     id,
     proteinSequence,
@@ -92,6 +115,8 @@ export async function saveBlastResult({
     timestamp: Date.now(),
     geneId,
     transcriptId,
+    transcriptName,
+    geneName,
   }
   await db.put(STORE_NAME, entry)
   return entry
@@ -101,6 +126,14 @@ export async function getAllCachedResults() {
   const db = await getDB()
   const results = await db.getAll(STORE_NAME)
   return results.toSorted((a, b) => b.timestamp - a.timestamp)
+}
+
+export async function getCachedResultsByGeneId(geneId: string) {
+  const db = await getDB()
+  const results = await db.getAll(STORE_NAME)
+  return results
+    .filter(r => r.geneId === geneId)
+    .toSorted((a, b) => b.timestamp - a.timestamp)
 }
 
 export async function deleteCachedResult(id: string) {

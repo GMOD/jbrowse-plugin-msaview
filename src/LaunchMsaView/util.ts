@@ -38,7 +38,24 @@ export function getTranscriptLength(feature: Feature) {
   }
 }
 export function getId(val?: Feature): string {
-  return val?.get('name') ?? val?.get('id') ?? ''
+  return val?.id() ?? ''
+}
+
+export function getMatchableIds(val?: Feature): string[] {
+  if (!val) {
+    return []
+  }
+  const ids = [
+    val.id(),
+    val.get('name'),
+    val.get('id'),
+    val.get('transcript_id'),
+  ].filter((id): id is string => !!id)
+  return [...new Set(ids)]
+}
+
+export function featureMatchesId(feature: Feature, id: string): boolean {
+  return getMatchableIds(feature).includes(id)
 }
 
 export function getTranscriptDisplayName(val?: Feature) {
@@ -59,7 +76,8 @@ export function getGeneDisplayName(val?: Feature) {
 }
 
 export function getSortedTranscriptFeatures(feature: Feature) {
-  return getTranscriptFeatures(feature).toSorted(
+  const transcripts = getTranscriptFeatures(feature)
+  return transcripts.toSorted(
     (a, b) => getTranscriptLength(b).len - getTranscriptLength(a).len,
   )
 }

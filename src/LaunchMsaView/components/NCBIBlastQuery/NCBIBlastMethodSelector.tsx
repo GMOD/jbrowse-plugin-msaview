@@ -21,13 +21,14 @@ export default function NCBIBlastMethodSelector({
         <FormControlLabel
           value="automatic"
           control={<Radio />}
-          label="Run NCBI BLAST and load results automatically"
+          label="Automatic"
         />
         <FormControlLabel
-          value="manual"
+          value="rid"
           control={<Radio />}
-          label="Link to NCBI BLAST and import results manually"
+          label="Load from RID"
         />
+        <FormControlLabel value="manual" control={<Radio />} label="Manual" />
       </RadioGroup>
     </FormControl>
   )

@@ -34,6 +34,42 @@
   "tracks": [
     {
       "type": "FeatureTrack",
+      "trackId": "hg38-ncbiRefSeq",
+      "name": "NCBI RefSeq - RefSeq All",
+      "assemblyNames": ["hg38"],
+      "description": "NCBI RefSeq genes, curated and predicted (NM_*, XM_*, NR_*, XR_*, NP_*, YP_*)",
+      "category": ["Genes and Gene Predictions"],
+      "metadata": {
+        "ucsc": {
+          "baseColorDefault": "genomicCodons",
+          "baseColorUseCds": "given",
+          "color": "12,12,120",
+          "idXref": "ncbiRefSeqLink mrnaAcc name",
+          "longLabel": "NCBI RefSeq genes, curated and predicted (NM_*, XM_*, NR_*, XR_*, NP_*, YP_*)",
+          "parent": "refSeqComposite off",
+          "priority": "1",
+          "shortLabel": "RefSeq All",
+          "track": "ncbiRefSeq",
+          "html": ""
+        }
+      },
+      "adapter": {
+        "type": "Gff3TabixAdapter",
+        "gffGzLocation": {
+          "locationType": "UriLocation",
+          "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz"
+        },
+        "index": {
+          "indexType": "CSI",
+          "location": {
+            "locationType": "UriLocation",
+            "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz.csi"
+          }
+        }
+      }
+    },
+    {
+      "type": "FeatureTrack",
       "trackId": "hg38-knownGene",
       "name": "GENCODE V48",
       "assemblyNames": ["hg38"],

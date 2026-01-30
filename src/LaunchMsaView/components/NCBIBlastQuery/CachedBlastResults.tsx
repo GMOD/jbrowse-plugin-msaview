@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { Feature, getContainingView } from '@jbrowse/core/util'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -24,6 +24,31 @@ import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
+function getGeneIdentifiers(feature: Feature): string[] {
+  const ids = [
+    feature.id(),
+    feature.get('id'),
+    feature.get('name'),
+    feature.get('gene_id'),
+    feature.get('gene_name'),
+  ].filter((id): id is string => !!id)
+  return [...new Set(ids)]
+}
+
+function getResultDisplayName(result: CachedBlastResult): string {
+  const parts = []
+  if (result.geneName) {
+    parts.push(result.geneName)
+  }
+  if (result.transcriptName && result.transcriptName !== result.geneName) {
+    parts.push(result.transcriptName)
+  }
+  if (parts.length === 0) {
+    parts.push(result.geneId ?? result.transcriptId ?? 'Unknown')
+  }
+  return parts.join(' - ')
+}
+
 const CachedBlastResults = observer(function ({
   model,
   handleClose,
@@ -37,19 +62,20 @@ const CachedBlastResults = observer(function ({
   const [loading, setLoading] = useState(true)
   const view = getContainingView(model) as LinearGenomeViewModel
 
-  const geneId = feature.get('id')
+  const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
+
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
         const cached = await getAllCachedResults()
-        setResults(cached.filter(r => r.geneId === geneId))
+        setResults(cached.filter(r => r.geneId && geneIds.includes(r.geneId)))
         setLoading(false)
       } catch (e) {
         console.error(e)
       }
     })()
-  }, [geneId])
+  }, [geneIds])
 
   const handleDelete = async (id: string) => {
     await deleteCachedResult(id)
@@ -65,7 +91,7 @@ const CachedBlastResults = observer(function ({
     blastLaunchViewFromCache({
       view,
       cached,
-      newViewTitle: `BLAST - ${cached.geneId ?? cached.transcriptId ?? 'Unknown gene'}`,
+      newViewTitle: `BLAST - ${getResultDisplayName(cached)}`,
     })
     handleClose()
   }
@@ -132,7 +158,7 @@ const CachedBlastResults = observer(function ({
               }}
             >
               <ListItemText
-                primary={`${result.geneId ?? result.transcriptId ?? 'Unknown'} - ${result.blastDatabase}/${result.blastProgram} (${result.msaAlgorithm})`}
+                primary={`${getResultDisplayName(result)} - ${result.blastDatabase}/${result.blastProgram} (${result.msaAlgorithm})`}
                 secondary={`${new Date(result.timestamp).toLocaleString()} - Seq: ${result.proteinSequence.slice(0, 30)}...`}
               />
             </ListItemButton>

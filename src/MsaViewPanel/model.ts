@@ -94,6 +94,7 @@ export interface BlastParams {
   blastProgram: string
   selectedTranscript?: Feature
   proteinSequence: string
+  rid?: string
 }
 
 /**

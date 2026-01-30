@@ -3,7 +3,7 @@ import { makeId, strip } from '../LaunchMsaView/components/util'
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { saveBlastResult } from '../utils/blastCache'
 import { launchMSA } from '../utils/msa'
-import { queryBlast } from '../utils/ncbiBlast'
+import { queryBlast, queryBlastFromRid } from '../utils/ncbiBlast'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
 import type { TaxonomyInfo } from '../utils/taxonomyNames'
@@ -21,21 +21,39 @@ export async function doLaunchBlast({
     msaAlgorithm,
     proteinSequence,
     selectedTranscript,
+    rid: existingRid,
   } = self.blastParams!
   const cleanedSeq = cleanProteinSequence(proteinSequence)
 
-  const { hits, rid } = await queryBlast({
-    query: cleanedSeq,
-    blastDatabase,
-    blastProgram,
-    baseUrl,
-    onProgress: arg => {
-      self.setProgress(arg)
-    },
-    onRid: r => {
-      self.setRid(r)
-    },
-  })
+  let hits
+  let rid: string
+  if (existingRid) {
+    self.setRid(existingRid)
+    const result = await queryBlastFromRid({
+      rid: existingRid,
+      baseUrl,
+      onProgress: arg => {
+        self.setProgress(arg)
+      },
+    })
+    hits = result.hits
+    rid = result.rid
+  } else {
+    const result = await queryBlast({
+      query: cleanedSeq,
+      blastDatabase,
+      blastProgram,
+      baseUrl,
+      onProgress: arg => {
+        self.setProgress(arg)
+      },
+      onRid: r => {
+        self.setRid(r)
+      },
+    })
+    hits = result.hits
+    rid = result.rid
+  }
 
   self.setProgress('Fetching species taxonomy info...')
   const taxids = hits
@@ -79,7 +97,12 @@ export async function doLaunchBlast({
     treeMetadata: treeMetadataJson,
     rid,
     geneId: selectedTranscript?.get('parentId'),
-    transcriptId: selectedTranscript?.get('id'),
+    transcriptId: selectedTranscript?.id(),
+    transcriptName:
+      selectedTranscript?.get('name') ?? selectedTranscript?.get('id'),
+    geneName:
+      selectedTranscript?.get('gene_name') ??
+      selectedTranscript?.get('parentId'),
   })
 
   return {
