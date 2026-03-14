@@ -1,0 +1,56 @@
+name: Daily
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Install deps (with cache)
+        uses: bahmutov/npm-install@v1
+      - name: Build
+        run: yarn build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  e2e-tests:
+    name: E2E tests (nightly)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      - name: Install deps (with cache)
+        uses: bahmutov/npm-install@v1
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Setup JBrowse nightly
+        run: npx @jbrowse/cli create .test-jbrowse --nightly
+      - name: Run tests
+        run: yarn vitest run
+        env:
+          TEST_JBROWSE_VERSION: nightly
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-nightly
+          path: test-screenshots/
