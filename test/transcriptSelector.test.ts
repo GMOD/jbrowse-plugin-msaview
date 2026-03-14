@@ -214,7 +214,7 @@ describe('TranscriptSelector E2E', () => {
         // Look for the track container by finding elements with "GENCODE" text
         const labels = document.querySelectorAll('*')
         for (const label of labels) {
-          if (label.textContent?.includes('GENCODE')) {
+          if (label.textContent.includes('GENCODE')) {
             // Get the parent track container
             let parent = label.parentElement
             while (parent) {
