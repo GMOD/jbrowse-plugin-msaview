@@ -36,8 +36,7 @@ export default class MsaViewPlugin extends Plugin {
     }
   }
 
-  // @ts-expect-error
-  rootConfigurationSchema(pluginManager: PluginManager) {
+  rootConfigurationSchema = (pluginManager: PluginManager) => {
     return {
       msa: ConfigurationSchema('MSA', {
         datasets: types.maybe(
