@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-} from '@jbrowse/core/util'
+import { getContainingView } from '@jbrowse/core/util'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
@@ -24,22 +20,16 @@ import CachedBlastResults from './CachedBlastResults'
 import { blastLaunchView } from './blastLaunchView'
 import TextField2 from '../../../components/TextField2'
 import { getAllCachedResults } from '../../../utils/blastCache'
-import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
+import {
+  getGeneDisplayName,
+  getGeneIdentifiers,
+  getTranscriptDisplayName,
+} from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
-function getGeneIdentifiers(feature: Feature): string[] {
-  const ids = [
-    feature.id(),
-    feature.get('id'),
-    feature.get('name'),
-    feature.get('gene_id'),
-    feature.get('gene_name'),
-  ].filter((id): id is string => !!id)
-  return [...new Set(ids)]
-}
 
 const useStyles = makeStyles()({
   dialogContent: {

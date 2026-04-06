@@ -1,7 +1,8 @@
 import { getSession } from '@jbrowse/core/util'
 
-import { JBrowsePluginMsaViewModel } from './model'
 import { checkHovered } from './util'
+
+import type { JBrowsePluginMsaViewModel } from './model'
 
 /**
  * Convert a genome coordinate from session.hovered to a visible MSA column.

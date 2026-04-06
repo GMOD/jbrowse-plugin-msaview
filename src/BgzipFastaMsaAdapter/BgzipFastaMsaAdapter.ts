@@ -1,9 +1,8 @@
 import { readConfObject } from '@jbrowse/core/configuration'
-import {
-  BaseAdapter,
-  BaseFeatureDataAdapter,
-} from '@jbrowse/core/data_adapters/BaseAdapter'
+import { BaseAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { firstValueFrom, toArray } from 'rxjs'
+
+import type { BaseFeatureDataAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 
 export default class BgzipFastaMsaAdapter extends BaseAdapter {
   configureP: Promise<BaseFeatureDataAdapter> | undefined

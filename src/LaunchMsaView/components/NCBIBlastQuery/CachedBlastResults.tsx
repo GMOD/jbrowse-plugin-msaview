@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { Feature, getContainingView } from '@jbrowse/core/util'
+import { getContainingView } from '@jbrowse/core/util'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Button,
@@ -19,21 +19,11 @@ import {
   deleteCachedResult,
   getAllCachedResults,
 } from '../../../utils/blastCache'
+import { getGeneIdentifiers } from '../../util'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
-import type { AbstractTrackModel } from '@jbrowse/core/util'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
-function getGeneIdentifiers(feature: Feature): string[] {
-  const ids = [
-    feature.id(),
-    feature.get('id'),
-    feature.get('name'),
-    feature.get('gene_id'),
-    feature.get('gene_name'),
-  ].filter((id): id is string => !!id)
-  return [...new Set(ids)]
-}
 
 function getResultDisplayName(result: CachedBlastResult): string {
   const parts = []

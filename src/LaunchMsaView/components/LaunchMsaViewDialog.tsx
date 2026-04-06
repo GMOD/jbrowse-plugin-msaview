@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 
 import { readConfObject } from '@jbrowse/core/configuration'
 import { Dialog } from '@jbrowse/core/ui'
-import { AbstractTrackModel, Feature, getSession } from '@jbrowse/core/util'
+import { getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 
 import EnsemblGeneTree from './EnsemblGeneTree/EnsemblGeneTree'
@@ -12,6 +12,7 @@ import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import TabPanel from './TabPanel'
 
 import type { Dataset } from './PreLoadedMSA/types'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 export default function LaunchMsaViewDialog({
   handleClose,

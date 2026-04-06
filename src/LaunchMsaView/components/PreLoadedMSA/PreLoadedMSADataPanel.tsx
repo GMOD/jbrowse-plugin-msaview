@@ -2,13 +2,7 @@ import React, { useState } from 'react'
 
 import { readConfObject } from '@jbrowse/core/configuration'
 import { ErrorMessage, LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-  getEnv,
-  getSession,
-} from '@jbrowse/core/util'
+import { getContainingView, getEnv, getSession } from '@jbrowse/core/util'
 import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import useSWR from 'swr'
@@ -21,8 +15,9 @@ import { useTranscriptSelection } from '../useTranscriptSelection'
 import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
-import { Dataset } from './types'
 
+import type { Dataset } from './types'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({

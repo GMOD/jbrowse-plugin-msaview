@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import { Feature } from '@jbrowse/core/util'
 import { Button, MenuItem, TextField } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
@@ -12,6 +11,8 @@ import {
   getTranscriptDisplayName,
   getTranscriptLength,
 } from '../util'
+
+import type { Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
   flex: {
