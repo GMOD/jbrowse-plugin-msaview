@@ -26,11 +26,6 @@ export function useTranscriptSelection({
     feature: selectedTranscript,
   })
 
-  const validSet = useMemo(
-    () => (validIds ? new Set(validIds) : undefined),
-    [validIds],
-  )
-
   useEffect(() => {
     if (validIds && validIds.length > 0) {
       const currentFeature = options.find(opt => getId(opt) === selectedId)
@@ -43,7 +38,8 @@ export function useTranscriptSelection({
         }
       }
     }
-  }, [validIds, options, selectedId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [validIds, options])
 
   return {
     options,
@@ -52,6 +48,6 @@ export function useTranscriptSelection({
     selectedTranscript,
     proteinSequence,
     error,
-    validSet,
+    validIds,
   }
 }

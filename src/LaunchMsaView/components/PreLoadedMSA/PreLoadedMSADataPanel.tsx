@@ -26,7 +26,7 @@ const useStyles = makeStyles()({
   },
 })
 
-const PreLoadedMSA = observer(function PreLoadedMSA2({
+const PreLoadedMSA = observer(function ({
   model,
   feature,
   handleClose,
@@ -73,7 +73,6 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     selectedTranscript,
     proteinSequence,
     error: proteinSequenceError,
-    validSet,
   } = useTranscriptSelection({ feature, view, validIds: msaList })
 
   const {
@@ -82,7 +81,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     error: msaDataFetchError,
   } = useSWR(
     selectedId && selectedDatasetId
-      ? `${selectedId}-${selectedId}-${msaList?.length}-msa`
+      ? `${selectedDatasetId}-${selectedId}-${msaList?.length}-msa`
       : 'none-msa',
     () =>
       selectedId && selectedDataset && msaList
@@ -145,7 +144,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                   selectedTranscript={selectedTranscript}
                   onTranscriptChange={setSelectedId}
                   proteinSequence={proteinSequence}
-                  validSet={validSet}
+                  validIds={msaList}
                 />
               </div>
             ) : null}
@@ -187,9 +186,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         <Button
           color="secondary"
           variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
+          onClick={handleClose}
         >
           Cancel
         </Button>

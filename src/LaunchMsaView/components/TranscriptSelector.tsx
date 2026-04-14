@@ -30,7 +30,7 @@ export default function TranscriptSelector({
   selectedTranscript,
   onTranscriptChange,
   proteinSequence,
-  validSet,
+  validIds,
 }: {
   feature: Feature
   options: Feature[]
@@ -38,7 +38,7 @@ export default function TranscriptSelector({
   selectedTranscript: Feature | undefined
   onTranscriptChange: (transcriptId: string) => void
   proteinSequence: string | undefined
-  validSet?: Set<string>
+  validIds?: string[]
 }) {
   const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
@@ -57,15 +57,15 @@ export default function TranscriptSelector({
           }}
         >
           {options.map(val => {
-            const inSet = validSet
-              ? [...validSet].some(id => featureMatchesId(val, id))
+            const inSet = validIds
+              ? validIds.some(id => featureMatchesId(val, id))
               : true
             const { len, mod } = getTranscriptLength(val)
             return (
               <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
                 {getTranscriptDisplayName(val)} ({len} aa){' '}
                 {mod ? ` (possible fragment)` : ''}
-                {validSet ? (inSet ? ' (has data)' : ' (no data)') : ''}
+                {validIds ? (inSet ? ' (has data)' : ' (no data)') : ''}
               </MenuItem>
             )
           })}

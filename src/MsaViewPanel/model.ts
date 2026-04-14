@@ -483,54 +483,20 @@ export default function stateModelFactory() {
     .actions(self => ({
       afterCreate() {
         runCleanup()
-        addDisposer(
-          self,
-          autorun(() => {
-            loadStoredData(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            storeDataToIndexedDB(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            launchBlastIfNeeded(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            processInit(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            updateGenomeHighlights(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            highlightConnectedStructures(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            autoConnectStructures(self)
-          }),
-        )
-        addDisposer(
-          self,
-          autorun(() => {
-            observeProteinHighlights(self)
-          }),
-        )
+        for (const fn of [
+          loadStoredData,
+          storeDataToIndexedDB,
+          launchBlastIfNeeded,
+          processInit,
+          updateGenomeHighlights,
+          highlightConnectedStructures,
+          autoConnectStructures,
+          observeProteinHighlights,
+        ]) {
+          addDisposer(self, autorun(() => {
+            fn(self)
+          }))
+        }
       },
     }))
 }
