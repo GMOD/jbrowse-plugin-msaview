@@ -38,8 +38,7 @@ export function useTranscriptSelection({
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [validIds, options])
+  }, [validIds, options, selectedId])
 
   return {
     options,
