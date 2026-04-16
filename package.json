@@ -2,6 +2,10 @@
   "version": "2.2.11",
   "license": "MIT",
   "name": "jbrowse-plugin-msaview",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GMOD/jbrowse-plugin-msaview.git"
+  },
   "keywords": [
     "jbrowse",
     "jbrowse2"
