@@ -1,5 +1,6 @@
-import PluginManager from '@jbrowse/core/PluginManager'
 import { ConfigurationSchema } from '@jbrowse/core/configuration'
+
+import type PluginManager from '@jbrowse/core/PluginManager'
 
 export default function configSchemaF(pluginManager: PluginManager) {
   const base = pluginManager.getAdapterType('BgzipFastaAdapter')

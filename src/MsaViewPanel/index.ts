@@ -1,9 +1,10 @@
 import { lazy } from 'react'
 
-import PluginManager from '@jbrowse/core/PluginManager'
 import ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
 
 import stateModelFactory from './model'
+
+import type PluginManager from '@jbrowse/core/PluginManager'
 
 // lazies
 const MsaViewPanel = lazy(() => import('./components/MsaViewPanel'))

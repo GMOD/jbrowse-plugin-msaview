@@ -4,8 +4,9 @@ import { LoadingEllipses } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 
-import { JBrowsePluginMsaViewModel } from '../model'
 import LoadingBLAST from './LoadingBLAST'
+
+import type { JBrowsePluginMsaViewModel } from '../model'
 
 const MsaViewPanel = observer(function MsaViewPanel2({
   model,

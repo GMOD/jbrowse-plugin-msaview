@@ -1,11 +1,7 @@
 import React, { useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-} from '@jbrowse/core/util'
+import { getContainingView } from '@jbrowse/core/util'
 import {
   Button,
   DialogActions,
@@ -17,12 +13,15 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchView } from './blastLaunchView'
+import { msaAlgorithms } from './consts'
 import ExternalLink from '../../../components/ExternalLink'
 import TextField2 from '../../../components/TextField2'
 import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
+import type { MsaAlgorithm } from './consts'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
@@ -30,10 +29,6 @@ const useStyles = makeStyles()({
     width: '80em',
   },
 })
-
-const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft'] as const
-
-type msaAlgorithmsT = (typeof msaAlgorithms)[number]
 
 const NCBIBlastRIDPanel = observer(function ({
   handleClose,
@@ -53,7 +48,7 @@ const NCBIBlastRIDPanel = observer(function ({
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [rid, setRid] = useState('')
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
-    useState<msaAlgorithmsT>('clustalo')
+    useState<MsaAlgorithm>('clustalo')
 
   const {
     options,
@@ -108,9 +103,7 @@ const NCBIBlastRIDPanel = observer(function ({
           select
           value={selectedMsaAlgorithm}
           onChange={event => {
-            setSelectedMsaAlgorithm(
-              event.target.value as (typeof msaAlgorithms)[number],
-            )
+            setSelectedMsaAlgorithm(event.target.value as MsaAlgorithm)
           }}
         >
           {msaAlgorithms.map(val => (

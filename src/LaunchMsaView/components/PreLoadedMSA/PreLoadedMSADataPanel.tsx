@@ -2,13 +2,7 @@ import React, { useState } from 'react'
 
 import { readConfObject } from '@jbrowse/core/configuration'
 import { ErrorMessage, LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-  getEnv,
-  getSession,
-} from '@jbrowse/core/util'
+import { getContainingView, getEnv, getSession } from '@jbrowse/core/util'
 import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import useSWR from 'swr'
@@ -21,8 +15,9 @@ import { useTranscriptSelection } from '../useTranscriptSelection'
 import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
-import { Dataset } from './types'
 
+import type { Dataset } from './types'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
@@ -31,7 +26,7 @@ const useStyles = makeStyles()({
   },
 })
 
-const PreLoadedMSA = observer(function PreLoadedMSA2({
+const PreLoadedMSA = observer(function ({
   model,
   feature,
   handleClose,
@@ -78,7 +73,6 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     selectedTranscript,
     proteinSequence,
     error: proteinSequenceError,
-    validSet,
   } = useTranscriptSelection({ feature, view, validIds: msaList })
 
   const {
@@ -87,7 +81,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
     error: msaDataFetchError,
   } = useSWR(
     selectedId && selectedDatasetId
-      ? `${selectedId}-${selectedId}-${msaList?.length}-msa`
+      ? `${selectedDatasetId}-${selectedId}-${msaList?.length}-msa`
       : 'none-msa',
     () =>
       selectedId && selectedDataset && msaList
@@ -150,7 +144,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
                   selectedTranscript={selectedTranscript}
                   onTranscriptChange={setSelectedId}
                   proteinSequence={proteinSequence}
-                  validSet={validSet}
+                  validIds={msaList}
                 />
               </div>
             ) : null}
@@ -189,13 +183,7 @@ const PreLoadedMSA = observer(function PreLoadedMSA2({
         >
           Submit
         </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
+        <Button color="secondary" variant="contained" onClick={handleClose}>
           Cancel
         </Button>
       </DialogActions>

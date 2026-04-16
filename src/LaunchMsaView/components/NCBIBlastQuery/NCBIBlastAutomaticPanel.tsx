@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
-import {
-  AbstractTrackModel,
-  Feature,
-  getContainingView,
-} from '@jbrowse/core/util'
+import { getContainingView } from '@jbrowse/core/util'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
@@ -22,40 +18,47 @@ import { makeStyles } from 'tss-react/mui'
 
 import CachedBlastResults from './CachedBlastResults'
 import { blastLaunchView } from './blastLaunchView'
+import { msaAlgorithms } from './consts'
 import TextField2 from '../../../components/TextField2'
 import { getAllCachedResults } from '../../../utils/blastCache'
-import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
+import {
+  getGeneDisplayName,
+  getGeneIdentifiers,
+  getTranscriptDisplayName,
+} from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
+import type { MsaAlgorithm } from './consts'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
-function getGeneIdentifiers(feature: Feature): string[] {
-  const ids = [
-    feature.id(),
-    feature.get('id'),
-    feature.get('name'),
-    feature.get('gene_id'),
-    feature.get('gene_name'),
-  ].filter((id): id is string => !!id)
-  return [...new Set(ids)]
-}
 
 const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
   },
-  textAreaFont: {
-    fontFamily: 'Courier New',
+  selectField: {
+    width: 150,
+  },
+  databaseFieldContainer: {
+    display: 'flex',
+  },
+  clusterSeqMessage: {
+    marginLeft: 4,
+    alignContent: 'center',
+  },
+  cachedResultsAccordion: {
+    marginTop: 20,
+  },
+  infoText: {
+    marginTop: 20,
   },
 })
 
 const blastDatabaseOptions = ['nr', 'nr_cluster_seq'] as const
-const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft'] as const
 const blastPrograms = ['blastp', 'quick-blastp'] as const
 
 type blastDatabaseOptionsT = (typeof blastDatabaseOptions)[number]
-type msaAlgorithmsT = (typeof msaAlgorithms)[number]
 type blastProgramsT = (typeof blastPrograms)[number]
 
 const NCBIBlastAutomaticPanel = observer(function ({
@@ -77,7 +80,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const [selectedBlastDatabase, setSelectedBlastDatabase] =
     useState<blastDatabaseOptionsT>('nr')
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
-    useState<msaAlgorithmsT>('clustalo')
+    useState<MsaAlgorithm>('clustalo')
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')
   const [hasCachedResults, setHasCachedResults] = useState(false)
@@ -107,14 +110,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
     proteinSequence,
     error: proteinSequenceError,
   } = useTranscriptSelection({ feature, view })
-
-  useEffect(() => {
-    if (selectedBlastDatabase === 'nr_cluster_seq') {
-      setSelectedBlastProgram('blastp')
-    }
-  }, [selectedBlastDatabase])
   const e = proteinSequenceError ?? launchViewError ?? error
-  const style = { width: 150 }
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -123,13 +119,16 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="BLAST database"
-          style={style}
+          className={classes.selectField}
           select
           value={selectedBlastDatabase}
           onChange={event => {
-            setSelectedBlastDatabase(
-              event.target.value as (typeof blastDatabaseOptions)[number],
-            )
+            const newDb = event.target
+              .value as (typeof blastDatabaseOptions)[number]
+            setSelectedBlastDatabase(newDb)
+            if (newDb === 'nr_cluster_seq') {
+              setSelectedBlastProgram('blastp')
+            }
           }}
         >
           {blastDatabaseOptions.map(val => (
@@ -142,13 +141,11 @@ const NCBIBlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="MSA Algorithm"
-          style={style}
+          className={classes.selectField}
           select
           value={selectedMsaAlgorithm}
           onChange={event => {
-            setSelectedMsaAlgorithm(
-              event.target.value as (typeof msaAlgorithms)[number],
-            )
+            setSelectedMsaAlgorithm(event.target.value as MsaAlgorithm)
           }}
         >
           {msaAlgorithms.map(val => (
@@ -158,12 +155,12 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ))}
         </TextField2>
 
-        <div style={{ display: 'flex' }}>
+        <div className={classes.databaseFieldContainer}>
           <TextField2
             variant="outlined"
             label="BLAST program"
             disabled={selectedBlastDatabase === 'nr_cluster_seq'}
-            style={style}
+            className={classes.selectField}
             select
             value={selectedBlastProgram}
             onChange={event => {
@@ -181,10 +178,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
           {selectedBlastDatabase === 'nr_cluster_seq' ? (
             <Typography
               variant="subtitle2"
-              style={{
-                marginLeft: 4,
-                alignContent: 'center',
-              }}
+              className={classes.clusterSeqMessage}
             >
               Can only use blastp on nr_cluster_seq
             </Typography>
@@ -200,7 +194,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
           proteinSequence={proteinSequence}
         />
 
-        <Typography style={{ marginTop: 20 }}>
+        <Typography className={classes.infoText}>
           This panel will automatically submit a query to NCBI. Using blastp can
           take 10+ minutes to run, quick-blastp is generally a lot faster but is
           not available for the clustered database. After completion, all the
@@ -212,7 +206,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
         </Typography>
 
         {hasCachedResults ? (
-          <Accordion style={{ marginTop: 20 }}>
+          <Accordion className={classes.cachedResultsAccordion}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Previous BLAST Results</Typography>
             </AccordionSummary>
@@ -260,13 +254,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
         >
           Submit
         </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
+        <Button color="secondary" variant="contained" onClick={handleClose}>
           Cancel
         </Button>
       </DialogActions>

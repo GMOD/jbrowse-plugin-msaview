@@ -18,5 +18,5 @@ export function makeId(
 }
 
 export function strip(s: string) {
-  return s.replace('-', '')
+  return s.replaceAll('-', '')
 }

@@ -85,3 +85,14 @@ export function getSortedTranscriptFeatures(feature: Feature) {
 export function cleanProteinSequence(seq: string) {
   return seq.replaceAll('*', '').replaceAll('&', '')
 }
+
+export function getGeneIdentifiers(feature: Feature): string[] {
+  const ids = [
+    feature.id(),
+    feature.get('id'),
+    feature.get('name'),
+    feature.get('gene_id'),
+    feature.get('gene_name'),
+  ].filter((id): id is string => !!id)
+  return [...new Set(ids)]
+}

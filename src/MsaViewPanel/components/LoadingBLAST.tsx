@@ -5,8 +5,9 @@ import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { JBrowsePluginMsaViewModel } from '../model'
 import RIDLink from './RIDLink'
+
+import type { JBrowsePluginMsaViewModel } from '../model'
 
 const useStyles = makeStyles()(theme => ({
   margin: {

@@ -1,13 +1,7 @@
 import React, { useState } from 'react'
 
 import { ErrorMessage, FileSelector } from '@jbrowse/core/ui'
-import {
-  AbstractTrackModel,
-  Feature,
-  FileLocation,
-  getContainingView,
-  getSession,
-} from '@jbrowse/core/util'
+import { getContainingView, getSession } from '@jbrowse/core/util'
 import {
   Alert,
   Button,
@@ -27,6 +21,11 @@ import { getGeneDisplayName } from '../../util'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
+import type {
+  AbstractTrackModel,
+  Feature,
+  FileLocation,
+} from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { Feature, getContainingView } from '@jbrowse/core/util'
+import { ErrorMessage } from '@jbrowse/core/ui'
+import { getContainingView } from '@jbrowse/core/util'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Button,
@@ -19,21 +20,11 @@ import {
   deleteCachedResult,
   getAllCachedResults,
 } from '../../../utils/blastCache'
+import { getGeneIdentifiers } from '../../util'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
-import type { AbstractTrackModel } from '@jbrowse/core/util'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
-function getGeneIdentifiers(feature: Feature): string[] {
-  const ids = [
-    feature.id(),
-    feature.get('id'),
-    feature.get('name'),
-    feature.get('gene_id'),
-    feature.get('gene_name'),
-  ].filter((id): id is string => !!id)
-  return [...new Set(ids)]
-}
 
 function getResultDisplayName(result: CachedBlastResult): string {
   const parts = []
@@ -60,6 +51,7 @@ const CachedBlastResults = observer(function ({
 }) {
   const [results, setResults] = useState<CachedBlastResult[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<unknown>()
   const view = getContainingView(model) as LinearGenomeViewModel
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
@@ -73,18 +65,27 @@ const CachedBlastResults = observer(function ({
         setLoading(false)
       } catch (e) {
         console.error(e)
+        setError(e)
       }
     })()
   }, [geneIds])
 
   const handleDelete = async (id: string) => {
-    await deleteCachedResult(id)
-    setResults(r => r.filter(result => result.id !== id))
+    try {
+      await deleteCachedResult(id)
+      setResults(r => r.filter(result => result.id !== id))
+    } catch (e) {
+      setError(e)
+    }
   }
 
   const handleClearAll = async () => {
-    await clearAllCachedResults()
-    setResults([])
+    try {
+      await clearAllCachedResults()
+      setResults([])
+    } catch (e) {
+      setError(e)
+    }
   }
 
   const handleUseCached = (cached: CachedBlastResult) => {
@@ -94,6 +95,10 @@ const CachedBlastResults = observer(function ({
       newViewTitle: `BLAST - ${getResultDisplayName(cached)}`,
     })
     handleClose()
+  }
+
+  if (error) {
+    return <ErrorMessage error={error} />
   }
 
   if (loading) {

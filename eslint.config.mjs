@@ -113,6 +113,10 @@ export default defineConfig(
       'unicorn/no-nested-ternary': 'off',
       'unicorn/no-for-loop': 'off',
 
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports' },
+      ],
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-confusing-non-null-assertion': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

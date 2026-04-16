@@ -1,4 +1,4 @@
-import { Feature } from '@jbrowse/core/util'
+import type { Feature } from '@jbrowse/core/util'
 
 export function checkHovered(hovered: unknown): hovered is {
   hoverFeature: Feature

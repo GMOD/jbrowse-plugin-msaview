@@ -1,6 +1,7 @@
 import { gatherSequencesFromTree } from './gatherSequencesFromTree'
-import { TreeNode } from './types'
 import { fetchWithLocalStorageCache, jsonfetch, textfetch } from './util'
+
+import type { TreeNode } from './types'
 
 const base = 'https://rest.ensembl.org'
 

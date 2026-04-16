@@ -1,7 +1,6 @@
 import Plugin from '@jbrowse/core/Plugin'
-import PluginManager from '@jbrowse/core/PluginManager'
 import { ConfigurationSchema } from '@jbrowse/core/configuration'
-import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
+import { isAbstractMenuManager } from '@jbrowse/core/util'
 import { types } from '@jbrowse/mobx-state-tree'
 import GridOn from '@mui/icons-material/GridOn'
 
@@ -11,6 +10,9 @@ import LaunchMsaViewF from './LaunchMsaView'
 import LaunchMsaViewExtensionPointF from './LaunchMsaViewExtensionPoint'
 import MsaViewF from './MsaViewPanel'
 import { version } from './version'
+
+import type PluginManager from '@jbrowse/core/PluginManager'
+import type { AbstractSessionModel } from '@jbrowse/core/util'
 
 export default class MsaViewPlugin extends Plugin {
   name = 'MsaViewPlugin'

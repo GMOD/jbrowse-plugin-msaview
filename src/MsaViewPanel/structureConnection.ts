@@ -64,9 +64,5 @@ export function ungappedToGappedPosition(
  * Convert Map to plain object for MST frozen storage
  */
 export function mapToRecord(map: Map<number, number>): Record<number, number> {
-  const record: Record<number, number> = {}
-  for (const [key, value] of map) {
-    record[key] = value
-  }
-  return record
+  return Object.fromEntries(map)
 }

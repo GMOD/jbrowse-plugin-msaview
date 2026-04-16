@@ -1,4 +1,3 @@
-import { JBrowsePluginMsaViewModel } from './model'
 import { makeId, strip } from '../LaunchMsaView/components/util'
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { saveBlastResult } from '../utils/blastCache'
@@ -6,6 +5,7 @@ import { launchMSA } from '../utils/msa'
 import { queryBlast, queryBlastFromRid } from '../utils/ncbiBlast'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
+import type { JBrowsePluginMsaViewModel } from './model'
 import type { TaxonomyInfo } from '../utils/taxonomyNames'
 import type { BlastHitDescription } from '../utils/types'
 

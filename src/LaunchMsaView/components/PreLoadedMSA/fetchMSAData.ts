@@ -1,8 +1,8 @@
-import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 import { getAdapter } from '@jbrowse/core/data_adapters/dataAdapterCache'
-import { Feature } from '@jbrowse/core/util'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
+import type { AnyConfigurationModel } from '@jbrowse/core/configuration'
+import type { Feature } from '@jbrowse/core/util'
 
 export async function fetchMSAList({
   config,

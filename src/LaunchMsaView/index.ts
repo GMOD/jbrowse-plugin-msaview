@@ -1,12 +1,13 @@
-import PluginManager from '@jbrowse/core/PluginManager'
-import { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
-import DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
-import { MenuItem } from '@jbrowse/core/ui'
-import { Feature, getContainingTrack, getSession } from '@jbrowse/core/util'
+import { getContainingTrack, getSession } from '@jbrowse/core/util'
 import AddIcon from '@mui/icons-material/Add'
 
 import LaunchMsaViewDialog from './components/LaunchMsaViewDialog'
 
+import type PluginManager from '@jbrowse/core/PluginManager'
+import type { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
+import type DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
+import type { MenuItem } from '@jbrowse/core/ui'
+import type { Feature } from '@jbrowse/core/util'
 import type { IAnyModelType } from '@jbrowse/mobx-state-tree'
 
 function isDisplay(elt: { name: string }): elt is DisplayType {
