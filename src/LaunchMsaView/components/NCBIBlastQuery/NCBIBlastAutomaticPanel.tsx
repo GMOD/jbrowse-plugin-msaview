@@ -123,7 +123,8 @@ const NCBIBlastAutomaticPanel = observer(function ({
           select
           value={selectedBlastDatabase}
           onChange={event => {
-            const newDb = event.target.value as (typeof blastDatabaseOptions)[number]
+            const newDb = event.target
+              .value as (typeof blastDatabaseOptions)[number]
             setSelectedBlastDatabase(newDb)
             if (newDb === 'nr_cluster_seq') {
               setSelectedBlastProgram('blastp')
@@ -253,11 +254,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
         >
           Submit
         </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={handleClose}
-        >
+        <Button color="secondary" variant="contained" onClick={handleClose}>
           Cancel
         </Button>
       </DialogActions>

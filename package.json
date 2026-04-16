@@ -35,7 +35,7 @@
     "g2p_mapper": "^2.0.0",
     "idb": "^8.0.3",
     "pako-esm2": "^2.0.2",
-    "react-msaview": "^5.0.7",
+    "react-msaview": "^5.0.13",
     "swr": "^2.4.1"
   },
   "devDependencies": {

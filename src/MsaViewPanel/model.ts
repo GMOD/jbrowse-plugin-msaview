@@ -493,9 +493,12 @@ export default function stateModelFactory() {
           autoConnectStructures,
           observeProteinHighlights,
         ]) {
-          addDisposer(self, autorun(() => {
-            fn(self)
-          }))
+          addDisposer(
+            self,
+            autorun(() => {
+              fn(self)
+            }),
+          )
         }
       },
     }))

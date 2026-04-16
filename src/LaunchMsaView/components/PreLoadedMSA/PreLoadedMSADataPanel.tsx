@@ -183,11 +183,7 @@ const PreLoadedMSA = observer(function ({
         >
           Submit
         </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={handleClose}
-        >
+        <Button color="secondary" variant="contained" onClick={handleClose}>
           Cancel
         </Button>
       </DialogActions>
