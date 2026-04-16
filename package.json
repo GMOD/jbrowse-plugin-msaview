@@ -30,8 +30,9 @@
     "test:versions": "node scripts/test-versions.mjs run",
     "test:version": "node scripts/test-versions.mjs run",
     "prepack": "yarn build",
-    "postversion": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add -A src && git diff --cached --quiet || git commit -m '[skip ci] Bump version.ts' && git push --follow-tags",
-    "preversion": "yarn lint"
+    "preversion": "yarn lint",
+    "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add src/version.ts",
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",
