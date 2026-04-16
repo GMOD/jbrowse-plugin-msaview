@@ -58,6 +58,8 @@ jobs:
           else
             pnpm dlx @jbrowse/cli create .test-jbrowse-${{ matrix.jbrowse-version }} --tag ${{ matrix.jbrowse-version }}
           fi
+      - name: Install Puppeteer browsers
+        run: npx puppeteer browsers install chrome
       - name: Run tests
         run: pnpm vitest run
         env:
