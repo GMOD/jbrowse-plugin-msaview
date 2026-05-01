@@ -18,10 +18,10 @@
   "scripts": {
     "clean": "rimraf dist",
     "start": "node esbuild.mjs --watch",
-    "format": "prettier --write .",
+    "format": "pnpm prettier --write .",
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
-    "prebuild": "yarn clean",
-    "lint": "eslint --report-unused-disable-directives --max-warnings 0",
+    "prebuild": "pnpm clean",
+    "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
     "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -29,8 +29,8 @@
     "test:setup:version": "node scripts/test-versions.mjs setup",
     "test:versions": "node scripts/test-versions.mjs run",
     "test:version": "node scripts/test-versions.mjs run",
-    "prepack": "yarn build",
-    "preversion": "yarn lint",
+    "prepack": "pnpm build",
+    "preversion": "pnpm lint",
     "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add src/version.ts",
     "postversion": "git push --follow-tags"
   },
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@emotion/react": "^11.14.0",
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
     "@jbrowse/core": "^4.1.15",
     "@jbrowse/mobx-state-tree": "^5.6.0",
@@ -56,11 +56,9 @@
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "esbuild": "^0.28.0",
-    "eslint": "^9.39.4",
-    "eslint-plugin-import": "^2.32.0",
+    "eslint": "^10.2.1",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-unicorn": "^64.0.0",
     "mobx": "^6.15.0",
     "mobx-react": "^9.2.1",
@@ -74,7 +72,10 @@
     "serve": "^14.2.6",
     "tss-react": "^4.9.20",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.2",
-    "vitest": "^4.1.4"
+    "typescript-eslint": "^8.59.1",
+    "vitest": "^4.1.4",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint-plugin-import-x": "^4.16.2"
   }
 }
