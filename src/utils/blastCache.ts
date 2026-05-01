@@ -40,11 +40,10 @@ function createCacheKey(
   blastProgram: string,
   transcriptId?: string,
 ) {
-  const seqKey = proteinSequence.slice(0, 100)
   if (transcriptId) {
-    return `${blastDatabase}:${blastProgram}:${transcriptId}:${seqKey}`
+    return `${blastDatabase}:${blastProgram}:${transcriptId}:${proteinSequence}`
   }
-  return `${blastDatabase}:${blastProgram}:${seqKey}`
+  return `${blastDatabase}:${blastProgram}:${proteinSequence}`
 }
 
 export async function getCachedBlastResult({

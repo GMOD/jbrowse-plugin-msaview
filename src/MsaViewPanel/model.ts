@@ -123,24 +123,31 @@ export default function stateModelFactory() {
       }),
     )
 
-    .volatile(() => ({
-      /**
-       * #volatile
-       */
-      rid: undefined as string | undefined,
-      /**
-       * #volatile
-       */
-      progress: '',
-      /**
-       * #volatile
-       */
-      error: undefined as unknown,
-      /**
-       * #volatile
-       */
-      loadingStoredData: false,
-    }))
+    .volatile(
+      (): {
+        rid: string | undefined
+        progress: string
+        error: unknown
+        loadingStoredData: boolean
+      } => ({
+        /**
+         * #volatile
+         */
+        rid: undefined,
+        /**
+         * #volatile
+         */
+        progress: '',
+        /**
+         * #volatile
+         */
+        error: undefined,
+        /**
+         * #volatile
+         */
+        loadingStoredData: false,
+      }),
+    )
 
     .views(self => ({
       /**

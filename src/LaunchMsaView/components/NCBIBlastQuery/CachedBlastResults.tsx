@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { getContainingView } from '@jbrowse/core/util'
@@ -15,11 +15,7 @@ import {
 import { observer } from 'mobx-react'
 
 import { blastLaunchViewFromCache } from './blastLaunchView'
-import {
-  clearAllCachedResults,
-  deleteCachedResult,
-  getAllCachedResults,
-} from '../../../utils/blastCache'
+import { useCachedBlastResults } from './useCachedBlastResults'
 import { getGeneIdentifiers } from '../../util'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
@@ -49,44 +45,13 @@ const CachedBlastResults = observer(function ({
   handleClose: () => void
   feature: Feature
 }) {
-  const [results, setResults] = useState<CachedBlastResult[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<unknown>()
   const view = getContainingView(model) as LinearGenomeViewModel
+  const [operationError, setOperationError] = useState<unknown>()
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
 
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        const cached = await getAllCachedResults()
-        setResults(cached.filter(r => r.geneId && geneIds.includes(r.geneId)))
-        setLoading(false)
-      } catch (e) {
-        console.error(e)
-        setError(e)
-      }
-    })()
-  }, [geneIds])
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteCachedResult(id)
-      setResults(r => r.filter(result => result.id !== id))
-    } catch (e) {
-      setError(e)
-    }
-  }
-
-  const handleClearAll = async () => {
-    try {
-      await clearAllCachedResults()
-      setResults([])
-    } catch (e) {
-      setError(e)
-    }
-  }
+  const { results, error, isLoading, handleDelete, handleClearAll } =
+    useCachedBlastResults(geneIds)
 
   const handleUseCached = (cached: CachedBlastResult) => {
     blastLaunchViewFromCache({
@@ -97,11 +62,12 @@ const CachedBlastResults = observer(function ({
     handleClose()
   }
 
-  if (error) {
-    return <ErrorMessage error={error} />
+  const displayError = error ?? operationError
+  if (displayError) {
+    return <ErrorMessage error={displayError} />
   }
 
-  if (loading) {
+  if (isLoading) {
     return <Typography>Loading cached results...</Typography>
   }
 
@@ -130,9 +96,13 @@ const CachedBlastResults = observer(function ({
         <Button
           size="small"
           color="error"
-          onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            handleClearAll()
+          onClick={async () => {
+            try {
+              setOperationError(undefined)
+              await handleClearAll()
+            } catch (e) {
+              setOperationError(e)
+            }
           }}
         >
           Clear All
@@ -147,10 +117,14 @@ const CachedBlastResults = observer(function ({
               <IconButton
                 edge="end"
                 size="small"
-                onClick={e => {
+                onClick={async e => {
                   e.stopPropagation()
-                  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                  handleDelete(result.id)
+                  try {
+                    setOperationError(undefined)
+                    await handleDelete(result.id)
+                  } catch (err) {
+                    setOperationError(err)
+                  }
                 }}
               >
                 <DeleteIcon fontSize="small" />

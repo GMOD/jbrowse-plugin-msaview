@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { getContainingView } from '@jbrowse/core/util'
@@ -19,8 +19,8 @@ import { makeStyles } from 'tss-react/mui'
 import CachedBlastResults from './CachedBlastResults'
 import { blastLaunchView } from './blastLaunchView'
 import { msaAlgorithms } from './consts'
+import { useCachedBlastResults } from './useCachedBlastResults'
 import TextField2 from '../../../components/TextField2'
-import { getAllCachedResults } from '../../../utils/blastCache'
 import {
   getGeneDisplayName,
   getGeneIdentifiers,
@@ -83,24 +83,10 @@ const NCBIBlastAutomaticPanel = observer(function ({
     useState<MsaAlgorithm>('clustalo')
   const [selectedBlastProgram, setSelectedBlastProgram] =
     useState<blastProgramsT>('quick-blastp')
-  const [hasCachedResults, setHasCachedResults] = useState(false)
-  const [error, setError] = useState<unknown>()
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
-  useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        const results = await getAllCachedResults()
-        setHasCachedResults(
-          results.some(r => r.geneId && geneIds.includes(r.geneId)),
-        )
-      } catch (e) {
-        console.error(e)
-        setError(e)
-      }
-    })()
-  }, [geneIds])
+  const { results: cachedResults, error: cachedResultsError } =
+    useCachedBlastResults(geneIds)
 
   const {
     options,
@@ -110,7 +96,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
     proteinSequence,
     error: proteinSequenceError,
   } = useTranscriptSelection({ feature, view })
-  const e = proteinSequenceError ?? launchViewError ?? error
+  const e = proteinSequenceError ?? launchViewError ?? cachedResultsError
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -205,7 +191,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
           submitting BLAST yourself and downloading the resulting files
         </Typography>
 
-        {hasCachedResults ? (
+        {cachedResults.length > 0 ? (
           <Accordion className={classes.cachedResultsAccordion}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Previous BLAST Results</Typography>

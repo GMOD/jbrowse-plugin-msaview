@@ -38,7 +38,7 @@ export function useTranscriptSelection({
         }
       }
     }
-  }, [validIds, options, selectedId])
+  }, [validIds, options])
 
   return {
     options,
