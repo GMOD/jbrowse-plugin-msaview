@@ -13,6 +13,22 @@ import { getUniprotIdFromAlphaFoldUrl } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 
+interface ProteinView {
+  type: 'ProteinView'
+  id: string
+  structures: {
+    connectedViewId?: string
+    uniprotId?: string
+    structureSequences?: unknown[]
+    hoverGenomeHighlights?: { start: number; end: number }[]
+  }[]
+}
+
+function isProteinView(view: unknown): view is ProteinView {
+  const v = view as Record<string, unknown>
+  return v.type === 'ProteinView' && Array.isArray(v.structures)
+}
+
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   const { dataStoreId, rows } = self
   if (dataStoreId && rows.length === 0) {
@@ -202,10 +218,10 @@ export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
   }
 
   for (const view of views) {
-    const v = view as any
-    if (v.type !== 'ProteinView' || !v.structures) {
+    if (!isProteinView(view)) {
       continue
     }
+    const v = view
 
     for (
       let structureIdx = 0;
@@ -213,6 +229,9 @@ export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
       structureIdx++
     ) {
       const structure = v.structures[structureIdx]
+      if (!structure) {
+        continue
+      }
 
       if (structure.connectedViewId !== connectedViewId) {
         continue
@@ -250,13 +269,13 @@ export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
     return
   }
 
-  const columns: number[] = []
+  const columns = new Set<number>()
 
   for (const view of views) {
-    const v = view as any
-    if (v.type !== 'ProteinView' || !v.structures) {
+    if (!isProteinView(view)) {
       continue
     }
+    const v = view
 
     for (const structure of v.structures) {
       if (structure.connectedViewId !== connectedViewId) {
@@ -274,16 +293,14 @@ export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
           const proteinPos = g2p[coord]
           if (proteinPos !== undefined) {
             const col = self.seqPosToGlobalCol(querySeqName, proteinPos)
-            if (!columns.includes(col)) {
-              columns.push(col)
-            }
+            columns.add(col)
           }
         }
       }
     }
   }
 
-  const visibleColumns = columns
+  const visibleColumns = Array.from(columns)
     .map(col => self.globalColToVisibleCol(col))
     .filter((col): col is number => col !== undefined)
 

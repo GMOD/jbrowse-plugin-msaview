@@ -198,11 +198,15 @@ export default function stateModelFactory() {
         return self.connectedStructures
           .map(conn => {
             const proteinView = views.find(
-              (v: any) => v.id === conn.proteinViewId,
-            ) as any
+              (v: unknown) =>
+                (v as Record<string, unknown>).id === conn.proteinViewId,
+            )
             return proteinView ? { ...conn, proteinView } : undefined
           })
-          .filter((c): c is StructureConnection & { proteinView: any } => !!c)
+          .filter(
+            (c): c is StructureConnection & { proteinView: any } =>
+              c !== undefined,
+          )
       },
     }))
 
