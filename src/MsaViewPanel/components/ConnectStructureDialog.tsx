@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Dialog } from '@jbrowse/core/ui'
+import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
 import { getSession } from '@jbrowse/core/util'
 import {
   Button,
@@ -22,9 +22,6 @@ import type { JBrowsePluginMsaViewModel } from '../model'
 const useStyles = makeStyles()(theme => ({
   formControl: {
     marginBottom: theme.spacing(2),
-  },
-  errorText: {
-    marginTop: theme.spacing(1),
   },
 }))
 
@@ -136,11 +133,7 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
               </Select>
             </FormControl>
 
-            {error && (
-              <Typography color="error" className={classes.errorText}>
-                {error}
-              </Typography>
-            )}
+            {error && <ErrorMessage error={error} />}
           </>
         )}
       </DialogContent>
