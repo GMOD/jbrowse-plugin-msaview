@@ -163,13 +163,13 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           }}
         />
 
-        {!querySeqName.trim() && (
+        {!querySeqName.trim() ? (
           <Alert severity="warning" style={{ marginTop: 10 }}>
             Without specifying the MSA row name, clicking on the MSA will not
             navigate to the corresponding genome position, and hovering
             highlights will not work.
           </Alert>
-        )}
+        ) : null}
       </DialogContent>
 
       <DialogActions>

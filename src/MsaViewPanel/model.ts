@@ -200,10 +200,12 @@ export default function stateModelFactory() {
       get connectedProteinViews() {
         const { views } = getSession(self)
         const unknownViews = views as unknown[]
-        const result: (StructureConnection & { proteinView: ProteinView })[] = []
+        const result: (StructureConnection & { proteinView: ProteinView })[] =
+          []
         for (const conn of self.connectedStructures) {
           const proteinView = unknownViews.find(
-            (v): v is ProteinView => isProteinView(v) && v.id === conn.proteinViewId,
+            (v): v is ProteinView =>
+              isProteinView(v) && v.id === conn.proteinViewId,
           )
           if (proteinView) {
             result.push({ ...conn, proteinView })

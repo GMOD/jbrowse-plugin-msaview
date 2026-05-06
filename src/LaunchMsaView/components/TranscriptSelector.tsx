@@ -83,7 +83,7 @@ export default function TranscriptSelector({
         </div>
       </div>
 
-      {showSequence && (
+      {showSequence ? (
         <ReadOnlyTextField2
           value={
             proteinSequence
@@ -91,7 +91,7 @@ export default function TranscriptSelector({
               : 'Loading...'
           }
         />
-      )}
+      ) : null}
     </>
   )
 }

@@ -13,7 +13,7 @@ export default function TabPanel({
 }) {
   return (
     <div role="tabpanel" hidden={value !== index} {...other}>
-      {value === index && <div>{children}</div>}
+      {value === index ? <div>{children}</div> : null}
     </div>
   )
 }

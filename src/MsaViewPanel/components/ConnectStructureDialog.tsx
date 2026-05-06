@@ -97,7 +97,7 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
               </Select>
             </FormControl>
 
-            {structures.length > 1 && (
+            {structures.length > 1 ? (
               <FormControl fullWidth className={classes.formControl}>
                 <InputLabel>Structure</InputLabel>
                 <Select
@@ -114,7 +114,7 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
                   ))}
                 </Select>
               </FormControl>
-            )}
+            ) : null}
 
             <FormControl fullWidth className={classes.formControl}>
               <InputLabel>MSA Row</InputLabel>
@@ -133,7 +133,7 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
               </Select>
             </FormControl>
 
-            {error && <ErrorMessage error={error} />}
+            {error ? <ErrorMessage error={error} /> : null}
           </>
         )}
       </DialogContent>
