@@ -1,3 +1,26 @@
+export interface ProteinViewStructure {
+  url?: string
+  connectedViewId?: string
+  uniprotId?: string
+  structureSequences?: string[]
+  hoverGenomeHighlights?: { start: number; end: number }[]
+  hoverPosition?: { structureSeqPos?: number }
+  clearHighlightFromExternal?: () => void
+  highlightFromExternal?: (pos: number) => void
+}
+
+export interface ProteinView {
+  type: 'ProteinView'
+  id: string
+  displayName?: string
+  structures: ProteinViewStructure[]
+}
+
+export function isProteinView(view: unknown): view is ProteinView {
+  const v = view as Record<string, unknown>
+  return v.type === 'ProteinView' && Array.isArray(v.structures)
+}
+
 /**
  * Represents a connection between the MSA view and a protein structure
  */

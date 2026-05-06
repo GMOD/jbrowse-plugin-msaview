@@ -10,6 +10,9 @@ const swrConfig = {
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
   revalidateIfStale: false,
+  refreshWhenHidden: false,
+  refreshWhenOffline: false,
+  shouldRetryOnError: false,
 }
 
 export function useCachedBlastResults(geneIds: string[]) {

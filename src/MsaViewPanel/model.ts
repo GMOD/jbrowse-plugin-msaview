@@ -21,9 +21,13 @@ import {
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
-import { mapToRecord, ungappedToGappedPosition } from './structureConnection'
+import {
+  isProteinView,
+  mapToRecord,
+  ungappedToGappedPosition,
+} from './structureConnection'
 
-import type { StructureConnection } from './structureConnection'
+import type { ProteinView, StructureConnection } from './structureConnection'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -195,18 +199,17 @@ export default function stateModelFactory() {
        */
       get connectedProteinViews() {
         const { views } = getSession(self)
-        return self.connectedStructures
-          .map(conn => {
-            const proteinView = views.find(
-              (v: unknown) =>
-                (v as Record<string, unknown>).id === conn.proteinViewId,
-            )
-            return proteinView ? { ...conn, proteinView } : undefined
-          })
-          .filter(
-            (c): c is StructureConnection & { proteinView: any } =>
-              c !== undefined,
+        const unknownViews = views as unknown[]
+        const result: (StructureConnection & { proteinView: ProteinView })[] = []
+        for (const conn of self.connectedStructures) {
+          const proteinView = unknownViews.find(
+            (v): v is ProteinView => isProteinView(v) && v.id === conn.proteinViewId,
           )
+          if (proteinView) {
+            result.push({ ...conn, proteinView })
+          }
+        }
+        return result
       },
     }))
 
@@ -216,7 +219,7 @@ export default function stateModelFactory() {
        */
       get structureHoverCol(): number | undefined {
         for (const conn of self.connectedProteinViews) {
-          const structure = conn.proteinView?.structures?.[conn.structureIdx]
+          const structure = conn.proteinView.structures[conn.structureIdx]
           const structurePos = structure?.hoverPosition?.structureSeqPos
           if (structurePos !== undefined) {
             const msaUngapped = conn.structureToMsa[structurePos]
@@ -380,14 +383,14 @@ export default function stateModelFactory() {
 
         const { views } = getSession(self)
 
-        const proteinView = views.find(
-          (v: any) => v.id === proteinViewId,
-        ) as any
+        const proteinView = (views as unknown[]).find(
+          (v): v is ProteinView => isProteinView(v) && v.id === proteinViewId,
+        )
         if (!proteinView) {
           throw new Error(`ProteinView "${proteinViewId}" not found`)
         }
 
-        const structure = proteinView.structures?.[structureIdx]
+        const structure = proteinView.structures[structureIdx]
         if (!structure) {
           throw new Error(`Structure at index ${structureIdx} not found`)
         }

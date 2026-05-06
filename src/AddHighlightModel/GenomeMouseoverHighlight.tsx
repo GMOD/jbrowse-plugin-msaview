@@ -38,8 +38,7 @@ const GenomeMouseoverHighlightRenderer = observer(function ({
   hovered,
 }: {
   model: LinearGenomeViewModel
-
-  hovered: any
+  hovered: object & Record<'hoverPosition', unknown>
 }) {
   const { classes } = useStyles()
   const { offsetPx } = model
