@@ -21,6 +21,10 @@ const useStyles = makeStyles()({
   minWidth: {
     minWidth: 300,
   },
+  centered: {
+    alignContent: 'center',
+    marginLeft: 20,
+  },
 })
 
 export default function TranscriptSelector({
@@ -70,7 +74,7 @@ export default function TranscriptSelector({
             )
           })}
         </TextField>
-        <div style={{ alignContent: 'center', marginLeft: 20 }}>
+        <div className={classes.centered}>
           <Button
             variant="contained"
             color="primary"

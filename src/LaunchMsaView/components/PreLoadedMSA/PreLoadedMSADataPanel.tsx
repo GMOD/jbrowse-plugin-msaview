@@ -24,6 +24,9 @@ const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
   },
+  selectedContainer: {
+    marginTop: 50,
+  },
 })
 
 const PreLoadedMSA = observer(function ({
@@ -120,7 +123,7 @@ const PreLoadedMSA = observer(function ({
         </TextField2>
 
         {selectedDataset ? (
-          <div style={{ marginTop: 50 }}>
+          <div className={classes.selectedContainer}>
             {!msaListLoading && msaDataLoading ? (
               <LoadingEllipses
                 variant="h6"

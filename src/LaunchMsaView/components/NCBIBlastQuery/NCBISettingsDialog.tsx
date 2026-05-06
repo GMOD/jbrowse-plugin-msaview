@@ -7,9 +7,16 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
 
 import { BASE_BLAST_URL } from './consts'
 import TextField2 from '../../../components/TextField2'
+
+const useStyles = makeStyles()({
+  urlField: {
+    minWidth: 300,
+  },
+})
 
 export default function NCBISettingsDialog({
   handleClose,
@@ -18,6 +25,7 @@ export default function NCBISettingsDialog({
   handleClose: (arg?: string) => void
   baseUrl: string
 }) {
+  const { classes } = useStyles()
   const [tempBaseUrl, setTempBaseUrl] = useState(baseUrl)
   return (
     <Dialog
@@ -36,7 +44,7 @@ export default function NCBISettingsDialog({
           fullWidth
           variant="outlined"
           value={tempBaseUrl}
-          style={{ minWidth: '300px' }}
+          className={classes.urlField}
           onChange={e => {
             setTempBaseUrl(e.target.value)
           }}

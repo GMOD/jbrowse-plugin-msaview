@@ -229,12 +229,11 @@ const NCBIBlastAutomaticPanel = observer(function ({
                   proteinSequence,
                 },
               })
+              handleClose()
             } catch (e) {
               console.error(e)
               setLaunchViewError(e)
             }
-
-            handleClose()
           }}
           disabled={!proteinSequence}
         >

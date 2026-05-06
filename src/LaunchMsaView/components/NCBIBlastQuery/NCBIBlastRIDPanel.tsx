@@ -28,6 +28,15 @@ const useStyles = makeStyles()({
   dialogContent: {
     width: '80em',
   },
+  marginBottom: {
+    marginBottom: 16,
+  },
+  ridField: {
+    width: 150,
+  },
+  infoText: {
+    marginTop: 20,
+  },
 })
 
 const NCBIBlastRIDPanel = observer(function ({
@@ -60,7 +69,6 @@ const NCBIBlastRIDPanel = observer(function ({
   } = useTranscriptSelection({ feature, view })
 
   const e = proteinSequenceError ?? launchViewError
-  const style = { width: 150 }
   const trimmedRid = rid.trim()
 
   return (
@@ -69,7 +77,7 @@ const NCBIBlastRIDPanel = observer(function ({
         {children}
         {e ? <ErrorMessage error={e} /> : null}
 
-        <Typography variant="body2" style={{ marginBottom: 16 }}>
+        <Typography variant="body2" className={classes.marginBottom}>
           Enter the RID (Request ID) from a previously submitted NCBI BLAST
           query. You can find the RID in the BLAST results page URL or at the
           top of the results page. RIDs are typically valid for 24-36 hours
@@ -81,7 +89,7 @@ const NCBIBlastRIDPanel = observer(function ({
           label="BLAST RID"
           placeholder="e.g., ABC12345"
           fullWidth
-          style={{ marginBottom: 16 }}
+          className={classes.marginBottom}
           value={rid}
           onChange={event => {
             setRid(event.target.value)
@@ -89,7 +97,7 @@ const NCBIBlastRIDPanel = observer(function ({
         />
 
         {trimmedRid ? (
-          <Typography variant="body2" style={{ marginBottom: 16 }}>
+          <Typography variant="body2" className={classes.marginBottom}>
             <ExternalLink href={`${baseUrl}?CMD=Get&RID=${trimmedRid}`}>
               View BLAST results on NCBI
             </ExternalLink>
@@ -99,7 +107,7 @@ const NCBIBlastRIDPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="MSA Algorithm"
-          style={style}
+          className={classes.ridField}
           select
           value={selectedMsaAlgorithm}
           onChange={event => {
@@ -122,7 +130,7 @@ const NCBIBlastRIDPanel = observer(function ({
           proteinSequence={proteinSequence}
         />
 
-        <Typography style={{ marginTop: 20 }}>
+        <Typography className={classes.infoText}>
           This will fetch the BLAST results for the provided RID and run them
           through a multiple sequence alignment. The protein sequence from the
           selected transcript will be added as the query sequence in the MSA.
@@ -152,12 +160,11 @@ const NCBIBlastRIDPanel = observer(function ({
                   rid: trimmedRid,
                 },
               })
+              handleClose()
             } catch (e) {
               console.error(e)
               setLaunchViewError(e)
             }
-
-            handleClose()
           }}
           disabled={!proteinSequence || !trimmedRid}
         >

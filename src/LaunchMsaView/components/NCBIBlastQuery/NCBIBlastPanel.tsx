@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useLocalStorage } from '@jbrowse/core/util'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { IconButton } from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
 
 import NCBIBlastAutomaticPanel from './NCBIBlastAutomaticPanel'
 import NCBIBlastManualPanel from './NCBIBlastManualPanel'
@@ -12,6 +13,12 @@ import NCBISettingsDialog from './NCBISettingsDialog'
 import { BASE_BLAST_URL } from './consts'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
+
+const useStyles = makeStyles()({
+  settingsButton: {
+    float: 'right',
+  },
+})
 
 const panelMap = {
   automatic: NCBIBlastAutomaticPanel,
@@ -34,13 +41,14 @@ export default function NCBIBlastPanel({
     BASE_BLAST_URL,
   )
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const { classes } = useStyles()
 
   const Panel = panelMap[lookupMethod as keyof typeof panelMap]
 
   return (
     <>
       <IconButton
-        style={{ float: 'right' }}
+        className={classes.settingsButton}
         size="small"
         onClick={() => {
           setSettingsOpen(true)

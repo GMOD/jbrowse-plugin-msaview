@@ -26,6 +26,9 @@ const useStyles = makeStyles()({
     margin: 30,
     maxWidth: 600,
   },
+  infoText: {
+    marginTop: 20,
+  },
 })
 
 const NCBIBlastManualPanel = observer(function ({
@@ -77,7 +80,7 @@ const NCBIBlastManualPanel = observer(function ({
           </div>
         ) : null}
 
-        <Typography style={{ marginTop: 20 }}>
+        <Typography className={classes.infoText}>
           Click the link above and run your BLAST query, and once you have
           results, click "Multiple Alignment" at the top of the results page to
           be redirected to COBALT, NCBI's multiple sequence aligner. Once COBALT

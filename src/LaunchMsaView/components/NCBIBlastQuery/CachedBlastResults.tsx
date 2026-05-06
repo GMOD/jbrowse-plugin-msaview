@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
+import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchViewFromCache } from './blastLaunchView'
 import { useCachedBlastResults } from './useCachedBlastResults'
@@ -21,6 +22,19 @@ import { getGeneIdentifiers } from '../../util'
 import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+
+const useStyles = makeStyles()({
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  resultList: {
+    maxHeight: 300,
+    overflow: 'auto',
+  },
+})
 
 function getResultDisplayName(result: CachedBlastResult): string {
   const parts = []
@@ -45,6 +59,7 @@ const CachedBlastResults = observer(function ({
   handleClose: () => void
   feature: Feature
 }) {
+  const { classes } = useStyles()
   const view = getContainingView(model) as LinearGenomeViewModel
   const [operationError, setOperationError] = useState<unknown>()
 
@@ -82,14 +97,7 @@ const CachedBlastResults = observer(function ({
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 8,
-        }}
-      >
+      <div className={classes.header}>
         <Typography variant="subtitle1">
           Cached BLAST Results ({results.length})
         </Typography>
@@ -108,7 +116,7 @@ const CachedBlastResults = observer(function ({
           Clear All
         </Button>
       </div>
-      <List dense style={{ maxHeight: 300, overflow: 'auto' }}>
+      <List dense className={classes.resultList}>
         {results.map(result => (
           <ListItem
             key={result.id}
