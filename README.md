@@ -58,3 +58,11 @@ use it on any species there
 ## Programmatic usage
 
 See [DEVELOPERS.md](DEVELOPERS.md)
+
+## Publishing
+
+just push a new tag using e.g.
+
+```
+pnpm version minor
+```

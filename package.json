@@ -1,5 +1,5 @@
 {
-  "version": "2.3.5",
+  "version": "2.3.6",
   "license": "MIT",
   "name": "jbrowse-plugin-msaview",
   "repository": {
@@ -30,9 +30,7 @@
     "test:versions": "node scripts/test-versions.mjs run",
     "test:version": "node scripts/test-versions.mjs run",
     "prepack": "pnpm build",
-    "preversion": "pnpm lint",
-    "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add src/version.ts",
-    "postversion": "git push --follow-tags"
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",
