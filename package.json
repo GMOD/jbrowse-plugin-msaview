@@ -30,7 +30,9 @@
     "test:versions": "node scripts/test-versions.mjs run",
     "test:version": "node scripts/test-versions.mjs run",
     "prepack": "pnpm build",
-    "release": "node scripts/release.mjs"
+    "preversion": "pnpm lint",
+    "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add src/version.ts",
+    "postversion": "git push --follow-tags"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",
