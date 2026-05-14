@@ -1,6 +1,6 @@
 import { getSession } from '@jbrowse/core/util'
 
-import type { JBrowsePluginMsaViewModel } from '../../../MsaViewPanel/model'
+import type { BlastParams } from '../../../MsaViewPanel/model'
 import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -14,9 +14,9 @@ export function blastLaunchView({
   newViewTitle: string
   view: LinearGenomeViewModel
   feature: Feature
-  blastParams: Record<string, unknown>
+  blastParams: BlastParams
 }) {
-  return getSession(view).addView('MsaView', {
+  getSession(view).addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
     connectedViewId: view.id,
@@ -25,7 +25,7 @@ export function blastLaunchView({
     colWidth: 10,
     rowHeight: 12,
     blastParams,
-  }) as JBrowsePluginMsaViewModel
+  })
 }
 
 export function blastLaunchViewFromCache({
@@ -37,7 +37,7 @@ export function blastLaunchViewFromCache({
   view: LinearGenomeViewModel
   cached: CachedBlastResult
 }) {
-  return getSession(view).addView('MsaView', {
+  getSession(view).addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
     connectedViewId: view.id,
@@ -49,5 +49,5 @@ export function blastLaunchViewFromCache({
       tree: cached.tree,
       treeMetadata: cached.treeMetadata,
     },
-  }) as JBrowsePluginMsaViewModel
+  })
 }

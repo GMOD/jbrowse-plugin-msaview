@@ -54,14 +54,8 @@ const PreLoadedMSA = observer(function ({
     isLoading: msaListLoading,
     error: msaListFetchError,
   } = useSWR(
-    selectedDatasetId ? `${selectedDatasetId}-msa-list` : 'none-msa-list',
-    () =>
-      selectedDataset
-        ? fetchMSAList({
-            config: selectedDataset.adapter,
-            pluginManager,
-          })
-        : undefined,
+    selectedDataset ? `${selectedDataset.datasetId}-msa-list` : null,
+    () => fetchMSAList({ config: selectedDataset!.adapter, pluginManager }),
     swrFlags,
   )
 
@@ -79,25 +73,20 @@ const PreLoadedMSA = observer(function ({
     isLoading: msaDataLoading,
     error: msaDataFetchError,
   } = useSWR(
-    selectedId && selectedDatasetId
-      ? `${selectedDatasetId}-${selectedId}-${msaList?.length}-msa`
-      : 'none-msa',
+    selectedId && selectedDataset && msaList
+      ? `${selectedDataset.datasetId}-${selectedId}-${msaList.length}-msa`
+      : null,
     () =>
-      selectedId && selectedDataset && msaList
-        ? fetchMSA({
-            msaId: selectedId,
-            config: selectedDataset.adapter,
-            pluginManager,
-          })
-        : undefined,
+      fetchMSA({
+        msaId: selectedId,
+        config: selectedDataset!.adapter,
+        pluginManager,
+      }),
     swrFlags,
   )
 
   const e =
     msaListFetchError ?? msaDataFetchError ?? proteinSequenceError ?? viewError
-  if (e) {
-    console.error(e)
-  }
   return (
     <>
       <DialogContent className={classes.dialogContent}>

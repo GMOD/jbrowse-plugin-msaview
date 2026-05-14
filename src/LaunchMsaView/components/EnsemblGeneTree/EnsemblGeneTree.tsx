@@ -82,6 +82,7 @@ const EnsemblGeneTree = observer(function ({
         <Button
           color="primary"
           variant="contained"
+          disabled={!treeData}
           onClick={() => {
             try {
               if (!treeData) {
