@@ -4,7 +4,6 @@ import { Dialog } from '@jbrowse/core/ui'
 import { getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 
-import EnsemblGeneTree from './EnsemblGeneTree/EnsemblGeneTree'
 import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
 import NCBIBlastPanel from './NCBIBlastQuery/NCBIBlastPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
@@ -39,7 +38,6 @@ export default function LaunchMsaViewDialog({
         {hasPreloadedDatasets ? (
           <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
         ) : null}
-        <Tab label="Ensembl GeneTree" value="ensembl_genetree" />
         <Tab label="Manual upload" value="manual_msa" />
       </Tabs>
       <TabPanel value={value} index="ncbi_blast">
@@ -58,13 +56,6 @@ export default function LaunchMsaViewDialog({
           />
         </TabPanel>
       ) : null}
-      <TabPanel value={value} index="ensembl_genetree">
-        <EnsemblGeneTree
-          model={model}
-          feature={feature}
-          handleClose={handleClose}
-        />
-      </TabPanel>
       <TabPanel value={value} index="manual_msa">
         <ManualMSALoader
           model={model}

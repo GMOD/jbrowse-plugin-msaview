@@ -101,8 +101,7 @@ describe('TranscriptSelector E2E', () => {
     await page!.screenshot({ path: getScreenshotPath('02-search-results') })
     console.log(`Screenshot saved: ${getScreenshotPath('02-search-results')}`)
 
-    // Use keyboard navigation to select search result (more reliable than clicking)
-    // Wait for dropdown to be visible
+    // Wait for search results to appear
     const hasResults = await page!.waitForSelector('[role="option"]', {
       timeout: 5000,
     })
@@ -113,10 +112,31 @@ describe('TranscriptSelector E2E', () => {
       throw new Error('No search results found for SPATA6')
     }
 
-    // Use keyboard to select first result
-    await page!.keyboard.press('ArrowDown')
-    await new Promise(r => setTimeout(r, 200))
-    await page!.keyboard.press('Enter')
+    // Select the SPATA6 result specifically (not SPATA6L, which also matches).
+    // The results list may order SPATA6L first, so click by text rather than
+    // relying on position.
+    const spata6Option = await page!.evaluateHandle(() => {
+      const options = Array.from(document.querySelectorAll('[role="option"]'))
+      return (
+        options.find(opt => {
+          const t = opt.textContent ?? ''
+          return t.includes('(SPATA6)') && !t.includes('(SPATA6L)')
+        }) ?? null
+      )
+    })
+    const optionEl = spata6Option.asElement()
+    if (optionEl) {
+      await optionEl.click()
+      console.log('Clicked SPATA6 search result directly')
+    } else {
+      // Fallback: first result
+      await page!.keyboard.press('ArrowDown')
+      await new Promise(r => setTimeout(r, 200))
+      await page!.keyboard.press('Enter')
+      console.log(
+        'Selected first search result via keyboard (SPATA6 not found)',
+      )
+    }
 
     console.log('Selected search result via keyboard')
 
@@ -136,18 +156,31 @@ describe('TranscriptSelector E2E', () => {
 
     // Find the track container and right-click on a feature
     // The search navigates to the gene location, so features should be visible
-    // We'll find an SVG element in the track (gene features can be rects or paths)
-    const featureElement = await page!.evaluateHandle(() => {
-      // First try to find feature rects (CDS boxes) - they typically have a fill
-      const rects = document.querySelectorAll('svg rect')
-      for (const rect of rects) {
+    // Locate SPATA6 specifically, since that is the gene we searched for.
+    // First try SVG text labels; if those are absent (canvas rendering), fall
+    // back to SVG feature rects; last resort is the track area bounding box.
+    const clickTarget = await page!.evaluate(() => {
+      // SVG text labels
+      for (const el of Array.from(document.querySelectorAll('text, tspan'))) {
+        const t = el.textContent ?? ''
+        if (t.includes('SPATA6') || t.includes('ENSG00000106686')) {
+          const bbox = el.getBoundingClientRect()
+          if (bbox.y > 150 && bbox.y < 500) {
+            return { x: bbox.x + bbox.width / 2, y: bbox.y + 10 }
+          }
+        }
+      }
+
+      // SVG feature rects (y > 185 skips overview bar + ruler; height < 25
+      // excludes full-height background rects)
+      for (const rect of Array.from(document.querySelectorAll('svg rect'))) {
         const bbox = rect.getBoundingClientRect()
         const fill = rect.getAttribute('fill')
-        // Look for colored rects (not white/transparent) in the track area
         if (
           bbox.width > 3 &&
           bbox.height > 3 &&
-          bbox.y > 100 &&
+          bbox.height < 25 &&
+          bbox.y > 185 &&
           bbox.y < 500 &&
           fill &&
           fill !== 'none' &&
@@ -155,71 +188,38 @@ describe('TranscriptSelector E2E', () => {
           fill !== '#fff' &&
           fill !== '#ffffff'
         ) {
-          console.log(
-            `Found rect: ${bbox.width}x${bbox.height} at y=${bbox.y}, fill=${fill}`,
-          )
-          return rect
-        }
-      }
-
-      // Fallback: look for any clickable element in the track area with data attributes
-      const trackElements = document.querySelectorAll(
-        '[data-testid*="feature"]',
-      )
-      for (const el of trackElements) {
-        const bbox = el.getBoundingClientRect()
-        if (bbox.width > 3 && bbox.height > 3 && bbox.y > 100 && bbox.y < 500) {
-          return el
+          return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 }
         }
       }
 
       return null
     })
 
-    const element = featureElement.asElement()
-
-    // If no feature element found, try clicking in the middle of the track area
-    // where features should be rendered
-    if (element) {
-      console.log('Found gene feature element')
-
-      // Screenshot: Feature found
-      await page!.screenshot({ path: getScreenshotPath('04-feature-found') })
-      console.log(`Screenshot saved: ${getScreenshotPath('04-feature-found')}`)
-
-      // Get bounding box and right-click on it
-      const box = await element.boundingBox()
-      if (!box) {
-        throw new Error('Could not get bounding box for feature element')
-      }
-
-      // Right-click on the feature
-      await page!.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
-        button: 'right',
-      })
-
-      // Wait for context menu to appear
-      await new Promise(r => setTimeout(r, 1000))
-
-      // Screenshot: Context menu
-      await page!.screenshot({ path: getScreenshotPath('05-context-menu') })
-      console.log(`Screenshot saved: ${getScreenshotPath('05-context-menu')}`)
-    } else {
+    if (clickTarget) {
       console.log(
-        'No specific feature element found, trying to find track area...',
+        `Right-clicking gene feature at ${clickTarget.x},${clickTarget.y}`,
       )
+      await page!.screenshot({ path: getScreenshotPath('04-feature-found') })
+      await page!.mouse.click(clickTarget.x, clickTarget.y, { button: 'right' })
+      await new Promise(r => setTimeout(r, 1000))
+    }
 
-      // Find the track container and click in it
+    // If the above didn't open a menu, fall back to the GENCODE track bounding
+    // box and click near the left edge where SPATA6 is rendered.
+    let menuItems = await page!.$$('[role="menuitem"]')
+    if (menuItems.length === 0) {
+      console.log(
+        'Context menu not visible; falling back to GENCODE track area...',
+      )
+      await page!.keyboard.press('Escape')
+      await new Promise(r => setTimeout(r, 500))
+
       const trackBox = await page!.evaluate(() => {
-        // Look for the track container by finding elements with "GENCODE" text
-        const labels = document.querySelectorAll('*')
-        for (const label of labels) {
-          if (label.textContent.includes('GENCODE')) {
-            // Get the parent track container
+        for (const label of Array.from(document.querySelectorAll('*'))) {
+          if (label.textContent?.includes('GENCODE')) {
             let parent = label.parentElement
             while (parent) {
               const bbox = parent.getBoundingClientRect()
-              // Track container should be wide and have reasonable height
               if (bbox.width > 500 && bbox.height > 50 && bbox.height < 300) {
                 return {
                   x: bbox.x,
@@ -235,38 +235,7 @@ describe('TranscriptSelector E2E', () => {
         return null
       })
 
-      if (trackBox) {
-        console.log(`Found track area: ${JSON.stringify(trackBox)}`)
-        // Click in the center-right of the track where features are likely visible
-        const clickX = trackBox.x + trackBox.width * 0.7
-        const clickY = trackBox.y + trackBox.height * 0.5
-        console.log(`Will right-click at: ${clickX}, ${clickY}`)
-
-        await page!.screenshot({ path: getScreenshotPath('03-track-area') })
-
-        // Right-click on the track area
-        await page!.mouse.click(clickX, clickY, { button: 'right' })
-        await new Promise(r => setTimeout(r, 1000))
-
-        // Screenshot: Context menu attempt
-        await page!.screenshot({
-          path: getScreenshotPath('04-context-menu-attempt'),
-        })
-
-        // Check if we got a context menu
-        const menuItems = await page!.$$('[role="menuitem"]')
-        if (menuItems.length > 0) {
-          console.log(`Context menu appeared with ${menuItems.length} items`)
-          // Continue to menu item search below
-        } else {
-          await page!.screenshot({
-            path: getScreenshotPath('03-error-no-feature'),
-          })
-          throw new Error(
-            `No gene feature found and no context menu appeared. Screenshot: ${getScreenshotPath('03-error-no-feature')}`,
-          )
-        }
-      } else {
+      if (!trackBox) {
         await page!.screenshot({
           path: getScreenshotPath('03-error-no-feature'),
         })
@@ -274,10 +243,30 @@ describe('TranscriptSelector E2E', () => {
           `No gene feature found in track. Screenshot: ${getScreenshotPath('03-error-no-feature')}`,
         )
       }
+
+      // Track sidebar is ~13% of total width. Use 15% x / 78% y to target the
+      // SPATA6 region — derived from the Jan-24 run where SPATA6 was
+      // successfully clicked at ~(195, 225) inside {x:2,y:50,w:1276,h:225}.
+      console.log(`Found track area: ${JSON.stringify(trackBox)}`)
+      const clickX = trackBox.x + trackBox.width * 0.15
+      const clickY = trackBox.y + trackBox.height * 0.78
+      console.log(`Right-clicking track area at: ${clickX}, ${clickY}`)
+      await page!.mouse.click(clickX, clickY, { button: 'right' })
+      await new Promise(r => setTimeout(r, 1000))
+      menuItems = await page!.$$('[role="menuitem"]')
+    }
+
+    // Screenshot: Context menu (whichever path produced it)
+    await page!.screenshot({ path: getScreenshotPath('05-context-menu') })
+    console.log(`Screenshot saved: ${getScreenshotPath('05-context-menu')}`)
+
+    if (menuItems.length === 0) {
+      throw new Error(
+        `Context menu did not appear after right-clicking on track feature. Screenshot: ${getScreenshotPath('05-context-menu')}`,
+      )
     }
 
     // Look for "Launch MSA view" menu item
-    const menuItems = await page!.$$('[role="menuitem"]')
     console.log(`Found ${menuItems.length} menu items`)
 
     for (const item of menuItems) {
@@ -377,12 +366,93 @@ describe('TranscriptSelector E2E', () => {
 
                   expect(finalValue).toBe(newValue)
 
-                  // Screenshot: Final success
+                  // Screenshot: Transcript selection verified
                   await page!.screenshot({
-                    path: getScreenshotPath('10-final-success'),
+                    path: getScreenshotPath('10-transcript-selection-verified'),
                   })
                   console.log(
-                    `Screenshot saved: ${getScreenshotPath('10-final-success')}`,
+                    `Screenshot saved: ${getScreenshotPath('10-transcript-selection-verified')}`,
+                  )
+
+                  // Switch to MANUAL UPLOAD tab and paste a small alignment so
+                  // the MSA view can be launched without any external API calls.
+                  console.log('Switching to MANUAL UPLOAD tab...')
+                  const tabs = await page!.$$('[role="tab"]')
+                  for (const tab of tabs) {
+                    const tabText = await page!.evaluate(
+                      el => (el as HTMLElement).textContent,
+                      tab,
+                    )
+                    if (tabText?.toLowerCase().includes('manual')) {
+                      await tab.click()
+                      console.log('Clicked MANUAL UPLOAD tab')
+                      break
+                    }
+                  }
+                  await new Promise(r => setTimeout(r, 1000))
+
+                  // Select "Paste text" radio button
+                  const pasteLabel = await page!.evaluateHandle(() => {
+                    const labels = Array.from(
+                      document.querySelectorAll('label'),
+                    )
+                    return (
+                      labels.find(l =>
+                        l.textContent?.toLowerCase().includes('paste'),
+                      ) ?? null
+                    )
+                  })
+                  const pasteLabelEl = pasteLabel.asElement()
+                  if (pasteLabelEl) {
+                    await pasteLabelEl.click()
+                    console.log('Selected "Paste text" mode')
+                  }
+                  await new Promise(r => setTimeout(r, 500))
+
+                  // Paste a minimal FASTA alignment into the MSA textarea
+                  const minimalMsa =
+                    '>human\nACGTACGTACGT\n>mouse\nACGTACGTACGT\n'
+                  const msaTextarea = await page!.$('textarea[name="MSA"]')
+                  if (msaTextarea) {
+                    await msaTextarea.click()
+                    await page!.keyboard.type(minimalMsa)
+                    console.log('Pasted MSA text')
+                  }
+                  await new Promise(r => setTimeout(r, 500))
+
+                  // Screenshot: Manual upload tab with MSA pasted
+                  await page!.screenshot({
+                    path: getScreenshotPath('10b-manual-upload-tab'),
+                  })
+
+                  // Submit button should now be enabled (selectedTranscript + msaText)
+                  console.log('Clicking Submit...')
+                  const submitHandle = await page!.evaluateHandle(() => {
+                    const buttons = Array.from(
+                      document.querySelectorAll('button'),
+                    )
+                    return buttons.find(b => b.textContent?.trim() === 'SUBMIT')
+                  })
+                  await submitHandle.asElement()!.click()
+
+                  // Wait for dialog to close
+                  await page!.waitForFunction(
+                    () => !document.querySelector('[role="dialog"]'),
+                    { timeout: 10_000 },
+                  )
+                  console.log(
+                    'Dialog closed, waiting for MSA view to render...',
+                  )
+
+                  // Wait for MSA view to render
+                  await new Promise(r => setTimeout(r, 3000))
+
+                  // Screenshot: Final success - MSA view launched
+                  await page!.screenshot({
+                    path: getScreenshotPath('11-final-success'),
+                  })
+                  console.log(
+                    `Screenshot saved: ${getScreenshotPath('11-final-success')}`,
                   )
                 }
                 break
@@ -398,7 +468,7 @@ describe('TranscriptSelector E2E', () => {
         break
       }
     }
-  }, 120_000)
+  }, 240_000)
 
   it('should maintain transcript selection after changing it', async () => {
     // This test verifies the specific bug fix
