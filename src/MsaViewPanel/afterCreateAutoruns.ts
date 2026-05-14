@@ -8,7 +8,10 @@ import {
   retrieveMsaData,
   storeMsaData,
 } from './msaDataStore'
-import { gappedToUngappedPosition, getProteinViews } from './structureConnection'
+import {
+  gappedToUngappedPosition,
+  getProteinViews,
+} from './structureConnection'
 import { getUniprotIdFromAlphaFoldUrl } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'

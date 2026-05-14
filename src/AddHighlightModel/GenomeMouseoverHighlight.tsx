@@ -10,9 +10,7 @@ import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 function hasHoverPosition(
   hovered: unknown,
 ): hovered is { hoverPosition: unknown } {
-  return (
-    !!hovered && typeof hovered === 'object' && 'hoverPosition' in hovered
-  )
+  return !!hovered && typeof hovered === 'object' && 'hoverPosition' in hovered
 }
 
 const GenomeMouseoverHighlight = observer(function ({

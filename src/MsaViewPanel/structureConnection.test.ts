@@ -120,4 +120,3 @@ describe('gappedToUngappedPosition and ungappedToGappedPosition are inverses', (
     }
   })
 })
-
