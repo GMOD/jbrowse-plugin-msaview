@@ -21,9 +21,16 @@ async function getDB() {
   })
 }
 
-async function getCachedCommonName(taxid: number) {
+async function getCachedTaxonomies(taxids: number[]) {
   const db = await getDB()
-  return db.get(STORE_NAME, taxid) as Promise<CachedTaxonomy | undefined>
+  const tx = db.transaction(STORE_NAME, 'readonly')
+  const results = await Promise.all(
+    taxids.map(
+      taxid => tx.store.get(taxid) as Promise<CachedTaxonomy | undefined>,
+    ),
+  )
+  await tx.done
+  return results
 }
 
 async function saveTaxonomyCache(entries: CachedTaxonomy[]) {
@@ -45,9 +52,11 @@ export async function fetchTaxonomyInfo(
 ): Promise<Map<number, TaxonomyInfo>> {
   const result = new Map<number, TaxonomyInfo>()
   const uncachedTaxids: number[] = []
+  const cachedResults = await getCachedTaxonomies(taxids)
 
-  for (const taxid of taxids) {
-    const cached = await getCachedCommonName(taxid)
+  for (let i = 0; i < taxids.length; i++) {
+    const taxid = taxids[i]!
+    const cached = cachedResults[i]
     if (cached) {
       result.set(taxid, {
         sciname: cached.sciname,

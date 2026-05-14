@@ -97,15 +97,6 @@ const NCBIBlastManualPanel = observer(function ({
             handleClose()
           }}
         >
-          Submit
-        </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
           Close
         </Button>
       </DialogActions>

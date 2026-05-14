@@ -66,15 +66,6 @@ export async function retrieveMsaData(id: string) {
   }
 }
 
-export async function deleteMsaData(id: string) {
-  try {
-    const db = await getDB()
-    await db.delete(STORE_NAME, id)
-  } catch (e) {
-    console.warn('Failed to delete MSA data:', e)
-  }
-}
-
 export async function cleanupOldData(maxAgeMs = 7 * 24 * 60 * 60 * 1000) {
   try {
     const db = await getDB()
