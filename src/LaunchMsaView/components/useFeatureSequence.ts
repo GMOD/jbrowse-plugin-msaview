@@ -6,23 +6,17 @@ import type { Feature } from '@jbrowse/core/util'
 export function useFeatureSequence({
   view,
   feature,
-  upDownBp = 0,
-  forceLoad = true,
 }: {
   view: { assemblyNames?: string[] } | undefined
   feature?: Feature
-  upDownBp?: number
-  forceLoad?: boolean
 }) {
   const { sequence, error } = useSWRFeatureSequence({
     view,
     feature,
-    upDownBp,
-    forceLoad,
   })
 
   const proteinSequence =
-    sequence && !('error' in sequence) && feature
+    sequence && feature
       ? getProteinSequenceFromFeature({
           seq: sequence.seq,
           feature,

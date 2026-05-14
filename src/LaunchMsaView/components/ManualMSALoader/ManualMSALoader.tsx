@@ -208,7 +208,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
                 feature: selectedTranscript,
-                querySeqName: querySeqName.trim() || undefined,
+                querySeqName: querySeqName.trim(),
                 ...(inputMethod === 'file'
                   ? {
                       msaFilehandle: msaFileLocation,
@@ -217,7 +217,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                   : {
                       data: {
                         msa: msaText,
-                        tree: treeText || undefined,
+                        tree: treeText,
                       },
                     }),
               })

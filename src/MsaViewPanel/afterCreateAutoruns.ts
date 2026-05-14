@@ -8,7 +8,7 @@ import {
   retrieveMsaData,
   storeMsaData,
 } from './msaDataStore'
-import { gappedToUngappedPosition, isProteinView } from './structureConnection'
+import { gappedToUngappedPosition, getProteinViews } from './structureConnection'
 import { getUniprotIdFromAlphaFoldUrl } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
@@ -41,8 +41,7 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
   const { rows, dataStoreId } = self
   if (rows.length > 0 && !dataStoreId) {
-    const hasFilehandle = !!(self.msaFilehandle ?? self.treeFilehandle)
-    if (hasFilehandle) {
+    if (self.msaFilehandle || self.treeFilehandle) {
       return
     }
 
@@ -194,18 +193,13 @@ export function highlightConnectedStructures(self: JBrowsePluginMsaViewModel) {
 }
 
 export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
-  const views = getSession(self).views as unknown[]
   const { connectedViewId, uniprotId, rows, connectedStructures } = self
 
   if (!uniprotId || rows.length === 0) {
     return
   }
 
-  for (const view of views) {
-    if (!isProteinView(view)) {
-      continue
-    }
-
+  for (const view of getProteinViews(getSession(self).views)) {
     for (
       let structureIdx = 0;
       structureIdx < view.structures.length;
@@ -245,7 +239,6 @@ export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
 }
 
 export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
-  const views = getSession(self).views as unknown[]
   const { connectedViewId, transcriptToMsaMap, querySeqName } = self
 
   if (!connectedViewId || !transcriptToMsaMap) {
@@ -254,11 +247,7 @@ export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
 
   const columns = new Set<number>()
 
-  for (const view of views) {
-    if (!isProteinView(view)) {
-      continue
-    }
-
+  for (const view of getProteinViews(getSession(self).views)) {
     for (const structure of view.structures) {
       if (structure.connectedViewId !== connectedViewId) {
         continue

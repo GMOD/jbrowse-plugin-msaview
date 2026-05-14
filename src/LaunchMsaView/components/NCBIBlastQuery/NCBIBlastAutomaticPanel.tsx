@@ -18,7 +18,7 @@ import { makeStyles } from 'tss-react/mui'
 
 import CachedBlastResults from './CachedBlastResults'
 import { blastLaunchView } from './blastLaunchView'
-import { msaAlgorithms } from './consts'
+import { blastDatabaseOptions, blastPrograms, msaAlgorithms } from './consts'
 import { useCachedBlastResults } from './useCachedBlastResults'
 import TextField2 from '../../../components/TextField2'
 import {
@@ -29,7 +29,7 @@ import {
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
-import type { MsaAlgorithm } from './consts'
+import type { BlastDatabase, BlastProgram, MsaAlgorithm } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -55,12 +55,6 @@ const useStyles = makeStyles()({
   },
 })
 
-const blastDatabaseOptions = ['nr', 'nr_cluster_seq'] as const
-const blastPrograms = ['blastp', 'quick-blastp'] as const
-
-type blastDatabaseOptionsT = (typeof blastDatabaseOptions)[number]
-type blastProgramsT = (typeof blastPrograms)[number]
-
 const NCBIBlastAutomaticPanel = observer(function ({
   handleClose,
   feature,
@@ -78,11 +72,11 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const view = getContainingView(model) as LinearGenomeViewModel
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [selectedBlastDatabase, setSelectedBlastDatabase] =
-    useState<blastDatabaseOptionsT>('nr')
+    useState<BlastDatabase>('nr')
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
     useState<MsaAlgorithm>('clustalo')
   const [selectedBlastProgram, setSelectedBlastProgram] =
-    useState<blastProgramsT>('quick-blastp')
+    useState<BlastProgram>('quick-blastp')
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
   const { results: cachedResults, error: cachedResultsError } =
@@ -109,8 +103,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
           select
           value={selectedBlastDatabase}
           onChange={event => {
-            const newDb = event.target
-              .value as (typeof blastDatabaseOptions)[number]
+            const newDb = event.target.value as BlastDatabase
             setSelectedBlastDatabase(newDb)
             if (newDb === 'nr_cluster_seq') {
               setSelectedBlastProgram('blastp')
@@ -150,9 +143,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
             select
             value={selectedBlastProgram}
             onChange={event => {
-              setSelectedBlastProgram(
-                event.target.value as (typeof blastPrograms)[number],
-              )
+              setSelectedBlastProgram(event.target.value as BlastProgram)
             }}
           >
             {blastPrograms.map(val => (

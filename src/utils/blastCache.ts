@@ -1,5 +1,11 @@
 import { openDB } from 'idb'
 
+import type {
+  BlastDatabase,
+  BlastProgram,
+  MsaAlgorithm,
+} from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+
 const DB_NAME = 'jbrowse-msaview-blast-cache'
 const STORE_NAME = 'blast-results'
 const DB_VERSION = 2
@@ -7,9 +13,9 @@ const DB_VERSION = 2
 export interface CachedBlastResult {
   id: string
   proteinSequence: string
-  blastDatabase: string
-  blastProgram: string
-  msaAlgorithm: string
+  blastDatabase: BlastDatabase
+  blastProgram: BlastProgram
+  msaAlgorithm: MsaAlgorithm
   msa: string
   tree: string
   treeMetadata: string
@@ -36,8 +42,8 @@ async function getDB() {
 
 function createCacheKey(
   proteinSequence: string,
-  blastDatabase: string,
-  blastProgram: string,
+  blastDatabase: BlastDatabase,
+  blastProgram: BlastProgram,
   transcriptId?: string,
 ) {
   if (transcriptId) {
@@ -53,8 +59,8 @@ export async function getCachedBlastResult({
   transcriptId,
 }: {
   proteinSequence: string
-  blastDatabase: string
-  blastProgram: string
+  blastDatabase: BlastDatabase
+  blastProgram: BlastProgram
   transcriptId?: string
 }) {
   const db = await getDB()
@@ -82,9 +88,9 @@ export async function saveBlastResult({
   geneName,
 }: {
   proteinSequence: string
-  blastDatabase: string
-  blastProgram: string
-  msaAlgorithm: string
+  blastDatabase: BlastDatabase
+  blastProgram: BlastProgram
+  msaAlgorithm: MsaAlgorithm
   msa: string
   tree: string
   treeMetadata: string

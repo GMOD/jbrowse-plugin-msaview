@@ -1,9 +1,11 @@
 import { textfetch, timeout } from './fetch'
 
+import type { MsaAlgorithm } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+
 const base = `https://www.ebi.ac.uk/Tools/services/rest`
 
 const algorithms: Record<
-  string,
+  MsaAlgorithm,
   {
     params: Record<string, string>
     msaResult: string
@@ -38,7 +40,7 @@ async function wait({
   algorithm,
 }: {
   jobId: string
-  algorithm: string
+  algorithm: MsaAlgorithm
   onProgress: (arg: string) => void
 }) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -62,14 +64,11 @@ export async function launchMSA({
   sequence,
   onProgress,
 }: {
-  algorithm: string
+  algorithm: MsaAlgorithm
   sequence: string
   onProgress: (arg: string) => void
 }) {
   const config = algorithms[algorithm]
-  if (!config) {
-    throw new Error(`unknown algorithm: ${algorithm}`)
-  }
 
   onProgress(`Launching ${algorithm} MSA...`)
 

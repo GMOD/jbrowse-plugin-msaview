@@ -47,16 +47,15 @@ const EnsemblGeneTree = observer(function ({
   } = useTranscriptSelection({ feature, view })
   const { treeData, isTreeLoading, treeError } = useGeneTree(selectedId)
 
-  const loadingMessage = isTreeLoading
-    ? 'Loading tree data from Ensembl GeneTree'
-    : undefined
   const e = treeError ?? launchViewError ?? featureSequenceError
 
   return (
     <>
       <DialogContent className={classes.dialogContent}>
         {e ? <ErrorMessage error={e} /> : null}
-        {loadingMessage ? <LoadingEllipses message={loadingMessage} /> : null}
+        {isTreeLoading ? (
+          <LoadingEllipses message="Loading tree data from Ensembl GeneTree" />
+        ) : null}
         {treeData ? (
           <div>
             <div>Found Ensembl Compara GeneTree: {treeData.geneTreeId}</div>

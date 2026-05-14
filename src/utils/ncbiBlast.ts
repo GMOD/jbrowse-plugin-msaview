@@ -1,6 +1,10 @@
 import { jsonfetch, textfetch, timeout } from './fetch'
 
 import type { BlastResults } from './types'
+import type {
+  BlastDatabase,
+  BlastProgram,
+} from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 
 export async function queryBlastFromRid({
   rid,
@@ -35,8 +39,8 @@ export async function queryBlast({
   onRid,
 }: {
   query: string
-  blastDatabase: string
-  blastProgram: string
+  blastDatabase: BlastDatabase
+  blastProgram: BlastProgram
   baseUrl: string
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
@@ -59,8 +63,8 @@ async function initialQuery({
   baseUrl,
 }: {
   query: string
-  blastProgram: string
-  blastDatabase: string
+  blastProgram: BlastProgram
+  blastDatabase: BlastDatabase
   baseUrl: string
 }) {
   const res = await textfetch(baseUrl, {
@@ -70,7 +74,7 @@ async function initialQuery({
       PROGRAM: blastProgram === 'quick-blastp' ? 'blastp' : blastProgram,
       DATABASE: blastDatabase,
       QUERY: query,
-      ...(blastDatabase === 'nr_clustered_seq'
+      ...(blastDatabase === 'nr_cluster_seq'
         ? {
             CLUSTERED_DB: 'on',
             DB_TYPE: 'Experimental Databases',

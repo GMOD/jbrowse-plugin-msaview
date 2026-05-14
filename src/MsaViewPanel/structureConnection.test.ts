@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest'
 
 import {
   gappedToUngappedPosition,
-  mapToRecord,
   ungappedToGappedPosition,
 } from './structureConnection'
 
@@ -122,22 +121,3 @@ describe('gappedToUngappedPosition and ungappedToGappedPosition are inverses', (
   })
 })
 
-describe('mapToRecord', () => {
-  test('converts Map to Record', () => {
-    const map = new Map<number, number>([
-      [0, 5],
-      [1, 10],
-      [2, 15],
-    ])
-    const record = mapToRecord(map)
-    expect(record[0]).toBe(5)
-    expect(record[1]).toBe(10)
-    expect(record[2]).toBe(15)
-  })
-
-  test('handles empty Map', () => {
-    const map = new Map<number, number>()
-    const record = mapToRecord(map)
-    expect(Object.keys(record)).toHaveLength(0)
-  })
-})

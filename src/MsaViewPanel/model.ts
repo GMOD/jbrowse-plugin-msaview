@@ -22,13 +22,17 @@ import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
 import {
-  isProteinView,
-  mapToRecord,
+  getProteinViews,
   ungappedToGappedPosition,
 } from './structureConnection'
 
 import type { ProteinView, StructureConnection } from './structureConnection'
 import type { MafRegion, MsaViewInitState } from './types'
+import type {
+  BlastDatabase,
+  BlastProgram,
+  MsaAlgorithm,
+} from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -49,9 +53,9 @@ export interface IRegion {
 
 export interface BlastParams {
   baseUrl: string
-  blastDatabase: string
-  msaAlgorithm: string
-  blastProgram: string
+  blastDatabase: BlastDatabase
+  msaAlgorithm: MsaAlgorithm
+  blastProgram: BlastProgram
   selectedTranscript?: Feature
   proteinSequence: string
   rid?: string
@@ -182,13 +186,6 @@ export default function stateModelFactory() {
       /**
        * #getter
        */
-      get processing() {
-        return !!self.progress
-      },
-
-      /**
-       * #getter
-       */
       get connectedView() {
         const { views } = getSession(self)
         return views.find(f => f.id === self.connectedViewId) as MaybeLGV
@@ -198,14 +195,12 @@ export default function stateModelFactory() {
        * #getter
        */
       get connectedProteinViews() {
-        const { views } = getSession(self)
-        const unknownViews = views as unknown[]
+        const proteinViews = getProteinViews(getSession(self).views)
         const result: (StructureConnection & { proteinView: ProteinView })[] =
           []
         for (const conn of self.connectedStructures) {
-          const proteinView = unknownViews.find(
-            (v): v is ProteinView =>
-              isProteinView(v) && v.id === conn.proteinViewId,
+          const proteinView = proteinViews.find(
+            v => v.id === conn.proteinViewId,
           )
           if (proteinView) {
             result.push({ ...conn, proteinView })
@@ -250,12 +245,6 @@ export default function stateModelFactory() {
           return structureCol
         }
         return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
-      },
-      /**
-       * #getter
-       */
-      get clickCol2() {
-        return undefined
       },
     }))
 
@@ -383,10 +372,8 @@ export default function stateModelFactory() {
 
         const ungappedMsaSequence = msaSequence.replaceAll('-', '')
 
-        const { views } = getSession(self)
-
-        const proteinView = (views as unknown[]).find(
-          (v): v is ProteinView => isProteinView(v) && v.id === proteinViewId,
+        const proteinView = getProteinViews(getSession(self).views).find(
+          v => v.id === proteinViewId,
         )
         if (!proteinView) {
           throw new Error(`ProteinView "${proteinViewId}" not found`)
@@ -412,8 +399,8 @@ export default function stateModelFactory() {
           proteinViewId,
           structureIdx,
           msaRowName: rowName,
-          msaToStructure: mapToRecord(seq1ToSeq2),
-          structureToMsa: mapToRecord(seq2ToSeq1),
+          msaToStructure: Object.fromEntries(seq1ToSeq2),
+          structureToMsa: Object.fromEntries(seq2ToSeq1),
         }
 
         self.connectedStructures.push(connection)

@@ -22,6 +22,13 @@ export function isProteinView(view: unknown): view is ProteinView {
 }
 
 /**
+ * Extract all ProteinView instances from a session's views array.
+ */
+export function getProteinViews(views: { type: string }[]): ProteinView[] {
+  return (views as unknown[]).filter(isProteinView)
+}
+
+/**
  * Represents a connection between the MSA view and a protein structure
  */
 export interface StructureConnection {
@@ -83,9 +90,3 @@ export function ungappedToGappedPosition(
   return undefined
 }
 
-/**
- * Convert Map to plain object for MST frozen storage
- */
-export function mapToRecord(map: Map<number, number>): Record<number, number> {
-  return Object.fromEntries(map)
-}

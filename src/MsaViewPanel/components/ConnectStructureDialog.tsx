@@ -15,7 +15,7 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { isProteinView } from '../structureConnection'
+import { getProteinViews } from '../structureConnection'
 
 import type { JBrowsePluginMsaViewModel } from '../model'
 
@@ -39,7 +39,7 @@ const ConnectStructureDialog = observer(function ConnectStructureDialog({
   const [selectedMsaRow, setSelectedMsaRow] = useState(model.querySeqName)
   const [error, setError] = useState<string>()
 
-  const proteinViews = (session.views as unknown[]).filter(isProteinView)
+  const proteinViews = getProteinViews(session.views)
 
   const selectedView = proteinViews.find(v => v.id === selectedViewId)
   const structures = selectedView?.structures ?? []

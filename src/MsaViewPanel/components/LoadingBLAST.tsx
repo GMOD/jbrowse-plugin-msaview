@@ -60,7 +60,7 @@ const LoadingBLAST = observer(function LoadingBLAST2({
   model: JBrowsePluginMsaViewModel
   baseUrl: string
 }) {
-  const { progress, rid, error, processing } = model
+  const { progress, rid, error } = model
   const { classes } = useStyles()
   return (
     <div className={classes.margin}>
@@ -69,8 +69,9 @@ const LoadingBLAST = observer(function LoadingBLAST2({
         <RIDError baseUrl={baseUrl} rid={rid} error={error} />
       ) : rid ? (
         <RIDProgress baseUrl={baseUrl} rid={rid} progress={progress} />
-      ) : null}
-      <Typography>{processing || 'Initializing BLAST query'}</Typography>
+      ) : (
+        <Typography>{progress || 'Initializing BLAST query'}</Typography>
+      )}
     </div>
   )
 })

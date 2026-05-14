@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import { readConfObject } from '@jbrowse/core/configuration'
 import { ErrorMessage, LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
 import { getContainingView, getEnv, getSession } from '@jbrowse/core/util'
 import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
@@ -15,8 +14,8 @@ import { useTranscriptSelection } from '../useTranscriptSelection'
 import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
+import { readMsaDatasets } from './types'
 
-import type { Dataset } from './types'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -45,10 +44,7 @@ const PreLoadedMSA = observer(function ({
   const { assemblyNames } = view
   const [viewError, setViewError] = useState<unknown>()
 
-  const { jbrowse } = session
-  const datasets = readConfObject(jbrowse, ['msa', 'datasets']) as
-    | Dataset[]
-    | undefined
+  const datasets = readMsaDatasets(session.jbrowse)
   const [selectedDatasetId, setSelectedDatasetId] = useState(
     datasets?.[0]?.datasetId,
   )
