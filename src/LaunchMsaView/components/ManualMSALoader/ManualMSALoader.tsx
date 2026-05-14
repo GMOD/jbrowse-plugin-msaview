@@ -77,10 +77,10 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
     setSelectedId,
     selectedTranscript,
     proteinSequence,
-    error: error2,
+    error,
   } = useTranscriptSelection({ feature, view })
 
-  const e = launchViewError ?? error2
+  const e = launchViewError ?? error
   return (
     <>
       <DialogContent className={classes.dialogContent}>
@@ -198,16 +198,12 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           }
           onClick={() => {
             try {
-              if (!selectedTranscript) {
-                return
-              }
-
               setLaunchViewError(undefined)
               launchView({
                 session,
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
-                feature: selectedTranscript,
+                feature: selectedTranscript!,
                 querySeqName: querySeqName.trim(),
                 ...(inputMethod === 'file'
                   ? {
@@ -223,9 +219,9 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
               })
 
               handleClose()
-            } catch (e) {
-              console.error(e)
-              setLaunchViewError(e)
+            } catch (err) {
+              console.error(err)
+              setLaunchViewError(err)
             }
           }}
         >

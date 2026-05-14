@@ -48,6 +48,7 @@ export default defineConfig(
       ],
       'no-underscore-dangle': 'off',
       curly: 'error',
+      'object-shorthand': 'error',
       semi: ['error', 'never'],
       'spaced-comment': [
         'error',

@@ -1,6 +1,5 @@
 import { type ChildProcess, execSync, spawn } from 'node:child_process'
 import fs from 'node:fs'
-import http from 'node:http'
 import path from 'node:path'
 
 import { launch } from 'puppeteer'
@@ -9,8 +8,6 @@ import type { Browser, Page } from 'puppeteer'
 
 export const JBROWSE_PORT = 9876
 
-// Support testing against multiple JBrowse versions via environment variable
-// e.g., TEST_JBROWSE_VERSION=v3.7.0 or TEST_JBROWSE_VERSION=nightly
 const JBROWSE_VERSION = process.env.TEST_JBROWSE_VERSION ?? 'nightly'
 const VERSION_SUFFIX =
   JBROWSE_VERSION === 'nightly' ? '' : `-${JBROWSE_VERSION}`
@@ -18,6 +15,7 @@ const TEST_JBROWSE_DIR = path.join(
   process.cwd(),
   `.test-jbrowse${VERSION_SUFFIX}`,
 )
+const SCREENSHOT_DIR = path.join(process.cwd(), 'test-screenshots')
 
 export function getTestJBrowseDir() {
   return TEST_JBROWSE_DIR
@@ -27,137 +25,74 @@ export function getJBrowseVersion() {
   return JBROWSE_VERSION
 }
 
-export async function waitForServer(
-  port: number,
-  pathToCheck = '/',
-  timeout = 30_000,
-): Promise<void> {
-  const start = Date.now()
-  while (Date.now() - start < timeout) {
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const req = http.get(`http://localhost:${port}${pathToCheck}`, res => {
-          if (res.statusCode === 200) {
-            resolve()
-          } else {
-            reject(new Error(`Server returned ${res.statusCode}`))
-          }
-        })
-        req.on('error', reject)
-        req.setTimeout(1000, () => {
-          req.destroy()
-          reject(new Error('Request timeout'))
-        })
-      })
-      return
-    } catch {
-      await new Promise(r => setTimeout(r, 500))
-    }
-  }
-  throw new Error(`Server on port ${port} did not start within ${timeout}ms`)
-}
-
-/**
- * Set up a local JBrowse instance for testing.
- * Assumes the JBrowse instance was created via the setup script.
- */
 export function setupJBrowse() {
-  console.log(
-    `Setting up JBrowse test instance (version: ${JBROWSE_VERSION})...`,
-  )
-  console.log(`Test directory: ${TEST_JBROWSE_DIR}`)
-
   if (!fs.existsSync(TEST_JBROWSE_DIR)) {
     throw new Error(
       `JBrowse directory not found at ${TEST_JBROWSE_DIR}. Run "yarn test:setup" or "yarn test:setup:version ${JBROWSE_VERSION}" first.`,
     )
   }
 
-  // Build the plugin
-  console.log('Building plugin...')
   execSync('yarn build', {
     cwd: process.cwd(),
     stdio: 'inherit',
     timeout: 60_000,
   })
 
-  // Load config from test_data/config.json and update plugin URL
-  console.log('Setting up config...')
-  const testConfigPath = path.join(process.cwd(), 'test_data', 'config.json')
-  const testConfig = JSON.parse(fs.readFileSync(testConfigPath, 'utf8'))
-
-  // Update plugin URL to point to the test server
+  const testConfig = JSON.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), 'test_data', 'config.json'),
+      'utf8',
+    ),
+  )
   testConfig.plugins = [
     {
       name: 'MsaView',
       url: `http://localhost:${JBROWSE_PORT}/plugin/jbrowse-plugin-msaview.umd.production.min.js`,
     },
   ]
-
   fs.writeFileSync(
     path.join(TEST_JBROWSE_DIR, 'config.json'),
     JSON.stringify(testConfig, null, 2),
   )
 
-  // Copy the plugin dist to JBrowse directory
-  console.log('Copying plugin...')
   const pluginDir = path.join(TEST_JBROWSE_DIR, 'plugin')
   fs.mkdirSync(pluginDir, { recursive: true })
   fs.cpSync(path.join(process.cwd(), 'dist'), pluginDir, { recursive: true })
-
-  console.log('JBrowse test instance ready!')
 }
-
-let jbrowseServer: ChildProcess | undefined
 
 function killProcessOnPort(port: number): void {
   try {
-    // Find and kill any process using the port
     execSync(`lsof -ti:${port} | xargs -r kill -9 2>/dev/null || true`, {
       stdio: 'ignore',
     })
-    console.log(`Killed any existing process on port ${port}`)
   } catch {
-    // Ignore errors - port might not be in use
+    // port may not be in use
   }
 }
 
 export async function startJBrowseServer(): Promise<ChildProcess> {
-  console.log(`Starting JBrowse server on port ${JBROWSE_PORT}...`)
-
-  // Kill any existing process on the port
   killProcessOnPort(JBROWSE_PORT)
 
   return new Promise((resolve, reject) => {
     const proc = spawn(
       'npx',
       ['serve', '-p', String(JBROWSE_PORT), '-s', TEST_JBROWSE_DIR],
-      {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      },
+      { stdio: ['ignore', 'pipe', 'pipe'] },
     )
 
     const timeout = setTimeout(() => {
       proc.kill()
-      reject(new Error(`Server did not start within 30000ms`))
+      reject(new Error('Server did not start within 30000ms'))
     }, 30_000)
 
     const onData = (data: Buffer) => {
-      const str = data.toString()
-      console.log(`[jbrowse-server] ${str}`)
-
-      // Extract port from message like "Accepting connections at http://localhost:9876"
       const match = /Accepting connections at http:\/\/localhost:(\d+)/.exec(
-        str,
+        data.toString(),
       )
       if (match) {
         const actualPort = Number.parseInt(match[1], 10)
-        console.log(
-          `Server reported port: ${actualPort}, expected: ${JBROWSE_PORT}`,
-        )
-
+        clearTimeout(timeout)
         if (actualPort !== JBROWSE_PORT) {
-          clearTimeout(timeout)
           proc.kill()
           reject(
             new Error(
@@ -166,13 +101,7 @@ export async function startJBrowseServer(): Promise<ChildProcess> {
           )
           return
         }
-
-        clearTimeout(timeout)
-        jbrowseServer = proc
-
-        // Give server a moment to be fully ready, then resolve
         setTimeout(() => {
-          console.log('JBrowse server started!')
           resolve(proc)
         }, 500)
       }
@@ -214,16 +143,6 @@ export async function stopServer(proc: ChildProcess): Promise<void> {
   })
 }
 
-export async function cleanupJBrowse(): Promise<void> {
-  if (jbrowseServer) {
-    await stopServer(jbrowseServer)
-  }
-  // Optionally remove the test directory
-  // if (fs.existsSync(TEST_JBROWSE_DIR)) {
-  //   fs.rmSync(TEST_JBROWSE_DIR, { recursive: true })
-  // }
-}
-
 export async function launchBrowser(headless = true): Promise<Browser> {
   return launch({
     headless,
@@ -235,33 +154,30 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
   const page = await browser.newPage()
   await page.setViewport({ width: 1280, height: 900 })
 
-  // Enable console logging from the page
   page.on('console', msg => {
     const type = msg.type()
     if (type === 'error' || type === 'warning') {
       console.log(`[browser ${type}] ${msg.text()}`)
     }
   })
-
   page.on('pageerror', err => {
     console.log(`[browser page error] ${err.message}`)
   })
-
   page.on('requestfailed', request => {
     console.log(
       `[request failed] ${request.url()}: ${request.failure()?.errorText}`,
     )
   })
 
-  const jbrowseUrl = `http://localhost:${JBROWSE_PORT}/`
-  console.log(`Navigating to: ${jbrowseUrl}`)
-  await page.goto(jbrowseUrl, { waitUntil: 'networkidle2', timeout: 60_000 })
+  await page.goto(`http://localhost:${JBROWSE_PORT}/`, {
+    waitUntil: 'networkidle2',
+    timeout: 60_000,
+  })
 
   return page
 }
 
 export async function waitForJBrowseLoad(page: Page): Promise<void> {
-  // First wait for React app to mount - look for root div with content
   await page.waitForFunction(
     () => {
       const root = document.querySelector('#root')
@@ -269,32 +185,15 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
     },
     { timeout: 30_000 },
   )
-  console.log('React app mounted')
 
-  // Take a screenshot to see current state
-  await page.screenshot({ path: 'debug-after-mount.png' })
-
-  // Try to wait for canvas, but don't fail if not found
   try {
     await page.waitForSelector('canvas', { timeout: 30_000 })
-    console.log('Canvas found')
   } catch {
-    console.log('No canvas found after 30s, continuing anyway...')
-    await page.screenshot({ path: 'debug-no-canvas.png' })
+    fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
+    await page.screenshot({
+      path: path.join(SCREENSHOT_DIR, `${JBROWSE_VERSION}-00-no-canvas.png`),
+    })
   }
 
-  // Give additional time for any loading
-  await new Promise(r => setTimeout(r, 3000))
-}
-
-export async function waitForTrackLoad(page: Page): Promise<void> {
-  // Wait for feature track to have rendered content
-  try {
-    await page.waitForSelector('canvas', { timeout: 30_000 })
-    console.log('Track canvas found')
-  } catch {
-    console.log('No track canvas found, continuing...')
-  }
-  // Wait for any loading
   await new Promise(r => setTimeout(r, 3000))
 }
