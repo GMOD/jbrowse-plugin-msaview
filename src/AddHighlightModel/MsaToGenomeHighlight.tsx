@@ -3,32 +3,32 @@ import React from 'react'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
-import { useStyles } from './util'
+import { hasHoverPosition, useStyles } from './util'
 
 import type { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 type LGV = LinearGenomeViewModel
 
-// Outer component: only re-renders when MSA view or highlights change
 const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   model,
 }: {
   model: LGV
 }) {
-  const { views } = getSession(model)
+  const { views, hovered } = getSession(model)
   const msaView = views.find(f => f.type === 'MsaView') as
     | JBrowsePluginMsaViewModel
     | undefined
-
   const highlights = msaView?.connectedHighlights
 
-  // Early return if no highlights - avoid all other work
-  if (!highlights || highlights.length === 0) {
-    return null
-  }
-
-  return <MsaToGenomeHighlightRenderer model={model} highlights={highlights} />
+  // Suppress codon highlight while hovering the LGV — GenomeMouseoverHighlight
+  // handles the single-bp display in that case
+  return !hasHoverPosition(hovered) && highlights?.length ? (
+    <MsaToGenomeHighlightRenderer
+      model={model}
+      highlights={Array.from(highlights)}
+    />
+  ) : null
 })
 
 // Inner component: handles the scroll-dependent rendering

@@ -3,15 +3,9 @@ import React from 'react'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
-import { useStyles } from './util'
+import { hasHoverPosition, useStyles } from './util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
-function hasHoverPosition(
-  hovered: unknown,
-): hovered is { hoverPosition: unknown } {
-  return !!hovered && typeof hovered === 'object' && 'hoverPosition' in hovered
-}
 
 const GenomeMouseoverHighlight = observer(function ({
   model,

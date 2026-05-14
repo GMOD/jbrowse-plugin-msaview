@@ -1,5 +1,11 @@
 import { makeStyles } from 'tss-react/mui'
 
+export function hasHoverPosition(
+  hovered: unknown,
+): hovered is { hoverPosition: unknown } {
+  return !!hovered && typeof hovered === 'object' && 'hoverPosition' in hovered
+}
+
 export const useStyles = makeStyles()({
   highlight: {
     height: '100%',
