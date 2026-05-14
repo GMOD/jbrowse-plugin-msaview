@@ -25,6 +25,7 @@ import {
   getProteinViews,
   ungappedToGappedPosition,
 } from './structureConnection'
+import { getCanonicalRefName } from './util'
 
 import type { ProteinView, StructureConnection } from './structureConnection'
 import type { MafRegion, MsaViewInitState } from './types'
@@ -137,6 +138,7 @@ export default function stateModelFactory() {
         progress: string
         error: unknown
         loadingStoredData: boolean
+        isStoringData: boolean
       } => ({
         /**
          * #volatile
@@ -154,6 +156,10 @@ export default function stateModelFactory() {
          * #volatile
          */
         loadingStoredData: false,
+        /**
+         * #volatile
+         */
+        isStoringData: false,
       }),
     )
 
@@ -336,6 +342,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setIsStoringData(arg: boolean) {
+        self.isStoringData = arg
+      },
+      /**
+       * #action
+       */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
         const { assemblyManager } = getSession(self)
@@ -348,10 +360,11 @@ export default function stateModelFactory() {
         if (zoomToBaseLevel) {
           connectedView.navTo(r2)
         } else {
-          const r =
-            assemblyManager
-              .get(connectedView.assemblyNames[0]!)
-              ?.getCanonicalRefName(r2.refName) ?? r2.refName
+          const r = getCanonicalRefName({
+            assemblyManager,
+            assemblyNames: connectedView.assemblyNames,
+            refName: r2.refName,
+          })
           connectedView.centerAt(r2.start, r)
         }
       },

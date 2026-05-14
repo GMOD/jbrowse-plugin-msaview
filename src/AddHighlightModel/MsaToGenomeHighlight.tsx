@@ -4,6 +4,7 @@ import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
 import { hasHoverPosition, useStyles } from './util'
+import { getCanonicalRefName } from '../MsaViewPanel/util'
 
 import type { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -41,17 +42,16 @@ const MsaToGenomeHighlightRenderer = observer(function ({
 }) {
   const { classes } = useStyles()
   const { assemblyManager } = getSession(model)
-  const assembly = assemblyManager.get(model.assemblyNames[0]!)
   const { offsetPx } = model
-
-  if (!assembly) {
-    return null
-  }
 
   return (
     <>
       {highlights.map((r, idx) => {
-        const refName = assembly.getCanonicalRefName(r.refName) ?? r.refName
+        const refName = getCanonicalRefName({
+          assemblyManager,
+          assemblyNames: model.assemblyNames,
+          refName: r.refName,
+        })
         const s = model.bpToPx({ refName, coord: r.start })
         const e = model.bpToPx({ refName, coord: r.end })
         if (s && e) {
