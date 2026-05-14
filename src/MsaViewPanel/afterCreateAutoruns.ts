@@ -42,8 +42,8 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
 }
 
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
-  const { rows, dataStoreId } = self
-  if (rows.length > 0 && !dataStoreId) {
+  const { rows, dataStoreId, isStoringData } = self
+  if (rows.length > 0 && !dataStoreId && !isStoringData) {
     if (self.msaFilehandle || self.treeFilehandle) {
       return
     }
@@ -52,6 +52,10 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
     const treeData = self.data.tree
 
     if (msaData || treeData) {
+      // mark as storing synchronously so re-runs of this autorun (e.g. when
+      // data observables change while the write is pending) don't kick off a
+      // duplicate write and leave an orphan IndexedDB entry
+      self.setIsStoringData(true)
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       ;(async () => {
         try {
@@ -66,6 +70,8 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
           }
         } catch (e) {
           console.error('Failed to store MSA data to IndexedDB:', e)
+        } finally {
+          self.setIsStoringData(false)
         }
       })()
     }

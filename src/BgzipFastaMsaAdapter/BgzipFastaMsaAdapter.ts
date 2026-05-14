@@ -40,18 +40,24 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
     return this.refNamesP
   }
 
+  getMsaRegex() {
+    return new RegExp(this.getConf('msaRegex'))
+  }
+
+  refNameToMsaId(refName: string) {
+    return refName.split(this.getMsaRegex())[0]!
+  }
+
   async getMSAList() {
     const refNames = await this.getMSARefs()
-    const val = this.getConf('msaRegex')
-    const re = new RegExp(val)
-    const list = new Set(refNames.map(name => name.split(re)[0]!))
+    const list = new Set(refNames.map(name => this.refNameToMsaId(name)))
     return [...list]
   }
 
   async getMSA(id: string) {
     const adapter = await this.configure()
     const refNames = await adapter.getRefNames()
-    const rows = refNames.filter(refName => refName.startsWith(id))
+    const rows = refNames.filter(refName => this.refNameToMsaId(refName) === id)
     return firstValueFrom(
       adapter
         .getFeaturesInMultipleRegions(

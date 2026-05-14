@@ -24,14 +24,11 @@ const GenomeMouseoverHighlightRenderer = observer(function ({
   hovered,
 }: {
   model: LinearGenomeViewModel
-  hovered: { hoverPosition: unknown }
+  hovered: { hoverPosition: { coord: number; refName: string } }
 }) {
   const { classes } = useStyles()
   const { offsetPx } = model
-  const { coord, refName } = hovered.hoverPosition as {
-    coord: number
-    refName: string
-  }
+  const { coord, refName } = hovered.hoverPosition
 
   const s = model.bpToPx({ refName, coord: coord - 1 })
   const e = model.bpToPx({ refName, coord })

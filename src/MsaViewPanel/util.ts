@@ -5,11 +5,36 @@ export function checkHovered(hovered: unknown): hovered is {
   hoverPosition: { coord: number; refName: string }
 } {
   return (
+    !!hovered &&
     typeof hovered === 'object' &&
-    hovered !== null &&
     'hoverFeature' in hovered &&
-    'hoverPosition' in hovered
+    'hoverPosition' in hovered &&
+    !!hovered.hoverPosition
   )
+}
+
+interface AssemblyManagerLike {
+  get: (name: string) =>
+    | { getCanonicalRefName: (r: string) => string | undefined }
+    | undefined
+}
+
+export function getCanonicalRefName({
+  assemblyManager,
+  assemblyNames,
+  refName,
+}: {
+  assemblyManager: AssemblyManagerLike
+  assemblyNames: string[] | undefined
+  refName: string
+}) {
+  const assemblyName = assemblyNames?.[0]
+  if (assemblyName) {
+    return (
+      assemblyManager.get(assemblyName)?.getCanonicalRefName(refName) ?? refName
+    )
+  }
+  return refName
 }
 
 /**

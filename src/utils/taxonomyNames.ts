@@ -135,8 +135,6 @@ export async function fetchTaxonomyInfo(
           const sci = sciName?.[1] ?? ''
           result.set(taxid, { sciname: sci, commonName: name })
           toCache.push({ taxid, sciname: sci, commonName: name })
-        } else {
-          toCache.push({ taxid, sciname: '', commonName: undefined })
         }
       }
     } catch (error) {
