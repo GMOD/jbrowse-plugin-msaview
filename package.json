@@ -1,5 +1,5 @@
 {
-  "version": "2.4.2",
+  "version": "2.4.3",
   "license": "MIT",
   "name": "jbrowse-plugin-msaview",
   "repository": {
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",
-    "g2p_mapper": "^2.0.2",
+    "g2p_mapper": "^2.1.5",
     "idb": "^8.0.3",
     "pako-esm2": "^2.0.2",
     "react-msaview": "^5.0.16",
@@ -52,13 +52,13 @@
     "@mui/icons-material": "^7.3.11",
     "@mui/material": "^7.3.11",
     "@mui/system": "^7.3.11",
-    "@mui/x-data-grid": "^8.28.5",
-    "@types/node": "^25.7.0",
-    "@types/react": "^19.2.14",
-    "@typescript-eslint/eslint-plugin": "^8.59.3",
-    "@typescript-eslint/parser": "^8.59.3",
+    "@mui/x-data-grid": "^8.28.7",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/parser": "^8.59.4",
     "esbuild": "^0.28.0",
-    "eslint": "^10.3.0",
+    "eslint": "^10.4.0",
     "eslint-plugin-import-x": "^4.16.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -75,7 +75,7 @@
     "serve": "^14.2.6",
     "tss-react": "^4.9.21",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.3",
-    "vitest": "^4.1.6"
+    "typescript-eslint": "^8.59.4",
+    "vitest": "^4.1.7"
   }
 }
