@@ -1,26 +1,19 @@
 import React from 'react'
 
-import { ErrorMessage } from '@jbrowse/core/ui'
-import { getContainingView, shorten2 } from '@jbrowse/core/util'
-import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
+import { shorten2 } from '@jbrowse/core/util'
+import { Button, DialogActions, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import ExternalLink from '../../../components/ExternalLink'
-import { cleanProteinSequence } from '../../util'
+import { cleanProteinSequence, getLinearGenomeView } from '../../util'
+import LaunchPanelContent from '../LaunchPanelContent'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
-  dialogContent: {
-    width: '80em',
-  },
-  textAreaFont: {
-    fontFamily: 'Courier New',
-  },
   ncbiLink: {
     wordBreak: 'break-all',
     margin: 30,
@@ -45,15 +38,9 @@ const NCBIBlastManualPanel = observer(function ({
   handleClose: () => void
 }) {
   const { classes } = useStyles()
-  const view = getContainingView(model) as LinearGenomeViewModel
-  const {
-    options,
-    selectedId,
-    setSelectedId,
-    selectedTranscript,
-    proteinSequence,
-    error,
-  } = useTranscriptSelection({ feature, view })
+  const view = getLinearGenomeView(model)
+  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const { proteinSequence, error } = transcriptSelection
 
   const s2 = cleanProteinSequence(proteinSequence)
   const link = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${s2}`
@@ -61,18 +48,10 @@ const NCBIBlastManualPanel = observer(function ({
 
   return (
     <>
-      <DialogContent className={classes.dialogContent}>
+      <LaunchPanelContent error={error}>
         {children}
-        {error ? <ErrorMessage error={error} /> : null}
 
-        <TranscriptSelector
-          feature={feature}
-          options={options}
-          selectedId={selectedId}
-          selectedTranscript={selectedTranscript}
-          onTranscriptChange={setSelectedId}
-          proteinSequence={proteinSequence}
-        />
+        <TranscriptSelector feature={feature} {...transcriptSelection} />
 
         {proteinSequence ? (
           <div className={classes.ncbiLink}>
@@ -87,7 +66,7 @@ const NCBIBlastManualPanel = observer(function ({
           completes, you can download an MSA (.aln file) and optionally a Newick
           tree (.nh) and paste the results into JBrowse
         </Typography>
-      </DialogContent>
+      </LaunchPanelContent>
 
       <DialogActions>
         <Button

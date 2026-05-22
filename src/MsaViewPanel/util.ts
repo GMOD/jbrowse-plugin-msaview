@@ -14,9 +14,9 @@ export function checkHovered(hovered: unknown): hovered is {
 }
 
 interface AssemblyManagerLike {
-  get: (name: string) =>
-    | { getCanonicalRefName: (r: string) => string | undefined }
-    | undefined
+  get: (
+    name: string,
+  ) => { getCanonicalRefName: (r: string) => string | undefined } | undefined
 }
 
 export function getCanonicalRefName({

@@ -5,26 +5,24 @@ import { useFeatureSequence } from './useFeatureSequence'
 
 import type { Feature } from '@jbrowse/core/util'
 
-function featureInValidIds(feature: Feature, validIds: string[]): boolean {
-  return validIds.some(id => featureMatchesId(feature, id))
-}
-
 function findValidSelection(
   currentId: string,
   options: Feature[],
   validIds: string[] | undefined,
 ): string | undefined {
-  if (!validIds || validIds.length === 0) {
-    return undefined
+  if (validIds && validIds.length > 0) {
+    const currentFeature = options.find(opt => getId(opt) === currentId)
+    const currentIsValid =
+      currentFeature &&
+      validIds.some(id => featureMatchesId(currentFeature, id))
+    if (currentFeature && !currentIsValid) {
+      const validOption = options.find(opt =>
+        validIds.some(id => featureMatchesId(opt, id)),
+      )
+      return validOption ? getId(validOption) : undefined
+    }
   }
-
-  const currentFeature = options.find(opt => getId(opt) === currentId)
-  if (!currentFeature || featureInValidIds(currentFeature, validIds)) {
-    return undefined
-  }
-
-  const validOption = options.find(opt => featureInValidIds(opt, validIds))
-  return validOption ? getId(validOption) : undefined
+  return undefined
 }
 
 export function useTranscriptSelection({
@@ -39,7 +37,7 @@ export function useTranscriptSelection({
   const options = useMemo(() => getSortedTranscriptFeatures(feature), [feature])
   const [selectedId, setSelectedId] = useState(() => getId(options[0]))
   const validatedSelectedId =
-    findValidSelection(selectedId, options, validIds) || selectedId
+    findValidSelection(selectedId, options, validIds) ?? selectedId
   const selectedTranscript = options.find(
     val => getId(val) === validatedSelectedId,
   )

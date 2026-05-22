@@ -1,6 +1,19 @@
-import { sum } from '@jbrowse/core/util'
+import { getContainingView, sum } from '@jbrowse/core/util'
 
-import type { Feature } from '@jbrowse/core/util'
+import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
+import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+
+export function getLinearGenomeView(model: AbstractTrackModel) {
+  return getContainingView(model) as LinearGenomeViewModel
+}
+
+function uniqueDefined(vals: (string | undefined)[]): string[] {
+  return [...new Set(vals.filter((v): v is string => !!v))]
+}
+
+function joinDefined(sep: string, parts: (string | undefined)[]): string {
+  return parts.filter((p): p is string => !!p).join(sep)
+}
 
 export function getTranscriptFeatures(feature: Feature) {
   // check if we are looking at a 'two-level' or 'three-level' feature by
@@ -42,16 +55,14 @@ export function getId(val?: Feature): string {
 }
 
 export function getMatchableIds(val?: Feature): string[] {
-  if (!val) {
-    return []
-  }
-  const ids = [
-    val.id(),
-    val.get('name'),
-    val.get('id'),
-    val.get('transcript_id'),
-  ].filter((id): id is string => !!id)
-  return [...new Set(ids)]
+  return val
+    ? uniqueDefined([
+        val.id(),
+        val.get('name'),
+        val.get('id'),
+        val.get('transcript_id'),
+      ])
+    : []
 }
 
 export function featureMatchesId(feature: Feature, id: string): boolean {
@@ -59,20 +70,20 @@ export function featureMatchesId(feature: Feature, id: string): boolean {
 }
 
 export function getTranscriptDisplayName(val?: Feature) {
-  return val === undefined
-    ? ''
-    : [val.get('name'), val.get('id')].filter(f => !!f).join(' ')
+  return val ? joinDefined(' ', [val.get('name'), val.get('id')]) : ''
 }
 
 export function getGeneDisplayName(val?: Feature) {
-  return val === undefined
-    ? ''
-    : [
+  return val
+    ? joinDefined(' ', [
         val.get('gene_name') ?? val.get('name'),
-        val.get('id') ? `(${val.get('id')})` : '',
-      ]
-        .filter(f => !!f)
-        .join(' ')
+        val.get('id') ? `(${val.get('id')})` : undefined,
+      ])
+    : ''
+}
+
+export function getBlastViewTitle(feature: Feature, transcript: Feature) {
+  return `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(transcript)}`
 }
 
 export function getSortedTranscriptFeatures(feature: Feature) {
@@ -87,12 +98,11 @@ export function cleanProteinSequence(seq: string) {
 }
 
 export function getGeneIdentifiers(feature: Feature): string[] {
-  const ids = [
+  return uniqueDefined([
     feature.id(),
     feature.get('id'),
     feature.get('name'),
     feature.get('gene_id'),
     feature.get('gene_name'),
-  ].filter((id): id is string => !!id)
-  return [...new Set(ids)]
+  ])
 }

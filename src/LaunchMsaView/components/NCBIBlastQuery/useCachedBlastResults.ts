@@ -5,15 +5,7 @@ import {
   deleteCachedResult,
   getAllCachedResults,
 } from '../../../utils/blastCache'
-
-const swrConfig = {
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false,
-  revalidateIfStale: false,
-  refreshWhenHidden: false,
-  refreshWhenOffline: false,
-  shouldRetryOnError: false,
-}
+import { staticSwrConfig } from '../../../utils/swrConfig'
 
 export function useCachedBlastResults(geneIds: string[]) {
   const {
@@ -26,7 +18,7 @@ export function useCachedBlastResults(geneIds: string[]) {
       const cached = await getAllCachedResults()
       return cached.filter(r => r.geneId && geneIds.includes(r.geneId))
     },
-    swrConfig,
+    staticSwrConfig,
   )
 
   const handleDelete = async (id: string) => {

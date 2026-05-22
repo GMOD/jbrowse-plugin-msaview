@@ -1,12 +1,9 @@
 import React, { useState } from 'react'
 
-import { ErrorMessage, FileSelector } from '@jbrowse/core/ui'
-import { getContainingView, getSession } from '@jbrowse/core/util'
+import { FileSelector } from '@jbrowse/core/ui'
+import { getSession } from '@jbrowse/core/util'
 import {
   Alert,
-  Button,
-  DialogActions,
-  DialogContent,
   FormControl,
   FormControlLabel,
   Radio,
@@ -17,7 +14,9 @@ import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
 import TextField2 from '../../../components/TextField2'
-import { getGeneDisplayName } from '../../util'
+import { getGeneDisplayName, getLinearGenomeView } from '../../util'
+import LaunchPanelContent from '../LaunchPanelContent'
+import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
@@ -26,12 +25,8 @@ import type {
   Feature,
   FileLocation,
 } from '@jbrowse/core/util'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
-  dialogContent: {
-    width: '80em',
-  },
   textAreaFont: {
     fontFamily: 'Courier New',
   },
@@ -62,7 +57,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   handleClose: () => void
 }) {
   const session = getSession(model)
-  const view = getContainingView(model) as LinearGenomeViewModel
+  const view = getLinearGenomeView(model)
   const { classes } = useStyles()
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [inputMethod, setInputMethod] = useState<'file' | 'text'>('file')
@@ -71,20 +66,13 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
   const [querySeqName, setQuerySeqName] = useState('')
-  const {
-    options,
-    selectedId,
-    setSelectedId,
-    selectedTranscript,
-    proteinSequence,
-    error,
-  } = useTranscriptSelection({ feature, view })
+  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const { selectedTranscript, error } = transcriptSelection
 
   const e = launchViewError ?? error
   return (
     <>
-      <DialogContent className={classes.dialogContent}>
-        {e ? <ErrorMessage error={e} /> : null}
+      <LaunchPanelContent error={e}>
         <FormControl component="fieldset">
           <RadioGroup
             row
@@ -155,14 +143,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           )}
         </div>
 
-        <TranscriptSelector
-          feature={feature}
-          options={options}
-          selectedId={selectedId}
-          selectedTranscript={selectedTranscript}
-          onTranscriptChange={setSelectedId}
-          proteinSequence={proteinSequence}
-        />
+        <TranscriptSelector feature={feature} {...transcriptSelection} />
 
         <TextField2
           variant="outlined"
@@ -185,25 +166,23 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             highlights will not work.
           </Alert>
         ) : null}
-      </DialogContent>
+      </LaunchPanelContent>
 
-      <DialogActions>
-        <Button
-          color="primary"
-          variant="contained"
-          disabled={
-            !selectedTranscript ||
-            (inputMethod === 'file' && !msaFileLocation) ||
-            (inputMethod === 'text' && !msaText.trim())
-          }
-          onClick={() => {
-            try {
+      <SubmitCancelActions
+        submitDisabled={
+          !selectedTranscript ||
+          (inputMethod === 'file' && !msaFileLocation) ||
+          (inputMethod === 'text' && !msaText.trim())
+        }
+        onSubmit={() => {
+          try {
+            if (selectedTranscript) {
               setLaunchViewError(undefined)
               launchView({
                 session,
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
-                feature: selectedTranscript!,
+                feature: selectedTranscript,
                 querySeqName: querySeqName.trim(),
                 ...(inputMethod === 'file'
                   ? {
@@ -217,26 +196,15 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                       },
                     }),
               })
-
               handleClose()
-            } catch (err) {
-              console.error(err)
-              setLaunchViewError(err)
             }
-          }}
-        >
-          Submit
-        </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+          } catch (err) {
+            console.error(err)
+            setLaunchViewError(err)
+          }
+        }}
+        onCancel={handleClose}
+      />
     </>
   )
 })

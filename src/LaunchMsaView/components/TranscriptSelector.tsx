@@ -32,7 +32,7 @@ export default function TranscriptSelector({
   options,
   selectedId,
   selectedTranscript,
-  onTranscriptChange,
+  setSelectedId,
   proteinSequence,
   validIds,
 }: {
@@ -40,7 +40,7 @@ export default function TranscriptSelector({
   options: Feature[]
   selectedId: string
   selectedTranscript: Feature | undefined
-  onTranscriptChange: (transcriptId: string) => void
+  setSelectedId: (transcriptId: string) => void
   proteinSequence: string | undefined
   validIds?: string[]
 }) {
@@ -57,7 +57,7 @@ export default function TranscriptSelector({
           className={classes.minWidth}
           value={selectedId}
           onChange={event => {
-            onTranscriptChange(event.target.value)
+            setSelectedId(event.target.value)
           }}
         >
           {options.map(val => {

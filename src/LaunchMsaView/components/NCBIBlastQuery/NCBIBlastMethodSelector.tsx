@@ -2,12 +2,14 @@ import React from 'react'
 
 import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 
+import type { BlastLookupMethod } from './NCBIBlastPanel'
+
 export default function NCBIBlastMethodSelector({
   lookupMethod,
   setLookupMethod,
 }: {
-  lookupMethod: string
-  setLookupMethod: (method: string) => void
+  lookupMethod: BlastLookupMethod
+  setLookupMethod: (method: BlastLookupMethod) => void
 }) {
   return (
     <FormControl component="fieldset">
@@ -15,7 +17,7 @@ export default function NCBIBlastMethodSelector({
         row
         value={lookupMethod}
         onChange={event => {
-          setLookupMethod(event.target.value)
+          setLookupMethod(event.target.value as BlastLookupMethod)
         }}
       >
         <FormControlLabel

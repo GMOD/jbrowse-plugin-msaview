@@ -1,28 +1,26 @@
 import React, { useState } from 'react'
 
-import { ErrorMessage, LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
-import { getContainingView, getEnv, getSession } from '@jbrowse/core/util'
-import { Button, DialogActions, DialogContent, MenuItem } from '@mui/material'
+import { LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
+import { getEnv, getSession } from '@jbrowse/core/util'
+import { MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
-import { getGeneDisplayName } from '../../util'
+import { staticSwrConfig } from '../../../utils/swrConfig'
+import { getGeneDisplayName, getLinearGenomeView } from '../../util'
+import LaunchPanelContent from '../LaunchPanelContent'
+import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
-import { swrFlags } from './consts'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
 import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import { readMsaDatasets } from './types'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
-  dialogContent: {
-    width: '80em',
-  },
   selectedContainer: {
     marginTop: 50,
   },
@@ -38,7 +36,7 @@ const PreLoadedMSA = observer(function ({
   handleClose: () => void
 }) {
   const session = getSession(model)
-  const view = getContainingView(model) as LinearGenomeViewModel
+  const view = getLinearGenomeView(model)
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
   const { assemblyNames } = view
@@ -56,17 +54,15 @@ const PreLoadedMSA = observer(function ({
   } = useSWR(
     selectedDataset ? `${selectedDataset.datasetId}-msa-list` : null,
     () => fetchMSAList({ config: selectedDataset!.adapter, pluginManager }),
-    swrFlags,
+    staticSwrConfig,
   )
 
-  const {
-    options: transcripts,
-    selectedId,
-    setSelectedId,
-    selectedTranscript,
-    proteinSequence,
-    error: proteinSequenceError,
-  } = useTranscriptSelection({ feature, view, validIds: msaList })
+  const transcriptSelection = useTranscriptSelection({
+    feature,
+    view,
+    validIds: msaList,
+  })
+  const { selectedId, selectedTranscript } = transcriptSelection
 
   const {
     data: msaData,
@@ -82,16 +78,17 @@ const PreLoadedMSA = observer(function ({
         config: selectedDataset!.adapter,
         pluginManager,
       }),
-    swrFlags,
+    staticSwrConfig,
   )
 
   const e =
-    msaListFetchError ?? msaDataFetchError ?? proteinSequenceError ?? viewError
+    msaListFetchError ??
+    msaDataFetchError ??
+    transcriptSelection.error ??
+    viewError
   return (
     <>
-      <DialogContent className={classes.dialogContent}>
-        {e ? <ErrorMessage error={e} /> : null}
-
+      <LaunchPanelContent error={e}>
         <TextField2
           select
           label="Select MSA dataset"
@@ -127,29 +124,19 @@ const PreLoadedMSA = observer(function ({
                 <SanitizedHTML html={selectedDataset.description} />
                 <TranscriptSelector
                   feature={feature}
-                  options={transcripts}
-                  selectedId={selectedId}
-                  selectedTranscript={selectedTranscript}
-                  onTranscriptChange={setSelectedId}
-                  proteinSequence={proteinSequence}
-                  validIds={msaList}
+                  {...transcriptSelection}
                 />
               </div>
             ) : null}
           </div>
         ) : null}
-      </DialogContent>
+      </LaunchPanelContent>
 
-      <DialogActions>
-        <Button
-          color="primary"
-          variant="contained"
-          disabled={!selectedTranscript || !msaData?.length}
-          onClick={() => {
-            try {
-              if (!selectedTranscript || !msaData) {
-                return
-              }
+      <SubmitCancelActions
+        submitDisabled={!selectedTranscript || !msaData?.length}
+        onSubmit={() => {
+          try {
+            if (selectedTranscript && msaData) {
               const querySeqName = `${selectedId}_${assemblyNames[0]}`
               preCalculatedLaunchView({
                 session,
@@ -164,23 +151,13 @@ const PreLoadedMSA = observer(function ({
                 },
               })
               handleClose()
-            } catch (e) {
-              setViewError(e)
             }
-          }}
-        >
-          Submit
-        </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+          } catch (e) {
+            setViewError(e)
+          }
+        }}
+        onCancel={handleClose}
+      />
     </>
   )
 })

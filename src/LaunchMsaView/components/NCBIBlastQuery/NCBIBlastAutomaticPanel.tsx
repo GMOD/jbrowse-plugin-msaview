@@ -1,15 +1,10 @@
 import React, { useMemo, useState } from 'react'
 
-import { ErrorMessage } from '@jbrowse/core/ui'
-import { getContainingView } from '@jbrowse/core/util'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Button,
-  DialogActions,
-  DialogContent,
   MenuItem,
   Typography,
 } from '@mui/material'
@@ -17,26 +12,25 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import CachedBlastResults from './CachedBlastResults'
+import MsaAlgorithmSelect from './MsaAlgorithmSelect'
 import { blastLaunchView } from './blastLaunchView'
-import { blastDatabaseOptions, blastPrograms, msaAlgorithms } from './consts'
+import { blastDatabaseOptions, blastPrograms } from './consts'
 import { useCachedBlastResults } from './useCachedBlastResults'
 import TextField2 from '../../../components/TextField2'
 import {
-  getGeneDisplayName,
+  getBlastViewTitle,
   getGeneIdentifiers,
-  getTranscriptDisplayName,
+  getLinearGenomeView,
 } from '../../util'
+import LaunchPanelContent from '../LaunchPanelContent'
+import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { BlastDatabase, BlastProgram, MsaAlgorithm } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
-  dialogContent: {
-    width: '80em',
-  },
   selectField: {
     width: 150,
   },
@@ -69,7 +63,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
   children: React.ReactNode
 }) {
   const { classes } = useStyles()
-  const view = getContainingView(model) as LinearGenomeViewModel
+  const view = getLinearGenomeView(model)
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [selectedBlastDatabase, setSelectedBlastDatabase] =
     useState<BlastDatabase>('nr')
@@ -82,20 +76,13 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const { results: cachedResults, error: cachedResultsError } =
     useCachedBlastResults(geneIds)
 
-  const {
-    options,
-    selectedId,
-    setSelectedId,
-    selectedTranscript,
-    proteinSequence,
-    error: proteinSequenceError,
-  } = useTranscriptSelection({ feature, view })
-  const e = proteinSequenceError ?? launchViewError ?? cachedResultsError
+  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const { selectedTranscript, proteinSequence } = transcriptSelection
+  const e = transcriptSelection.error ?? launchViewError ?? cachedResultsError
   return (
     <>
-      <DialogContent className={classes.dialogContent}>
+      <LaunchPanelContent error={e}>
         {children}
-        {e ? <ErrorMessage error={e} /> : null}
         <TextField2
           variant="outlined"
           label="BLAST database"
@@ -117,22 +104,11 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ))}
         </TextField2>
 
-        <TextField2
-          variant="outlined"
-          label="MSA Algorithm"
+        <MsaAlgorithmSelect
           className={classes.selectField}
-          select
           value={selectedMsaAlgorithm}
-          onChange={event => {
-            setSelectedMsaAlgorithm(event.target.value as MsaAlgorithm)
-          }}
-        >
-          {msaAlgorithms.map(val => (
-            <MenuItem value={val} key={val}>
-              {val}
-            </MenuItem>
-          ))}
-        </TextField2>
+          onChange={setSelectedMsaAlgorithm}
+        />
 
         <div className={classes.databaseFieldContainer}>
           <TextField2
@@ -162,14 +138,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
           ) : null}
         </div>
 
-        <TranscriptSelector
-          feature={feature}
-          options={options}
-          selectedId={selectedId}
-          selectedTranscript={selectedTranscript}
-          onTranscriptChange={setSelectedId}
-          proteinSequence={proteinSequence}
-        />
+        <TranscriptSelector feature={feature} {...transcriptSelection} />
 
         <Typography className={classes.infoText}>
           This panel will automatically submit a query to NCBI. Using blastp can
@@ -196,21 +165,17 @@ const NCBIBlastAutomaticPanel = observer(function ({
             </AccordionDetails>
           </Accordion>
         ) : null}
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            try {
-              if (!selectedTranscript) {
-                return
-              }
+      </LaunchPanelContent>
+      <SubmitCancelActions
+        submitDisabled={!proteinSequence}
+        onSubmit={() => {
+          try {
+            if (selectedTranscript) {
               setLaunchViewError(undefined)
               blastLaunchView({
                 feature: selectedTranscript,
                 view,
-                newViewTitle: `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                newViewTitle: getBlastViewTitle(feature, selectedTranscript),
                 blastParams: {
                   baseUrl,
                   blastProgram: selectedBlastProgram,
@@ -221,25 +186,14 @@ const NCBIBlastAutomaticPanel = observer(function ({
                 },
               })
               handleClose()
-            } catch (e) {
-              console.error(e)
-              setLaunchViewError(e)
             }
-          }}
-          disabled={!proteinSequence}
-        >
-          Submit
-        </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+          } catch (e) {
+            console.error(e)
+            setLaunchViewError(e)
+          }
+        }}
+        onCancel={handleClose}
+      />
     </>
   )
 })

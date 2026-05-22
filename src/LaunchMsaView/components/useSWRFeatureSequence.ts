@@ -2,6 +2,7 @@ import { getSession } from '@jbrowse/core/util'
 import useSWR from 'swr'
 
 import { fetchSeq } from './fetchSeq'
+import { staticSwrConfig } from '../../utils/swrConfig'
 
 import type { Feature } from '@jbrowse/core/util'
 
@@ -38,22 +39,12 @@ export function useSWRFeatureSequence({
   feature?: Feature
 }) {
   const assemblyName = view?.assemblyNames?.[0]
+  const args =
+    feature && assemblyName ? { feature, assemblyName, view } : undefined
   const { data, error } = useSWR(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    feature && assemblyName && view
-      ? [feature.id(), assemblyName, 'feature-sequence']
-      : null,
-    () =>
-      featureSequenceFetcher({
-        feature: feature!,
-        assemblyName: assemblyName!,
-        view: view!,
-      }),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: false,
-    },
+    args ? [args.feature.id(), args.assemblyName, 'feature-sequence'] : null,
+    () => featureSequenceFetcher(args!),
+    staticSwrConfig,
   )
 
   return {

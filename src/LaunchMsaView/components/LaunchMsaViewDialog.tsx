@@ -25,15 +25,18 @@ export default function LaunchMsaViewDialog({
   const datasets = readMsaDatasets(session.jbrowse)
   const hasPreloadedDatasets = !!datasets?.length
 
-  const [value, setValue] = useState('ncbi_blast')
-
-  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue)
-  }
+  const [value, setValue] = useState<
+    'ncbi_blast' | 'preloaded_msa' | 'manual_msa'
+  >('ncbi_blast')
 
   return (
     <Dialog maxWidth="xl" title="Launch MSA view" open onClose={handleClose}>
-      <Tabs value={value} onChange={handleChange}>
+      <Tabs
+        value={value}
+        onChange={(_event, newValue) => {
+          setValue(newValue)
+        }}
+      >
         <Tab label="NCBI BLAST query" value="ncbi_blast" />
         {hasPreloadedDatasets ? (
           <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />

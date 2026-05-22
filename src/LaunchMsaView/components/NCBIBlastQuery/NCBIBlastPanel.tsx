@@ -26,6 +26,8 @@ const panelMap = {
   manual: NCBIBlastManualPanel,
 } as const
 
+export type BlastLookupMethod = keyof typeof panelMap
+
 export default function NCBIBlastPanel({
   handleClose,
   model,
@@ -35,7 +37,8 @@ export default function NCBIBlastPanel({
   model: AbstractTrackModel
   feature: Feature
 }) {
-  const [lookupMethod, setLookupMethod] = useState('automatic')
+  const [lookupMethod, setLookupMethod] =
+    useState<BlastLookupMethod>('automatic')
   const [baseUrl, setBaseUrl] = useLocalStorage(
     'msa-blastRootUrl',
     BASE_BLAST_URL,
@@ -43,7 +46,7 @@ export default function NCBIBlastPanel({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const { classes } = useStyles()
 
-  const Panel = panelMap[lookupMethod as keyof typeof panelMap]
+  const Panel = panelMap[lookupMethod]
 
   return (
     <>

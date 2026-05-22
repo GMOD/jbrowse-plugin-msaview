@@ -1,4 +1,4 @@
-export const swrFlags = {
+export const staticSwrConfig = {
   revalidateOnFocus: false,
   revalidateOnReconnect: false,
   revalidateIfStale: false,

@@ -1,33 +1,23 @@
 import React, { useState } from 'react'
 
-import { ErrorMessage } from '@jbrowse/core/ui'
-import { getContainingView } from '@jbrowse/core/util'
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  MenuItem,
-  Typography,
-} from '@mui/material'
+import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import MsaAlgorithmSelect from './MsaAlgorithmSelect'
 import { blastLaunchView } from './blastLaunchView'
-import { msaAlgorithms } from './consts'
 import ExternalLink from '../../../components/ExternalLink'
 import TextField2 from '../../../components/TextField2'
-import { getGeneDisplayName, getTranscriptDisplayName } from '../../util'
+import { getBlastViewTitle, getLinearGenomeView } from '../../util'
+import LaunchPanelContent from '../LaunchPanelContent'
+import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
 import type { MsaAlgorithm } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
-  dialogContent: {
-    width: '80em',
-  },
   marginBottom: {
     marginBottom: 16,
   },
@@ -53,29 +43,22 @@ const NCBIBlastRIDPanel = observer(function ({
   children: React.ReactNode
 }) {
   const { classes } = useStyles()
-  const view = getContainingView(model) as LinearGenomeViewModel
+  const view = getLinearGenomeView(model)
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [rid, setRid] = useState('')
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
     useState<MsaAlgorithm>('clustalo')
 
-  const {
-    options,
-    selectedId,
-    setSelectedId,
-    selectedTranscript,
-    proteinSequence,
-    error: proteinSequenceError,
-  } = useTranscriptSelection({ feature, view })
+  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const { selectedTranscript, proteinSequence } = transcriptSelection
 
-  const e = proteinSequenceError ?? launchViewError
+  const e = transcriptSelection.error ?? launchViewError
   const trimmedRid = rid.trim()
 
   return (
     <>
-      <DialogContent className={classes.dialogContent}>
+      <LaunchPanelContent error={e}>
         {children}
-        {e ? <ErrorMessage error={e} /> : null}
 
         <Typography variant="body2" className={classes.marginBottom}>
           Enter the RID (Request ID) from a previously submitted NCBI BLAST
@@ -104,52 +87,30 @@ const NCBIBlastRIDPanel = observer(function ({
           </Typography>
         ) : null}
 
-        <TextField2
-          variant="outlined"
-          label="MSA Algorithm"
+        <MsaAlgorithmSelect
           className={classes.ridField}
-          select
           value={selectedMsaAlgorithm}
-          onChange={event => {
-            setSelectedMsaAlgorithm(event.target.value as MsaAlgorithm)
-          }}
-        >
-          {msaAlgorithms.map(val => (
-            <MenuItem value={val} key={val}>
-              {val}
-            </MenuItem>
-          ))}
-        </TextField2>
-
-        <TranscriptSelector
-          feature={feature}
-          options={options}
-          selectedId={selectedId}
-          selectedTranscript={selectedTranscript}
-          onTranscriptChange={setSelectedId}
-          proteinSequence={proteinSequence}
+          onChange={setSelectedMsaAlgorithm}
         />
+
+        <TranscriptSelector feature={feature} {...transcriptSelection} />
 
         <Typography className={classes.infoText}>
           This will fetch the BLAST results for the provided RID and run them
           through a multiple sequence alignment. The protein sequence from the
           selected transcript will be added as the query sequence in the MSA.
         </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            try {
-              if (!selectedTranscript || !trimmedRid) {
-                return
-              }
+      </LaunchPanelContent>
+      <SubmitCancelActions
+        submitDisabled={!proteinSequence || !trimmedRid}
+        onSubmit={() => {
+          try {
+            if (selectedTranscript && trimmedRid) {
               setLaunchViewError(undefined)
               blastLaunchView({
                 feature: selectedTranscript,
                 view,
-                newViewTitle: `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                newViewTitle: getBlastViewTitle(feature, selectedTranscript),
                 blastParams: {
                   baseUrl,
                   blastProgram: 'blastp',
@@ -161,25 +122,14 @@ const NCBIBlastRIDPanel = observer(function ({
                 },
               })
               handleClose()
-            } catch (e) {
-              console.error(e)
-              setLaunchViewError(e)
             }
-          }}
-          disabled={!proteinSequence || !trimmedRid}
-        >
-          Submit
-        </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
-          Cancel
-        </Button>
-      </DialogActions>
+          } catch (e) {
+            console.error(e)
+            setLaunchViewError(e)
+          }
+        }}
+        onCancel={handleClose}
+      />
     </>
   )
 })

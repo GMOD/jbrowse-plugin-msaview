@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
-import { getContainingView } from '@jbrowse/core/util'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Button,
@@ -17,11 +16,10 @@ import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchViewFromCache } from './blastLaunchView'
 import { useCachedBlastResults } from './useCachedBlastResults'
-import { getGeneIdentifiers } from '../../util'
+import { getGeneIdentifiers, getLinearGenomeView } from '../../util'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 const useStyles = makeStyles()({
   header: {
@@ -37,17 +35,15 @@ const useStyles = makeStyles()({
 })
 
 function getResultDisplayName(result: CachedBlastResult): string {
-  const parts = []
-  if (result.geneName) {
-    parts.push(result.geneName)
-  }
-  if (result.transcriptName && result.transcriptName !== result.geneName) {
-    parts.push(result.transcriptName)
-  }
-  if (parts.length === 0) {
-    parts.push(result.geneId ?? result.transcriptId ?? 'Unknown')
-  }
-  return parts.join(' - ')
+  const parts = [
+    result.geneName,
+    result.transcriptName !== result.geneName
+      ? result.transcriptName
+      : undefined,
+  ].filter((p): p is string => !!p)
+  return parts.length > 0
+    ? parts.join(' - ')
+    : (result.geneId ?? result.transcriptId ?? 'Unknown')
 }
 
 const CachedBlastResults = observer(function ({
@@ -60,7 +56,7 @@ const CachedBlastResults = observer(function ({
   feature: Feature
 }) {
   const { classes } = useStyles()
-  const view = getContainingView(model) as LinearGenomeViewModel
+  const view = getLinearGenomeView(model)
   const [operationError, setOperationError] = useState<unknown>()
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
@@ -78,24 +74,16 @@ const CachedBlastResults = observer(function ({
   }
 
   const displayError = error ?? operationError
-  if (displayError) {
-    return <ErrorMessage error={displayError} />
-  }
-
-  if (isLoading) {
-    return <Typography>Loading cached results...</Typography>
-  }
-
-  if (results.length === 0) {
-    return (
-      <Typography color="textSecondary">
-        No cached BLAST results found for this gene. Run a BLAST query to cache
-        results.
-      </Typography>
-    )
-  }
-
-  return (
+  return displayError ? (
+    <ErrorMessage error={displayError} />
+  ) : isLoading ? (
+    <Typography>Loading cached results...</Typography>
+  ) : results.length === 0 ? (
+    <Typography color="textSecondary">
+      No cached BLAST results found for this gene. Run a BLAST query to cache
+      results.
+    </Typography>
+  ) : (
     <div>
       <div className={classes.header}>
         <Typography variant="subtitle1">
