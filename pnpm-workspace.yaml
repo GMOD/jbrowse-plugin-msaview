@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: true
   puppeteer: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@jbrowse/mobx-state-tree@5.8.7'
