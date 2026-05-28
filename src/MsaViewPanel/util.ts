@@ -1,13 +1,9 @@
-import type { Feature } from '@jbrowse/core/util'
-
-export function checkHovered(hovered: unknown): hovered is {
-  hoverFeature: Feature
-  hoverPosition: { coord: number; refName: string }
-} {
+export function hasHoverPosition(
+  hovered: unknown,
+): hovered is { hoverPosition: { coord: number; refName: string } } {
   return (
     !!hovered &&
     typeof hovered === 'object' &&
-    'hoverFeature' in hovered &&
     'hoverPosition' in hovered &&
     !!hovered.hoverPosition
   )

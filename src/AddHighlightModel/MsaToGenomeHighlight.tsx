@@ -4,9 +4,8 @@ import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
 import { hasHoverPosition, useStyles } from './util'
+import { isMsaView } from '../MsaViewPanel/model'
 import { getCanonicalRefName } from '../MsaViewPanel/util'
-
-import type { JBrowsePluginMsaViewModel } from '../MsaViewPanel/model'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 type LGV = LinearGenomeViewModel
@@ -17,9 +16,7 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   model: LGV
 }) {
   const { views, hovered } = getSession(model)
-  const msaView = views.find(f => f.type === 'MsaView') as
-    | JBrowsePluginMsaViewModel
-    | undefined
+  const msaView = views.filter(isMsaView).find(v => v.connectedViewId === model.id)
   const highlights = msaView?.connectedHighlights
 
   // Suppress codon highlight while hovering the LGV — GenomeMouseoverHighlight
@@ -27,7 +24,7 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   return !hasHoverPosition(hovered) && highlights?.length ? (
     <MsaToGenomeHighlightRenderer
       model={model}
-      highlights={Array.from(highlights)}
+      highlights={highlights}
     />
   ) : null
 })

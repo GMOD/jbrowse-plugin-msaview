@@ -2,7 +2,7 @@ import { lazy } from 'react'
 
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
-import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
+import { addDisposer, types } from '@jbrowse/mobx-state-tree'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
@@ -16,7 +16,6 @@ import {
   processInit,
   runCleanup,
   storeDataToIndexedDB,
-  updateGenomeHighlights,
 } from './afterCreateAutoruns'
 import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
@@ -84,13 +83,6 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        connectedHighlights: types.array(
-          types.model({
-            refName: types.string,
-            start: types.number,
-            end: types.number,
-          }),
-        ),
         /**
          * #property
          */
@@ -246,11 +238,25 @@ export default function stateModelFactory() {
        * #getter
        */
       get mouseCol2(): number | undefined {
-        const structureCol = self.structureHoverCol
-        if (structureCol !== undefined) {
-          return structureCol
-        }
-        return genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
+        return (
+          self.structureHoverCol ??
+          genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
+        )
+      },
+
+      /**
+       * #getter
+       */
+      get connectedHighlights(): IRegion[] {
+        const { mouseCol, mouseClickCol } = self
+        return [
+          mouseCol === undefined
+            ? undefined
+            : msaCoordToGenomeCoord({ model: self, coord: mouseCol }),
+          mouseClickCol === undefined
+            ? undefined
+            : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol }),
+        ].filter((r): r is IRegion => r !== undefined)
       },
     }))
 
@@ -278,24 +284,6 @@ export default function stateModelFactory() {
        */
       setRid(arg: string) {
         self.rid = arg
-      },
-      /**
-       * #action
-       */
-      setConnectedHighlights(r: IRegion[]) {
-        self.connectedHighlights = cast(r)
-      },
-      /**
-       * #action
-       */
-      addToConnectedHighlights(r: IRegion) {
-        self.connectedHighlights.push(r)
-      },
-      /**
-       * #action
-       */
-      clearConnectedHighlights() {
-        self.connectedHighlights = cast([])
       },
       /**
        * #action
@@ -504,7 +492,6 @@ export default function stateModelFactory() {
           storeDataToIndexedDB,
           launchBlastIfNeeded,
           processInit,
-          updateGenomeHighlights,
           highlightConnectedStructures,
           autoConnectStructures,
           observeProteinHighlights,
@@ -526,3 +513,7 @@ export type JBrowsePluginMsaViewStateModel = ReturnType<
 export type JBrowsePluginMsaViewModel = Instance<JBrowsePluginMsaViewStateModel>
 
 export { type MafRegion, type MsaViewInitState } from './types'
+
+export function isMsaView(view: { type: string }): view is JBrowsePluginMsaViewModel {
+  return view.type === 'MsaView'
+}

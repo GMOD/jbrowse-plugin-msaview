@@ -4,6 +4,7 @@ import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
 import { hasHoverPosition, useStyles } from './util'
+import { isMsaView } from '../MsaViewPanel/model'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -13,7 +14,7 @@ const GenomeMouseoverHighlight = observer(function ({
   model: LinearGenomeViewModel
 }) {
   const { hovered, views } = getSession(model)
-  const hasMsaView = views.some(s => s.type === 'MsaView')
+  const hasMsaView = views.some(s => isMsaView(s) && s.connectedViewId === model.id)
   return hasMsaView && hasHoverPosition(hovered) ? (
     <GenomeMouseoverHighlightRenderer model={model} hovered={hovered} />
   ) : null

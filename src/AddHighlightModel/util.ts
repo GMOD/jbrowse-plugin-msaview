@@ -1,15 +1,6 @@
 import { makeStyles } from 'tss-react/mui'
 
-export function hasHoverPosition(
-  hovered: unknown,
-): hovered is { hoverPosition: { coord: number; refName: string } } {
-  return (
-    !!hovered &&
-    typeof hovered === 'object' &&
-    'hoverPosition' in hovered &&
-    !!hovered.hoverPosition
-  )
-}
+export { hasHoverPosition } from '../MsaViewPanel/util'
 
 export const useStyles = makeStyles()({
   highlight: {

@@ -46,10 +46,8 @@ function createCacheKey(
   blastProgram: BlastProgram,
   transcriptId?: string,
 ) {
-  if (transcriptId) {
-    return `${blastDatabase}:${blastProgram}:${transcriptId}:${proteinSequence}`
-  }
-  return `${blastDatabase}:${blastProgram}:${proteinSequence}`
+  const idPart = transcriptId ? `:${transcriptId}` : ''
+  return `${blastDatabase}:${blastProgram}${idPart}:${proteinSequence}`
 }
 
 export async function saveBlastResult({

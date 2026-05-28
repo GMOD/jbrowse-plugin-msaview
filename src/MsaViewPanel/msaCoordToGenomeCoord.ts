@@ -21,45 +21,29 @@ export function msaCoordToGenomeCoord({
 }) {
   const { querySeqName, transcriptToMsaMap, mafRegion } = model
 
-  // Get the query sequence
-  const queryRow = model.rows.find(f => f[0] === querySeqName)
-  const querySeq = queryRow?.[1]
+  const querySeq = model.rows.find(f => f[0] === querySeqName)?.[1]
   if (!querySeq) {
     return undefined
   }
 
-  // Convert gapped MSA column to ungapped sequence coordinate
-  // Returns undefined if the position is a gap
   const ungappedPos = gappedToUngappedPosition(querySeq, mouseCol)
   if (ungappedPos === undefined) {
     return undefined
   }
 
-  // Handle MAF region mapping
   if (mafRegion) {
     const genomePos = mafRegion.start + ungappedPos
-    // Check if position is within the region
-    if (genomePos >= mafRegion.end) {
-      return undefined
-    }
-    return {
-      refName: mafRegion.refName,
-      start: genomePos,
-      end: genomePos + 1,
-    }
+    return genomePos < mafRegion.end
+      ? { refName: mafRegion.refName, start: genomePos, end: genomePos + 1 }
+      : undefined
   }
 
-  // Handle transcript mapping (original behavior)
   if (transcriptToMsaMap) {
     const { refName, p2g } = transcriptToMsaMap
     const s = p2g[ungappedPos]
     const e = p2g[ungappedPos + 1]
     return s !== undefined && e !== undefined
-      ? {
-          refName,
-          start: Math.min(s, e),
-          end: Math.max(s, e),
-        }
+      ? { refName, start: Math.min(s, e), end: Math.max(s, e) }
       : undefined
   }
 

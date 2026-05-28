@@ -3,6 +3,7 @@ import React from 'react'
 import { getSession } from '@jbrowse/core/util'
 
 import HighlightComponents from './HighlightComponents'
+import { isMsaView } from '../MsaViewPanel/model'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -16,7 +17,7 @@ export default function AddHighlightComponentsModelF(
     (rest: React.ReactNode[], { model }: { model: LinearGenomeViewModel }) => {
       // Quick check: don't add any components if no MSA view exists
       const { views } = getSession(model)
-      const hasMsaView = views.some(v => v.type === 'MsaView')
+      const hasMsaView = views.some(v => isMsaView(v) && v.connectedViewId === model.id)
       if (!hasMsaView) {
         return rest
       }
