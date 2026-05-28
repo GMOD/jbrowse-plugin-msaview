@@ -217,7 +217,7 @@ describe('TranscriptSelector E2E', () => {
         comboboxes.find(el => {
           const label = el
             .closest('.MuiFormControl-root')
-            ?.querySelector('label')
+            ?.querySelector('.MuiInputLabel-root, label')
           return label?.textContent?.toLowerCase().includes('isoform')
         }) ?? null
       )
