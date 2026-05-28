@@ -14,7 +14,9 @@ const GenomeMouseoverHighlight = observer(function ({
   model: LinearGenomeViewModel
 }) {
   const { hovered, views } = getSession(model)
-  const hasMsaView = views.some(s => isMsaView(s) && s.connectedViewId === model.id)
+  const hasMsaView = views.some(
+    s => isMsaView(s) && s.connectedViewId === model.id,
+  )
   return hasMsaView && hasHoverPosition(hovered) ? (
     <GenomeMouseoverHighlightRenderer model={model} hovered={hovered} />
   ) : null

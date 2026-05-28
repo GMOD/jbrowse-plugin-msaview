@@ -514,6 +514,8 @@ export type JBrowsePluginMsaViewModel = Instance<JBrowsePluginMsaViewStateModel>
 
 export { type MafRegion, type MsaViewInitState } from './types'
 
-export function isMsaView(view: { type: string }): view is JBrowsePluginMsaViewModel {
+export function isMsaView(view: {
+  type: string
+}): view is JBrowsePluginMsaViewModel {
   return view.type === 'MsaView'
 }

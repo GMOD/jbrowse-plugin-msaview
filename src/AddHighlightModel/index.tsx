@@ -17,7 +17,9 @@ export default function AddHighlightComponentsModelF(
     (rest: React.ReactNode[], { model }: { model: LinearGenomeViewModel }) => {
       // Quick check: don't add any components if no MSA view exists
       const { views } = getSession(model)
-      const hasMsaView = views.some(v => isMsaView(v) && v.connectedViewId === model.id)
+      const hasMsaView = views.some(
+        v => isMsaView(v) && v.connectedViewId === model.id,
+      )
       if (!hasMsaView) {
         return rest
       }
