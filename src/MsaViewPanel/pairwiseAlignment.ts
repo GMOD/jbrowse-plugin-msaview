@@ -128,13 +128,8 @@ function buildConsensus(alignedSeq1: string, alignedSeq2: string) {
   for (let i = 0; i < alignedSeq1.length; i++) {
     const a = alignedSeq1[i]!
     const b = alignedSeq2[i]!
-    if (a === '-' || b === '-') {
-      consensus += ' '
-    } else if (a.toUpperCase() === b.toUpperCase()) {
-      consensus += '|'
-    } else {
-      consensus += ' '
-    }
+    const match = a !== '-' && b !== '-' && a.toUpperCase() === b.toUpperCase()
+    consensus += match ? '|' : ' '
   }
   return consensus
 }

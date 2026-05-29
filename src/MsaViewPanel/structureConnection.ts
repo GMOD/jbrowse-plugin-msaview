@@ -40,8 +40,6 @@ export interface StructureConnection {
   msaRowName: string
   /** Map from MSA ungapped position to structure sequence position */
   msaToStructure: Record<number, number>
-  /** Map from structure sequence position to MSA ungapped position */
-  structureToMsa: Record<number, number>
 }
 
 /**
@@ -68,24 +66,4 @@ export function gappedToUngappedPosition(
   }
 
   return ungapped
-}
-
-/**
- * Helper to convert ungapped position to gapped MSA column for a specific row
- */
-export function ungappedToGappedPosition(
-  sequence: string,
-  ungappedPosition: number,
-): number | undefined {
-  let ungapped = 0
-  for (let i = 0; i < sequence.length; i++) {
-    const element = sequence[i]
-    if (element !== '-') {
-      if (ungapped === ungappedPosition) {
-        return i
-      }
-      ungapped++
-    }
-  }
-  return undefined
 }

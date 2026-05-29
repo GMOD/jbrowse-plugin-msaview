@@ -3,4 +3,7 @@ allowBuilds:
   puppeteer: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
-  - '@jbrowse/mobx-state-tree@5.8.7'
+  - '@jbrowse/mobx-state-tree'
+  - 'react-msaview'
+  - '@jbrowse/svgcanvas@5.1.1'
+  - msa-parsers@5.1.1

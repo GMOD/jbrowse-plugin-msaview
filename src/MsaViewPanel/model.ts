@@ -16,14 +16,11 @@ import {
   processInit,
   runCleanup,
   storeDataToIndexedDB,
+  syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
-import { genomeToMSA } from './genomeToMSA'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
-import {
-  getProteinViews,
-  ungappedToGappedPosition,
-} from './structureConnection'
+import { getProteinViews } from './structureConnection'
 import { getCanonicalRefName } from './util'
 
 import type { ProteinView, StructureConnection } from './structureConnection'
@@ -212,41 +209,6 @@ export default function stateModelFactory() {
       /**
        * #getter
        */
-      get structureHoverCol(): number | undefined {
-        for (const conn of self.connectedProteinViews) {
-          const structure = conn.proteinView.structures[conn.structureIdx]
-          const structurePos = structure?.hoverPosition?.structureSeqPos
-          if (structurePos !== undefined) {
-            const msaUngapped = conn.structureToMsa[structurePos]
-            if (msaUngapped !== undefined) {
-              const seq = self.getSequenceByRowName(conn.msaRowName)
-              if (seq) {
-                const globalCol = ungappedToGappedPosition(seq, msaUngapped)
-                if (globalCol !== undefined) {
-                  return self.globalColToVisibleCol(globalCol)
-                }
-              }
-            }
-          }
-        }
-        return undefined
-      },
-    }))
-
-    .views(self => ({
-      /**
-       * #getter
-       */
-      get mouseCol2(): number | undefined {
-        return (
-          self.structureHoverCol ??
-          genomeToMSA({ model: self as JBrowsePluginMsaViewModel })
-        )
-      },
-
-      /**
-       * #getter
-       */
       get connectedHighlights(): IRegion[] {
         const { mouseCol, mouseClickCol } = self
         return [
@@ -394,14 +356,13 @@ export default function stateModelFactory() {
           ungappedMsaSequence,
           structureSequence,
         )
-        const { seq1ToSeq2, seq2ToSeq1 } = buildAlignmentMaps(alignment)
+        const { seq1ToSeq2 } = buildAlignmentMaps(alignment)
 
         const connection: StructureConnection = {
           proteinViewId,
           structureIdx,
           msaRowName: rowName,
           msaToStructure: Object.fromEntries(seq1ToSeq2),
-          structureToMsa: Object.fromEntries(seq2ToSeq1),
         }
 
         self.connectedStructures.push(connection)
@@ -503,6 +464,7 @@ export default function stateModelFactory() {
             }),
           )
         }
+        addDisposer(self, autorun(syncGenomeHoverToMsaColumn(self)))
       },
     }))
 }

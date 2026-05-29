@@ -112,12 +112,6 @@ async function waitForRid({
 }) {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
-    const iter = 20
-    for (let i = 0; i < iter; i++) {
-      await timeout(1000)
-      onProgress(`Re-checking BLAST status in... ${iter - i}`)
-    }
-
     const res = await textfetch(
       `${baseUrl}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
     )
@@ -126,6 +120,11 @@ async function waitForRid({
     const hasHits = /\s+ThereAreHits=yes/m.test(res)
 
     if (status === 'WAITING') {
+      const iter = 20
+      for (let i = 0; i < iter; i++) {
+        onProgress(`Re-checking BLAST status in... ${iter - i}`)
+        await timeout(1000)
+      }
       continue
     }
 

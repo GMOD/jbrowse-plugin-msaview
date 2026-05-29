@@ -1,6 +1,7 @@
 import { getSession } from '@jbrowse/core/util'
 
 import { doLaunchBlast } from './doLaunchBlast'
+import { genomeToMSA } from './genomeToMSA'
 import {
   cleanupOldData,
   generateDataStoreId,
@@ -142,6 +143,27 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
         console.error(e)
       }
     })()
+  }
+}
+
+/**
+ * Mirror the connected genome view's hover position onto the MSA's hovered
+ * column. Returns the autorun body so it can keep a flag tracking whether the
+ * MSA's mouseCol was set by this sync: that way an unrelated session hover
+ * change clears the column only when the genome put it there, never wiping a
+ * column the user is hovering directly in the MSA.
+ */
+export function syncGenomeHoverToMsaColumn(self: JBrowsePluginMsaViewModel) {
+  let genomeDrivenCol = false
+  return () => {
+    const col = genomeToMSA({ model: self })
+    if (col !== undefined) {
+      self.setMousePos(col)
+      genomeDrivenCol = true
+    } else if (genomeDrivenCol) {
+      self.setMousePos(undefined)
+      genomeDrivenCol = false
+    }
   }
 }
 
