@@ -154,5 +154,26 @@
       ]
     }
   ],
+  "defaultSession": {
+    "name": "Default Session",
+    "views": [
+      {
+        "id": "msaview-default-lgv",
+        "type": "LinearGenomeView",
+        "init": {
+          "loc": "chr10:87,841,937..87,993,564",
+          "assembly": "hg38",
+          "tracks": [
+            {
+              "trackId": "hg38-ncbiRefSeq",
+              "displaySnapshot": {
+                "heightPreConfig": 400
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "aggregateTextSearchAdapters": []
 }
