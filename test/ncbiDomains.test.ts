@@ -75,14 +75,18 @@ const xml = `<GBSet>
 </GBSet>`
 
 describe('parseCddDomains', () => {
-  test('extracts CDD domains and skips non-CDD regions and other features', () => {
+  test('keeps the CDD domain and site, dropping the non-CDD motif and CDS', () => {
     const result = parseCddDomains(xml)
 
-    // the kinase domain (Region) and active site (Site) are kept; the
-    // non-CDD "Cytoplasmic retention motif" Region and the CDS are dropped
-    const mapk = result.get('NP_002736.3')
-    expect(mapk).toHaveLength(2)
-    const domain = mapk!.find(m => m.signature.entry!.accession === '270839')!
+    // every CDD Region/Site is kept (smaller features draw on top of larger
+    // ones); only the non-CDD "Cytoplasmic retention motif" Region and the CDS
+    // are dropped
+    const mapk = result.get('NP_002736.3')!
+    expect(mapk.map(m => m.signature.entry!.name).sort()).toEqual([
+      'STKc_ERK1_2_like',
+      'active',
+    ])
+    const domain = mapk.find(m => m.signature.entry!.accession === '270839')!
     expect(domain.signature.entry).toEqual({
       name: 'STKc_ERK1_2_like',
       description: 'Catalytic domain; cd07849',
@@ -91,16 +95,37 @@ describe('parseCddDomains', () => {
     expect(domain.locations).toEqual([{ start: 19, end: 353 }])
   })
 
-  test('parses a Site as discontiguous locations with a distinct accession', () => {
+  test('collapses a discontiguous site to one bounding span with a distinct accession', () => {
     const site = parseCddDomains(xml)
       .get('NP_002736.3')!
       .find(m => m.signature.entry!.name === 'active')!
+    // intervals 31-34, point 52, point 149 collapse to a single 31-149 box so
+    // the site renders as one bar rather than a spray of 1px specks
     expect(site.signature.entry!.accession).toBe('270839:active')
-    expect(site.locations).toEqual([
-      { start: 31, end: 34 },
-      { start: 52, end: 52 },
-      { start: 149, end: 149 },
-    ])
+    expect(site.locations).toEqual([{ start: 31, end: 149 }])
+  })
+
+  test('keeps all CDD features, including ones nested inside larger domains', () => {
+    const multiXml = `<GBSet><GBSeq>
+      <GBSeq_accession-version>XP_1.1</GBSeq_accession-version>
+      <GBSeq_feature-table>
+        <GBFeature>
+          <GBFeature_key>Region</GBFeature_key>
+          <GBFeature_intervals><GBInterval><GBInterval_from>10</GBInterval_from><GBInterval_to>100</GBInterval_to></GBInterval></GBFeature_intervals>
+          <GBFeature_quals><GBQualifier><GBQualifier_name>region_name</GBQualifier_name><GBQualifier_value>dom1</GBQualifier_value></GBQualifier><GBQualifier><GBQualifier_name>db_xref</GBQualifier_name><GBQualifier_value>CDD:1</GBQualifier_value></GBQualifier></GBFeature_quals>
+        </GBFeature>
+        <GBFeature>
+          <GBFeature_key>Region</GBFeature_key>
+          <GBFeature_intervals><GBInterval><GBInterval_from>20</GBInterval_from><GBInterval_to>90</GBInterval_to></GBInterval></GBFeature_intervals>
+          <GBFeature_quals><GBQualifier><GBQualifier_name>region_name</GBQualifier_name><GBQualifier_value>dom1_inner</GBQualifier_value></GBQualifier><GBQualifier><GBQualifier_name>db_xref</GBQualifier_name><GBQualifier_value>CDD:2</GBQualifier_value></GBQualifier></GBFeature_quals>
+        </GBFeature>
+      </GBSeq_feature-table>
+    </GBSeq></GBSet>`
+    const names = parseCddDomains(multiXml)
+      .get('XP_1.1')!
+      .map(m => m.signature.entry!.name)
+      .sort()
+    expect(names).toEqual(['dom1', 'dom1_inner'])
   })
 
   test('keys results by both versioned and primary accession', () => {
@@ -140,12 +165,16 @@ describe('parseCddDomains on a real recorded NCBI GenPept response', () => {
     expect(domain.locations).toEqual([{ start: 19, end: 353 }])
   })
 
-  test('extracts a CDD active site as many discontiguous residues', () => {
+  test('keeps the kinase domain plus its functional sites, each a single box', () => {
     const matches = parseCddDomains(realXml).get('NP_002736.3')!
-    const active = matches.find(m => m.signature.entry!.name === 'active')!
-    // distinct accession so it gets its own color, not the parent domain's
-    expect(active.signature.entry!.accession).toBe('270839:active')
-    expect(active.locations.length).toBeGreaterThan(1)
+    const names = matches.map(m => m.signature.entry!.name)
+    // the domain and its distinct functional sites are all kept; sites layer on
+    // top of the domain since react-msaview draws longest-first
+    expect(names).toContain('STKc_ERK1_2_like')
+    expect(names).toContain('ATP binding site')
+    expect(matches.length).toBeGreaterThan(3)
+    // each feature collapses to one bounding box (no discontiguous specks)
+    expect(matches.every(m => m.locations.length === 1)).toBe(true)
   })
 
   test('keys by both versioned and primary accession', () => {

@@ -2,6 +2,7 @@ import { getSession } from '@jbrowse/core/util'
 
 import { doLaunchBlast } from './doLaunchBlast'
 import { genomeToMSA } from './genomeToMSA'
+import { loadProteinDomains } from './loadProteinDomains'
 import {
   cleanupOldData,
   generateDataStoreId,
@@ -91,6 +92,34 @@ export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
       } catch (e) {
         self.setError(e)
         console.error(e)
+      } finally {
+        self.setProgress('')
+      }
+    })()
+  }
+}
+
+/**
+ * Once an accession-bearing alignment is present (fresh from BLAST or restored
+ * from cache), fetch NCBI CDD domains for those accessions and overlay them.
+ * Runs once per view; the domainsRequested guard prevents refiring when NCBI
+ * returns no domains (which leaves interProAnnotations undefined).
+ */
+export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
+  const { rows, domainsRequested, interProAnnotations } = self
+  const hasAccessions = self.data.treeMetadata?.includes('"Accession"') ?? false
+  if (
+    rows.length > 0 &&
+    hasAccessions &&
+    !interProAnnotations &&
+    !domainsRequested
+  ) {
+    self.setDomainsRequested(true)
+    void (async () => {
+      try {
+        await loadProteinDomains(self)
+      } catch (e) {
+        console.error('[msaview-domains] auto-load failed:', e)
       } finally {
         self.setProgress('')
       }

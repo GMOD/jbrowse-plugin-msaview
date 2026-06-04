@@ -7,8 +7,7 @@ import type { InterProScanResults } from 'react-msaview'
 interface DomainModel {
   data: { treeMetadata?: string }
   setProgress: (arg: string) => void
-  setInterProAnnotations: (data: Record<string, InterProScanResults>) => void
-  setShowDomains: (arg: boolean) => void
+  setDomains: (data: Record<string, InterProScanResults>) => void
 }
 
 /**
@@ -54,6 +53,5 @@ export async function loadProteinDomains(self: DomainModel) {
     throw new Error('No CDD domain annotations found for these proteins')
   }
 
-  self.setInterProAnnotations(annotations)
-  self.setShowDomains(true)
+  self.setDomains(annotations)
 }

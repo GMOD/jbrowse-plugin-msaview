@@ -28,8 +28,11 @@ function parseQualifiers(featureXml: string) {
 // A feature can span several intervals: domains are usually one contiguous
 // range, but CDD Sites (e.g. an active site) are a set of scattered residues
 // expressed as multiple GBInterval ranges and single GBInterval_point residues.
-function parseLocations(featureXml: string) {
-  const locations: { start: number; end: number }[] = []
+// We collapse those to a single bounding span so a site renders as one box
+// rather than a spray of 1px specks.
+function parseBoundingSpan(featureXml: string) {
+  const starts: number[] = []
+  const ends: number[] = []
   const re = /<GBInterval>([\s\S]*?)<\/GBInterval>/g
   let m
   while ((m = re.exec(featureXml)) !== null) {
@@ -38,54 +41,53 @@ function parseLocations(featureXml: string) {
     const to = field(block, 'GBInterval_to')
     const point = field(block, 'GBInterval_point')
     if (from && to) {
-      locations.push({ start: Number(from), end: Number(to) })
+      starts.push(Number(from))
+      ends.push(Number(to))
     } else if (point) {
-      locations.push({ start: Number(point), end: Number(point) })
+      starts.push(Number(point))
+      ends.push(Number(point))
     }
   }
-  return locations
+  return starts.length > 0
+    ? { start: Math.min(...starts), end: Math.max(...ends) }
+    : undefined
 }
+
+// Drop single-residue specks (acetylation/phospho points) but keep every
+// genuine domain and functional site; react-msaview draws longest-first, so
+// smaller features (binding sites, loops) layer on top of the domain they sit
+// inside.
+const MIN_FEATURE_LENGTH = 2
 
 function parseFeature(featureXml: string): DomainMatch | undefined {
   const key = field(featureXml, 'GBFeature_key')
-  if (key !== 'Region' && key !== 'Site') {
-    return undefined
-  }
   const quals = parseQualifiers(featureXml)
   const xref = quals.db_xref
-  // only CDD-backed features are conserved-domain annotations; Regions/Sites
-  // without a CDD xref are UniProt-propagated motifs we don't want here
-  if (!xref?.startsWith('CDD:')) {
-    return undefined
-  }
-  const locations = parseLocations(featureXml)
-  if (locations.length === 0) {
-    return undefined
-  }
-  const cddId = xref.replace('CDD:', '')
-  if (key === 'Region') {
-    const name = quals.region_name ?? cddId
+  const span = parseBoundingSpan(featureXml)
+  // only CDD-backed Regions/Sites are conserved-domain annotations; Regions and
+  // Sites without a CDD xref are UniProt-propagated point motifs we don't want
+  if (
+    (key === 'Region' || key === 'Site') &&
+    xref?.startsWith('CDD:') &&
+    span &&
+    span.end - span.start + 1 >= MIN_FEATURE_LENGTH
+  ) {
+    const cddId = xref.replace('CDD:', '')
+    const isDomain = key === 'Region'
+    // a site's note (e.g. "ATP binding site [chemical binding]") is more
+    // specific than its generic site_type ("other"), so prefer it for the name
+    // — that gives each functional site its own color/legend/filter entry
+    const noteName = quals.note?.split(/[[(]/)[0]?.trim()
+    const name = isDomain
+      ? (quals.region_name ?? cddId)
+      : noteName || quals.site_type || 'site'
+    const accession = isDomain ? cddId : `${cddId}:${name}`
     return {
-      signature: {
-        entry: { name, description: quals.note ?? name, accession: cddId },
-      },
-      locations,
+      signature: { entry: { name, description: quals.note ?? name, accession } },
+      locations: [span],
     }
   }
-  // Sites get a distinct accession (their own color/legend/filter in
-  // react-msaview), otherwise they would inherit the parent domain's color and
-  // be invisible inside its box
-  const siteType = quals.site_type ?? 'site'
-  return {
-    signature: {
-      entry: {
-        name: siteType,
-        description: quals.note ?? siteType,
-        accession: `${cddId}:${siteType}`,
-      },
-    },
-    locations,
-  }
+  return undefined
 }
 
 /**
