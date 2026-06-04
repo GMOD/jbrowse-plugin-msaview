@@ -1,5 +1,7 @@
 import { openDB } from 'idb'
 
+import { efetchUrl } from './eutils'
+
 const DB_NAME = 'jbrowse-msaview-taxonomy-cache'
 const STORE_NAME = 'common-names'
 const DB_VERSION = 2
@@ -80,7 +82,7 @@ export async function fetchTaxonomyInfo(
 
     try {
       const response = await fetch(
-        `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=${idsParam}&retmode=xml`,
+        efetchUrl({ db: 'taxonomy', id: idsParam, retmode: 'xml' }),
       )
       const text = await response.text()
 

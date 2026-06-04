@@ -30,6 +30,9 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
           if (storedData.tree) {
             self.setTree(storedData.tree)
           }
+          if (storedData.treeMetadata) {
+            self.setTreeMetadata(storedData.treeMetadata)
+          }
         }
       } catch (e) {
         console.error('Failed to load MSA data from IndexedDB:', e)

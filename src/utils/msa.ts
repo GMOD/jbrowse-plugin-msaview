@@ -1,4 +1,5 @@
-import { textfetch, timeout } from './fetch'
+import { textfetch } from './fetch'
+import { pollLoop } from './poll'
 
 import type { MsaAlgorithm } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 
@@ -44,21 +45,22 @@ async function wait({
   algorithm: MsaAlgorithm
   onProgress: (arg: string) => void
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  while (true) {
-    const result = await textfetch(`${base}/${algorithm}/status/${jobId}`)
-
-    if (result === 'FINISHED') {
-      break
-    } else if (result.includes('FAILURE')) {
-      throw new Error(`Failed to run: jobId ${jobId}`)
-    }
-
-    for (let i = 0; i < 10; i++) {
-      onProgress(`Re-checking MSA status in... ${10 - i}`)
-      await timeout(1000)
-    }
-  }
+  await pollLoop({
+    intervalSeconds: 10,
+    onCountdown: s => {
+      onProgress(`Re-checking MSA status in... ${s}`)
+    },
+    check: async () => {
+      const result = await textfetch(`${base}/${algorithm}/status/${jobId}`)
+      if (result.includes('FINISHED')) {
+        return true
+      }
+      if (result.includes('FAILURE')) {
+        throw new Error(`Failed to run: jobId ${jobId}`)
+      }
+      return false
+    },
+  })
 }
 
 export async function launchMSA({

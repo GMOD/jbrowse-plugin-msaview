@@ -1,4 +1,5 @@
-import { jsonfetch, textfetch, timeout } from './fetch'
+import { jsonfetch, textfetch } from './fetch'
+import { pollLoop } from './poll'
 
 import type { BlastResults } from './types'
 import type {
@@ -110,38 +111,33 @@ async function waitForRid({
   onProgress: (arg: string) => void
   baseUrl: string
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  while (true) {
-    const res = await textfetch(
-      `${baseUrl}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
-    )
-    const statusMatch = /\s+Status=(\S+)/m.exec(res)
-    const status = statusMatch?.[1]
-    const hasHits = /\s+ThereAreHits=yes/m.test(res)
+  await pollLoop({
+    intervalSeconds: 20,
+    onCountdown: s => {
+      onProgress(`Re-checking BLAST status in... ${s}`)
+    },
+    check: async () => {
+      const res = await textfetch(
+        `${baseUrl}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=${rid}`,
+      )
+      const status = /\s+Status=(\S+)/m.exec(res)?.[1]
+      const hasHits = /\s+ThereAreHits=yes/m.test(res)
 
-    if (status === 'WAITING') {
-      const iter = 20
-      for (let i = 0; i < iter; i++) {
-        onProgress(`Re-checking BLAST status in... ${iter - i}`)
-        await timeout(1000)
+      if (status === 'WAITING') {
+        return false
       }
-      continue
-    }
-
-    if (status === 'FAILED') {
-      throw new Error(`BLAST ${rid} failed`)
-    }
-
-    if (status === 'READY') {
-      if (hasHits) {
-        return true
-      } else {
+      if (status === 'FAILED') {
+        throw new Error(`BLAST ${rid} failed`)
+      }
+      if (status === 'READY') {
+        if (hasHits) {
+          return true
+        }
         throw new Error('No hits found')
       }
-    }
-
-    throw new Error(
-      `BLAST ${rid} returned unexpected status: ${status ?? 'unknown'}`,
-    )
-  }
+      throw new Error(
+        `BLAST ${rid} returned unexpected status: ${status ?? 'unknown'}`,
+      )
+    },
+  })
 }

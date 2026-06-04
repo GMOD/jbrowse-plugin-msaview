@@ -18,6 +18,7 @@ import {
   storeDataToIndexedDB,
   syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
+import { loadProteinDomains } from './loadProteinDomains'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
 import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
 import { getProteinViews } from './structureConnection'
@@ -77,9 +78,6 @@ export default function stateModelFactory() {
          * #property
          */
         connectedFeature: types.frozen(),
-        /**
-         * #property
-         */
         /**
          * #property
          */
@@ -165,6 +163,15 @@ export default function stateModelFactory() {
        */
       getSequenceByRowName(rowName: string) {
         return self.rows.find(r => r[0] === rowName)?.[1]
+      },
+
+      /**
+       * #getter
+       * whether the alignment has NCBI accessions (from the BLAST workflow) that
+       * can be used to overlay CDD protein domains
+       */
+      get canLoadProteinDomains() {
+        return self.data.treeMetadata?.includes('"Accession"') ?? false
       },
     }))
 
@@ -389,6 +396,26 @@ export default function stateModelFactory() {
         self.connectedStructures.clear()
       },
     }))
+    .actions(self => ({
+      /**
+       * #action
+       * overlay CDD protein domains fetched directly from NCBI onto the
+       * alignment rows that have accessions
+       */
+      loadProteinDomains() {
+        void (async () => {
+          try {
+            self.setError(undefined)
+            await loadProteinDomains(self)
+          } catch (e) {
+            self.setError(e)
+            console.error(e)
+          } finally {
+            self.setProgress('')
+          }
+        })()
+      },
+    }))
     .actions(self => {
       const superSetMouseClickPos = self.setMouseClickPos.bind(self)
 
@@ -441,6 +468,27 @@ export default function stateModelFactory() {
                 },
               ]
             : []),
+          ...(self.interProAnnotations
+            ? [
+                {
+                  label: 'Show protein domains',
+                  type: 'checkbox',
+                  checked: self.showDomains,
+                  onClick: () => {
+                    self.setShowDomains(!self.showDomains)
+                  },
+                },
+              ]
+            : self.canLoadProteinDomains
+              ? [
+                  {
+                    label: 'Show protein domains (NCBI CDD)',
+                    onClick: () => {
+                      self.loadProteinDomains()
+                    },
+                  },
+                ]
+              : []),
         ]
       },
     }))
