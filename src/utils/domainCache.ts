@@ -26,8 +26,7 @@ export async function getCachedDomains(accessions: string[]) {
   const tx = db.transaction(STORE_NAME, 'readonly')
   const results = await Promise.all(
     accessions.map(
-      accession =>
-        tx.store.get(accession) as Promise<CachedDomain | undefined>,
+      accession => tx.store.get(accession) as Promise<CachedDomain | undefined>,
     ),
   )
   await tx.done

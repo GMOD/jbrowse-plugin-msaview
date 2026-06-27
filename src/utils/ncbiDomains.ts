@@ -83,7 +83,9 @@ function parseFeature(featureXml: string): DomainMatch | undefined {
       : noteName || quals.site_type || 'site'
     const accession = isDomain ? cddId : `${cddId}:${name}`
     return {
-      signature: { entry: { name, description: quals.note ?? name, accession } },
+      signature: {
+        entry: { name, description: quals.note ?? name, accession },
+      },
       locations: [span],
     }
   }
