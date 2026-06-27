@@ -5,7 +5,6 @@ import { observer } from 'mobx-react'
 
 import { hasHoverPosition, useStyles } from './util'
 import { isMsaView } from '../MsaViewPanel/model'
-import { getCanonicalRefName } from '../MsaViewPanel/util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -38,19 +37,19 @@ const MsaToGenomeHighlightRenderer = observer(function ({
   highlights: { refName: string; start: number; end: number }[]
 }) {
   const { classes } = useStyles()
-  const { assemblyManager } = getSession(model)
   const { offsetPx } = model
 
   return (
     <>
       {highlights.map((r, idx) => {
-        const refName = getCanonicalRefName({
-          assemblyManager,
-          assemblyNames: model.assemblyNames,
-          refName: r.refName,
-        })
-        const s = model.bpToPx({ refName, coord: r.start })
-        const e = model.bpToPx({ refName, coord: r.end })
+        // Use the highlight's own refName, which is already in the connected
+        // view's coordinate space (it comes from the connectedFeature the
+        // launcher set on this LGV). Do NOT canonicalize: bpToPx matches
+        // displayed regions by exact refName with no alias resolution, so
+        // rewriting e.g. "chr17" to the assembly-canonical "17" misses a view
+        // whose regions are "chr17". (GenomeMouseoverHighlight does the same.)
+        const s = model.bpToPx({ refName: r.refName, coord: r.start })
+        const e = model.bpToPx({ refName: r.refName, coord: r.end })
         if (s && e) {
           const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
           const left = Math.min(s.offsetPx, e.offsetPx) - offsetPx

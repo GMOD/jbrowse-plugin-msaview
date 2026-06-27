@@ -1,5 +1,3 @@
-import { lazy } from 'react'
-
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
 import { addDisposer, types } from '@jbrowse/mobx-state-tree'
@@ -12,9 +10,7 @@ import { MSAModelF } from 'react-msaview'
 export type { MSAFormat } from 'msa-parsers'
 
 import {
-  autoConnectStructures,
   autoLoadProteinDomains,
-  highlightConnectedStructures,
   launchBlastIfNeeded,
   loadStoredData,
   observeProteinHighlights,
@@ -24,11 +20,7 @@ import {
   syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
 import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
-import { buildAlignmentMaps, runPairwiseAlignment } from './pairwiseAlignment'
-import { getProteinViews } from './structureConnection'
-import { getCanonicalRefName } from './util'
 
-import type { ProteinView, StructureConnection } from './structureConnection'
 import type { MafRegion, MsaViewInitState } from './types'
 import type {
   BlastDatabase,
@@ -38,10 +30,6 @@ import type {
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
-
-const ConnectStructureDialog = lazy(
-  () => import('./components/ConnectStructureDialog'),
-)
 
 type LGV = LinearGenomeViewModel
 
@@ -105,11 +93,6 @@ export default function stateModelFactory() {
          * #property
          */
         init: types.frozen<MsaViewInitState | undefined>(),
-
-        /**
-         * #property
-         */
-        connectedStructures: types.array(types.frozen<StructureConnection>()),
 
         /**
          * #property
@@ -193,24 +176,6 @@ export default function stateModelFactory() {
       get connectedView() {
         const { views } = getSession(self)
         return views.find(f => f.id === self.connectedViewId) as MaybeLGV
-      },
-
-      /**
-       * #getter
-       */
-      get connectedProteinViews() {
-        const proteinViews = getProteinViews(getSession(self).views)
-        const result: (StructureConnection & { proteinView: ProteinView })[] =
-          []
-        for (const conn of self.connectedStructures) {
-          const proteinView = proteinViews.find(
-            v => v.id === conn.proteinViewId,
-          )
-          if (proteinView) {
-            result.push({ ...conn, proteinView })
-          }
-        }
-        return result
       },
     }))
 
@@ -315,94 +280,22 @@ export default function stateModelFactory() {
        */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
-        const { assemblyManager } = getSession(self)
         const r2 = msaCoordToGenomeCoord({ model: self, coord })
 
         if (!r2 || !connectedView) {
           return
         }
 
+        // Use the genome coord's own refName for both nav paths — it matches the
+        // connected view's displayed regions. Canonicalizing (e.g. "chr17"->"17")
+        // can miss a view whose regions are an alias (same as the bpToPx path).
         if (zoomToBaseLevel) {
           connectedView.navTo(r2)
         } else {
-          const r = getCanonicalRefName({
-            assemblyManager,
-            assemblyNames: connectedView.assemblyNames,
-            refName: r2.refName,
-          })
-          connectedView.centerAt(r2.start, r)
+          connectedView.centerAt(r2.start, r2.refName)
         }
       },
 
-      /**
-       * #action
-       */
-      connectToStructure(
-        proteinViewId: string,
-        structureIdx: number,
-        msaRowName?: string,
-      ) {
-        const rowName = msaRowName ?? self.querySeqName
-        const msaSequence = self.getSequenceByRowName(rowName)
-        if (!msaSequence) {
-          throw new Error(`MSA row "${rowName}" not found`)
-        }
-
-        const ungappedMsaSequence = msaSequence.replaceAll('-', '')
-
-        const proteinView = getProteinViews(getSession(self).views).find(
-          v => v.id === proteinViewId,
-        )
-        if (!proteinView) {
-          throw new Error(`ProteinView "${proteinViewId}" not found`)
-        }
-
-        const structure = proteinView.structures[structureIdx]
-        if (!structure) {
-          throw new Error(`Structure at index ${structureIdx} not found`)
-        }
-
-        const structureSequence = structure.structureSequences?.[0]
-        if (!structureSequence) {
-          throw new Error('Structure sequence not available')
-        }
-
-        const alignment = runPairwiseAlignment(
-          ungappedMsaSequence,
-          structureSequence,
-        )
-        const { seq1ToSeq2 } = buildAlignmentMaps(alignment)
-
-        const connection: StructureConnection = {
-          proteinViewId,
-          structureIdx,
-          msaRowName: rowName,
-          msaToStructure: Object.fromEntries(seq1ToSeq2),
-        }
-
-        self.connectedStructures.push(connection)
-      },
-
-      /**
-       * #action
-       */
-      disconnectFromStructure(proteinViewId: string, structureIdx: number) {
-        const idx = self.connectedStructures.findIndex(
-          c =>
-            c.proteinViewId === proteinViewId &&
-            c.structureIdx === structureIdx,
-        )
-        if (idx !== -1) {
-          self.connectedStructures.splice(idx, 1)
-        }
-      },
-
-      /**
-       * #action
-       */
-      disconnectAllStructures() {
-        self.connectedStructures.clear()
-      },
     }))
     .actions(self => {
       const superSetMouseClickPos = self.setMouseClickPos.bind(self)
@@ -434,28 +327,6 @@ export default function stateModelFactory() {
               self.setZoomToBaseLevel(!self.zoomToBaseLevel)
             },
           },
-          {
-            label: 'Connect to protein structure...',
-            onClick: () => {
-              getSession(self).queueDialog(handleClose => [
-                ConnectStructureDialog,
-                {
-                  model: self,
-                  handleClose,
-                },
-              ])
-            },
-          },
-          ...(self.connectedStructures.length > 0
-            ? [
-                {
-                  label: 'Disconnect from protein structures',
-                  onClick: () => {
-                    self.disconnectAllStructures()
-                  },
-                },
-              ]
-            : []),
         ]
       },
     }))
@@ -468,8 +339,6 @@ export default function stateModelFactory() {
           storeDataToIndexedDB,
           launchBlastIfNeeded,
           processInit,
-          highlightConnectedStructures,
-          autoConnectStructures,
           autoLoadProteinDomains,
         ]) {
           addDisposer(

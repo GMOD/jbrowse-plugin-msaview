@@ -10,11 +10,7 @@ import {
   retrieveMsaData,
   storeMsaData,
 } from './msaDataStore'
-import {
-  gappedToUngappedPosition,
-  getProteinViews,
-  structureMatchesMsa,
-} from './structureConnection'
+import { getProteinViews } from './structureConnection'
 import { getUniprotIdFromAlphaFoldUrl } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
@@ -195,85 +191,6 @@ export function syncGenomeHoverToMsaColumn(self: JBrowsePluginMsaViewModel) {
     } else if (genomeDrivenCol) {
       self.setMousePos(undefined)
       genomeDrivenCol = false
-    }
-  }
-}
-
-export function highlightConnectedStructures(self: JBrowsePluginMsaViewModel) {
-  const { mouseCol, connectedProteinViews } = self
-  if (connectedProteinViews.length === 0) {
-    return
-  }
-
-  for (const conn of connectedProteinViews) {
-    const structure = conn.proteinView.structures[conn.structureIdx]
-    if (!structure) {
-      continue
-    }
-
-    if (mouseCol === undefined) {
-      structure.clearHighlightFromExternal?.()
-      continue
-    }
-
-    const seq = self.getSequenceByRowName(conn.msaRowName)
-    if (!seq) {
-      continue
-    }
-
-    const msaUngapped = gappedToUngappedPosition(seq, mouseCol)
-    if (msaUngapped === undefined) {
-      structure.clearHighlightFromExternal?.()
-      continue
-    }
-
-    const structurePos = conn.msaToStructure[msaUngapped]
-    if (structurePos === undefined) {
-      structure.clearHighlightFromExternal?.()
-    } else {
-      structure.highlightFromExternal?.(structurePos)
-    }
-  }
-}
-
-export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
-  const { connectedViewId, uniprotId, rows, connectedStructures } = self
-
-  if (rows.length === 0) {
-    return
-  }
-
-  for (const view of getProteinViews(getSession(self).views)) {
-    for (
-      let structureIdx = 0;
-      structureIdx < view.structures.length;
-      structureIdx++
-    ) {
-      const structure = view.structures[structureIdx]
-      if (!structure) {
-        continue
-      }
-
-      if (!structureMatchesMsa({ structure, connectedViewId, uniprotId })) {
-        continue
-      }
-
-      const alreadyConnected = connectedStructures.some(
-        c => c.proteinViewId === view.id && c.structureIdx === structureIdx,
-      )
-      if (alreadyConnected) {
-        continue
-      }
-
-      if (!structure.structureSequences?.[0]) {
-        continue
-      }
-
-      try {
-        self.connectToStructure(view.id, structureIdx)
-      } catch (e) {
-        console.error('Failed to auto-connect to ProteinView:', e)
-      }
     }
   }
 }
