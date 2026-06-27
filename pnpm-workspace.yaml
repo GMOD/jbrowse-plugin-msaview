@@ -5,5 +5,5 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@jbrowse/mobx-state-tree'
   - 'react-msaview'
-  - '@jbrowse/svgcanvas@5.1.1'
-  - msa-parsers@5.1.1
+  - '@jbrowse/svgcanvas'
+  - msa-parsers

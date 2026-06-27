@@ -31,6 +31,7 @@ spec URL parameters (see https://jbrowse.org/jb2/docs/urlparams/#session-spec).
 | `labelsAlignRight` | No                          | Align labels to the right                       |
 | `showBranchLen`    | No                          | Show branch lengths                             |
 | `querySeqName`     | No                          | Name for query sequence                         |
+| `highlightColumns` | No                          | Visible column indices to highlight on open     |
 
 ### URL example
 
@@ -226,3 +227,14 @@ large data from session snapshots.
 
 Note: URL-based files (loaded via file selector with a URL) don't need IndexedDB
 storage as they can be reloaded directly from the URL.
+
+## Screenshots
+
+The E2E suites write reference PNGs under `test-screenshots/`. puppeteer
+captures aren't pixel-deterministic (antialiasing, WebGL/canvas, font hinting),
+so `scripts/pngSnapshot.mjs` normalizes each capture through `pngquant --nofs`
+and only overwrites a committed PNG when it differs by more than ~1% of pixels —
+otherwise the existing file is left byte-for-byte intact, so unrelated runs
+don't churn git. Tune the threshold with `SCREENSHOT_DIFF_RATIO` (e.g. `0` to
+always rewrite, `0.05` to tolerate larger wobble). `pngquant` is optional: where
+it's absent the raw PNG is used as a fallback.

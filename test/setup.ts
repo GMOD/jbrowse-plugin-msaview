@@ -4,6 +4,8 @@ import path from 'node:path'
 
 import { launch } from 'puppeteer'
 
+import { saveStableScreenshot } from '../scripts/pngSnapshot.mjs'
+
 import type { Browser, Page } from 'puppeteer'
 
 export const JBROWSE_PORT = 9876
@@ -177,6 +179,15 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
   return page
 }
 
+// Capture `page` and persist it to `filePath`, overwriting the committed PNG
+// only when it differs meaningfully from the existing one (see pngSnapshot.mjs).
+export async function saveScreenshot(
+  page: Page,
+  filePath: string,
+): Promise<void> {
+  saveStableScreenshot(await page.screenshot(), filePath)
+}
+
 export async function waitForJBrowseLoad(page: Page): Promise<void> {
   await page.waitForFunction(
     () => {
@@ -189,10 +200,10 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
   try {
     await page.waitForSelector('canvas', { timeout: 30_000 })
   } catch {
-    fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
-    await page.screenshot({
-      path: path.join(SCREENSHOT_DIR, `${JBROWSE_VERSION}-00-no-canvas.png`),
-    })
+    await saveScreenshot(
+      page,
+      path.join(SCREENSHOT_DIR, `${JBROWSE_VERSION}-00-no-canvas.png`),
+    )
   }
 
   await new Promise(r => setTimeout(r, 3000))

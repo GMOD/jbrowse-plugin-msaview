@@ -7,6 +7,7 @@ import {
   createJBrowsePage,
   getTestJBrowseDir,
   launchBrowser,
+  saveScreenshot,
   setupJBrowse,
   startJBrowseServer,
   stopServer,
@@ -89,16 +90,17 @@ run('protein domain overlay screenshot', () => {
 
   test('auto-overlays CDD domains on an accession-bearing alignment', async () => {
     await page.waitForSelector('canvas', { timeout: 30_000 })
-    fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
-    await page.screenshot({
-      path: path.join(SCREENSHOT_DIR, 'domains-01-loaded.png'),
-    })
+    await saveScreenshot(
+      page,
+      path.join(SCREENSHOT_DIR, 'domains-01-loaded.png'),
+    )
 
     // wait for the auto-fetch (live efetch + parse + render) to complete
     await new Promise(r => setTimeout(r, 12_000))
-    await page.screenshot({
-      path: path.join(SCREENSHOT_DIR, 'domains-02-overlay.png'),
-    })
+    await saveScreenshot(
+      page,
+      path.join(SCREENSHOT_DIR, 'domains-02-overlay.png'),
+    )
 
     const hasCanvas = await page.evaluate(
       () => document.querySelectorAll('canvas').length > 0,

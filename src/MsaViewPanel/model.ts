@@ -7,6 +7,10 @@ import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
 
+// re-exported so the inferred (composed) state-model type can name MSAFormat
+// from msa-parsers when emitting declarations (avoids TS2883 portability error)
+export type { MSAFormat } from 'msa-parsers'
+
 import {
   autoConnectStructures,
   autoLoadProteinDomains,

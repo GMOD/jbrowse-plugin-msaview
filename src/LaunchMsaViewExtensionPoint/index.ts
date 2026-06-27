@@ -24,6 +24,7 @@ export default function LaunchMsaViewExtensionPointF(
       labelsAlignRight,
       showBranchLen,
       querySeqName,
+      highlightColumns,
     }: {
       session: AbstractSessionModel
       data?: { msa: string; tree?: string }
@@ -41,6 +42,7 @@ export default function LaunchMsaViewExtensionPointF(
       labelsAlignRight?: boolean
       showBranchLen?: boolean
       querySeqName?: string
+      highlightColumns?: number[]
     }) => {
       if (!data && !msaFileLocation) {
         throw new Error(
@@ -61,6 +63,7 @@ export default function LaunchMsaViewExtensionPointF(
         drawNodeBubbles,
         labelsAlignRight,
         showBranchLen,
+        highlightColumns,
         init: {
           msaData: data?.msa,
           treeData: data?.tree,

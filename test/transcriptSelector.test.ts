@@ -7,6 +7,7 @@ import {
   createJBrowsePage,
   getJBrowseVersion,
   launchBrowser,
+  saveScreenshot,
   setupJBrowse,
   startJBrowseServer,
   stopServer,
@@ -52,7 +53,7 @@ describe('TranscriptSelector E2E', () => {
     const p = page!
     const root = await p.$('#root')
     expect(root).not.toBeNull()
-    await p.screenshot({ path: getScreenshotPath('01-initial-load') })
+    await saveScreenshot(p, getScreenshotPath('01-initial-load'))
   }, 30_000)
 
   it('should open MSA dialog when right-clicking on SPATA6 gene', async () => {
@@ -69,7 +70,7 @@ describe('TranscriptSelector E2E', () => {
     await searchInput.click()
     await searchInput.type('SPATA6')
     await new Promise(r => setTimeout(r, 2000))
-    await p.screenshot({ path: getScreenshotPath('02-search-results') })
+    await saveScreenshot(p, getScreenshotPath('02-search-results'))
 
     await p.waitForSelector('[role="option"]', { timeout: 5000 })
 
@@ -93,7 +94,7 @@ describe('TranscriptSelector E2E', () => {
     }
 
     await new Promise(r => setTimeout(r, 3000))
-    await p.screenshot({ path: getScreenshotPath('03-after-search') })
+    await saveScreenshot(p, getScreenshotPath('03-after-search'))
 
     // Try SVG text labels first, then feature rects
     const clickTarget = await p.evaluate(() => {
@@ -128,7 +129,7 @@ describe('TranscriptSelector E2E', () => {
     })
 
     if (clickTarget) {
-      await p.screenshot({ path: getScreenshotPath('04-feature-found') })
+      await saveScreenshot(p, getScreenshotPath('04-feature-found'))
       await p.mouse.click(clickTarget.x, clickTarget.y, { button: 'right' })
       await new Promise(r => setTimeout(r, 1000))
     }
@@ -176,7 +177,7 @@ describe('TranscriptSelector E2E', () => {
       menuItems = await p.$$('[role="menuitem"]')
     }
 
-    await p.screenshot({ path: getScreenshotPath('05-context-menu') })
+    await saveScreenshot(p, getScreenshotPath('05-context-menu'))
 
     if (menuItems.length === 0) {
       throw new Error(
@@ -198,7 +199,7 @@ describe('TranscriptSelector E2E', () => {
 
     await launchItem.click()
     await new Promise(r => setTimeout(r, 3000))
-    await p.screenshot({ path: getScreenshotPath('06-msa-dialog') })
+    await saveScreenshot(p, getScreenshotPath('06-msa-dialog'))
 
     const dialog = await p.$('[role="dialog"]')
     if (!dialog) {
@@ -207,7 +208,7 @@ describe('TranscriptSelector E2E', () => {
       )
     }
 
-    await p.screenshot({ path: getScreenshotPath('07-msa-dialog-content') })
+    await saveScreenshot(p, getScreenshotPath('07-msa-dialog-content'))
 
     const isoformSelect = await p.evaluateHandle(() => {
       const comboboxes = Array.from(
@@ -234,7 +235,7 @@ describe('TranscriptSelector E2E', () => {
 
     await isoformEl.click()
     await new Promise(r => setTimeout(r, 500))
-    await p.screenshot({ path: getScreenshotPath('08-dropdown-open') })
+    await saveScreenshot(p, getScreenshotPath('08-dropdown-open'))
 
     const options = await p.$$('[role="option"]')
     if (options.length <= 1) {
@@ -243,7 +244,7 @@ describe('TranscriptSelector E2E', () => {
 
     await options[1]!.click()
     await new Promise(r => setTimeout(r, 1000))
-    await p.screenshot({ path: getScreenshotPath('09-selection-changed') })
+    await saveScreenshot(p, getScreenshotPath('09-selection-changed'))
 
     const newValue = await p.evaluate(
       el => (el as HTMLElement).textContent,
@@ -259,9 +260,10 @@ describe('TranscriptSelector E2E', () => {
     )
     expect(finalValue).toBe(newValue)
 
-    await p.screenshot({
-      path: getScreenshotPath('10-transcript-selection-verified'),
-    })
+    await saveScreenshot(
+      p,
+      getScreenshotPath('10-transcript-selection-verified'),
+    )
 
     // Switch to manual upload tab to submit without external API calls
     const tabs = await p.$$('[role="tab"]')
@@ -296,7 +298,7 @@ describe('TranscriptSelector E2E', () => {
     await msaTextarea.click()
     await p.keyboard.type('>human\nACGTACGTACGT\n>mouse\nACGTACGTACGT\n')
     await new Promise(r => setTimeout(r, 500))
-    await p.screenshot({ path: getScreenshotPath('10b-manual-upload-tab') })
+    await saveScreenshot(p, getScreenshotPath('10b-manual-upload-tab'))
 
     const submitHandle = await p.evaluateHandle(() => {
       const buttons = Array.from(document.querySelectorAll('button'))
@@ -313,6 +315,6 @@ describe('TranscriptSelector E2E', () => {
     })
 
     await new Promise(r => setTimeout(r, 3000))
-    await p.screenshot({ path: getScreenshotPath('11-final-success') })
+    await saveScreenshot(p, getScreenshotPath('11-final-success'))
   }, 240_000)
 })
