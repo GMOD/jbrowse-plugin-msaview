@@ -128,22 +128,15 @@ export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
   }
 }
 
-// Resolve the declarative `init` launch contract once. Inline strings go straight
-// to the data model; URLs are handed to react-msaview's native filehandle loaders
-// (openLocation + progress + abort + CORS-proxy) rather than a hand-rolled fetch;
-// the bgzip name-indexed block is the one source with no native loader.
+// Resolve the declarative `init` launch contract once, then clear it. msaUrl is
+// handed to react-msaview's native filehandle loader (openLocation + progress +
+// abort + CORS-proxy) and sniffed for an AlphaFold uniprotId; the bgzip
+// name-indexed block is the one source with no native loader, so it's fetched
+// here. Inline data and tree URLs arrive as native snapshot props, not via init.
 export function processInit(self: JBrowsePluginMsaViewModel) {
   const { init } = self
   if (init) {
-    const {
-      msaData,
-      msaUrl,
-      msaIndexedLocation,
-      msaName,
-      treeData,
-      treeUrl,
-      querySeqName,
-    } = init
+    const { msaUrl, msaIndexedLocation, msaName, querySeqName } = init
     void (async () => {
       try {
         self.setError(undefined)
@@ -159,9 +152,7 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
           self.setQuerySeqName(querySeqName)
         }
 
-        if (msaData) {
-          self.setMSA(msaData)
-        } else if (msaUrl) {
+        if (msaUrl) {
           self.setMSAFilehandle({ uri: msaUrl, locationType: 'UriLocation' })
         } else if (msaIndexedLocation && msaName) {
           const fasta = await fetchIndexedMsa({
@@ -175,12 +166,6 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
               `No alignment named ${msaName} in ${msaIndexedLocation.uri}`,
             )
           }
-        }
-
-        if (treeData) {
-          self.setTree(treeData)
-        } else if (treeUrl) {
-          self.setTreeFilehandle({ uri: treeUrl, locationType: 'UriLocation' })
         }
 
         self.setInit(undefined)
@@ -253,7 +238,7 @@ export function highlightConnectedStructures(self: JBrowsePluginMsaViewModel) {
 export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
   const { connectedViewId, uniprotId, rows, connectedStructures } = self
 
-  if (!uniprotId || rows.length === 0) {
+  if (rows.length === 0) {
     return
   }
 
@@ -268,11 +253,23 @@ export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
         continue
       }
 
-      if (structure.connectedViewId !== connectedViewId) {
-        continue
-      }
-
-      if (structure.uniprotId !== uniprotId) {
+      // Two independent ways a structure belongs to this alignment:
+      //  - a shared genome view: both this MsaView and the structure are pinned
+      //    to the same LinearGenomeView by connectedViewId (the genome-centric
+      //    gene-explorer flow — the same key genome↔MSA and genome↔structure
+      //    already bridge through), OR
+      //  - a shared UniProt accession (the BLAST/AlphaFold flow, which has no
+      //    genome view to bridge through).
+      // The residue map is built purely by sequence — connectToStructure
+      // pairwise-aligns the query row against the structure — so neither key is
+      // mechanically required; they only scope WHICH structure to pair. uniprotId
+      // used to be mandatory, so a genome-connected alignment with no UniProt id
+      // (a name-indexed multi-species MSA) never linked to its structure despite
+      // sharing the genome view.
+      const sharesGenomeView =
+        !!connectedViewId && structure.connectedViewId === connectedViewId
+      const sharesUniprot = !!uniprotId && structure.uniprotId === uniprotId
+      if (!sharesGenomeView && !sharesUniprot) {
         continue
       }
 

@@ -46,18 +46,25 @@ export default function LaunchMsaViewExtensionPointF(
         )
       }
 
-      // all data sources flow through `init` so processInit is the single place
-      // that resolves them (AlphaFold detection, native filehandle loading, etc.)
+      // inline data and the tree URL are native react-msaview snapshot props, set
+      // directly. Only sources needing launch-time resolution go through `init`:
+      // msaUrl (AlphaFold sniff) and the name-indexed bgzip block (no native loader).
       session.addView('MsaView', {
         type: 'MsaView',
         ...rest,
+        data,
+        ...(treeFileLocation
+          ? {
+              treeFilehandle: {
+                ...treeFileLocation,
+                locationType: 'UriLocation',
+              },
+            }
+          : {}),
         init: {
-          msaData: data?.msa,
-          treeData: data?.tree,
           msaUrl: msaFileLocation?.uri,
           msaIndexedLocation,
           msaName,
-          treeUrl: treeFileLocation?.uri,
           querySeqName,
         },
       })
