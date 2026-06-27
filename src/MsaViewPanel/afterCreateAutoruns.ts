@@ -1,7 +1,7 @@
 import { getSession } from '@jbrowse/core/util'
 
 import { doLaunchBlast } from './doLaunchBlast'
-import { fetchTabixMsa } from './fetchTabixMsa'
+import { fetchIndexedMsa } from './fetchIndexedMsa'
 import { genomeToMSA } from './genomeToMSA'
 import { loadProteinDomains } from './loadProteinDomains'
 import {
@@ -137,9 +137,8 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
         const {
           msaData,
           msaUrl,
-          msaTabixLocation,
-          msaIndexLocation,
-          msaId,
+          msaIndexedLocation,
+          msaName,
           treeData,
           treeUrl,
           querySeqName,
@@ -166,24 +165,17 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
           }
           const data = await response.text()
           self.setMSA(data)
-        } else if (msaTabixLocation) {
-          const feature = self.connectedFeature
-          if (feature) {
-            const fasta = await fetchTabixMsa({
-              location: msaTabixLocation,
-              indexLocation: msaIndexLocation,
-              msaId: msaId ?? String(feature.name),
-              refName: String(feature.refName),
-              start: Number(feature.start),
-              end: Number(feature.end),
-            })
-            if (fasta) {
-              self.setMSA(fasta)
-            } else {
-              throw new Error(
-                `No alignment for ${msaId ?? String(feature.name)} in ${msaTabixLocation.uri}`,
-              )
-            }
+        } else if (msaIndexedLocation && msaName) {
+          const fasta = await fetchIndexedMsa({
+            location: msaIndexedLocation,
+            name: msaName,
+          })
+          if (fasta) {
+            self.setMSA(fasta)
+          } else {
+            throw new Error(
+              `No alignment named ${msaName} in ${msaIndexedLocation.uri}`,
+            )
           }
         }
 

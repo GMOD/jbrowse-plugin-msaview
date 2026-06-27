@@ -1,14 +1,13 @@
 export interface MsaViewInitState {
   msaData?: string
   msaUrl?: string
-  // a tabix file keyed by genomic locus, where each line packs one transcript's
-  // whole multiple-alignment (`name:SEQ;name:SEQ;...`). The transcript's locus
-  // comes from the view's connectedFeature, and `msaId` (default the feature's
-  // name) selects its line. Lets one genome-scale alignment serve any gene
-  // without per-gene files. See react-msaview's gene-explorer.
-  msaTabixLocation?: { uri: string }
-  msaIndexLocation?: { uri: string }
-  msaId?: string
+  // a single bgzip `.fa.gz` of per-transcript FASTA blocks; its `.gzi` and name
+  // index `.idx` (name<TAB>offset<TAB>length) are found by suffix. `msaName`
+  // selects one transcript's block by name (a random read), so one genome-scale
+  // alignment serves any gene without per-gene files or coordinates. See
+  // react-msaview's gene-explorer.
+  msaIndexedLocation?: { uri: string }
+  msaName?: string
   treeData?: string
   treeUrl?: string
   querySeqName?: string

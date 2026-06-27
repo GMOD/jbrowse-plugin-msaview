@@ -11,9 +11,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(@types/react@19.2.17)(react@19.2.7)
-      '@gmod/tabix':
-        specifier: ^3.0.1
-        version: 3.4.2
+      '@gmod/bgzf-filehandle':
+        specifier: ^6.2.0
+        version: 6.2.0
       g2p_mapper:
         specifier: ^2.1.5
         version: 2.1.5
@@ -505,9 +505,6 @@ packages:
 
   '@gmod/http-range-fetcher@5.0.7':
     resolution: {integrity: sha512-WEOm5SnRbdhtB5RDXDW7LSUsam/fJH1hiGsyqjdG1vvkn6Ddv4wcCAY8AP4qqxPZicg1KNz53qhifMMksg6eLQ==}
-
-  '@gmod/tabix@3.4.2':
-    resolution: {integrity: sha512-WDPdOL1eKUkloTH9PY5VpAIxStN+PgvhQ7Tf1pzjA5u2VTUnQyBMQix+SvOQEZrqtHOOMMlbcUeQUADvNkhLuA==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3245,13 +3242,6 @@ snapshots:
   '@gmod/http-range-fetcher@5.0.7':
     dependencies:
       '@jbrowse/quick-lru': 7.3.5
-
-  '@gmod/tabix@3.4.2':
-    dependencies:
-      '@gmod/abortable-promise-cache': 3.0.4
-      '@gmod/bgzf-filehandle': 6.2.0
-      '@jbrowse/quick-lru': 7.3.5
-      generic-filehandle2: 2.2.0
 
   '@humanfs/core@0.19.2':
     dependencies:

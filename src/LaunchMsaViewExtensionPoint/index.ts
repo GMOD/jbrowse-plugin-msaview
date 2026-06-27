@@ -11,9 +11,8 @@ export default function LaunchMsaViewExtensionPointF(
       session,
       data,
       msaFileLocation,
-      msaTabixLocation,
-      msaIndexLocation,
-      msaId,
+      msaIndexedLocation,
+      msaName,
       treeFileLocation,
       connectedViewId,
       connectedFeature,
@@ -32,9 +31,8 @@ export default function LaunchMsaViewExtensionPointF(
       session: AbstractSessionModel
       data?: { msa: string; tree?: string }
       msaFileLocation?: { uri: string }
-      msaTabixLocation?: { uri: string }
-      msaIndexLocation?: { uri: string }
-      msaId?: string
+      msaIndexedLocation?: { uri: string }
+      msaName?: string
       treeFileLocation?: { uri: string }
       connectedViewId?: string
       connectedFeature?: Record<string, unknown>
@@ -50,7 +48,7 @@ export default function LaunchMsaViewExtensionPointF(
       querySeqName?: string
       highlightColumns?: number[]
     }) => {
-      if (!data && !msaFileLocation && !msaTabixLocation) {
+      if (!data && !msaFileLocation && !msaIndexedLocation) {
         throw new Error(
           'No MSA data or file location provided when launching MSA view',
         )
@@ -74,9 +72,8 @@ export default function LaunchMsaViewExtensionPointF(
           msaData: data?.msa,
           treeData: data?.tree,
           msaUrl: msaFileLocation?.uri,
-          msaTabixLocation,
-          msaIndexLocation,
-          msaId,
+          msaIndexedLocation,
+          msaName,
           treeUrl: treeFileLocation?.uri,
           querySeqName,
         },
