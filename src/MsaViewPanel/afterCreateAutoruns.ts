@@ -282,46 +282,71 @@ export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
   }
 }
 
+/**
+ * Mirror a connected 3D protein view's hovered residue onto the MSA's
+ * highlighted columns. Returns the autorun body and keeps a flag tracking
+ * whether the current highlight was set by THIS sync: when a protein hover ends
+ * we restore the declarative highlightColumns seed (or clear) rather than
+ * blindly wiping it.
+ *
+ * Without the flag this autorun fires once on creation — with the view connected
+ * to a *genome* LGV but no 3D protein structure attached — computes zero columns,
+ * and calls setHighlightedColumns(undefined), clobbering the seed that
+ * MSAModelF.afterCreate just set from the declarative `highlightColumns`. That is
+ * the bug that made the BRAF/TP53 genome-browser links open with no V600/R248
+ * column lit (SRC has no highlightColumns, so nothing was there to wipe).
+ */
 export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
-  const { connectedViewId, transcriptToMsaMap, querySeqName } = self
+  let proteinDriven = false
+  return () => {
+    const { connectedViewId, transcriptToMsaMap, querySeqName } = self
 
-  if (!connectedViewId || !transcriptToMsaMap) {
-    return
-  }
+    if (!connectedViewId || !transcriptToMsaMap) {
+      return
+    }
 
-  const columns = new Set<number>()
+    const columns = new Set<number>()
 
-  for (const view of getProteinViews(getSession(self).views)) {
-    for (const structure of view.structures) {
-      if (structure.connectedViewId !== connectedViewId) {
-        continue
-      }
+    for (const view of getProteinViews(getSession(self).views)) {
+      for (const structure of view.structures) {
+        if (structure.connectedViewId !== connectedViewId) {
+          continue
+        }
 
-      const highlights = structure.hoverGenomeHighlights
-      if (!highlights || highlights.length === 0) {
-        continue
-      }
+        const highlights = structure.hoverGenomeHighlights
+        if (!highlights || highlights.length === 0) {
+          continue
+        }
 
-      const { g2p } = transcriptToMsaMap
-      for (const highlight of highlights) {
-        for (let coord = highlight.start; coord < highlight.end; coord++) {
-          const proteinPos = g2p[coord]
-          if (proteinPos !== undefined) {
-            const col = self.seqPosToGlobalCol(querySeqName, proteinPos)
-            columns.add(col)
+        const { g2p } = transcriptToMsaMap
+        for (const highlight of highlights) {
+          for (let coord = highlight.start; coord < highlight.end; coord++) {
+            const proteinPos = g2p[coord]
+            if (proteinPos !== undefined) {
+              const col = self.seqPosToGlobalCol(querySeqName, proteinPos)
+              columns.add(col)
+            }
           }
         }
       }
     }
+
+    const visibleColumns = Array.from(columns)
+      .map(col => self.globalColToVisibleCol(col))
+      .filter((col): col is number => col !== undefined)
+
+    if (visibleColumns.length > 0) {
+      self.setHighlightedColumns(visibleColumns)
+      proteinDriven = true
+    } else if (proteinDriven) {
+      // our protein-hover highlight ended — fall back to the declarative seed
+      // instead of wiping a column the URL/user asked to keep lit
+      self.setHighlightedColumns(
+        self.highlightColumns?.length ? self.highlightColumns : undefined,
+      )
+      proteinDriven = false
+    }
   }
-
-  const visibleColumns = Array.from(columns)
-    .map(col => self.globalColToVisibleCol(col))
-    .filter((col): col is number => col !== undefined)
-
-  self.setHighlightedColumns(
-    visibleColumns.length > 0 ? visibleColumns : undefined,
-  )
 }
 
 export function runCleanup() {

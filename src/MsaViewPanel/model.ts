@@ -471,7 +471,6 @@ export default function stateModelFactory() {
           highlightConnectedStructures,
           autoConnectStructures,
           autoLoadProteinDomains,
-          observeProteinHighlights,
         ]) {
           addDisposer(
             self,
@@ -480,7 +479,10 @@ export default function stateModelFactory() {
             }),
           )
         }
+        // these two keep per-reaction state across runs (a "did I set it?" flag),
+        // so they're factories returning the autorun body rather than plain fns
         addDisposer(self, autorun(syncGenomeHoverToMsaColumn(self)))
+        addDisposer(self, autorun(observeProteinHighlights(self)))
       },
     }))
 }
