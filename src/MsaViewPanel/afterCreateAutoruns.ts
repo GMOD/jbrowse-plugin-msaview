@@ -1,6 +1,7 @@
 import { getSession } from '@jbrowse/core/util'
 
 import { doLaunchBlast } from './doLaunchBlast'
+import { fetchTabixMsa } from './fetchTabixMsa'
 import { genomeToMSA } from './genomeToMSA'
 import { loadProteinDomains } from './loadProteinDomains'
 import {
@@ -133,7 +134,16 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
     void (async () => {
       try {
         self.setError(undefined)
-        const { msaData, msaUrl, treeData, treeUrl, querySeqName } = init
+        const {
+          msaData,
+          msaUrl,
+          msaTabixLocation,
+          msaIndexLocation,
+          msaId,
+          treeData,
+          treeUrl,
+          querySeqName,
+        } = init
 
         if (msaUrl) {
           const id = getUniprotIdFromAlphaFoldUrl(msaUrl)
@@ -156,6 +166,25 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
           }
           const data = await response.text()
           self.setMSA(data)
+        } else if (msaTabixLocation) {
+          const feature = self.connectedFeature
+          if (feature) {
+            const fasta = await fetchTabixMsa({
+              location: msaTabixLocation,
+              indexLocation: msaIndexLocation,
+              msaId: msaId ?? String(feature.name),
+              refName: String(feature.refName),
+              start: Number(feature.start),
+              end: Number(feature.end),
+            })
+            if (fasta) {
+              self.setMSA(fasta)
+            } else {
+              throw new Error(
+                `No alignment for ${msaId ?? String(feature.name)} in ${msaTabixLocation.uri}`,
+              )
+            }
+          }
         }
 
         if (treeData) {
