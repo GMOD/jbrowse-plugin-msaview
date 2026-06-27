@@ -13,6 +13,7 @@ import {
 import {
   gappedToUngappedPosition,
   getProteinViews,
+  structureMatchesMsa,
 } from './structureConnection'
 import { getUniprotIdFromAlphaFoldUrl } from './util'
 
@@ -253,23 +254,7 @@ export function autoConnectStructures(self: JBrowsePluginMsaViewModel) {
         continue
       }
 
-      // Two independent ways a structure belongs to this alignment:
-      //  - a shared genome view: both this MsaView and the structure are pinned
-      //    to the same LinearGenomeView by connectedViewId (the genome-centric
-      //    gene-explorer flow — the same key genome↔MSA and genome↔structure
-      //    already bridge through), OR
-      //  - a shared UniProt accession (the BLAST/AlphaFold flow, which has no
-      //    genome view to bridge through).
-      // The residue map is built purely by sequence — connectToStructure
-      // pairwise-aligns the query row against the structure — so neither key is
-      // mechanically required; they only scope WHICH structure to pair. uniprotId
-      // used to be mandatory, so a genome-connected alignment with no UniProt id
-      // (a name-indexed multi-species MSA) never linked to its structure despite
-      // sharing the genome view.
-      const sharesGenomeView =
-        !!connectedViewId && structure.connectedViewId === connectedViewId
-      const sharesUniprot = !!uniprotId && structure.uniprotId === uniprotId
-      if (!sharesGenomeView && !sharesUniprot) {
+      if (!structureMatchesMsa({ structure, connectedViewId, uniprotId })) {
         continue
       }
 

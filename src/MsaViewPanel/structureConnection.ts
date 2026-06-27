@@ -29,6 +29,36 @@ export function getProteinViews(views: { type: string }[]): ProteinView[] {
 }
 
 /**
+ * Whether a 3D structure belongs to a given alignment — the single source of
+ * truth for pairing an MsaView with a ProteinView's structure. A structure
+ * matches when it either:
+ *  - shares the alignment's genome view (both pinned to the same
+ *    LinearGenomeView via `connectedViewId` — the genome-centric gene-explorer
+ *    flow, the same key genome↔MSA and genome↔structure already bridge through),
+ *    or
+ *  - shares the alignment's UniProt accession (the BLAST/AlphaFold flow, which
+ *    has no genome view to bridge through).
+ *
+ * The residue map itself is built by sequence (connectToStructure pairwise-
+ * aligns the query row against the structure), so neither key is mechanically
+ * required — they only scope WHICH structure pairs with the alignment.
+ */
+export function structureMatchesMsa({
+  structure,
+  connectedViewId,
+  uniprotId,
+}: {
+  structure: Pick<ProteinViewStructure, 'connectedViewId' | 'uniprotId'>
+  connectedViewId?: string
+  uniprotId?: string
+}) {
+  const sharesGenomeView =
+    !!connectedViewId && structure.connectedViewId === connectedViewId
+  const sharesUniprot = !!uniprotId && structure.uniprotId === uniprotId
+  return sharesGenomeView || sharesUniprot
+}
+
+/**
  * Represents a connection between the MSA view and a protein structure
  */
 export interface StructureConnection {

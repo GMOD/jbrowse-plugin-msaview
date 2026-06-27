@@ -1,6 +1,58 @@
 import { describe, expect, test } from 'vitest'
 
-import { gappedToUngappedPosition } from './structureConnection'
+import {
+  gappedToUngappedPosition,
+  structureMatchesMsa,
+} from './structureConnection'
+
+describe('structureMatchesMsa', () => {
+  test('matches on a shared genome view alone (no UniProt id)', () => {
+    expect(
+      structureMatchesMsa({
+        structure: { connectedViewId: 'lgv-TP53' },
+        connectedViewId: 'lgv-TP53',
+      }),
+    ).toBe(true)
+  })
+
+  test('matches on a shared UniProt id alone (no genome view)', () => {
+    expect(
+      structureMatchesMsa({
+        structure: { uniprotId: 'P04637' },
+        uniprotId: 'P04637',
+      }),
+    ).toBe(true)
+  })
+
+  test('shared genome view wins even when UniProt ids differ', () => {
+    expect(
+      structureMatchesMsa({
+        structure: { connectedViewId: 'lgv-TP53', uniprotId: 'OTHER' },
+        connectedViewId: 'lgv-TP53',
+        uniprotId: 'P04637',
+      }),
+    ).toBe(true)
+  })
+
+  test('no match when neither key matches', () => {
+    expect(
+      structureMatchesMsa({
+        structure: { connectedViewId: 'lgv-OTHER', uniprotId: 'OTHER' },
+        connectedViewId: 'lgv-TP53',
+        uniprotId: 'P04637',
+      }),
+    ).toBe(false)
+  })
+
+  test('two undefined connectedViewIds do not count as a shared genome view', () => {
+    // both sides lacking a genome view must NOT auto-pair on `undefined ===
+    // undefined`; only an explicit shared id (or UniProt id) connects
+    expect(structureMatchesMsa({ structure: {} })).toBe(false)
+    expect(
+      structureMatchesMsa({ structure: { uniprotId: 'P04637' } }),
+    ).toBe(false)
+  })
+})
 
 describe('gappedToUngappedPosition', () => {
   test('returns correct ungapped position for non-gap character', () => {
