@@ -128,21 +128,25 @@ export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
   }
 }
 
+// Resolve the declarative `init` launch contract once. Inline strings go straight
+// to the data model; URLs are handed to react-msaview's native filehandle loaders
+// (openLocation + progress + abort + CORS-proxy) rather than a hand-rolled fetch;
+// the bgzip name-indexed block is the one source with no native loader.
 export function processInit(self: JBrowsePluginMsaViewModel) {
   const { init } = self
   if (init) {
+    const {
+      msaData,
+      msaUrl,
+      msaIndexedLocation,
+      msaName,
+      treeData,
+      treeUrl,
+      querySeqName,
+    } = init
     void (async () => {
       try {
         self.setError(undefined)
-        const {
-          msaData,
-          msaUrl,
-          msaIndexedLocation,
-          msaName,
-          treeData,
-          treeUrl,
-          querySeqName,
-        } = init
 
         if (msaUrl) {
           const id = getUniprotIdFromAlphaFoldUrl(msaUrl)
@@ -151,7 +155,6 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
             self.setQuerySeqName('query')
           }
         }
-
         if (querySeqName) {
           self.setQuerySeqName(querySeqName)
         }
@@ -159,12 +162,7 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
         if (msaData) {
           self.setMSA(msaData)
         } else if (msaUrl) {
-          const response = await fetch(msaUrl)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch MSA: ${response.status}`)
-          }
-          const data = await response.text()
-          self.setMSA(data)
+          self.setMSAFilehandle({ uri: msaUrl, locationType: 'UriLocation' })
         } else if (msaIndexedLocation && msaName) {
           const fasta = await fetchIndexedMsa({
             location: msaIndexedLocation,
@@ -182,12 +180,7 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
         if (treeData) {
           self.setTree(treeData)
         } else if (treeUrl) {
-          const response = await fetch(treeUrl)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch tree: ${response.status}`)
-          }
-          const data = await response.text()
-          self.setTree(data)
+          self.setTreeFilehandle({ uri: treeUrl, locationType: 'UriLocation' })
         }
 
         self.setInit(undefined)

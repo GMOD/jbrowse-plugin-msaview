@@ -1,3 +1,6 @@
+// Declarative launch contract, resolved once by processInit. This is also a
+// cross-repo contract: jbrowse-plugin-protein3d builds an MsaView snapshot
+// directly with `init: { msaUrl }`, so these keys must stay stable.
 export interface MsaViewInitState {
   msaData?: string
   msaUrl?: string
