@@ -182,17 +182,34 @@ export default function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
+       * Genome region under the current MSA hover column. Suppressed on the LGV
+       * while it's being hovered (GenomeMouseoverHighlight shows the crisp 1bp
+       * marker there instead of this wider codon band).
+       */
+      get connectedHoverHighlight(): IRegion | undefined {
+        const { mouseCol } = self
+        return mouseCol === undefined
+          ? undefined
+          : msaCoordToGenomeCoord({ model: self, coord: mouseCol })
+      },
+      /**
+       * #getter
+       * Genome region under the persistent MSA click selection. Shown
+       * regardless of LGV hover, so hovering the genome doesn't hide it.
+       */
+      get connectedClickHighlight(): IRegion | undefined {
+        const { mouseClickCol } = self
+        return mouseClickCol === undefined
+          ? undefined
+          : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
+      },
+      /**
+       * #getter
        */
       get connectedHighlights(): IRegion[] {
-        const { mouseCol, mouseClickCol } = self
-        return [
-          mouseCol === undefined
-            ? undefined
-            : msaCoordToGenomeCoord({ model: self, coord: mouseCol }),
-          mouseClickCol === undefined
-            ? undefined
-            : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol }),
-        ].filter((r): r is IRegion => r !== undefined)
+        return [this.connectedHoverHighlight, this.connectedClickHighlight].filter(
+          (r): r is IRegion => r !== undefined,
+        )
       },
     }))
 

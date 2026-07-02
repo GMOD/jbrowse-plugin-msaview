@@ -19,11 +19,20 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   const msaView = views
     .filter(isMsaView)
     .find(v => v.connectedViewId === model.id)
-  const highlights = msaView?.connectedHighlights
 
-  // Suppress codon highlight while hovering the LGV — GenomeMouseoverHighlight
-  // handles the single-bp display in that case
-  return !hasHoverPosition(hovered) && highlights?.length ? (
+  // The persistent click selection always shows. The hover codon is suppressed
+  // while hovering the LGV — GenomeMouseoverHighlight handles the single-bp
+  // display in that case, so we don't stack a wider codon band on top of it.
+  const clickHighlight = msaView?.connectedClickHighlight
+  const hoverHighlight = hasHoverPosition(hovered)
+    ? undefined
+    : msaView?.connectedHoverHighlight
+  const highlights = [clickHighlight, hoverHighlight].filter(
+    (r): r is { refName: string; start: number; end: number } =>
+      r !== undefined,
+  )
+
+  return highlights.length ? (
     <MsaToGenomeHighlightRenderer model={model} highlights={highlights} />
   ) : null
 })
