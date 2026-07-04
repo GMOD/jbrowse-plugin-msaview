@@ -39,7 +39,6 @@
     "@gmod/bgzf-filehandle": "^6.2.0",
     "g2p_mapper": "^2.1.5",
     "idb": "^8.0.3",
-    "pako-esm2": "^2.0.2",
     "react-msaview": "^5.5.0",
     "swr": "^2.4.2"
   },

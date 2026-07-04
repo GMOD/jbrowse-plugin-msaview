@@ -56,7 +56,7 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
 
   async getMSA(id: string) {
     const adapter = await this.configure()
-    const refNames = await adapter.getRefNames()
+    const refNames = await this.getMSARefs()
     const rows = refNames.filter(refName => this.refNameToMsaId(refName) === id)
     return firstValueFrom(
       adapter

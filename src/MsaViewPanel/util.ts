@@ -9,30 +9,6 @@ export function hasHoverPosition(
   )
 }
 
-interface AssemblyManagerLike {
-  get: (
-    name: string,
-  ) => { getCanonicalRefName: (r: string) => string | undefined } | undefined
-}
-
-export function getCanonicalRefName({
-  assemblyManager,
-  assemblyNames,
-  refName,
-}: {
-  assemblyManager: AssemblyManagerLike
-  assemblyNames: string[] | undefined
-  refName: string
-}) {
-  const assemblyName = assemblyNames?.[0]
-  if (assemblyName) {
-    return (
-      assemblyManager.get(assemblyName)?.getCanonicalRefName(refName) ?? refName
-    )
-  }
-  return refName
-}
-
 /**
  * Extracts UniProt ID from an AlphaFold URL
  * Examples:

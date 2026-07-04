@@ -70,7 +70,7 @@ const PreLoadedMSA = observer(function ({
     error: msaDataFetchError,
   } = useSWR(
     selectedId && selectedDataset && msaList
-      ? `${selectedDataset.datasetId}-${selectedId}-${msaList.length}-msa`
+      ? `${selectedDataset.datasetId}-${selectedId}-msa`
       : null,
     () =>
       fetchMSA({

@@ -12,15 +12,21 @@ interface StoredMsaData {
   timestamp: number
 }
 
-async function getDB() {
-  return openDB(DB_NAME, DB_VERSION, {
+let dbPromise: ReturnType<typeof openDB> | undefined
+
+function getDB() {
+  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
         store.createIndex('timestamp', 'timestamp', { unique: false })
       }
     },
+  }).catch((e: unknown) => {
+    dbPromise = undefined
+    throw e
   })
+  return dbPromise
 }
 
 export function generateDataStoreId() {

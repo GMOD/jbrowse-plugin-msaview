@@ -11,6 +11,7 @@ export function useCachedBlastResults(geneIds: string[]) {
   const {
     data: results,
     error,
+    isLoading,
     mutate,
   } = useSWR(
     `cached-blast-${geneIds.join(',')}`,
@@ -37,7 +38,7 @@ export function useCachedBlastResults(geneIds: string[]) {
   return {
     results: results ?? [],
     error,
-    isLoading: !results && !error,
+    isLoading,
     handleDelete,
     handleClearAll,
   }

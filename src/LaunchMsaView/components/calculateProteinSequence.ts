@@ -8,6 +8,10 @@ import {
 import type { Feat } from './types'
 import type { Feature } from '@jbrowse/core/util'
 
+// pure constant: the standard codon table never varies, so build it once rather
+// than on every translation (which runs on every panel re-render)
+const codonTable = generateCodonTable(defaultCodonTable)
+
 export function stitch(subfeats: Feat[], sequence: string) {
   return subfeats.map(sub => sequence.slice(sub.start, sub.end)).join('')
 }
@@ -15,11 +19,9 @@ export function stitch(subfeats: Feat[], sequence: string) {
 export function calculateProteinSequence({
   cds,
   sequence,
-  codonTable,
 }: {
   cds: Feat[]
   sequence: string
-  codonTable: Record<string, string>
 }) {
   const str = stitch(cds, sequence)
   let protein = ''
@@ -63,6 +65,5 @@ export function getProteinSequenceFromFeature({
   return calculateProteinSequence({
     cds: strand === -1 ? revlist(cds, seq.length) : cds,
     sequence: strand === -1 ? revcom(seq) : seq,
-    codonTable: generateCodonTable(defaultCodonTable),
   })
 }

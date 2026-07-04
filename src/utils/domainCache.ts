@@ -11,14 +11,20 @@ interface CachedDomain {
   matches: DomainMatch[]
 }
 
-async function getDB() {
-  return openDB(DB_NAME, DB_VERSION, {
+let dbPromise: ReturnType<typeof openDB> | undefined
+
+function getDB() {
+  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'accession' })
       }
     },
+  }).catch((e: unknown) => {
+    dbPromise = undefined
+    throw e
   })
+  return dbPromise
 }
 
 export async function getCachedDomains(accessions: string[]) {

@@ -161,9 +161,16 @@ export async function fetchProteinDomains(accessions: string[]) {
     )
     const parsed = parseCddDomains(xml)
     for (const acc of batch) {
-      const matches = parsed.get(acc) ?? []
-      byAccession.set(acc, matches)
-      toCache.push({ accession: acc, matches })
+      // only cache accessions actually present in the response: a genuinely
+      // domain-less protein comes back as an empty array (cache it), but an
+      // accession the batch omitted comes back undefined — caching [] for it
+      // would permanently hide its domains on later loads (the domain cache
+      // never expires), so leave it uncached to be retried
+      const matches = parsed.get(acc)
+      if (matches !== undefined) {
+        byAccession.set(acc, matches)
+        toCache.push({ accession: acc, matches })
+      }
     }
   }
   if (toCache.length > 0) {

@@ -12,15 +12,21 @@ interface CachedTaxonomy {
   commonName?: string
 }
 
-async function getDB() {
-  return openDB(DB_NAME, DB_VERSION, {
+let dbPromise: ReturnType<typeof openDB> | undefined
+
+function getDB() {
+  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (db.objectStoreNames.contains(STORE_NAME)) {
         db.deleteObjectStore(STORE_NAME)
       }
       db.createObjectStore(STORE_NAME, { keyPath: 'taxid' })
     },
+  }).catch((e: unknown) => {
+    dbPromise = undefined
+    throw e
   })
+  return dbPromise
 }
 
 async function getCachedTaxonomies(taxids: number[]) {

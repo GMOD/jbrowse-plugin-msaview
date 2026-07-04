@@ -27,8 +27,10 @@ export interface CachedBlastResult {
   geneName?: string
 }
 
-async function getDB() {
-  return openDB(DB_NAME, DB_VERSION, {
+let dbPromise: ReturnType<typeof openDB> | undefined
+
+function getDB() {
+  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion) {
       if (oldVersion < 2 && db.objectStoreNames.contains(STORE_NAME)) {
         db.deleteObjectStore(STORE_NAME)
@@ -37,17 +39,25 @@ async function getDB() {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' })
       }
     },
+  }).catch((e: unknown) => {
+    dbPromise = undefined
+    throw e
   })
+  return dbPromise
 }
 
 function createCacheKey(
   proteinSequence: string,
   blastDatabase: BlastDatabase,
   blastProgram: BlastProgram,
+  msaAlgorithm: MsaAlgorithm,
   transcriptId?: string,
 ) {
   const idPart = transcriptId ? `:${transcriptId}` : ''
-  return `${blastDatabase}:${blastProgram}${idPart}:${proteinSequence}`
+  // msaAlgorithm is part of the key because the stored msa/tree are produced by
+  // it — without it, re-running the same query under a different algorithm
+  // overwrites the earlier result and drops it from the history list
+  return `${blastDatabase}:${blastProgram}:${msaAlgorithm}${idPart}:${proteinSequence}`
 }
 
 export async function saveBlastResult({
@@ -82,6 +92,7 @@ export async function saveBlastResult({
     proteinSequence,
     blastDatabase,
     blastProgram,
+    msaAlgorithm,
     transcriptId,
   )
   const entry: CachedBlastResult = {
