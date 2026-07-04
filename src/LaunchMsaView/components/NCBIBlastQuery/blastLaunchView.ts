@@ -32,15 +32,18 @@ export function blastLaunchViewFromCache({
   newViewTitle,
   view,
   cached,
+  connectedFeature,
 }: {
   newViewTitle: string
   view: LinearGenomeViewModel
   cached: CachedBlastResult
+  connectedFeature?: ReturnType<Feature['toJSON']>
 }) {
   getSession(view).addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
     connectedViewId: view.id,
+    connectedFeature,
     drawNodeBubbles: true,
     colWidth: 10,
     rowHeight: 12,

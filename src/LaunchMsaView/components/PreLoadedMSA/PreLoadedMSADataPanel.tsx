@@ -139,7 +139,6 @@ const PreLoadedMSA = observer(function ({
             if (selectedTranscript && msaData) {
               const querySeqName = `${selectedId}_${assemblyNames[0]}`
               preCalculatedLaunchView({
-                session,
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
                 querySeqName,

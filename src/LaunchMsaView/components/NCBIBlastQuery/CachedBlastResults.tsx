@@ -16,7 +16,12 @@ import { makeStyles } from 'tss-react/mui'
 
 import { blastLaunchViewFromCache } from './blastLaunchView'
 import { useCachedBlastResults } from './useCachedBlastResults'
-import { getGeneIdentifiers, getLinearGenomeView } from '../../util'
+import {
+  featureMatchesId,
+  getGeneIdentifiers,
+  getLinearGenomeView,
+  getSortedTranscriptFeatures,
+} from '../../util'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
@@ -65,10 +70,21 @@ const CachedBlastResults = observer(function ({
     useCachedBlastResults(geneIds)
 
   const handleUseCached = (cached: CachedBlastResult) => {
+    // reconnect the cached MSA to the genome: the cached query row is named
+    // 'QUERY' (react-msaview's default querySeqName) and corresponds to the
+    // transcript stored as transcriptId. Resolving it here restores the
+    // MSA<->genome navigation and hover-sync a fresh BLAST gets.
+    const { transcriptId } = cached
+    const transcript = transcriptId
+      ? getSortedTranscriptFeatures(feature).find(t =>
+          featureMatchesId(t, transcriptId),
+        )
+      : undefined
     blastLaunchViewFromCache({
       view,
       cached,
       newViewTitle: `BLAST - ${getResultDisplayName(cached)}`,
+      connectedFeature: transcript?.toJSON(),
     })
     handleClose()
   }

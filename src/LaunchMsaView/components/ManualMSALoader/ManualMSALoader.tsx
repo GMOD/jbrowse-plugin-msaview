@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 
 import { FileSelector } from '@jbrowse/core/ui'
-import { getSession } from '@jbrowse/core/util'
 import {
   Alert,
   FormControl,
@@ -56,7 +55,6 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   feature: Feature
   handleClose: () => void
 }) {
-  const session = getSession(model)
   const view = getLinearGenomeView(model)
   const { classes } = useStyles()
   const [launchViewError, setLaunchViewError] = useState<unknown>()
@@ -179,7 +177,6 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
             if (selectedTranscript) {
               setLaunchViewError(undefined)
               launchView({
-                session,
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
                 feature: selectedTranscript,

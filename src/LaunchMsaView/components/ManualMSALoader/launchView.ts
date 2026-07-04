@@ -1,12 +1,9 @@
-import type {
-  AbstractSessionModel,
-  Feature,
-  FileLocation,
-} from '@jbrowse/core/util'
+import { getSession } from '@jbrowse/core/util'
+
+import type { Feature, FileLocation } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 export function launchView({
-  session,
   newViewTitle,
   view,
   feature,
@@ -15,7 +12,6 @@ export function launchView({
   querySeqName,
   data,
 }: {
-  session: AbstractSessionModel
   newViewTitle: string
   view: LinearGenomeViewModel
   feature: Feature
@@ -27,7 +23,7 @@ export function launchView({
     tree?: string
   }
 }) {
-  session.addView('MsaView', {
+  getSession(view).addView('MsaView', {
     type: 'MsaView',
     displayName: newViewTitle,
     connectedViewId: view.id,
