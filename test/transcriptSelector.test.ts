@@ -96,33 +96,21 @@ describe('TranscriptSelector E2E', () => {
     await new Promise(r => setTimeout(r, 3000))
     await saveScreenshot(p, getScreenshotPath('03-after-search'))
 
-    // Try SVG text labels first, then feature rects
+    // Features render on a canvas with an HTML label below each glyph. Find the
+    // SPATA6 label, then target the glyph just above it.
     const clickTarget = await p.evaluate(() => {
-      for (const el of Array.from(document.querySelectorAll('text, tspan'))) {
-        const t = el.textContent ?? ''
-        if (t.includes('SPATA6') || t.includes('ENSG00000106686')) {
+      for (const el of Array.from(
+        document.querySelectorAll('div, span, text, tspan'),
+      )) {
+        const own = Array.from(el.childNodes)
+          .filter(n => n.nodeType === 3)
+          .map(n => n.textContent ?? '')
+          .join('')
+        if (own.includes('SPATA6') && !own.includes('SPATA6L')) {
           const bbox = el.getBoundingClientRect()
-          if (bbox.y > 150 && bbox.y < 500) {
-            return { x: bbox.x + bbox.width / 2, y: bbox.y + 10 }
+          if (bbox.y > 150 && bbox.y < 500 && bbox.width > 0) {
+            return { x: bbox.x + bbox.width / 2, y: bbox.y - 6 }
           }
-        }
-      }
-      for (const rect of Array.from(document.querySelectorAll('svg rect'))) {
-        const bbox = rect.getBoundingClientRect()
-        const fill = rect.getAttribute('fill')
-        if (
-          bbox.width > 3 &&
-          bbox.height > 3 &&
-          bbox.height < 25 &&
-          bbox.y > 185 &&
-          bbox.y < 500 &&
-          fill &&
-          fill !== 'none' &&
-          fill !== 'white' &&
-          fill !== '#fff' &&
-          fill !== '#ffffff'
-        ) {
-          return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 }
         }
       }
       return null

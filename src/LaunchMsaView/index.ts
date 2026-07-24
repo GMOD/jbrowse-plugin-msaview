@@ -14,45 +14,75 @@ function isDisplay(elt: { name: string }): elt is DisplayType {
   return elt.name === 'LinearBasicDisplay'
 }
 
+// Canvas-based LinearBasicDisplay (JBrowse nightly) exposes the right-clicked
+// feature via contextMenuInfo + async fetchFullFeature; older releases exposed
+// it synchronously as contextMenuFeature.
+interface ContextMenuInfo {
+  item: { featureId: string; type?: string }
+  displayedRegionIndex: number
+}
+
+interface DisplayModel {
+  contextMenuItems: () => MenuItem[]
+  contextMenuInfo?: ContextMenuInfo
+  isGeneLike?: boolean
+  fetchFullFeature?: (
+    featureId: string,
+    displayedRegionIndex: number,
+  ) => Promise<Feature | undefined>
+  contextMenuFeature?: Feature
+}
+
 function extendStateModel(stateModel: IAnyModelType) {
-  return stateModel.views(
-    (self: {
-      contextMenuItems: () => MenuItem[]
-      contextMenuFeature?: Feature
-    }) => {
-      const superContextMenuItems = self.contextMenuItems
-      return {
-        contextMenuItems() {
-          const feature = self.contextMenuFeature
-          const track = getContainingTrack(self)
-          const featureType = feature?.get('type')
-          const showMsaMenuItem =
-            feature && ['gene', 'mRNA', 'transcript'].includes(featureType)
-          return [
-            ...superContextMenuItems(),
-            ...(showMsaMenuItem
-              ? [
-                  {
-                    label: 'Launch MSA view',
-                    icon: AddIcon,
-                    onClick: () => {
-                      getSession(track).queueDialog(handleClose => [
-                        LaunchMsaViewDialog,
-                        {
-                          model: track,
-                          handleClose,
-                          feature,
-                        },
-                      ])
-                    },
-                  },
-                ]
-              : []),
-          ]
-        },
-      }
-    },
-  )
+  return stateModel.views((self: DisplayModel) => {
+    const superContextMenuItems = self.contextMenuItems
+    return {
+      contextMenuItems() {
+        const track = getContainingTrack(self)
+        const session = getSession(track)
+        const launch = (feature: Feature) => {
+          session.queueDialog(handleClose => [
+            LaunchMsaViewDialog,
+            { model: track, handleClose, feature },
+          ])
+        }
+
+        const info = self.contextMenuInfo
+        const fetchFullFeature = self.fetchFullFeature
+        const legacyFeature = self.contextMenuFeature
+        const onClick =
+          info && fetchFullFeature && self.isGeneLike
+            ? () => {
+                Promise.resolve(
+                  fetchFullFeature(info.item.featureId, info.displayedRegionIndex),
+                )
+                  .then(feature => {
+                    if (feature) {
+                      launch(feature)
+                    }
+                  })
+                  .catch((e: unknown) => {
+                    session.notifyError(`${e}`, e)
+                  })
+              }
+            : legacyFeature &&
+                ['gene', 'mRNA', 'transcript'].includes(
+                  String(legacyFeature.get('type')),
+                )
+              ? () => {
+                  launch(legacyFeature)
+                }
+              : undefined
+
+        return [
+          ...superContextMenuItems(),
+          ...(onClick
+            ? [{ label: 'Launch MSA view', icon: AddIcon, onClick }]
+            : []),
+        ]
+      },
+    }
+  })
 }
 
 export default function LaunchMsaViewF(pluginManager: PluginManager) {
