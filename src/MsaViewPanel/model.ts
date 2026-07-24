@@ -77,7 +77,7 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        querySeqName: 'QUERY',
+        querySeqName: types.stripDefault(types.string, 'QUERY'),
 
         /**
          * #property
@@ -87,7 +87,7 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        zoomToBaseLevel: false,
+        zoomToBaseLevel: types.stripDefault(types.boolean, false),
 
         /**
          * #property
@@ -207,9 +207,10 @@ export default function stateModelFactory() {
        * #getter
        */
       get connectedHighlights(): IRegion[] {
-        return [this.connectedHoverHighlight, this.connectedClickHighlight].filter(
-          (r): r is IRegion => r !== undefined,
-        )
+        return [
+          this.connectedHoverHighlight,
+          this.connectedClickHighlight,
+        ].filter((r): r is IRegion => r !== undefined)
       },
     }))
 
@@ -312,7 +313,6 @@ export default function stateModelFactory() {
           connectedView.centerAt(r2.start, r2.refName)
         }
       },
-
     }))
     .actions(self => {
       const superSetMouseClickPos = self.setMouseClickPos.bind(self)
