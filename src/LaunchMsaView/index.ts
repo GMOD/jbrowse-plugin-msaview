@@ -60,6 +60,11 @@ function extendStateModel(stateModel: IAnyModelType) {
                             LaunchMsaViewDialog,
                             { model: track, handleClose, feature },
                           ])
+                        } else {
+                          session.notify(
+                            'Could not load feature for MSA view',
+                            'warning',
+                          )
                         }
                       })
                       .catch((e: unknown) => {
