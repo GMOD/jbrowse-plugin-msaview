@@ -96,8 +96,9 @@ describe('TranscriptSelector E2E', () => {
     await new Promise(r => setTimeout(r, 3000))
     await saveScreenshot(p, getScreenshotPath('03-after-search'))
 
-    // Features render on a canvas with an HTML label below each glyph. Find the
-    // SPATA6 label, then target the glyph just above it.
+    // Features paint on a canvas; each label is an HTML element whose bounds sit
+    // inside the feature's hit box (the canvas hit index widens each feature to
+    // cover its label). So clicking the SPATA6 label's center hit-tests to it.
     const clickTarget = await p.evaluate(() => {
       for (const el of Array.from(
         document.querySelectorAll('div, span, text, tspan'),
@@ -109,7 +110,7 @@ describe('TranscriptSelector E2E', () => {
         if (own.includes('SPATA6') && !own.includes('SPATA6L')) {
           const bbox = el.getBoundingClientRect()
           if (bbox.y > 150 && bbox.y < 500 && bbox.width > 0) {
-            return { x: bbox.x + bbox.width / 2, y: bbox.y - 6 }
+            return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 }
           }
         }
       }
