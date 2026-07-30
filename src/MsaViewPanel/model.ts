@@ -77,7 +77,12 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        querySeqName: types.stripDefault(types.string, 'QUERY'),
+        // Plain defaults, not types.stripDefault: that postdates the
+        // mobx-state-tree every released core exposes (present only on main), and
+        // the missing function throws while this model is being built, which
+        // error-pages the whole app rather than just this view. Restore
+        // stripDefault once a release ships it.
+        querySeqName: 'QUERY',
 
         /**
          * #property
@@ -87,7 +92,8 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        zoomToBaseLevel: types.stripDefault(types.boolean, false),
+        // see querySeqName above re: types.stripDefault
+        zoomToBaseLevel: false,
 
         /**
          * #property

@@ -46,7 +46,22 @@ const rebuildLogPlugin = {
   },
 }
 
-const globals = JBrowseReExports
+// Modules whose EXPORTED SHAPE differs across the MUI majors that hosts bundle.
+// The key being present in JBrowseReExports is not enough: we build against the
+// core we dev on, but the bundle runs on every host a config names.
+//
+// @mui/material/SvgIcon is the case that bit us. Released hosts (v4.0.0 through
+// latest, on MUI 7) expose it as the SvgIcon component itself -- $$typeof,
+// render, displayName -- while MUI 9 also hangs createSvgIcon off it, which is
+// what @mui/icons-material v9 calls. Externalizing it meant 2.7.0 threw
+// "createSvgIcon is not a function" while evaluating, so its global was never
+// defined, so PluginLoader's Promise.all rejected and error-paged the entire
+// app on every released host. 2.6.8 bundled it and was fine.
+//
+// Bundling it pulls in some MUI internals -- roughly 433KB -> 503KB -- and works
+// on both MUI generations. Worth 70KB to not error-page every host.
+const SHAPE_VARIES_BY_HOST = new Set(['@mui/material/SvgIcon'])
+const globals = JBrowseReExports.filter(x => !SHAPE_VARIES_BY_HOST.has(x))
 const config = {
   entryPoints: ['src/index.ts'],
   bundle: true,
