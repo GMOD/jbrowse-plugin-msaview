@@ -129,3 +129,6 @@ cypress/screenshots
 # Ignore code editor
 debug-*.png
 .vscode
+
+# host-compat probe report (regenerated each run)
+host-compat.json

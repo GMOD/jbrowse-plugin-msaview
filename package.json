@@ -29,8 +29,9 @@
     "test:setup:version": "node scripts/test-versions.mjs setup",
     "test:versions": "node scripts/test-versions.mjs run",
     "test:version": "node scripts/test-versions.mjs run",
+    "host-compat": "node scripts/host-compat-probe.mjs --bundle dist/jbrowse-plugin-msaview.umd.production.min.js",
     "prepack": "pnpm build",
-    "preversion": "pnpm lint",
+    "preversion": "pnpm lint && pnpm build && pnpm host-compat",
     "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git add src/version.ts",
     "postversion": "git push --follow-tags"
   },
