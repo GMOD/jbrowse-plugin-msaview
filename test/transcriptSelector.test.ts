@@ -256,31 +256,37 @@ describe('TranscriptSelector E2E', () => {
 
     // Switch to manual upload tab to submit without external API calls
     const tabs = await p.$$('[role="tab"]')
+    let manualTabClicked = false
     for (const tab of tabs) {
       const tabText = await p.evaluate(
         el => (el as HTMLElement).textContent,
         tab,
       )
-      if (tabText?.toLowerCase().includes('manual')) {
+      if (!manualTabClicked && tabText?.toLowerCase().includes('manual')) {
         await tab.click()
-        break
+        manualTabClicked = true
       }
     }
-    await new Promise(r => setTimeout(r, 1000))
-
-    const pasteLabel = await p.evaluateHandle(() => {
+    if (!manualTabClicked) {
+      throw new Error('Manual upload tab not found in MSA dialog')
+    }
+    // Wait for the panel rather than sleeping: the radio only exists once the
+    // tab has rendered, and skipping its click leaves the file input showing
+    const pasteLabel = await p.waitForFunction(() => {
       const labels = Array.from(document.querySelectorAll('label'))
       return (
         labels.find(l => l.textContent?.toLowerCase().includes('paste')) ?? null
       )
     })
     const pasteLabelEl = pasteLabel.asElement()
-    if (pasteLabelEl) {
-      await pasteLabelEl.click()
+    if (!pasteLabelEl) {
+      throw new Error('Paste text radio not found on manual upload tab')
     }
-    await new Promise(r => setTimeout(r, 500))
+    await pasteLabelEl.click()
 
-    const msaTextarea = await p.$('textarea[name="MSA"]')
+    const msaTextarea = await p.waitForSelector('textarea[name="MSA"]', {
+      timeout: 10_000,
+    })
     if (!msaTextarea) {
       throw new Error('MSA textarea not found on manual upload tab')
     }

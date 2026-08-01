@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import { useLocalStorage } from '@jbrowse/core/util'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { IconButton } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
@@ -11,6 +10,7 @@ import NCBIBlastMethodSelector from './NCBIBlastMethodSelector'
 import NCBIBlastRIDPanel from './NCBIBlastRIDPanel'
 import NCBISettingsDialog from './NCBISettingsDialog'
 import { BASE_BLAST_URL } from './consts'
+import { useLocalStorage } from '../../../utils/useLocalStorage'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 

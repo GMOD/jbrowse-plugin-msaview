@@ -15,8 +15,9 @@ function isDisplay(elt: { name: string }): elt is DisplayType {
 }
 
 // The canvas LinearBasicDisplay (JBrowse >=4.3) exposes the right-clicked
-// feature via contextMenuInfo + async fetchFullFeature rather than a synchronous
-// feature object.
+// feature via contextMenuInfo + async fetchFullFeature. Hosts before that -- and
+// the v3.7.0 in the wild that shipped configs still name -- expose it
+// synchronously as contextMenuFeature, and only have that one.
 interface ContextMenuInfo {
   item: { featureId: string; type?: string }
   displayedRegionIndex: number
@@ -25,12 +26,15 @@ interface ContextMenuInfo {
 interface DisplayModel {
   contextMenuItems: () => MenuItem[]
   contextMenuInfo?: ContextMenuInfo
-  isGeneLike: boolean
-  fetchFullFeature: (
+  isGeneLike?: boolean
+  fetchFullFeature?: (
     featureId: string,
     displayedRegionIndex: number,
   ) => Promise<Feature | undefined>
+  contextMenuFeature?: Feature
 }
+
+const GENE_LIKE_TYPES = new Set(['gene', 'mRNA', 'transcript'])
 
 function extendStateModel(stateModel: IAnyModelType) {
   return stateModel.views((self: DisplayModel) => {
@@ -39,40 +43,45 @@ function extendStateModel(stateModel: IAnyModelType) {
       contextMenuItems() {
         const track = getContainingTrack(self)
         const session = getSession(track)
+        const launch = (feature: Feature) => {
+          session.queueDialog(handleClose => [
+            LaunchMsaViewDialog,
+            { model: track, handleClose, feature },
+          ])
+        }
+
         const info = self.contextMenuInfo
-        const showMsaMenuItem = info && self.isGeneLike
+        const fetchFullFeature = self.fetchFullFeature
+        const legacyFeature = self.contextMenuFeature
+        const onClick =
+          info && fetchFullFeature && self.isGeneLike
+            ? () => {
+                fetchFullFeature(info.item.featureId, info.displayedRegionIndex)
+                  .then(feature => {
+                    if (feature) {
+                      launch(feature)
+                    } else {
+                      session.notify(
+                        'Could not load feature for MSA view',
+                        'warning',
+                      )
+                    }
+                  })
+                  .catch((e: unknown) => {
+                    session.notifyError(`${e}`, e)
+                  })
+              }
+            : legacyFeature &&
+                GENE_LIKE_TYPES.has(String(legacyFeature.get('type')))
+              ? () => {
+                  launch(legacyFeature)
+                }
+              : undefined
+
         return [
           ...superContextMenuItems(),
-          ...(showMsaMenuItem
-            ? [
-                {
-                  label: 'Launch MSA view',
-                  icon: AddIcon,
-                  onClick: () => {
-                    self
-                      .fetchFullFeature(
-                        info.item.featureId,
-                        info.displayedRegionIndex,
-                      )
-                      .then(feature => {
-                        if (feature) {
-                          session.queueDialog(handleClose => [
-                            LaunchMsaViewDialog,
-                            { model: track, handleClose, feature },
-                          ])
-                        } else {
-                          session.notify(
-                            'Could not load feature for MSA view',
-                            'warning',
-                          )
-                        }
-                      })
-                      .catch((e: unknown) => {
-                        session.notifyError(`${e}`, e)
-                      })
-                  },
-                },
-              ]
+          ...(onClick
+            ? [{ label: 'Launch MSA view', icon: AddIcon, onClick }]
             : []),
         ]
       },
