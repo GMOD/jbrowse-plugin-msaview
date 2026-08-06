@@ -1,4 +1,6 @@
-import { openDB } from 'idb'
+import { createDbOpener } from '../utils/idb'
+
+import type { DBSchema } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-data'
 const DB_VERSION = 1
@@ -12,22 +14,20 @@ interface StoredMsaData {
   timestamp: number
 }
 
-let dbPromise: ReturnType<typeof openDB> | undefined
-
-function getDB() {
-  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-        store.createIndex('timestamp', 'timestamp', { unique: false })
-      }
-    },
-  }).catch((e: unknown) => {
-    dbPromise = undefined
-    throw e
-  })
-  return dbPromise
+interface MsaDataDB extends DBSchema {
+  [STORE_NAME]: {
+    key: string
+    value: StoredMsaData
+    indexes: { timestamp: number }
+  }
 }
+
+const getDB = createDbOpener<MsaDataDB>(DB_NAME, DB_VERSION, db => {
+  if (!db.objectStoreNames.contains(STORE_NAME)) {
+    const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+    store.createIndex('timestamp', 'timestamp', { unique: false })
+  }
+})
 
 export function generateDataStoreId() {
   return `msa-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
@@ -57,7 +57,7 @@ export async function storeMsaData(
 export async function retrieveMsaData(id: string) {
   try {
     const db = await getDB()
-    const result = (await db.get(STORE_NAME, id)) as StoredMsaData | undefined
+    const result = await db.get(STORE_NAME, id)
     if (result) {
       return {
         msa: result.msa,

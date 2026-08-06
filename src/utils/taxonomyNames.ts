@@ -1,6 +1,8 @@
-import { openDB } from 'idb'
-
 import { efetchUrl } from './eutils'
+import { textfetch } from './fetch'
+import { createDbOpener } from './idb'
+
+import type { DBSchema } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-taxonomy-cache'
 const STORE_NAME = 'common-names'
@@ -12,31 +14,24 @@ interface CachedTaxonomy {
   commonName?: string
 }
 
-let dbPromise: ReturnType<typeof openDB> | undefined
-
-function getDB() {
-  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (db.objectStoreNames.contains(STORE_NAME)) {
-        db.deleteObjectStore(STORE_NAME)
-      }
-      db.createObjectStore(STORE_NAME, { keyPath: 'taxid' })
-    },
-  }).catch((e: unknown) => {
-    dbPromise = undefined
-    throw e
-  })
-  return dbPromise
+interface TaxonomyCacheDB extends DBSchema {
+  [STORE_NAME]: {
+    key: number
+    value: CachedTaxonomy
+  }
 }
+
+const getDB = createDbOpener<TaxonomyCacheDB>(DB_NAME, DB_VERSION, db => {
+  if (db.objectStoreNames.contains(STORE_NAME)) {
+    db.deleteObjectStore(STORE_NAME)
+  }
+  db.createObjectStore(STORE_NAME, { keyPath: 'taxid' })
+})
 
 async function getCachedTaxonomies(taxids: number[]) {
   const db = await getDB()
   const tx = db.transaction(STORE_NAME, 'readonly')
-  const results = await Promise.all(
-    taxids.map(
-      taxid => tx.store.get(taxid) as Promise<CachedTaxonomy | undefined>,
-    ),
-  )
+  const results = await Promise.all(taxids.map(taxid => tx.store.get(taxid)))
   await tx.done
   return results
 }
@@ -87,10 +82,13 @@ export async function fetchTaxonomyInfo(
     const idsParam = batch.join(',')
 
     try {
-      const response = await fetch(
+      // textfetch rather than a bare fetch: an NCBI 429/5xx returns an HTML
+      // error body that the regexes below silently find nothing in, so without
+      // the status check a throttled batch looks like "these taxa have no
+      // names" instead of reporting why
+      const text = await textfetch(
         efetchUrl({ db: 'taxonomy', id: idsParam, retmode: 'xml' }),
       )
-      const text = await response.text()
 
       // Build a map of taxid -> taxon block by finding Taxon elements.
       // Prefer entries with <LineageEx> (full top-level entries) over nested

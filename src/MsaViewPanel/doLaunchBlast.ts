@@ -25,35 +25,28 @@ export async function doLaunchBlast({
   } = self.blastParams!
   const cleanedSeq = cleanProteinSequence(proteinSequence)
 
-  let hits
-  let rid: string
-  if (existingRid) {
-    self.setRid(existingRid)
-    const result = await queryBlastFromRid({
-      rid: existingRid,
-      baseUrl,
-      onProgress: arg => {
-        self.setProgress(arg)
-      },
-    })
-    hits = result.hits
-    rid = result.rid
-  } else {
-    const result = await queryBlast({
-      query: cleanedSeq,
-      blastDatabase,
-      blastProgram,
-      baseUrl,
-      onProgress: arg => {
-        self.setProgress(arg)
-      },
-      onRid: r => {
-        self.setRid(r)
-      },
-    })
-    hits = result.hits
-    rid = result.rid
+  const onProgress = (arg: string) => {
+    self.setProgress(arg)
   }
+
+  if (existingRid) {
+    // publish it before the first poll so the view can link out to NCBI while
+    // the job is still running
+    self.setRid(existingRid)
+  }
+
+  const { hits, rid } = existingRid
+    ? await queryBlastFromRid({ rid: existingRid, baseUrl, onProgress })
+    : await queryBlast({
+        query: cleanedSeq,
+        blastDatabase,
+        blastProgram,
+        baseUrl,
+        onProgress,
+        onRid: r => {
+          self.setRid(r)
+        },
+      })
 
   self.setProgress('Fetching species taxonomy info...')
   const taxids = hits
@@ -80,9 +73,7 @@ export async function doLaunchBlast({
   const result = await launchMSA({
     algorithm: msaAlgorithm,
     sequence: [`>QUERY\n${cleanedSeq}`, ...sequences].join('\n'),
-    onProgress: arg => {
-      self.setProgress(arg)
-    },
+    onProgress,
   })
 
   const treeMetadataJson = JSON.stringify(treeMetadata)

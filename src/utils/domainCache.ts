@@ -1,6 +1,7 @@
-import { openDB } from 'idb'
+import { createDbOpener } from './idb'
 
 import type { DomainMatch } from './ncbiDomains'
+import type { DBSchema } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-domain-cache'
 const STORE_NAME = 'domains'
@@ -11,29 +12,24 @@ interface CachedDomain {
   matches: DomainMatch[]
 }
 
-let dbPromise: ReturnType<typeof openDB> | undefined
-
-function getDB() {
-  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'accession' })
-      }
-    },
-  }).catch((e: unknown) => {
-    dbPromise = undefined
-    throw e
-  })
-  return dbPromise
+interface DomainCacheDB extends DBSchema {
+  [STORE_NAME]: {
+    key: string
+    value: CachedDomain
+  }
 }
+
+const getDB = createDbOpener<DomainCacheDB>(DB_NAME, DB_VERSION, db => {
+  if (!db.objectStoreNames.contains(STORE_NAME)) {
+    db.createObjectStore(STORE_NAME, { keyPath: 'accession' })
+  }
+})
 
 export async function getCachedDomains(accessions: string[]) {
   const db = await getDB()
   const tx = db.transaction(STORE_NAME, 'readonly')
   const results = await Promise.all(
-    accessions.map(
-      accession => tx.store.get(accession) as Promise<CachedDomain | undefined>,
-    ),
+    accessions.map(accession => tx.store.get(accession)),
   )
   await tx.done
   return results

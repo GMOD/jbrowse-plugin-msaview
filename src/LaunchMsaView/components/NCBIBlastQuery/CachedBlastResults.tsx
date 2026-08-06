@@ -117,7 +117,7 @@ const CachedBlastResults = observer(function ({
             }
           }}
         >
-          Clear All
+          Clear results for this gene
         </Button>
       </div>
       <List dense className={classes.resultList}>

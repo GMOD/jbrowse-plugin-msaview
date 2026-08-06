@@ -1,7 +1,6 @@
 import useSWR from 'swr'
 
 import {
-  clearAllCachedResults,
   deleteCachedResult,
   getAllCachedResults,
 } from '../../../utils/blastCache'
@@ -30,8 +29,11 @@ export function useCachedBlastResults(geneIds: string[]) {
     )
   }
 
+  // deletes only what this hook listed, i.e. the results for these gene ids.
+  // The list the user is looking at is gene-scoped, so a store-wide clear here
+  // would silently throw away every other gene's cached alignments too
   const handleClearAll = async () => {
-    await clearAllCachedResults()
+    await Promise.all((results ?? []).map(r => deleteCachedResult(r.id)))
     await mutate([], false)
   }
 

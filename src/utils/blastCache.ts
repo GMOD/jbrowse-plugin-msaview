@@ -1,10 +1,11 @@
-import { openDB } from 'idb'
+import { createDbOpener } from './idb'
 
 import type {
   BlastDatabase,
   BlastProgram,
   MsaAlgorithm,
 } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+import type { DBSchema } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-blast-cache'
 const STORE_NAME = 'blast-results'
@@ -27,24 +28,25 @@ export interface CachedBlastResult {
   geneName?: string
 }
 
-let dbPromise: ReturnType<typeof openDB> | undefined
-
-function getDB() {
-  dbPromise ??= openDB(DB_NAME, DB_VERSION, {
-    upgrade(db, oldVersion) {
-      if (oldVersion < 2 && db.objectStoreNames.contains(STORE_NAME)) {
-        db.deleteObjectStore(STORE_NAME)
-      }
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' })
-      }
-    },
-  }).catch((e: unknown) => {
-    dbPromise = undefined
-    throw e
-  })
-  return dbPromise
+interface BlastCacheDB extends DBSchema {
+  [STORE_NAME]: {
+    key: string
+    value: CachedBlastResult
+  }
 }
+
+const getDB = createDbOpener<BlastCacheDB>(
+  DB_NAME,
+  DB_VERSION,
+  (db, oldVersion) => {
+    if (oldVersion < 2 && db.objectStoreNames.contains(STORE_NAME)) {
+      db.deleteObjectStore(STORE_NAME)
+    }
+    if (!db.objectStoreNames.contains(STORE_NAME)) {
+      db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+    }
+  },
+)
 
 function createCacheKey(
   proteinSequence: string,
@@ -124,9 +126,4 @@ export async function getAllCachedResults() {
 export async function deleteCachedResult(id: string) {
   const db = await getDB()
   await db.delete(STORE_NAME, id)
-}
-
-export async function clearAllCachedResults() {
-  const db = await getDB()
-  await db.clear(STORE_NAME)
 }
