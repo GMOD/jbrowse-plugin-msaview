@@ -12,22 +12,30 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
     return undefined
   }
 
-  const { coord: hoverCoord, refName } = hovered.hoverPosition
+  const { coord, refName } = hovered.hoverPosition
+
+  // hoverPosition.coord is a 1-based display coordinate (core's pxToBp adds the
+  // +1), while g2p and mafRegion are keyed by 0-based genome position
+  const genomePos = coord - 1
 
   if (mafRegion) {
     if (
       refName !== mafRegion.refName ||
       !connectedView.assemblyNames.includes(mafRegion.assemblyName) ||
-      hoverCoord < mafRegion.start ||
-      hoverCoord >= mafRegion.end
+      genomePos < mafRegion.start ||
+      genomePos >= mafRegion.end
     ) {
       return undefined
     }
-    return model.seqPosToVisibleCol(querySeqName, hoverCoord - mafRegion.start)
+    return model.seqPosToVisibleCol(querySeqName, genomePos - mafRegion.start)
   }
 
-  if (transcriptToMsaMap) {
-    const seqPos = transcriptToMsaMap.g2p[hoverCoord]
+  // session.hovered is global -- set by whichever LinearGenomeView the cursor
+  // was last over, on any assembly -- so the refName gate is load bearing:
+  // without it the same numeric coordinate on an unrelated chromosome matches a
+  // g2p key and lights up a column for a different locus
+  if (refName === transcriptToMsaMap?.refName) {
+    const seqPos = transcriptToMsaMap.g2p[genomePos]
     if (seqPos !== undefined) {
       return model.seqPosToVisibleCol(querySeqName, seqPos)
     }

@@ -75,7 +75,14 @@ between MSA positions and genome coordinates:
 
 1. MSA column (gapped) → ungapped position
 2. Ungapped position → protein position
-3. Protein position → genome coordinate (via p2g mapping)
+3. Protein position → genome coordinates (via `p2gCodon`, the full set of
+   genomic bases in the codon, so the region is exact on either strand and a
+   codon split across an exon boundary yields one region per piece)
+
+Both directions have a coordinate-base conversion to get right:
+`session.hovered.hoverPosition.coord` is a **1-based** display coordinate (core's
+`pxToBp` adds the +1), while `g2p`/`p2gCodon` and the regions handed to `bpToPx`
+are **0-based**.
 
 Key files:
 

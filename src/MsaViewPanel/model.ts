@@ -19,7 +19,10 @@ import {
   storeDataToIndexedDB,
   syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
-import { msaCoordToGenomeCoord } from './msaCoordToGenomeCoord'
+import {
+  msaCoordToGenomeCoord,
+  msaCoordToGenomeRegions,
+} from './msaCoordToGenomeCoord'
 
 import type { MafRegion, MsaViewInitState } from './types'
 import type {
@@ -188,35 +191,37 @@ export default function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
-       * Genome region under the current MSA hover column. Suppressed on the LGV
+       * Genome regions under the current MSA hover column. Suppressed on the LGV
        * while it's being hovered (GenomeMouseoverHighlight shows the crisp 1bp
        * marker there instead of this wider codon band).
        */
-      get connectedHoverHighlight(): IRegion | undefined {
+      get connectedHoverHighlights(): IRegion[] {
         const { mouseCol } = self
         return mouseCol === undefined
-          ? undefined
-          : msaCoordToGenomeCoord({ model: self, coord: mouseCol })
+          ? []
+          : msaCoordToGenomeRegions({ model: self, coord: mouseCol })
       },
       /**
        * #getter
-       * Genome region under the persistent MSA click selection. Shown
+       * Genome regions under the persistent MSA click selection. Shown
        * regardless of LGV hover, so hovering the genome doesn't hide it.
        */
-      get connectedClickHighlight(): IRegion | undefined {
+      get connectedClickHighlights(): IRegion[] {
         const { mouseClickCol } = self
         return mouseClickCol === undefined
-          ? undefined
-          : msaCoordToGenomeCoord({ model: self, coord: mouseClickCol })
+          ? []
+          : msaCoordToGenomeRegions({ model: self, coord: mouseClickCol })
       },
       /**
        * #getter
+       * cross-plugin contract: jbrowse-plugin-mafviewer reads this off the view
+       * to draw the same highlights in its own display
        */
       get connectedHighlights(): IRegion[] {
         return [
-          this.connectedHoverHighlight,
-          this.connectedClickHighlight,
-        ].filter((r): r is IRegion => r !== undefined)
+          ...this.connectedHoverHighlights,
+          ...this.connectedClickHighlights,
+        ]
       },
     }))
 

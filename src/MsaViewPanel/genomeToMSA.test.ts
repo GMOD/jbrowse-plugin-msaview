@@ -91,8 +91,9 @@ describe('genomeToMSA', () => {
 
       const result = genomeToMSA({ model })
 
-      // coord 1005 - start 1000 = ungapped position 5
-      expect(mockSeqPosToVisibleCol).toHaveBeenCalledWith('hg38.chr1', 5)
+      // hover coord 1005 is 1-based, so the 0-based genome position is 1004,
+      // which is ungapped position 4 of a region starting at 1000
+      expect(mockSeqPosToVisibleCol).toHaveBeenCalledWith('hg38.chr1', 4)
       expect(result).toBe(5)
     })
 
@@ -125,10 +126,11 @@ describe('genomeToMSA', () => {
     })
 
     test('returns undefined when hover coord is before mafRegion start', () => {
+      // 1-based coord 1000 is the 0-based base 999, one before the region
       mockGetSession.mockReturnValue({
         hovered: {
           hoverFeature: {},
-          hoverPosition: { coord: 999, refName: 'chr1' },
+          hoverPosition: { coord: 1000, refName: 'chr1' },
         },
       } as any)
 
@@ -153,10 +155,11 @@ describe('genomeToMSA', () => {
     })
 
     test('returns undefined when hover coord is at or after mafRegion end', () => {
+      // 1-based coord 1011 is the 0-based base 1010, one past the region
       mockGetSession.mockReturnValue({
         hovered: {
           hoverFeature: {},
-          hoverPosition: { coord: 1010, refName: 'chr1' },
+          hoverPosition: { coord: 1011, refName: 'chr1' },
         },
       } as any)
 
@@ -223,7 +226,9 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         transcriptToMsaMap: {
-          g2p: { 1005: 10 },
+          refName: 'chr1',
+          // g2p is keyed by 0-based genome position, the hover coord is 1-based
+          g2p: { 1004: 10 },
         },
         mafRegion: undefined,
         connectedView: { initialized: true },
@@ -234,6 +239,32 @@ describe('genomeToMSA', () => {
 
       expect(mockSeqPosToVisibleCol).toHaveBeenCalledWith('QUERY', 10)
       expect(result).toBe(10)
+    })
+
+    test('returns undefined when the hover is on another refName', () => {
+      // session.hovered is global, so a hover on an unrelated chromosome can
+      // carry a coordinate that happens to be a g2p key
+      mockGetSession.mockReturnValue({
+        hovered: {
+          hoverFeature: {},
+          hoverPosition: { coord: 1005, refName: 'chr2' },
+        },
+      } as any)
+
+      const mockSeqPosToVisibleCol = vi.fn()
+      const model = {
+        querySeqName: 'QUERY',
+        transcriptToMsaMap: {
+          refName: 'chr1',
+          g2p: { 1004: 10 },
+        },
+        mafRegion: undefined,
+        connectedView: { initialized: true },
+        seqPosToVisibleCol: mockSeqPosToVisibleCol,
+      } as any
+
+      expect(genomeToMSA({ model })).toBeUndefined()
+      expect(mockSeqPosToVisibleCol).not.toHaveBeenCalled()
     })
 
     test('returns undefined when g2p has no mapping for coord', () => {
@@ -247,7 +278,8 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         transcriptToMsaMap: {
-          g2p: { 1000: 0 }, // No entry for 1005
+          refName: 'chr1',
+          g2p: { 1000: 0 }, // No entry for 1004
         },
         mafRegion: undefined,
         connectedView: { initialized: true },

@@ -56,13 +56,15 @@ describe('syncGenomeHoverToMsaColumn (real genomeToMSA mapping)', () => {
     vi.clearAllMocks()
   })
 
-  test('genome hover at coord 1005 highlights MSA column 5', () => {
+  test('genome hover at coord 1005 highlights MSA column 4', () => {
     const { model, calls } = makeModel()
     const run = syncGenomeHoverToMsaColumn(model)
 
-    hoverGenome(1005) // 1005 - mafRegion.start(1000) = ungapped 5
+    // the hover coord is 1-based, so 1005 is the 0-based base 1004, i.e.
+    // ungapped offset 4 into a region starting at 1000
+    hoverGenome(1005)
     run()
-    expect(calls).toEqual([5])
+    expect(calls).toEqual([4])
   })
 
   test('moving the genome hover moves the highlighted column', () => {
@@ -73,7 +75,7 @@ describe('syncGenomeHoverToMsaColumn (real genomeToMSA mapping)', () => {
     run()
     hoverGenome(1007)
     run()
-    expect(calls).toEqual([2, 7])
+    expect(calls).toEqual([1, 6])
   })
 
   test('leaving the genome clears the column it set', () => {
@@ -84,7 +86,7 @@ describe('syncGenomeHoverToMsaColumn (real genomeToMSA mapping)', () => {
     run()
     clearGenomeHover()
     run()
-    expect(calls).toEqual([4, undefined])
+    expect(calls).toEqual([3, undefined])
   })
 
   test('a hover outside the maf region clears a previously-set column once', () => {
@@ -96,7 +98,7 @@ describe('syncGenomeHoverToMsaColumn (real genomeToMSA mapping)', () => {
     hoverGenome(5000) // outside [1000,1010) -> genomeToMSA returns undefined
     run()
     run()
-    expect(calls).toEqual([4, undefined])
+    expect(calls).toEqual([3, undefined])
   })
 
   test('never touches mouseCol when the genome never provides a column, so a direct MSA hover survives unrelated session hovers', () => {
