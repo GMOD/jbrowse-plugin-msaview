@@ -12,6 +12,7 @@ export type { MSAFormat } from 'msa-parsers'
 import {
   autoLoadProteinDomains,
   launchBlastIfNeeded,
+  launchOrthologsIfNeeded,
   loadStoredData,
   observeProteinHighlights,
   processInit,
@@ -54,6 +55,18 @@ export interface BlastParams {
   rid?: string
 }
 
+export interface OrthologParams {
+  /** NCBI taxon id of the assembly the query gene came from */
+  taxId: number
+  /** taxon ids to include as rows (the query taxon is represented by QUERY) */
+  taxa: number[]
+  /** candidate gene identifiers off the feature, tried in order */
+  geneCandidates: string[]
+  msaAlgorithm: MsaAlgorithm
+  selectedTranscript?: Feature
+  proteinSequence: string
+}
+
 /**
  * #stateModel MsaViewPlugin
  * extends
@@ -77,6 +90,10 @@ export default function stateModelFactory() {
          * #property
          */
         blastParams: types.frozen<BlastParams | undefined>(),
+        /**
+         * #property
+         */
+        orthologParams: types.frozen<OrthologParams | undefined>(),
         /**
          * #property
          */
@@ -259,6 +276,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setOrthologParams(args?: OrthologParams) {
+        self.orthologParams = args
+      },
+      /**
+       * #action
+       */
       setInit(arg?: MsaViewInitState) {
         self.init = arg
       },
@@ -366,6 +389,7 @@ export default function stateModelFactory() {
           loadStoredData,
           storeDataToIndexedDB,
           launchBlastIfNeeded,
+          launchOrthologsIfNeeded,
           processInit,
           autoLoadProteinDomains,
         ]) {

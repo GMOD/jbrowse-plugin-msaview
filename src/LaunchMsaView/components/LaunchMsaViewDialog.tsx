@@ -6,6 +6,7 @@ import { Tab, Tabs } from '@mui/material'
 
 import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
 import NCBIBlastPanel from './NCBIBlastQuery/NCBIBlastPanel'
+import OrthologPanel from './OrthologQuery/OrthologPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import { readMsaDatasets } from './PreLoadedMSA/types'
 import TabPanel from './TabPanel'
@@ -25,9 +26,11 @@ export default function LaunchMsaViewDialog({
   const datasets = readMsaDatasets(session.jbrowse)
   const hasPreloadedDatasets = !!datasets?.length
 
+  // orthologs first, and the default: it answers the same question in ~10s
+  // that BLAST takes 10+ minutes to answer worse (see utils/ncbiOrthologs.ts)
   const [value, setValue] = useState<
-    'ncbi_blast' | 'preloaded_msa' | 'manual_msa'
-  >('ncbi_blast')
+    'orthologs' | 'ncbi_blast' | 'preloaded_msa' | 'manual_msa'
+  >('orthologs')
 
   return (
     <Dialog maxWidth="xl" title="Launch MSA view" open onClose={handleClose}>
@@ -37,12 +40,20 @@ export default function LaunchMsaViewDialog({
           setValue(newValue)
         }}
       >
+        <Tab label="Orthologs (fast)" value="orthologs" />
         <Tab label="NCBI BLAST query" value="ncbi_blast" />
         {hasPreloadedDatasets ? (
           <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
         ) : null}
         <Tab label="Manual upload" value="manual_msa" />
       </Tabs>
+      <TabPanel value={value} index="orthologs">
+        <OrthologPanel
+          handleClose={handleClose}
+          feature={feature}
+          model={model}
+        />
+      </TabPanel>
       <TabPanel value={value} index="ncbi_blast">
         <NCBIBlastPanel
           handleClose={handleClose}

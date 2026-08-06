@@ -1,6 +1,7 @@
 import { getSession } from '@jbrowse/core/util'
 
 import { doLaunchBlast } from './doLaunchBlast'
+import { doLaunchOrthologs } from './doLaunchOrthologs'
 import { fetchIndexedMsa } from './fetchIndexedMsa'
 import { genomeToMSA } from './genomeToMSA'
 import { loadProteinDomains } from './loadProteinDomains'
@@ -75,6 +76,32 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
         }
       })()
     }
+  }
+}
+
+/**
+ * Same shape as launchBlastIfNeeded, for the ortholog path: the params ARE the
+ * request, and clearing them on success is what marks it done. They are left in
+ * place on failure so the error stays attributable to a specific request; the
+ * autorun's only tracked read is orthologParams itself, so nothing refires
+ * until a new request replaces them.
+ */
+export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
+  if (self.orthologParams) {
+    void (async () => {
+      try {
+        self.setProgress('Resolving orthologs')
+        self.setError(undefined)
+        const data = await doLaunchOrthologs({ self })
+        self.setData(data)
+        self.setOrthologParams(undefined)
+      } catch (e) {
+        self.setError(e)
+        console.error(e)
+      } finally {
+        self.setProgress('')
+      }
+    })()
   }
 }
 
