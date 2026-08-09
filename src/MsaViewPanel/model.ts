@@ -58,13 +58,24 @@ export interface BlastParams {
 export interface OrthologParams {
   /** NCBI taxon id of the assembly the query gene came from */
   taxId: number
-  /** taxon ids to include as rows (the query taxon is represented by QUERY) */
-  taxa: number[]
+  /**
+   * taxon ids to include as rows (the query taxon is represented by QUERY).
+   * Omitted means every species the launch dialog offers, which is what a
+   * launch that just wants "this gene across species" wants.
+   */
+  taxa?: number[]
   /** candidate gene identifiers off the feature, tried in order */
   geneCandidates: string[]
   msaAlgorithm: MsaAlgorithm
   selectedTranscript?: Feature
-  proteinSequence: string
+  /**
+   * The QUERY row. The launch dialog always supplies it, translated from the
+   * transcript the user picked, which is what `connectedFeature` maps genome
+   * coordinates through. Omitted — a session spec naming a gene and nothing
+   * else — the query row becomes NCBI's representative protein for the resolved
+   * gene, the same choice every other row makes.
+   */
+  proteinSequence?: string
 }
 
 /**

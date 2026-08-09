@@ -1,6 +1,7 @@
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { launchMSA } from '../utils/msa'
 import {
+  COMMON_SPECIES,
   fetchOrthologRows,
   fetchProteinForGene,
   resolveGeneId,
@@ -31,7 +32,6 @@ export async function doLaunchOrthologs({
 }) {
   const { taxId, taxa, geneCandidates, msaAlgorithm, proteinSequence } =
     self.orthologParams!
-  const cleanedSeq = cleanProteinSequence(proteinSequence)
 
   const onProgress = (arg: string) => {
     self.setProgress(arg)
@@ -45,8 +45,29 @@ export async function doLaunchOrthologs({
     )
   }
 
-  // the query species is represented by the user's own transcript below
-  const wanted = new Set(taxa.filter(t => t !== taxId))
+  // The query row. The dialog always supplies it — it is the user's OWN
+  // selected transcript, which is what makes `connectedFeature` map genome
+  // coordinates through this row. A launch that has no transcript to translate
+  // (a session spec naming only a gene) falls back to NCBI's representative
+  // protein for the resolved gene, which is the same choice made for every
+  // other row, so the alignment is the one NCBI would build for that gene.
+  const representative = await fetchRepresentativeQueryProtein(resolved.geneId)
+  const cleanedSeq = proteinSequence
+    ? cleanProteinSequence(proteinSequence)
+    : representative?.sequence
+  if (!cleanedSeq) {
+    throw new Error(
+      `No query protein: none was supplied and NCBI returned no representative protein for gene ${resolved.geneId}.`,
+    )
+  }
+
+  // Every species the panel offers, when a launch names none. A spec that wants
+  // a narrower comparison says so; one that just wants "this gene across
+  // species" should not have to enumerate the list the dialog would have
+  // checked for it.
+  const wantedTaxa = taxa ?? COMMON_SPECIES.map(s => s.taxId as number)
+  // the query species is represented by the query row above
+  const wanted = new Set(wantedTaxa.filter(t => t !== taxId))
   const rows = await fetchOrthologRows({
     geneId: resolved.geneId,
     taxa: wanted,
@@ -54,7 +75,7 @@ export async function doLaunchOrthologs({
   })
 
   const treeMetadata: Record<string, Record<string, string>> = {
-    QUERY: await buildQueryMetadata(self, resolved.geneId, cleanedSeq),
+    QUERY: buildQueryMetadata(self, resolved.geneId, cleanedSeq, representative),
   }
   for (const row of rows) {
     treeMetadata[row.label] = buildRowMetadata(row)
@@ -76,34 +97,42 @@ export async function doLaunchOrthologs({
 }
 
 /**
- * The query row is the user's own translated transcript, so it carries an
- * Accession — which is what drives the automatic CDD overlay
- * (afterCreateAutoruns.autoLoadProteinDomains -> loadProteinDomains) — ONLY
- * when its sequence is byte-identical to the RefSeq protein that accession
+ * A failed lookup only costs the query row its domain overlay and, for a launch
+ * that supplied no sequence of its own, the alignment — so it is reported by
+ * returning nothing rather than by throwing here.
+ */
+async function fetchRepresentativeQueryProtein(geneId: string) {
+  try {
+    return await fetchProteinForGene(geneId)
+  } catch (e) {
+    console.warn('[msaview-orthologs] query protein lookup failed:', e)
+    return undefined
+  }
+}
+
+/**
+ * The query row carries an Accession — which is what drives the automatic CDD
+ * overlay (afterCreateAutoruns.autoLoadProteinDomains -> loadProteinDomains) —
+ * ONLY when its sequence is byte-identical to the RefSeq protein that accession
  * names. Attaching it unconditionally would put every domain box at an offset
  * whenever the user picked a non-representative isoform, which is a silently
- * wrong figure rather than a missing one.
+ * wrong figure rather than a missing one. A launch that took the representative
+ * protein as its query row passes that test by construction.
  */
-async function buildQueryMetadata(
+function buildQueryMetadata(
   self: JBrowsePluginMsaViewModel,
   geneId: string,
   proteinSequence: string,
-): Promise<Record<string, string>> {
+  representative: { accession: string; sequence: string } | undefined,
+): Record<string, string> {
   const transcript = self.orthologParams?.selectedTranscript
   const metadata: Record<string, string> = { 'Gene ID': geneId }
   const name = transcript?.get('name') ?? transcript?.get('id')
   if (name) {
     metadata.Transcript = name
   }
-  try {
-    const representative = await fetchProteinForGene(geneId)
-    if (representative?.sequence === proteinSequence) {
-      metadata.Accession = representative.accession
-    }
-  } catch (e) {
-    // a failed lookup only costs the query row its domain overlay, so it must
-    // not take down an alignment that is otherwise complete
-    console.warn('[msaview-orthologs] query protein lookup failed:', e)
+  if (representative?.sequence === proteinSequence) {
+    metadata.Accession = representative.accession
   }
   return metadata
 }
