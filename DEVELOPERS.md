@@ -14,24 +14,73 @@ spec URL parameters (see https://jbrowse.org/jb2/docs/urlparams/#session-spec).
 
 ### Parameters
 
-| Parameter          | Required                    | Description                                     |
-| ------------------ | --------------------------- | ----------------------------------------------- |
-| `data`             | One of data/msaFileLocation | `{ msa: string, tree?: string }`                |
-| `msaFileLocation`  | One of data/msaFileLocation | `{ uri: string }` for MSA file                  |
-| `treeFileLocation` | No                          | `{ uri: string }` for tree file                 |
-| `connectedViewId`  | No                          | ID of connected LinearGenomeView                |
-| `connectedFeature` | No                          | Feature for cross-linking                       |
-| `displayName`      | No                          | Custom view display name                        |
-| `colorSchemeName`  | No                          | Color scheme (e.g., 'percent_identity_dynamic') |
-| `colWidth`         | No                          | Column width in pixels                          |
-| `rowHeight`        | No                          | Row height in pixels                            |
-| `treeAreaWidth`    | No                          | Tree area width                                 |
-| `treeWidth`        | No                          | Tree width                                      |
-| `drawNodeBubbles`  | No                          | Show node bubbles on tree                       |
-| `labelsAlignRight` | No                          | Align labels to the right                       |
-| `showBranchLen`    | No                          | Show branch lengths                             |
-| `querySeqName`     | No                          | Name for query sequence                         |
-| `highlightColumns` | No                          | Visible column indices to highlight on open     |
+Exactly one of the four **sources** is required. The first three name an
+alignment that already exists; `orthologParams` names no alignment at all and
+builds one at launch (see below).
+
+| Source               | Description                                       |
+| -------------------- | ------------------------------------------------- |
+| `data`               | `{ msa: string, tree?: string }`                  |
+| `msaFileLocation`    | `{ uri: string }` for MSA file                    |
+| `msaIndexedLocation` | `{ uri: string }` for a name-indexed bgzip block  |
+| `orthologParams`     | build the alignment from NCBI orthologs at launch |
+
+Everything else is optional.
+
+| Parameter          | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `treeFileLocation` | `{ uri: string }` for tree file                        |
+| `connectedViewId`  | ID of connected LinearGenomeView                       |
+| `connectedFeature` | Feature for cross-linking                              |
+| `displayName`      | Custom view display name                               |
+| `colorSchemeName`  | Color scheme (e.g., 'percent_identity_dynamic')        |
+| `colWidth`         | Column width in pixels                                 |
+| `rowHeight`        | Row height in pixels                                   |
+| `allowedGappyness` | Hide any column gappier than this percent, 100 to keep |
+| `treeAreaWidth`    | Tree area width                                        |
+| `treeWidth`        | Tree width                                             |
+| `drawNodeBubbles`  | Show node bubbles on tree                              |
+| `labelsAlignRight` | Align labels to the right                              |
+| `showBranchLen`    | Show branch lengths                                    |
+| `querySeqName`     | Name for query sequence                                |
+| `highlightColumns` | Visible column indices to highlight on open            |
+
+### Building an alignment from a gene: `orthologParams`
+
+This is the launch dialog's **Orthologs (fast)** tab reached declaratively, so a
+link can say "NLRP1 across species" and the view builds it. Two of its fields
+default so that a spec stays short.
+
+| Field                | Required | Description                                                         |
+| -------------------- | -------- | ------------------------------------------------------------------- |
+| `taxId`              | Yes      | NCBI taxon id of the assembly the query gene came from              |
+| `geneCandidates`     | Yes      | Gene identifiers, tried in order until one resolves                 |
+| `msaAlgorithm`       | Yes      | `clustalo`, `muscle`, `kalign` or `mafft`                           |
+| `taxa`               | No       | Taxon ids to include. Omitted means every species the dialog offers |
+| `proteinSequence`    | No       | The QUERY row. Omitted means NCBI's representative protein          |
+| `selectedTranscript` | No       | The transcript the query row was translated from                    |
+
+`proteinSequence` is what the launch dialog always supplies, translated from the
+transcript the user picked, because that is the row `connectedFeature` maps
+genome coordinates through. A spec naming a gene has no transcript to translate
+and should not have to carry ~1.5 kB of residues in a url, so it gets NCBI's
+representative protein instead, which is also the choice every other row makes.
+A query row taken from the representative additionally passes the byte-identity
+test that attaches its `Accession`, so the CDD domain overlay is there by
+construction.
+
+`allowedGappyness` is worth setting alongside it. Proteins that differ in length
+put one row's private N-terminal extension at column 0 with every other row gap
+underneath, so a launch that does not say otherwise can open on columns the link
+was not about.
+
+```
+session=spec-{"views":[{
+  "type": "MsaView",
+  "orthologParams": {"taxId":9606,"geneCandidates":["NLRP1"],"msaAlgorithm":"clustalo"},
+  "allowedGappyness": 80
+}]}
+```
 
 ### URL example
 
@@ -80,9 +129,9 @@ between MSA positions and genome coordinates:
    codon split across an exon boundary yields one region per piece)
 
 Both directions have a coordinate-base conversion to get right:
-`session.hovered.hoverPosition.coord` is a **1-based** display coordinate (core's
-`pxToBp` adds the +1), while `g2p`/`p2gCodon` and the regions handed to `bpToPx`
-are **0-based**.
+`session.hovered.hoverPosition.coord` is a **1-based** display coordinate
+(core's `pxToBp` adds the +1), while `g2p`/`p2gCodon` and the regions handed to
+`bpToPx` are **0-based**.
 
 Key files:
 
@@ -203,17 +252,20 @@ The MSA view can receive highlights from protein3d via two paths:
 ### Launch mechanisms
 
 The MSA view can be launched from the Linear Genome View via right-click context
-menu on gene/mRNA/transcript features. This provides several data source
-options:
+menu on gene/mRNA/transcript features. The dialog that opens carries one tab per
+data source:
 
-1. **NCBI BLAST Query**: Submit protein sequence to NCBI BLAST and display
-   results
-2. **Pre-loaded MSA Datasets**: Use pre-calculated alignments from configuration
-3. **Ensembl Gene Tree**: Fetch orthologous sequences from Ensembl
-4. **Manual MSA Loader**: Load MSA/tree files directly
+1. **Orthologs (fast)**: look up NCBI's precomputed ortholog gene per species
+   and align what comes back. No search job to queue, so this returns in seconds
+2. **NCBI BLAST query**: submit the protein sequence to NCBI BLAST and align the
+   hits. The route for a gene with no resolvable symbol
+3. **Pre-loaded MSA datasets**: use pre-calculated alignments from configuration
+4. **Manual upload**: load MSA/tree files directly
 
 Each launch method automatically sets up the genome view connection for
 coordinate mapping and highlighting.
+
+Only the first is reachable without the dialog, via `orthologParams` above.
 
 ## Data persistence
 
