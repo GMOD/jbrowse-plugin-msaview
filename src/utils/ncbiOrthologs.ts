@@ -26,8 +26,14 @@ const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
 // The species panel offered in the launch dialog, ordered from the reference
 // outward so a run that finds only close relatives still reads as a ladder.
-// Orthologs absent for a given gene are skipped rather than erroring, and the
-// index order here is the ROW order of the alignment (COMMON_TAX_RANK below).
+// Orthologs absent for a given gene are skipped rather than erroring.
+//
+// The index order is the order the sequences are SUBMITTED in
+// (`COMMON_TAX_RANK` below sorts `fetchOrthologGenes`' return), not the order the
+// rows are drawn in: the view lays rows out by the guide tree the aligner returns,
+// so a run on this list comes out grouped by relatedness rather than by this
+// list's own sequence. Reordering here changes what Clustal is handed, not the
+// picture.
 //
 // THE MAMMALS EARN THEIR PLACE, and the reason is measured rather than aesthetic.
 // The thirteen this list used to hold were one per major clade, which reads well
