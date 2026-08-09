@@ -26,18 +26,22 @@ const useStyles = makeStyles()({
   selectField: {
     width: 180,
   },
+  // A GRID, not a wrapping flex row of fixed-width items. The old form was three
+  // 160px columns inside a 560px box, which is five rows for thirteen species and
+  // eight for twenty-three -- and the checkbox list is the tallest thing in the
+  // dialog, so those rows are the dialog's height. Five auto-fitted columns is
+  // five rows for twenty-three, i.e. more species in less space, and it reflows
+  // rather than being pinned to a width the dialog may not have.
   speciesBox: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    maxWidth: 560,
-    marginTop: 12,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+    maxWidth: 700,
+    marginTop: 4,
   },
+  // The label carries the row height; the default control padding is what makes
+  // 23 rows of it tall.
   species: {
-    width: 160,
-  },
-  infoText: {
-    marginTop: 20,
-    maxWidth: 620,
+    marginRight: 0,
   },
 })
 
@@ -69,13 +73,14 @@ const OrthologPanel = observer(function ({
   return (
     <>
       <LaunchPanelContent error={e}>
-        <Typography>
-          Builds the alignment from NCBI&apos;s precomputed orthologs — one gene
-          per species — instead of searching. There is no job to wait on: the
-          NCBI lookups take about a second, and only the multiple alignment at
-          EBI costs real time (~10s), against 10+ minutes for BLAST. Rows come
-          out labelled by species rather than by accession, and NCBI&apos;s CDD
-          domains are overlaid automatically.
+        {/* One line rather than seven. What a reader needs here is which tab
+            to pick, and that is the seconds-against-minutes comparison; the
+            rest (species labels, CDD overlay, the query row being the selected
+            transcript) is visible in the result or documented, and as prose it
+            was most of the dialog's height. */}
+        <Typography variant="body2">
+          NCBI&apos;s precomputed orthologs, one gene per species, aligned at EBI
+          in seconds rather than the 10+ minutes BLAST takes.
         </Typography>
 
         <div>
@@ -104,7 +109,7 @@ const OrthologPanel = observer(function ({
           />
         </div>
 
-        <Typography variant="subtitle2" style={{ marginTop: 12 }}>
+        <Typography variant="subtitle2" style={{ marginTop: 8 }}>
           Species to include (those without an ortholog are skipped)
         </Typography>
         <div className={classes.speciesBox}>
@@ -131,11 +136,6 @@ const OrthologPanel = observer(function ({
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
-        <Typography className={classes.infoText} variant="body2">
-          The query row is the transcript selected above, not NCBI&apos;s
-          representative protein, so the alignment stays linked to the genome
-          view at codon resolution.
-        </Typography>
       </LaunchPanelContent>
       <SubmitCancelActions
         submitDisabled={!proteinSequence || taxa.length < 2}

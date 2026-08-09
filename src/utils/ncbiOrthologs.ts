@@ -26,14 +26,44 @@ const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
 // The species panel offered in the launch dialog, ordered from the reference
 // outward so a run that finds only close relatives still reads as a ladder.
-// Orthologs absent for a given gene are skipped rather than erroring.
+// Orthologs absent for a given gene are skipped rather than erroring, and the
+// index order here is the ROW order of the alignment (COMMON_TAX_RANK below).
+//
+// THE MAMMALS EARN THEIR PLACE, and the reason is measured rather than aesthetic.
+// The thirteen this list used to hold were one per major clade, which reads well
+// on a gene conserved to yeast and produces almost nothing on a gene that is not:
+// NCBI publishes 165 orthologs for human NLRP1 and every one of them is a mammal,
+// so of the old thirteen only Human, Mouse, Cow, Pig and Dog returned a row --
+// five, and Rat not among them, since NLRP1 is absent in Rattus norvegicus. The
+// same query against this list returns twelve. An inflammasome gene is not an
+// unusual case; anything immune, reproductive or lineage-specific behaves the
+// same way, and those are the genes a person opens an ortholog alignment on.
+//
+// Cat, rabbit and opossum are here despite contributing nothing to that gene.
+// They are the three that most often separate "absent in this clade" from
+// "absent in this species", which is the question a gap in the alignment raises.
+//
+// The cost is the run, and it is roughly linear: one NCBI protein fetch per
+// species and a Clustal Omega job over what comes back, so ~23 rows is about
+// twice the ~13-row wait. Still seconds rather than the minutes BLAST takes,
+// which is the comparison the panel's own text makes.
 export const COMMON_SPECIES = [
   { label: 'Human', taxId: 9606 },
+  { label: 'Chimpanzee', taxId: 9598 },
+  { label: 'Gorilla', taxId: 9595 },
+  { label: 'Rhesus macaque', taxId: 9544 },
+  { label: 'Marmoset', taxId: 9483 },
   { label: 'Mouse', taxId: 10090 },
   { label: 'Rat', taxId: 10116 },
-  { label: 'Cow', taxId: 9913 },
-  { label: 'Pig', taxId: 9823 },
+  { label: 'Guinea pig', taxId: 10141 },
+  { label: 'Rabbit', taxId: 9986 },
+  { label: 'Cat', taxId: 9685 },
   { label: 'Dog', taxId: 9615 },
+  { label: 'Horse', taxId: 9796 },
+  { label: 'Pig', taxId: 9823 },
+  { label: 'Cow', taxId: 9913 },
+  { label: 'Sheep', taxId: 9940 },
+  { label: 'Opossum', taxId: 13616 },
   { label: 'Chicken', taxId: 9031 },
   { label: 'Frog', taxId: 8364 },
   { label: 'Zebrafish', taxId: 7955 },

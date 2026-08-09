@@ -53,6 +53,12 @@ export default function TranscriptSelector({
         <TextField
           variant="outlined"
           label={`Choose isoform of ${getGeneDisplayName(feature)}`}
+          // The query row is this transcript rather than NCBI's representative
+          // protein, which is what keeps the alignment linked to the genome view
+          // at codon resolution. It used to be a paragraph under the panel; as
+          // helper text it says the same thing where the choice is made and
+          // costs no height of its own.
+          helperText="the query row, so the alignment stays linked to the genome view"
           select
           className={classes.minWidth}
           value={selectedId}
