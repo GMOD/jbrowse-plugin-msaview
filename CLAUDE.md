@@ -43,10 +43,31 @@ the class of failure where a plugin reads only `main`'s API shape and silently
 renders no menu item on every host a user actually runs. Nothing else in CI is
 sensitive to it.
 
+## BLAST runs on EBI, not NCBI, and that is not a preference
+
+`blast.ncbi.nlm.nih.gov/Blast.cgi` returns no `Access-Control-Allow-Origin` to
+third-party origins — it emits one only for `https://www.ncbi.nlm.nih.gov` —
+so a browser cannot read it at all. That broke every host at once (#58, 2026-08)
+and no plugin version fixes it. Searches now go to EBI's Job Dispatcher, which
+serves `ACAO: *` and already ran the MSA step.
+
+**There is no NCBI query path left at all** — `utils/ncbiBlast.ts`, the RID
+panel, and the configurable base url were all deleted in 2.9.0. A proxy would
+work, but shipping a service option that only functions for people who have
+stood up server-side infrastructure is worse than not offering it, and a
+central proxy is ruled out because NCBI throttles per source IP. Reaching `nr`
+now means the **Manual** panel, which links out to NCBI's own site and never
+fetches anything.
+
+The reasoning and the evidence are in `docs/blast.md`. Read it before touching
+`utils/ebiBlast.ts` or reaching for NCBI again.
+
 ## Other things worth knowing
 
 - **NCBI CDD domain annotations are fetched in-browser**, and the CORS
-  constraint is what rules out Batch CD-Search.
+  constraint is what rules out Batch CD-Search. NCBI's per-service CORS policies
+  differ: eutils sends `ACAO: *`, `api.ncbi.nlm.nih.gov/datasets` echoes the
+  origin, and Blast.cgi now sends nothing. Never assume one from another.
 - **MafViewer and GWAS are vendored into core**, so newer hosts skip those config
   entries and the external repos no longer need maintaining.
 - **Browser console and autorun logs go missing in the puppeteer tests** unless
