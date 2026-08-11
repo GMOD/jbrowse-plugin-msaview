@@ -5,7 +5,12 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import { normalizeEbiBlastHits } from '../src/utils/ebiBlast'
-import { waitForEbiJob } from '../src/utils/ebiJobDispatcher'
+import {
+  DEFAULT_EBI_EMAIL,
+  EBI_EMAIL_STORAGE_KEY,
+  getEbiEmail,
+  waitForEbiJob,
+} from '../src/utils/ebiJobDispatcher'
 
 // A real https://www.ebi.ac.uk/Tools/services/rest/ncbiblast result, trimmed to
 // three hits: two UniProtKB hits as returned, plus one carrying none of the
@@ -64,6 +69,40 @@ describe('normalizeEbiBlastHits', () => {
 
   test('tolerates a result with no hits', () => {
     expect(normalizeEbiBlastHits({})).toEqual([])
+  })
+})
+
+describe('getEbiEmail', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  function stubStorage(stored: string | null) {
+    vi.stubGlobal('localStorage', {
+      getItem: () => stored,
+      setItem: () => {},
+    })
+  }
+
+  test('falls back to the plugin address when nothing is configured', () => {
+    stubStorage(null)
+    expect(getEbiEmail()).toBe(DEFAULT_EBI_EMAIL)
+  })
+
+  test('uses a deployment-configured address', () => {
+    stubStorage(JSON.stringify('someone@example.org'))
+    expect(getEbiEmail()).toBe('someone@example.org')
+  })
+
+  test('falls back when the stored value is blank', () => {
+    // EBI rejects a submission with an empty email, so a user who clears the
+    // settings field must not be able to break every job
+    stubStorage(JSON.stringify('   '))
+    expect(getEbiEmail()).toBe(DEFAULT_EBI_EMAIL)
+  })
+
+  test('reads the key the settings dialog writes', () => {
+    expect(EBI_EMAIL_STORAGE_KEY).toBe('msa-ebiContactEmail')
   })
 })
 

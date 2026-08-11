@@ -10,6 +10,10 @@ import NCBIBlastMethodSelector from './NCBIBlastMethodSelector'
 import NCBIBlastRIDPanel from './NCBIBlastRIDPanel'
 import NCBISettingsDialog from './NCBISettingsDialog'
 import { BASE_BLAST_URL } from './consts'
+import {
+  DEFAULT_EBI_EMAIL,
+  EBI_EMAIL_STORAGE_KEY,
+} from '../../../utils/ebiJobDispatcher'
 import { useLocalStorage } from '../../../utils/useLocalStorage'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
@@ -43,6 +47,10 @@ export default function NCBIBlastPanel({
     'msa-blastRootUrl',
     BASE_BLAST_URL,
   )
+  const [ebiEmail, setEbiEmail] = useLocalStorage(
+    EBI_EMAIL_STORAGE_KEY,
+    DEFAULT_EBI_EMAIL,
+  )
   const [settingsOpen, setSettingsOpen] = useState(false)
   const { classes } = useStyles()
 
@@ -75,9 +83,11 @@ export default function NCBIBlastPanel({
       {settingsOpen ? (
         <NCBISettingsDialog
           baseUrl={baseUrl}
-          handleClose={newUrl => {
-            if (newUrl) {
-              setBaseUrl(newUrl)
+          ebiEmail={ebiEmail}
+          handleClose={settings => {
+            if (settings) {
+              setBaseUrl(settings.baseUrl)
+              setEbiEmail(settings.ebiEmail)
             }
             setSettingsOpen(false)
           }}

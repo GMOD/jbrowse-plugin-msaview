@@ -5,7 +5,7 @@ import { useState } from 'react'
 // throw "(0, PR.useLocalStorage) is not a function" on hosts built during that
 // window. Same failure mode as `defaultCodonTable`; keeping our own copy takes
 // this plugin out of the whack-a-mole.
-function readLocalStorage<T>(key: string, initialValue: T): T {
+export function readLocalStorage<T>(key: string, initialValue: T): T {
   try {
     const item = globalThis.localStorage.getItem(key)
     return item === null ? initialValue : (JSON.parse(item) as T)

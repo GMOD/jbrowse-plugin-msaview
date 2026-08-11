@@ -1,5 +1,6 @@
 import { textfetch } from './fetch'
 import { pollLoop } from './poll'
+import { readLocalStorage } from './useLocalStorage'
 
 /**
  * EBI's Job Dispatcher REST services (clustalo, muscle, ncbiblast, ...) all
@@ -13,9 +14,20 @@ export const EBI_BASE = 'https://www.ebi.ac.uk/Tools/services/rest'
 
 /**
  * EBI asks for a contact address on every submission so they can reach whoever
- * is generating the load. It identifies this plugin, not the end user.
+ * is generating the load. A deployment that sends real volume should point this
+ * at its own maintainer via the BLAST settings dialog — otherwise every
+ * msaview job in the world is attributed to one person.
  */
-export const EBI_EMAIL = 'colin.diesh@gmail.com'
+export const EBI_EMAIL_STORAGE_KEY = 'msa-ebiContactEmail'
+export const DEFAULT_EBI_EMAIL = 'colin.diesh@gmail.com'
+
+export function getEbiEmail() {
+  const configured = readLocalStorage(
+    EBI_EMAIL_STORAGE_KEY,
+    DEFAULT_EBI_EMAIL,
+  ).trim()
+  return configured || DEFAULT_EBI_EMAIL
+}
 
 /** Statuses that mean the job is over and produced no result. */
 const FAILED_STATUSES = new Set(['ERROR', 'FAILURE', 'NOT_FOUND'])
@@ -29,7 +41,7 @@ export async function submitEbiJob({
 }) {
   const jobId = await textfetch(`${EBI_BASE}/${tool}/run`, {
     method: 'POST',
-    body: new URLSearchParams({ email: EBI_EMAIL, ...params }),
+    body: new URLSearchParams({ email: getEbiEmail(), ...params }),
   })
   return jobId.trim()
 }
@@ -66,7 +78,7 @@ export async function waitForEbiJob({
   })
 }
 
-export function ebiResultUrl({
+export async function fetchEbiResult({
   tool,
   jobId,
   type,
@@ -75,13 +87,5 @@ export function ebiResultUrl({
   jobId: string
   type: string
 }) {
-  return `${EBI_BASE}/${tool}/result/${jobId}/${type}`
-}
-
-export async function fetchEbiResult(args: {
-  tool: string
-  jobId: string
-  type: string
-}) {
-  return textfetch(ebiResultUrl(args))
+  return textfetch(`${EBI_BASE}/${tool}/result/${jobId}/${type}`)
 }

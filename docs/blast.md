@@ -63,6 +63,18 @@ a user triggers by clicking a gene.
   databases, so those rows fall back to `hit_os` for a species name and get no
   common name.
 
+## Set a contact email if your site sends volume
+
+EBI wants a contact address on every submission so they can reach whoever is
+generating the load. The plugin ships with the maintainer's, which means every
+msaview job in the world is attributed to one person — fine at demo volume, not
+fine for a busy instance.
+
+The BLAST settings dialog (gear icon) writes one to `localStorage` under
+`msa-ebiContactEmail`, and it covers the MSA jobs as well as BLAST, since both
+go through `utils/ebiJobDispatcher.ts`. A blank value falls back to the default
+rather than submitting an empty `email`, which EBI rejects.
+
 ## Running against NCBI anyway, through your own proxy
 
 Selecting **NCBI** in the service dropdown still works if the BLAST base url
