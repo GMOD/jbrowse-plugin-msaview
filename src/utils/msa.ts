@@ -1,10 +1,6 @@
-import { textfetch } from './fetch'
-import { pollLoop } from './poll'
+import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
 import type { MsaAlgorithm } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
-
-const base = `https://www.ebi.ac.uk/Tools/services/rest`
-const email = 'colin.diesh@gmail.com'
 
 const algorithms: Record<
   MsaAlgorithm,
@@ -15,52 +11,25 @@ const algorithms: Record<
   }
 > = {
   clustalo: {
-    params: { email },
+    params: {},
     msaResult: 'aln-clustal_num',
     treeResult: 'phylotree',
   },
   muscle: {
-    params: { email, format: 'clw', tree: 'tree1' },
+    params: { format: 'clw', tree: 'tree1' },
     msaResult: 'fa',
     treeResult: 'phylotree',
   },
   kalign: {
-    params: { email, stype: 'protein' },
+    params: { stype: 'protein' },
     msaResult: 'fa',
     treeResult: 'phylotree',
   },
   mafft: {
-    params: { email, stype: 'protein' },
+    params: { stype: 'protein' },
     msaResult: 'fa',
     treeResult: 'phylotree',
   },
-}
-
-async function wait({
-  onProgress,
-  jobId,
-  algorithm,
-}: {
-  jobId: string
-  algorithm: MsaAlgorithm
-  onProgress: (arg: string) => void
-}) {
-  await pollLoop({
-    intervalSeconds: 10,
-    onCountdown: s => {
-      onProgress(`Re-checking MSA status in... ${s}`)
-    },
-    check: async () => {
-      const result = await textfetch(`${base}/${algorithm}/status/${jobId}`)
-      if (result.includes('FINISHED')) {
-        return true
-      }
-      if (result.includes('FAILURE')) {
-        throw new Error(`Failed to run: jobId ${jobId}`)
-      }
-      return false
-    },
-  })
 }
 
 export async function launchMSA({
@@ -76,17 +45,27 @@ export async function launchMSA({
 
   onProgress(`Launching ${algorithm} MSA...`)
 
-  const jobId = await textfetch(`${base}/${algorithm}/run`, {
-    method: 'POST',
-    body: new URLSearchParams({ ...config.params, sequence }),
+  const jobId = await submitEbiJob({
+    tool: algorithm,
+    params: { ...config.params, sequence },
   })
-  await wait({ jobId, algorithm, onProgress })
+  await waitForEbiJob({
+    tool: algorithm,
+    jobId,
+    onCountdown: s => {
+      onProgress(`Re-checking MSA status in... ${s}`)
+    },
+  })
   return {
-    msa: await textfetch(
-      `${base}/${algorithm}/result/${jobId}/${config.msaResult}`,
-    ),
-    tree: await textfetch(
-      `${base}/${algorithm}/result/${jobId}/${config.treeResult}`,
-    ),
+    msa: await fetchEbiResult({
+      tool: algorithm,
+      jobId,
+      type: config.msaResult,
+    }),
+    tree: await fetchEbiResult({
+      tool: algorithm,
+      jobId,
+      type: config.treeResult,
+    }),
   }
 }
