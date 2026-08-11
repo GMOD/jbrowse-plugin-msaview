@@ -237,7 +237,13 @@ const NCBIBlastAutomaticPanel = observer(function ({
                 blastParams: {
                   baseUrl,
                   blastService: selectedBlastService,
-                  blastProgram: selectedBlastProgram,
+                  // EBI runs blastp regardless of what the (hidden) program
+                  // field holds, and this value is both cached and displayed —
+                  // recording quick-blastp for a blastp run would be a lie
+                  blastProgram:
+                    selectedBlastService === 'ebi'
+                      ? 'blastp'
+                      : selectedBlastProgram,
                   blastDatabase: selectedBlastDatabase,
                   msaAlgorithm: selectedMsaAlgorithm,
                   selectedTranscript,

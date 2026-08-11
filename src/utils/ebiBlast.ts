@@ -1,9 +1,4 @@
-import {
-  ebiResultUrl,
-  fetchEbiResult,
-  submitEbiJob,
-  waitForEbiJob,
-} from './ebiJobDispatcher'
+import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
 import type { BlastHit } from './types'
 import type { EbiBlastDatabase } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
@@ -50,16 +45,20 @@ export function normalizeEbiBlastHits(result: EbiBlastJson): BlastHit[] {
           title: hit.hit_uni_de ?? hit.hit_desc,
         },
       ],
-      hsps: (hit.hit_hsps ?? [])
-        .filter(hsp => !!hsp.hsp_hseq)
-        .map(hsp => ({ hseq: hsp.hsp_hseq! })),
+      hsps: (hit.hit_hsps ?? []).flatMap(hsp =>
+        hsp.hsp_hseq ? [{ hseq: hsp.hsp_hseq }] : [],
+      ),
     }
   })
 }
 
-/** Human-facing link to a job's results, shown while it runs and on error. */
+/**
+ * Human-facing link to a job, shown while it runs and on error — so it has to
+ * be EBI's own results UI, not the REST result endpoint, which does not exist
+ * yet at the moment the link is on screen.
+ */
 export function ebiBlastResultUrl(jobId: string) {
-  return ebiResultUrl({ tool: TOOL, jobId, type: 'out' })
+  return `https://www.ebi.ac.uk/jdispatcher/sss/${TOOL}/summary?jobId=${jobId}`
 }
 
 export async function queryEbiBlastFromJobId({
