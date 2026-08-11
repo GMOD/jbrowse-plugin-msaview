@@ -13,13 +13,13 @@ import {
   getLinearGenomeView,
   getTranscriptDisplayName,
 } from '../../util'
+import MsaAlgorithmSelect from '../BlastQuery/MsaAlgorithmSelect'
 import LaunchPanelContent from '../LaunchPanelContent'
-import MsaAlgorithmSelect from '../NCBIBlastQuery/MsaAlgorithmSelect'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
-import type { MsaAlgorithm } from '../NCBIBlastQuery/consts'
+import type { MsaAlgorithm } from '../BlastQuery/consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({

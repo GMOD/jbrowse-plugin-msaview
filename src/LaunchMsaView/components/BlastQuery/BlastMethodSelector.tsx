@@ -2,9 +2,9 @@ import React from 'react'
 
 import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 
-import type { BlastLookupMethod } from './NCBIBlastPanel'
+import type { BlastLookupMethod } from './BlastPanel'
 
-export default function NCBIBlastMethodSelector({
+export default function BlastMethodSelector({
   lookupMethod,
   setLookupMethod,
 }: {
@@ -24,11 +24,6 @@ export default function NCBIBlastMethodSelector({
           value="automatic"
           control={<Radio />}
           label="Automatic"
-        />
-        <FormControlLabel
-          value="rid"
-          control={<Radio />}
-          label="Load from RID"
         />
         <FormControlLabel value="manual" control={<Radio />} label="Manual" />
       </RadioGroup>

@@ -1,7 +1,7 @@
 import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
 import type { BlastHit } from './types'
-import type { EbiBlastDatabase } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+import type { BlastDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
 
 const TOOL = 'ncbiblast'
 
@@ -95,7 +95,7 @@ export async function queryEbiBlast({
   onRid,
 }: {
   query: string
-  blastDatabase: EbiBlastDatabase
+  blastDatabase: BlastDatabase
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
 }) {

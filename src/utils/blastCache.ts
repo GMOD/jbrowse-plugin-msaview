@@ -2,10 +2,8 @@ import { createDbOpener } from './idb'
 
 import type {
   BlastDatabase,
-  BlastProgram,
-  BlastService,
   MsaAlgorithm,
-} from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+} from '../LaunchMsaView/components/BlastQuery/consts'
 import type { DBSchema } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-blast-cache'
@@ -15,10 +13,13 @@ const DB_VERSION = 2
 export interface CachedBlastResult {
   id: string
   proteinSequence: string
-  /** absent on entries cached before the EBI backend existed, which were NCBI */
-  blastService?: BlastService
   blastDatabase: BlastDatabase
-  blastProgram: BlastProgram
+  /**
+   * Only ever set on rows cached by a version that still queried NCBI, where
+   * the choice between blastp and quick-blastp was real. Kept so those rows
+   * still display; never written now.
+   */
+  blastProgram?: string
   msaAlgorithm: MsaAlgorithm
   msa: string
   tree: string
@@ -54,7 +55,6 @@ const getDB = createDbOpener<BlastCacheDB>(
 function createCacheKey(
   proteinSequence: string,
   blastDatabase: BlastDatabase,
-  blastProgram: BlastProgram,
   msaAlgorithm: MsaAlgorithm,
   transcriptId?: string,
 ) {
@@ -62,14 +62,12 @@ function createCacheKey(
   // msaAlgorithm is part of the key because the stored msa/tree are produced by
   // it — without it, re-running the same query under a different algorithm
   // overwrites the earlier result and drops it from the history list
-  return `${blastDatabase}:${blastProgram}:${msaAlgorithm}${idPart}:${proteinSequence}`
+  return `${blastDatabase}:${msaAlgorithm}${idPart}:${proteinSequence}`
 }
 
 export async function saveBlastResult({
   proteinSequence,
-  blastService,
   blastDatabase,
-  blastProgram,
   msaAlgorithm,
   msa,
   tree,
@@ -81,9 +79,7 @@ export async function saveBlastResult({
   geneName,
 }: {
   proteinSequence: string
-  blastService?: BlastService
   blastDatabase: BlastDatabase
-  blastProgram: BlastProgram
   msaAlgorithm: MsaAlgorithm
   msa: string
   tree: string
@@ -98,16 +94,13 @@ export async function saveBlastResult({
   const id = createCacheKey(
     proteinSequence,
     blastDatabase,
-    blastProgram,
     msaAlgorithm,
     transcriptId,
   )
   const entry: CachedBlastResult = {
     id,
     proteinSequence,
-    blastService,
     blastDatabase,
-    blastProgram,
     msaAlgorithm,
     msa,
     tree,

@@ -28,10 +28,8 @@ import {
 import type { MafRegion, MsaViewInitState } from './types'
 import type {
   BlastDatabase,
-  BlastProgram,
-  BlastService,
   MsaAlgorithm,
-} from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+} from '../LaunchMsaView/components/BlastQuery/consts'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -47,18 +45,10 @@ export interface IRegion {
 }
 
 export interface BlastParams {
-  baseUrl: string
-  /**
-   * Which service runs the search. Absent on sessions and cached launches
-   * created before the EBI backend existed, which were all NCBI.
-   */
-  blastService?: BlastService
   blastDatabase: BlastDatabase
   msaAlgorithm: MsaAlgorithm
-  blastProgram: BlastProgram
   selectedTranscript?: Feature
   proteinSequence: string
-  rid?: string
 }
 
 export interface OrthologParams {

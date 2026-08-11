@@ -1,6 +1,6 @@
 import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
-import type { MsaAlgorithm } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
+import type { MsaAlgorithm } from '../LaunchMsaView/components/BlastQuery/consts'
 
 const algorithms: Record<
   MsaAlgorithm,

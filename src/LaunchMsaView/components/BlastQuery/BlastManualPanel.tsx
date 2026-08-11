@@ -5,6 +5,7 @@ import { Button, DialogActions, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import { BASE_BLAST_URL } from './consts'
 import ExternalLink from '../../../components/ExternalLink'
 import { cleanProteinSequence, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
@@ -24,17 +25,15 @@ const useStyles = makeStyles()({
   },
 })
 
-const NCBIBlastManualPanel = observer(function ({
+const BlastManualPanel = observer(function ({
   handleClose,
   feature,
   model,
   children,
-  baseUrl,
 }: {
   children: React.ReactNode
   model: AbstractTrackModel
   feature: Feature
-  baseUrl: string
   handleClose: () => void
 }) {
   const { classes } = useStyles()
@@ -43,8 +42,10 @@ const NCBIBlastManualPanel = observer(function ({
   const { proteinSequence, error } = transcriptSelection
 
   const s2 = cleanProteinSequence(proteinSequence)
-  const link = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${s2}`
-  const link2 = `${baseUrl}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(s2, 10)}`
+  // a link the user follows to NCBI's own site, not something we fetch — which
+  // is exactly why this route still works when the automatic one cannot
+  const link = `${BASE_BLAST_URL}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${s2}`
+  const link2 = `${BASE_BLAST_URL}?PAGE_TYPE=BlastSearch&PAGE=Proteins&PROGRAM=blastp&QUERY=${shorten2(s2, 10)}`
 
   return (
     <>
@@ -83,4 +84,4 @@ const NCBIBlastManualPanel = observer(function ({
   )
 })
 
-export default NCBIBlastManualPanel
+export default BlastManualPanel

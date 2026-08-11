@@ -149,7 +149,7 @@ const CachedBlastResults = observer(function ({
               }}
             >
               <ListItemText
-                primary={`${getResultDisplayName(result)} - ${result.blastDatabase}/${result.blastProgram} (${result.msaAlgorithm})`}
+                primary={`${getResultDisplayName(result)} - ${result.blastDatabase}${result.blastProgram ? `/${result.blastProgram}` : ''} (${result.msaAlgorithm})`}
                 secondary={`${new Date(result.timestamp).toLocaleString()} - Seq: ${result.proteinSequence.slice(0, 30)}...`}
               />
             </ListItemButton>

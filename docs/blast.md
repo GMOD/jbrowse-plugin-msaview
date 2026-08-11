@@ -1,7 +1,8 @@
 # BLAST in jbrowse-plugin-msaview
 
-The "NCBI BLAST query" tab can run a search on one of two services. **EBI is the
-default**, and the reason is not preference.
+The BLAST tab submits searches to **EBI**, and the reason is not preference.
+There is no option to query NCBI directly, because there is no longer a way to
+do it from a browser at all.
 
 ## NCBI's Blast.cgi is no longer readable from a browser
 
@@ -51,6 +52,14 @@ Lambda's 10GB storage ceiling. NCBI's answer for that is
 provisions a cluster per search — minutes of setup and real money for something
 a user triggers by clicking a gene.
 
+A configurable base url briefly survived so that a self-hoster could point the
+NCBI path at their own proxy. That came out too: it shipped a service option
+that was broken for everyone who had not built server-side infrastructure, and a
+setting whose only correct value is one almost nobody has is worse than no
+setting. `utils/ncbiBlast.ts` and the RID panel went with it. Anyone who really
+wants `nr` from their own proxy is forking a file, not flipping a switch — and
+the manual route below covers the occasional case without any of that.
+
 ## Trade-offs of the EBI backend
 
 - Databases are the UniProtKB family, not NCBI `nr`. The default is
@@ -75,76 +84,12 @@ The BLAST settings dialog (gear icon) writes one to `localStorage` under
 go through `utils/ebiJobDispatcher.ts`. A blank value falls back to the default
 rather than submitting an empty `email`, which EBI rejects.
 
-## Running against NCBI anyway, through your own proxy
+## Searching NCBI's nr: the manual route
 
-Selecting **NCBI** in the service dropdown still works if the BLAST base url
-(gear icon, stored in `localStorage` as `msa-blastRootUrl`) points at a proxy
-you host. Every call is `${baseUrl}?…`, so the proxy needs to forward the query
-string and POST bodies unchanged and add the CORS headers.
+The **Manual** option on the BLAST tab builds a link to NCBI's own search page
+with the protein sequence filled in. The user runs BLAST there, clicks "Multiple
+Alignment" for COBALT, and pastes the resulting `.aln` (and optionally the `.nh`
+tree) back into JBrowse.
 
-This is the right place for the traffic: it runs under your institution's IP and
-your own query volume, which is how NCBI's per-IP accounting expects to see it.
-
-A Lambda behind a Function URL is enough:
-
-```js
-const UPSTREAM = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi'
-
-// Pin the upstream. A proxy that takes the target from the request is an open
-// relay and will be found and used as one.
-export const handler = async event => {
-  const { rawQueryString, body, isBase64Encoded } = event
-  const method = event.requestContext.http.method
-  const origin = event.headers.origin ?? ''
-
-  // Allowlist your own site rather than echoing whatever asks.
-  const allowed = ['https://jbrowse.example.org']
-  const cors = {
-    'Access-Control-Allow-Origin': allowed.includes(origin)
-      ? origin
-      : allowed[0],
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    Vary: 'Origin',
-  }
-  if (method === 'OPTIONS') {
-    return { statusCode: 204, headers: cors }
-  }
-
-  const res = await fetch(
-    rawQueryString ? `${UPSTREAM}?${rawQueryString}` : UPSTREAM,
-    {
-      method,
-      headers:
-        method === 'POST'
-          ? { 'Content-Type': 'application/x-www-form-urlencoded' }
-          : undefined,
-      body:
-        method === 'POST'
-          ? isBase64Encoded
-            ? Buffer.from(body ?? '', 'base64').toString()
-            : body
-          : undefined,
-    },
-  )
-
-  return {
-    statusCode: res.status,
-    headers: {
-      ...cors,
-      'Content-Type': res.headers.get('content-type') ?? 'text/html',
-    },
-    body: await res.text(),
-  }
-}
-```
-
-Two things to keep right:
-
-- **Do not forward the browser's `Origin` header upstream.** NCBI has treated a
-  foreign `Origin` on a POST as a CSRF signal since at least 2017 and answers
-  `403`. Omitting it is what makes the proxied request look like the ordinary
-  script request it is.
-- **Do not run the poll loop inside the Lambda.** The browser polls every 20s
-  and each poll should be its own short invocation; a Lambda that waits for a
-  10-minute blastp is paying to sleep and will hit the 15-minute ceiling.
+That path is unaffected by any of this, because the plugin never fetches
+anything — it hands the user a url and the browser navigates to it.

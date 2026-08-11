@@ -4,8 +4,8 @@ import { Dialog } from '@jbrowse/core/ui'
 import { getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 
+import BlastPanel from './BlastQuery/BlastPanel'
 import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
-import NCBIBlastPanel from './NCBIBlastQuery/NCBIBlastPanel'
 import OrthologPanel from './OrthologQuery/OrthologPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import { readMsaDatasets } from './PreLoadedMSA/types'
@@ -57,11 +57,7 @@ export default function LaunchMsaViewDialog({
         />
       </TabPanel>
       <TabPanel value={value} index="ncbi_blast">
-        <NCBIBlastPanel
-          handleClose={handleClose}
-          feature={feature}
-          model={model}
-        />
+        <BlastPanel handleClose={handleClose} feature={feature} model={model} />
       </TabPanel>
       {hasPreloadedDatasets ? (
         <TabPanel value={value} index="preloaded_msa">
