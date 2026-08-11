@@ -14,7 +14,13 @@ import { makeStyles } from 'tss-react/mui'
 import CachedBlastResults from './CachedBlastResults'
 import MsaAlgorithmSelect from './MsaAlgorithmSelect'
 import { blastLaunchView } from './blastLaunchView'
-import { blastDatabaseOptions, blastPrograms } from './consts'
+import {
+  blastDatabaseOptions,
+  blastPrograms,
+  blastServiceLabels,
+  blastServices,
+  defaultBlastDatabase,
+} from './consts'
 import { useCachedBlastResults } from './useCachedBlastResults'
 import TextField2 from '../../../components/TextField2'
 import {
@@ -27,7 +33,12 @@ import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
-import type { BlastDatabase, BlastProgram, MsaAlgorithm } from './consts'
+import type {
+  BlastDatabase,
+  BlastProgram,
+  BlastService,
+  MsaAlgorithm,
+} from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
@@ -65,8 +76,10 @@ const NCBIBlastAutomaticPanel = observer(function ({
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
   const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const [selectedBlastService, setSelectedBlastService] =
+    useState<BlastService>('ebi')
   const [selectedBlastDatabase, setSelectedBlastDatabase] =
-    useState<BlastDatabase>('nr')
+    useState<BlastDatabase>(defaultBlastDatabase.ebi)
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
     useState<MsaAlgorithm>('clustalo')
   const [selectedBlastProgram, setSelectedBlastProgram] =
@@ -85,6 +98,27 @@ const NCBIBlastAutomaticPanel = observer(function ({
         {children}
         <TextField2
           variant="outlined"
+          label="BLAST service"
+          className={classes.selectField}
+          select
+          value={selectedBlastService}
+          onChange={event => {
+            const newService = event.target.value as BlastService
+            setSelectedBlastService(newService)
+            // the two services have disjoint database lists, so the current
+            // selection cannot survive the switch
+            setSelectedBlastDatabase(defaultBlastDatabase[newService])
+          }}
+        >
+          {blastServices.map(val => (
+            <MenuItem value={val} key={val}>
+              {blastServiceLabels[val]}
+            </MenuItem>
+          ))}
+        </TextField2>
+
+        <TextField2
+          variant="outlined"
           label="BLAST database"
           className={classes.selectField}
           select
@@ -97,7 +131,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
             }
           }}
         >
-          {blastDatabaseOptions.map(val => (
+          {blastDatabaseOptions[selectedBlastService].map(val => (
             <MenuItem value={val} key={val}>
               {val}
             </MenuItem>
@@ -110,45 +144,69 @@ const NCBIBlastAutomaticPanel = observer(function ({
           onChange={setSelectedMsaAlgorithm}
         />
 
-        <div className={classes.databaseFieldContainer}>
-          <TextField2
-            variant="outlined"
-            label="BLAST program"
-            disabled={selectedBlastDatabase === 'nr_cluster_seq'}
-            className={classes.selectField}
-            select
-            value={selectedBlastProgram}
-            onChange={event => {
-              setSelectedBlastProgram(event.target.value as BlastProgram)
-            }}
-          >
-            {blastPrograms.map(val => (
-              <MenuItem value={val} key={val}>
-                {val}
-              </MenuItem>
-            ))}
-          </TextField2>
-          {selectedBlastDatabase === 'nr_cluster_seq' ? (
-            <Typography
-              variant="subtitle2"
-              className={classes.clusterSeqMessage}
+        {/* EBI's ncbiblast has no quick-blastp equivalent, so the choice is
+            NCBI-only rather than disabled-and-confusing. Not `hidden`: the UA
+            stylesheet's display:none loses to this class's display:flex */}
+        {selectedBlastService === 'ncbi' ? (
+          <div className={classes.databaseFieldContainer}>
+            <TextField2
+              variant="outlined"
+              label="BLAST program"
+              disabled={selectedBlastDatabase === 'nr_cluster_seq'}
+              className={classes.selectField}
+              select
+              value={selectedBlastProgram}
+              onChange={event => {
+                setSelectedBlastProgram(event.target.value as BlastProgram)
+              }}
             >
-              Can only use blastp on nr_cluster_seq
-            </Typography>
-          ) : null}
-        </div>
+              {blastPrograms.map(val => (
+                <MenuItem value={val} key={val}>
+                  {val}
+                </MenuItem>
+              ))}
+            </TextField2>
+            {selectedBlastDatabase === 'nr_cluster_seq' ? (
+              <Typography
+                variant="subtitle2"
+                className={classes.clusterSeqMessage}
+              >
+                Can only use blastp on nr_cluster_seq
+              </Typography>
+            ) : null}
+          </div>
+        ) : null}
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
         <Typography className={classes.infoText}>
-          This panel will automatically submit a query to NCBI. Using blastp can
-          take 10+ minutes to run, quick-blastp is generally a lot faster but is
-          not available for the clustered database. After completion, all the
-          hits will be run through a multiple sequence alignment. Note: we are
-          not able to currently run NCBI COBALT automatically on the BLAST
-          results, even though that is the method NCBI uses on their website. If
-          you need a COBALT alignment, please use the manual approach of
-          submitting BLAST yourself and downloading the resulting files
+          {selectedBlastService === 'ebi' ? (
+            <>
+              This panel will automatically submit a blastp query to EBI, which
+              searches UniProtKB rather than NCBI's nr. Searches usually finish
+              in under a minute, and swissprot returns curated sequences that
+              align more cleanly than the many near-identical entries a TrEMBL
+              search brings back. After completion, all the hits will be run
+              through a multiple sequence alignment.
+            </>
+          ) : (
+            <>
+              This panel will automatically submit a query to NCBI. Using blastp
+              can take 10+ minutes to run, quick-blastp is generally a lot
+              faster but is not available for the clustered database. After
+              completion, all the hits will be run through a multiple sequence
+              alignment. Note: we are not able to currently run NCBI COBALT
+              automatically on the BLAST results, even though that is the method
+              NCBI uses on their website. If you need a COBALT alignment, please
+              use the manual approach of submitting BLAST yourself and
+              downloading the resulting files.{' '}
+              <strong>
+                NCBI no longer allows browsers to read responses from Blast.cgi,
+                so this option only works if the BLAST base url (gear icon)
+                points at a proxy you host.
+              </strong>
+            </>
+          )}
         </Typography>
 
         {cachedResults.length > 0 ? (
@@ -178,6 +236,7 @@ const NCBIBlastAutomaticPanel = observer(function ({
                 newViewTitle: getBlastViewTitle(feature, selectedTranscript),
                 blastParams: {
                   baseUrl,
+                  blastService: selectedBlastService,
                   blastProgram: selectedBlastProgram,
                   blastDatabase: selectedBlastDatabase,
                   msaAlgorithm: selectedMsaAlgorithm,

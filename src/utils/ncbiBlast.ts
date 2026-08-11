@@ -3,8 +3,8 @@ import { pollLoop } from './poll'
 
 import type { BlastResults } from './types'
 import type {
-  BlastDatabase,
   BlastProgram,
+  NcbiBlastDatabase,
 } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 
 export async function queryBlastFromRid({
@@ -40,7 +40,7 @@ export async function queryBlast({
   onRid,
 }: {
   query: string
-  blastDatabase: BlastDatabase
+  blastDatabase: NcbiBlastDatabase
   blastProgram: BlastProgram
   baseUrl: string
   onProgress: (arg: string) => void
@@ -65,7 +65,7 @@ async function initialQuery({
 }: {
   query: string
   blastProgram: BlastProgram
-  blastDatabase: BlastDatabase
+  blastDatabase: NcbiBlastDatabase
   baseUrl: string
 }) {
   const res = await textfetch(baseUrl, {

@@ -27,7 +27,11 @@ const MsaViewPanel = observer(function MsaViewPanel2({
     <ErrorBoundary>
       <div>
         {blastParams ? (
-          <LoadingBLAST model={model} baseUrl={blastParams.baseUrl} />
+          <LoadingBLAST
+            model={model}
+            baseUrl={blastParams.baseUrl}
+            blastService={blastParams.blastService}
+          />
         ) : loadingStoredData ? (
           <div className={classes.loadingContainer}>
             <LoadingEllipses message="Loading MSA data" variant="h6" />

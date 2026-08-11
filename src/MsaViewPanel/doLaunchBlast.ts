@@ -1,13 +1,71 @@
+import { isEbiBlastDatabase } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 import { makeId, strip } from '../LaunchMsaView/components/util'
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { saveBlastResult } from '../utils/blastCache'
+import { queryEbiBlast, queryEbiBlastFromJobId } from '../utils/ebiBlast'
 import { launchMSA } from '../utils/msa'
 import { queryBlast, queryBlastFromRid } from '../utils/ncbiBlast'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
 import type { JBrowsePluginMsaViewModel } from './model'
+import type {
+  BlastDatabase,
+  BlastProgram,
+  BlastService,
+} from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 import type { TaxonomyInfo } from '../utils/taxonomyNames'
 import type { BlastHitDescription } from '../utils/types'
+
+/**
+ * Run the search on whichever service the launch asked for. Both backends
+ * return the same normalized hits, so everything after this point — taxonomy,
+ * row naming, the MSA — is identical.
+ */
+async function runBlast({
+  blastService,
+  blastDatabase,
+  blastProgram,
+  baseUrl,
+  query,
+  existingRid,
+  onProgress,
+  onRid,
+}: {
+  blastService: BlastService
+  blastDatabase: BlastDatabase
+  blastProgram: BlastProgram
+  baseUrl: string
+  query: string
+  existingRid?: string
+  onProgress: (arg: string) => void
+  onRid: (arg: string) => void
+}) {
+  if (blastService === 'ebi') {
+    if (!isEbiBlastDatabase(blastDatabase)) {
+      throw new Error(
+        `EBI BLAST cannot search "${blastDatabase}", which is an NCBI database`,
+      )
+    }
+    return existingRid
+      ? queryEbiBlastFromJobId({ jobId: existingRid, onProgress })
+      : queryEbiBlast({ query, blastDatabase, onProgress, onRid })
+  }
+  if (isEbiBlastDatabase(blastDatabase)) {
+    throw new Error(
+      `NCBI BLAST cannot search "${blastDatabase}", which is an EBI database`,
+    )
+  }
+  return existingRid
+    ? queryBlastFromRid({ rid: existingRid, baseUrl, onProgress })
+    : queryBlast({
+        query,
+        blastDatabase,
+        blastProgram,
+        baseUrl,
+        onProgress,
+        onRid,
+      })
+}
 
 export async function doLaunchBlast({
   self,
@@ -16,6 +74,7 @@ export async function doLaunchBlast({
 }) {
   const {
     baseUrl,
+    blastService = 'ncbi',
     blastDatabase,
     blastProgram,
     msaAlgorithm,
@@ -28,25 +87,26 @@ export async function doLaunchBlast({
   const onProgress = (arg: string) => {
     self.setProgress(arg)
   }
+  const onRid = (r: string) => {
+    self.setRid(r)
+  }
 
   if (existingRid) {
-    // publish it before the first poll so the view can link out to NCBI while
-    // the job is still running
+    // publish it before the first poll so the view can link out to the service
+    // while the job is still running
     self.setRid(existingRid)
   }
 
-  const { hits, rid } = existingRid
-    ? await queryBlastFromRid({ rid: existingRid, baseUrl, onProgress })
-    : await queryBlast({
-        query: cleanedSeq,
-        blastDatabase,
-        blastProgram,
-        baseUrl,
-        onProgress,
-        onRid: r => {
-          self.setRid(r)
-        },
-      })
+  const { hits, rid } = await runBlast({
+    blastService,
+    blastDatabase,
+    blastProgram,
+    baseUrl,
+    query: cleanedSeq,
+    existingRid,
+    onProgress,
+    onRid,
+  })
 
   self.setProgress('Fetching species taxonomy info...')
   const taxids = hits
@@ -80,6 +140,7 @@ export async function doLaunchBlast({
 
   await saveBlastResult({
     proteinSequence: cleanedSeq,
+    blastService,
     blastDatabase,
     blastProgram,
     msaAlgorithm,

@@ -113,6 +113,8 @@ const NCBIBlastRIDPanel = observer(function ({
                 newViewTitle: getBlastViewTitle(feature, selectedTranscript),
                 blastParams: {
                   baseUrl,
+                  // an RID is an NCBI identifier, so this panel is NCBI-only
+                  blastService: 'ncbi',
                   blastProgram: 'blastp',
                   blastDatabase: 'nr',
                   msaAlgorithm: selectedMsaAlgorithm,

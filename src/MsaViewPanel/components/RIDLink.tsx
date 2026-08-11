@@ -3,12 +3,26 @@ import React from 'react'
 import { Typography } from '@mui/material'
 
 import ExternalLink from '../../components/ExternalLink'
+import { ebiBlastResultUrl } from '../../utils/ebiBlast'
 
-function RIDLink({ baseUrl, rid }: { rid: string; baseUrl: string }) {
+import type { BlastService } from '../../LaunchMsaView/components/NCBIBlastQuery/consts'
+
+function RIDLink({
+  baseUrl,
+  rid,
+  blastService = 'ncbi',
+}: {
+  rid: string
+  baseUrl: string
+  blastService?: BlastService
+}) {
+  const isEbi = blastService === 'ebi'
   return (
     <Typography>
-      RID {rid} (
-      <ExternalLink href={`${baseUrl}?CMD=Get&RID=${rid}`}>
+      {isEbi ? 'Job' : 'RID'} {rid} (
+      <ExternalLink
+        href={isEbi ? ebiBlastResultUrl(rid) : `${baseUrl}?CMD=Get&RID=${rid}`}
+      >
         see status
       </ExternalLink>
       )

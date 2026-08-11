@@ -3,6 +3,7 @@ import { createDbOpener } from './idb'
 import type {
   BlastDatabase,
   BlastProgram,
+  BlastService,
   MsaAlgorithm,
 } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 import type { DBSchema } from 'idb'
@@ -14,6 +15,8 @@ const DB_VERSION = 2
 export interface CachedBlastResult {
   id: string
   proteinSequence: string
+  /** absent on entries cached before the EBI backend existed, which were NCBI */
+  blastService?: BlastService
   blastDatabase: BlastDatabase
   blastProgram: BlastProgram
   msaAlgorithm: MsaAlgorithm
@@ -64,6 +67,7 @@ function createCacheKey(
 
 export async function saveBlastResult({
   proteinSequence,
+  blastService,
   blastDatabase,
   blastProgram,
   msaAlgorithm,
@@ -77,6 +81,7 @@ export async function saveBlastResult({
   geneName,
 }: {
   proteinSequence: string
+  blastService?: BlastService
   blastDatabase: BlastDatabase
   blastProgram: BlastProgram
   msaAlgorithm: MsaAlgorithm
@@ -100,6 +105,7 @@ export async function saveBlastResult({
   const entry: CachedBlastResult = {
     id,
     proteinSequence,
+    blastService,
     blastDatabase,
     blastProgram,
     msaAlgorithm,

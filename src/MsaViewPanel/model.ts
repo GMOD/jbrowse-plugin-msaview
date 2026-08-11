@@ -29,6 +29,7 @@ import type { MafRegion, MsaViewInitState } from './types'
 import type {
   BlastDatabase,
   BlastProgram,
+  BlastService,
   MsaAlgorithm,
 } from '../LaunchMsaView/components/NCBIBlastQuery/consts'
 import type { Feature } from '@jbrowse/core/util'
@@ -47,6 +48,11 @@ export interface IRegion {
 
 export interface BlastParams {
   baseUrl: string
+  /**
+   * Which service runs the search. Absent on sessions and cached launches
+   * created before the EBI backend existed, which were all NCBI.
+   */
+  blastService?: BlastService
   blastDatabase: BlastDatabase
   msaAlgorithm: MsaAlgorithm
   blastProgram: BlastProgram
