@@ -1,0 +1,77 @@
+{
+  "program": "blastp",
+  "version": "BLASTP 2.16.0+",
+  "query_def": "EMBOSS_001",
+  "query_len": 75,
+  "db_count": 1,
+  "hits": [
+    {
+      "hit_num": 1,
+      "hit_def": "SP:P02769 ALBU_BOVIN Albumin OS=Bos taurus OX=9913 GN=ALB PE=1 SV=4",
+      "hit_db": "SP",
+      "hit_id": "ALBU_BOVIN",
+      "hit_acc": "P02769",
+      "hit_desc": "Albumin OS=Bos taurus OX=9913 GN=ALB PE=1 SV=4",
+      "hit_os": "Bos taurus",
+      "hit_uni_de": "Albumin",
+      "hit_uni_os": "Bos taurus",
+      "hit_uni_ox": "9913",
+      "hit_uni_gn": "ALB",
+      "hit_len": 607,
+      "hit_hsps": [
+        {
+          "hsp_num": 1,
+          "hsp_expect": 4.9e-45,
+          "hsp_identity": 100.0,
+          "hsp_qseq": "MKWVTFISLLLLFSSAYSRGVFRRDTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNELTEFAK",
+          "hsp_mseq": "MKWVTFISLLLLFSSAYSRGVFRRDTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNELTEFAK",
+          "hsp_hseq": "MKWVTFISLLLLFSSAYSRGVFRRDTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNELTEFAK"
+        }
+      ]
+    },
+    {
+      "hit_num": 2,
+      "hit_def": "SP:A2V9Z4 ALBU_MACFA Albumin OS=Macaca fascicularis OX=9541 GN=ALB PE=2 SV=1",
+      "hit_db": "SP",
+      "hit_id": "ALBU_MACFA",
+      "hit_acc": "A2V9Z4",
+      "hit_desc": "Albumin OS=Macaca fascicularis OX=9541 GN=ALB PE=2 SV=1",
+      "hit_os": "Macaca fascicularis",
+      "hit_uni_de": "Albumin",
+      "hit_uni_os": "Macaca fascicularis",
+      "hit_uni_ox": "9541",
+      "hit_uni_gn": "ALB",
+      "hit_len": 608,
+      "hit_hsps": [
+        {
+          "hsp_num": 1,
+          "hsp_expect": 3.5e-43,
+          "hsp_identity": 93.3,
+          "hsp_qseq": "MKWVTFISLLLLFSSAYSRGVFRRDTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNELTEFAK",
+          "hsp_mseq": "MKWVTFISLL LFSSAYSRGVFRRDTHKSE+AHRFKDLGEEHFKGLVL+AFSQYLQQCPF+EHVKLVNE+TEFAK",
+          "hsp_hseq": "MKWVTFISLLFLFSSAYSRGVFRRDTHKSEVAHRFKDLGEEHFKGLVLVAFSQYLQQCPFEEHVKLVNEVTEFAK"
+        }
+      ]
+    },
+    {
+      "hit_num": 3,
+      "hit_def": "no uniprot metadata",
+      "hit_db": "EM",
+      "hit_id": "CAA76847",
+      "hit_acc": "CAA76847",
+      "hit_desc": "serum albumin",
+      "hit_os": "Ovis aries",
+      "hit_len": 607,
+      "hit_hsps": [
+        {
+          "hsp_num": 1,
+          "hsp_expect": 1e-30,
+          "hsp_identity": 88.0,
+          "hsp_qseq": "MKWVTFISLL",
+          "hsp_mseq": "MKWVTFISLL",
+          "hsp_hseq": "MKWV-TFISLL"
+        }
+      ]
+    }
+  ]
+}
