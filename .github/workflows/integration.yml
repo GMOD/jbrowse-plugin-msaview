@@ -71,7 +71,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        jbrowse-version: [nightly, v3.7.0]
+        # v4.3.0 is the release most users are actually on, so the UI gets
+        # driven there and not only load-probed by host-compat. v3.7.0 stays
+        # because it is the only leg sensitive to the legacy context-menu shape.
+        jbrowse-version: [nightly, v4.3.0, v3.7.0]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8

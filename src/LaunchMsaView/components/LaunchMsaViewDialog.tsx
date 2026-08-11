@@ -41,7 +41,9 @@ export default function LaunchMsaViewDialog({
         }}
       >
         <Tab label="Orthologs (fast)" value="orthologs" />
-        <Tab label="NCBI BLAST query" value="ncbi_blast" />
+        {/* the tab value stays 'ncbi_blast' — it is only local state, and
+            renaming it buys nothing */}
+        <Tab label="BLAST query" value="ncbi_blast" />
         {hasPreloadedDatasets ? (
           <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
         ) : null}
