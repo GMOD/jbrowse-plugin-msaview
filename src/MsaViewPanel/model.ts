@@ -29,6 +29,8 @@ import type { MafRegion, MsaViewInitState } from './types'
 import type {
   BlastDatabase,
   MsaAlgorithm,
+  PhmmerDatabase,
+  SearchProgram,
 } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -45,8 +47,17 @@ export interface IRegion {
 }
 
 export interface BlastParams {
-  blastDatabase: BlastDatabase
-  msaAlgorithm: MsaAlgorithm
+  /**
+   * Still named blastDatabase, not database: it is persisted in session
+   * snapshots and in the IndexedDB result cache, so renaming it would orphan
+   * every row already written. phmmer names its databases differently
+   * ('swissprot' rather than 'uniprotkb_swissprot'), hence the union.
+   */
+  blastDatabase: BlastDatabase | PhmmerDatabase
+  /** absent on params written before phmmer existed, which were all blastp */
+  searchProgram?: SearchProgram
+  /** unused by the phmmer path, which aligns as it searches */
+  msaAlgorithm?: MsaAlgorithm
   selectedTranscript?: Feature
   proteinSequence: string
 }

@@ -3,6 +3,8 @@ import { createDbOpener } from './idb'
 import type {
   BlastDatabase,
   MsaAlgorithm,
+  PhmmerDatabase,
+  SearchProgram,
 } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { DBSchema } from 'idb'
 
@@ -13,14 +15,17 @@ const DB_VERSION = 2
 export interface CachedBlastResult {
   id: string
   proteinSequence: string
-  blastDatabase: BlastDatabase
+  blastDatabase: BlastDatabase | PhmmerDatabase
   /**
    * Only ever set on rows cached by a version that still queried NCBI, where
    * the choice between blastp and quick-blastp was real. Kept so those rows
    * still display; never written now.
    */
   blastProgram?: string
-  msaAlgorithm: MsaAlgorithm
+  /** absent on rows cached before phmmer existed, which were all blastp */
+  searchProgram?: SearchProgram
+  /** absent on phmmer rows, which are aligned by the search itself */
+  msaAlgorithm?: MsaAlgorithm
   msa: string
   tree: string
   treeMetadata: string
@@ -52,13 +57,25 @@ const getDB = createDbOpener<BlastCacheDB>(
   },
 )
 
-function createCacheKey(
-  proteinSequence: string,
-  blastDatabase: BlastDatabase,
-  msaAlgorithm: MsaAlgorithm,
-  transcriptId?: string,
-) {
+function createCacheKey({
+  proteinSequence,
+  blastDatabase,
+  msaAlgorithm,
+  searchProgram,
+  transcriptId,
+}: {
+  proteinSequence: string
+  blastDatabase: BlastDatabase | PhmmerDatabase
+  msaAlgorithm?: MsaAlgorithm
+  searchProgram?: SearchProgram
+  transcriptId?: string
+}) {
   const idPart = transcriptId ? `:${transcriptId}` : ''
+  // phmmer keys are prefixed and blastp keys are left exactly as they were, so
+  // results cached before phmmer existed still resolve
+  if (searchProgram === 'phmmer') {
+    return `phmmer:${blastDatabase}${idPart}:${proteinSequence}`
+  }
   // msaAlgorithm is part of the key because the stored msa/tree are produced by
   // it — without it, re-running the same query under a different algorithm
   // overwrites the earlier result and drops it from the history list
@@ -69,6 +86,7 @@ export async function saveBlastResult({
   proteinSequence,
   blastDatabase,
   msaAlgorithm,
+  searchProgram,
   msa,
   tree,
   treeMetadata,
@@ -79,8 +97,9 @@ export async function saveBlastResult({
   geneName,
 }: {
   proteinSequence: string
-  blastDatabase: BlastDatabase
-  msaAlgorithm: MsaAlgorithm
+  blastDatabase: BlastDatabase | PhmmerDatabase
+  msaAlgorithm?: MsaAlgorithm
+  searchProgram?: SearchProgram
   msa: string
   tree: string
   treeMetadata: string
@@ -91,17 +110,19 @@ export async function saveBlastResult({
   geneName?: string
 }) {
   const db = await getDB()
-  const id = createCacheKey(
+  const id = createCacheKey({
     proteinSequence,
     blastDatabase,
     msaAlgorithm,
+    searchProgram,
     transcriptId,
-  )
+  })
   const entry: CachedBlastResult = {
     id,
     proteinSequence,
     blastDatabase,
     msaAlgorithm,
+    searchProgram,
     msa,
     tree,
     treeMetadata,
