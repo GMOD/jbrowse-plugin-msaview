@@ -3,6 +3,7 @@ import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { saveBlastResult } from '../utils/blastCache'
 import { queryEbiBlast } from '../utils/ebiBlast'
 import { launchMSA, launchTree } from '../utils/msa'
+import { buildPhmmerMsa, buildRowMetadata } from '../utils/msaRows'
 import { queryPhmmer } from '../utils/phmmer'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
@@ -12,9 +13,6 @@ import type {
   MsaAlgorithm,
   PhmmerDatabase,
 } from '../LaunchMsaView/components/BlastQuery/consts'
-import type { PhmmerRow } from '../utils/phmmer'
-import type { TaxonomyInfo } from '../utils/taxonomyNames'
-import type { BlastHitDescription } from '../utils/types'
 
 type TreeMetadata = Record<string, Record<string, string>>
 
@@ -162,74 +160,15 @@ async function runPhmmer({
     rows.map(r => r.taxid).filter((t): t is number => t !== undefined),
   )
 
-  const treeMetadata: TreeMetadata = {}
-  const rowNames = makeRowNames(rows, taxonomyInfo)
-  const sequences = rows.map((row, i) => {
-    const rowName = rowNames[i]!
-    treeMetadata[rowName] = buildRowMetadata(row, taxonomyInfo)
-    return `>${rowName}\n${row.aligned}`
+  const { msa, treeMetadata } = buildPhmmerMsa({
+    rows,
+    queryRow,
+    taxonomyInfo,
   })
-
-  const msa = [`>QUERY\n${queryRow}`, ...sequences].join('\n')
   return {
     msa,
     tree: await launchTree({ alignment: msa, onProgress }),
     treeMetadata,
     rid,
   }
-}
-
-/**
- * One target can match the query in several places and phmmer emits a row per
- * matched envelope — four for lamprey albumin against human albumin, which has
- * three domains. Those rows share an accession and so would share a name, and
- * duplicate names silently collapse rows in both the MSA and the tree, so the
- * envelope disambiguates them.
- */
-function makeRowNames(
-  rows: PhmmerRow[],
-  taxonomyInfo: Map<number, TaxonomyInfo>,
-) {
-  const baseNames = rows.map(row => makeId(row, taxonomyInfo))
-  const counts = new Map<string, number>()
-  for (const name of baseNames) {
-    counts.set(name, (counts.get(name) ?? 0) + 1)
-  }
-
-  const used = new Set<string>()
-  return baseNames.map((base, i) => {
-    let name =
-      counts.get(base)! > 1 ? `${base}_${rows[i]!.range ?? i + 1}` : base
-    while (used.has(name)) {
-      name = `${name}_${i + 1}`
-    }
-    used.add(name)
-    return name
-  })
-}
-
-function buildRowMetadata(
-  desc: BlastHitDescription,
-  taxonomyInfo: Map<number, TaxonomyInfo>,
-) {
-  const metadata: Record<string, string> = {}
-  const taxInfo = desc.taxid ? taxonomyInfo.get(desc.taxid) : undefined
-
-  if (taxInfo?.sciname) {
-    metadata['Scientific name'] = taxInfo.sciname
-  }
-  if (taxInfo?.commonName) {
-    metadata['Common name'] = taxInfo.commonName
-  }
-  if (desc.accession) {
-    metadata.Accession = desc.accession
-  }
-  if (desc.id) {
-    metadata.ID = desc.id
-  }
-  if (desc.title) {
-    metadata.Description = desc.title
-  }
-
-  return metadata
 }
