@@ -62,7 +62,8 @@ the manual route below covers the occasional case without any of that.
 
 ## phmmer, and why its alignment is used as it comes
 
-The automatic panel offers a second search program, `hmmer3_phmmer`, suggested in
+The automatic panel offers a second search program, `hmmer3_phmmer`, suggested
+in
 [#58](https://github.com/GMOD/jbrowse-plugin-msaview/issues/58#issuecomment-5283718891).
 It is another Job Dispatcher service, so it speaks the same run/status/result
 protocol through `utils/ebiJobDispatcher.ts` and sends the same
@@ -73,31 +74,33 @@ which is a different service and is not usable from a browser. It was rebuilt as
 a React SPA with a JSON api at `/Tools/hmmer/api/v1/` — the old
 `POST /Tools/hmmer/search/phmmer` now answers `405` — and that api repeats
 Blast.cgi's pattern exactly: `Vary: Origin`, and an ACAO header for
-`https://www.ebi.ac.uk` and nobody else. The `OPTIONS` preflight returns 200 with
-no CORS headers at all. Same failure as NCBI, at a different institute.
+`https://www.ebi.ac.uk` and nobody else. The `OPTIONS` preflight returns 200
+with no CORS headers at all. Same failure as NCBI, at a different institute.
 
 The phmmer path differs from the BLAST path in more than the program:
 
 - **The search's own alignment is the MSA.** phmmer aligns every hit to a
   profile built from the query, so there is no realignment step. The BLAST path
   cannot do this — BLAST's alignments are pairwise, one hit at a time — so it
-  strips them off and hands the bare subsequences to clustalo, which for a
-  multi-domain protein can pair one hit's domain 1 against another's domain 2.
+  strips them off (`strip()`) and hands the bare subsequences to clustalo to
+  align again from scratch. How much that costs is measured below: less than you
+  would guess on average, a lot on individual hits.
 - **The query row is derived, not aligned.** phmmer leaves the query out of its
   own output unless the query is itself in the target database. It is exactly
-  recoverable anyway: the profile has one match state per query residue, `#=GC RF`
-  marks those columns, so the query is placed by walking `RF`. `parsePhmmerAlignment`
-  throws rather than emitting a row it cannot place — a query row off by one
-  residue would silently mis-map every column to the genome, which is worse than
-  no result. The test checks the derivation against the query's own row in a
-  swissprot search, where phmmer emits one to compare against.
+  recoverable anyway: the profile has one match state per query residue,
+  `#=GC RF` marks those columns, so the query is placed by walking `RF`.
+  `parsePhmmerAlignment` throws rather than emitting a row it cannot place — a
+  query row off by one residue would silently mis-map every column to the
+  genome, which is worse than no result. The test checks the derivation against
+  the query's own row in a swissprot search, where phmmer emits one to compare
+  against.
 - **The tree is built from the alignment**, by `simple_phylogeny` (clustalw2
   neighbour-joining, Kimura-corrected). What the BLAST path shows is clustalo's
-  *guide* tree, which exists to order a progressive alignment and is not a
+  _guide_ tree, which exists to order a progressive alignment and is not a
   phylogeny.
 - **One row per matched region.** A target matching the query in several places
-  gets a row each — four for lamprey albumin against human albumin — so row names
-  carry the envelope to keep them distinct.
+  gets a row each — four for lamprey albumin against human albumin — so row
+  names carry the envelope to keep them distinct.
 - Insert columns come back lowercase with `.` for gaps and are uppercased,
   because the MSA renderer looks colors up by the literal letter.
 
@@ -108,6 +111,48 @@ common name.
 
 Cache keys for phmmer results are prefixed; blastp keys are byte-identical to
 what they always were, so results cached before phmmer existed still resolve.
+
+## What the two pipelines actually produce
+
+Measured on human albumin against swissprot, both run for real. BLAST states its
+own residue-by-residue pairing of query to target in every HSP, which is an
+independent second opinion to score each finished MSA against: of the pairs
+BLAST asserted, how many does the MSA still place in the same column?
+
+|                            | blastp + clustalo   | phmmer              |
+| -------------------------- | ------------------- | ------------------- |
+| BLAST's aligned pairs kept | 25052/26315 (95.2%) | 24572/25021 (98.2%) |
+| hits keeping under half    | 4 of 60             | 0 of 46             |
+| distinct targets returned  | 60                  | ~45                 |
+| query row gaps             | 103 of 712 columns  | 96 of 705           |
+
+So **on the average hit the two are close**, and the realignment step is not the
+disaster it might sound like — clustalo puts 95% of it back. The difference is
+in the tail, and it is worth understanding rather than rounding off:
+
+- `P83517`, lungfish albumin, is in swissprot as two disjoint fragments.
+  clustalo keeps **0%** of BLAST's pairing for it; phmmer keeps 100%. This is
+  the multi-region case, and it is the one place the realignment genuinely falls
+  over.
+- The most divergent paralogs are where profile alignment earns its keep:
+  vitamin D-binding protein rows gain 5 to 14 points (`Q3MHN5` 0.84 → 0.98,
+  `P02774` 0.88 → 0.96).
+- Three of clustalo's four bad hits are targets **phmmer never returned**, so
+  phmmer wins those by omission rather than by aligning them better. phmmer's
+  inclusion threshold is stricter: 60 distinct targets from BLAST against about
+  45 from phmmer. Sensitivity is a real trade in the other direction.
+- phmmer scores _worse_ on `Q91274` (0.91 → 0.75) and `P85295` (0.93 → 0.78),
+  both targets it split into several rows. BLAST's single HSP spans regions
+  phmmer reports separately, so no one phmmer row can cover all of it — an
+  artifact of the comparison rather than a real loss.
+
+**The trees come out the same.** Scoring both for whether each known paralog
+family forms a clade: afamin and vitamin D-binding protein do in both, albumin
+and alpha-fetoprotein in neither. So `simple_phylogeny` on the phmmer alignment
+is not measurably better here than clustalo's guide tree — the argument for it
+is that a guide tree is not a phylogeny and should not be drawn as one, not that
+this gene came out differently. What both trees do get right is putting the
+query next to human albumin, its own swissprot entry.
 
 ## Trade-offs of the EBI backend
 
