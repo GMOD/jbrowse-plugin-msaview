@@ -163,6 +163,14 @@ anything.
 The reasoning and the evidence are in `docs/blast.md`. Read it before touching
 `utils/ebiBlast.ts` or reaching for NCBI again.
 
+**Job Dispatcher is the part of EBI that is reachable, not EBI generally.** The
+HMMER web server at `www.ebi.ac.uk/Tools/hmmer` — a separate service from the
+`hmmer3_phmmer` Job Dispatcher tool `utils/phmmer.ts` uses — serves its
+`/Tools/hmmer/api/v1/` json only to `https://www.ebi.ac.uk`, with `Vary: Origin`
+and a preflight that returns 200 carrying no CORS headers at all. That is the
+Blast.cgi failure exactly, at a different institute. Same host, same institute,
+neighbouring url: still check.
+
 ## Other things worth knowing
 
 - **NCBI CDD domain annotations are fetched in-browser**, and the CORS

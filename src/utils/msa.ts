@@ -32,6 +32,43 @@ const algorithms: Record<
   },
 }
 
+/**
+ * Build a tree from an alignment that already exists, which is what the phmmer
+ * path needs: phmmer produces the alignment itself, so there is no aligner run
+ * to take a guide tree from — and a guide tree is a byproduct of deciding
+ * progressive alignment order, not a phylogeny, so it is not what we would want
+ * even if there were one. simple_phylogeny is clustalw2's neighbour-joining on
+ * a real distance matrix, Kimura-corrected for protein distances.
+ */
+export async function launchTree({
+  alignment,
+  onProgress,
+}: {
+  alignment: string
+  onProgress: (arg: string) => void
+}) {
+  const tool = 'simple_phylogeny'
+  onProgress('Building tree...')
+
+  const jobId = await submitEbiJob({
+    tool,
+    params: {
+      sequence: alignment,
+      tree: 'phylip',
+      clustering: 'Neighbour-joining',
+      kimura: 'true',
+    },
+  })
+  await waitForEbiJob({
+    tool,
+    jobId,
+    onCountdown: s => {
+      onProgress(`Re-checking tree status in... ${s}`)
+    },
+  })
+  return fetchEbiResult({ tool, jobId, type: 'tree' })
+}
+
 export async function launchMSA({
   algorithm,
   sequence,
