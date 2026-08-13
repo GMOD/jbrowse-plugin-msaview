@@ -1,0 +1,257 @@
+{
+  "P02768-Homo_sapiens": {
+    "Accession": "P02768",
+    "ID": "ALBU_HUMAN",
+    "Description": "Albumin"
+  },
+  "Q5NVH5-Pongo_abelii": {
+    "Accession": "Q5NVH5",
+    "ID": "ALBU_PONAB",
+    "Description": "Albumin"
+  },
+  "A2V9Z4-Macaca_fascicularis": {
+    "Accession": "A2V9Z4",
+    "ID": "ALBU_MACFA",
+    "Description": "Albumin"
+  },
+  "Q28522-Macaca_mulatta": {
+    "Accession": "Q28522",
+    "ID": "ALBU_MACMU",
+    "Description": "Albumin (Fragment)"
+  },
+  "P49064-Felis_catus": {
+    "Accession": "P49064",
+    "ID": "ALBU_FELCA",
+    "Description": "Albumin"
+  },
+  "P49822-Canis_lupus_familiaris": {
+    "Accession": "P49822",
+    "ID": "ALBU_CANLF",
+    "Description": "Albumin"
+  },
+  "Q5XLE4-Equus_asinus": {
+    "Accession": "Q5XLE4",
+    "ID": "ALBU_EQUAS",
+    "Description": "Albumin"
+  },
+  "A6YF56-Mesocricetus_auratus": {
+    "Accession": "A6YF56",
+    "ID": "ALBU_MESAU",
+    "Description": "Albumin"
+  },
+  "P35747-Equus_caballus": {
+    "Accession": "P35747",
+    "ID": "ALBU_HORSE",
+    "Description": "Albumin"
+  },
+  "P49065-Oryctolagus_cuniculus": {
+    "Accession": "P49065",
+    "ID": "ALBU_RABIT",
+    "Description": "Albumin"
+  },
+  "P02769-Bos_taurus": {
+    "Accession": "P02769",
+    "ID": "ALBU_BOVIN",
+    "Description": "Albumin"
+  },
+  "P14639-Ovis_aries": {
+    "Accession": "P14639",
+    "ID": "ALBU_SHEEP",
+    "Description": "Albumin"
+  },
+  "P02770-Rattus_norvegicus": {
+    "Accession": "P02770",
+    "ID": "ALBU_RAT",
+    "Description": "Albumin"
+  },
+  "P08835-Sus_scrofa": {
+    "Accession": "P08835",
+    "ID": "ALBU_PIG",
+    "Description": "Albumin"
+  },
+  "P07724-Mus_musculus": {
+    "Accession": "P07724",
+    "ID": "ALBU_MOUSE",
+    "Description": "Albumin"
+  },
+  "O35090-Meriones_unguiculatus": {
+    "Accession": "O35090",
+    "ID": "ALBU_MERUN",
+    "Description": "Albumin"
+  },
+  "P19121-Gallus_gallus": {
+    "Accession": "P19121",
+    "ID": "ALBU_CHICK",
+    "Description": "Albumin"
+  },
+  "Q28789-Pan_troglodytes": {
+    "Accession": "Q28789",
+    "ID": "FETA_PANTR",
+    "Description": "Alpha-fetoprotein"
+  },
+  "P02771-Homo_sapiens": {
+    "Accession": "P02771",
+    "ID": "FETA_HUMAN",
+    "Description": "Alpha-fetoprotein"
+  },
+  "Q3T478-Bombina_maxima": {
+    "Accession": "Q3T478",
+    "ID": "ALBU_BOMMX",
+    "Description": "Serum albumin"
+  },
+  "P28050-Gorilla_gorilla_gorilla": {
+    "Accession": "P28050",
+    "ID": "FETA_GORGO",
+    "Description": "Alpha-fetoprotein"
+  },
+  "Q8MJU5-Canis_lupus_familiaris": {
+    "Accession": "Q8MJU5",
+    "ID": "FETA_CANLF",
+    "Description": "Alpha-fetoprotein"
+  },
+  "Q8MJ76-Sus_scrofa": {
+    "Accession": "Q8MJ76",
+    "ID": "FETA_PIG",
+    "Description": "Alpha-fetoprotein"
+  },
+  "P49066-Equus_caballus": {
+    "Accession": "P49066",
+    "ID": "FETA_HORSE",
+    "Description": "Alpha-fetoprotein"
+  },
+  "Q3SZ57-Bos_taurus": {
+    "Accession": "Q3SZ57",
+    "ID": "FETA_BOVIN",
+    "Description": "Alpha-fetoprotein"
+  },
+  "P14872-Xenopus_laevis": {
+    "Accession": "P14872",
+    "ID": "ALBUB_XENLA",
+    "Description": "Albumin B"
+  },
+  "P08759-Xenopus_laevis": {
+    "Accession": "P08759",
+    "ID": "ALBUA_XENLA",
+    "Description": "Albumin A"
+  },
+  "P02772-Mus_musculus": {
+    "Accession": "P02772",
+    "ID": "FETA_MOUSE",
+    "Description": "Alpha-fetoprotein"
+  },
+  "P84407-Gallus_gallus": {
+    "Accession": "P84407",
+    "ID": "FETA_CHICK",
+    "Description": "Alpha-fetoprotein"
+  },
+  "P02773-Rattus_norvegicus": {
+    "Accession": "P02773",
+    "ID": "FETA_RAT",
+    "Description": "Alpha-fetoprotein"
+  },
+  "G3MYZ3-Bos_taurus": {
+    "Accession": "G3MYZ3",
+    "ID": "AFAM_BOVIN",
+    "Description": "Afamin"
+  },
+  "P43652-Homo_sapiens": {
+    "Accession": "P43652",
+    "ID": "AFAM_HUMAN",
+    "Description": "Afamin"
+  },
+  "O89020-Mus_musculus": {
+    "Accession": "O89020",
+    "ID": "AFAM_MOUSE",
+    "Description": "Afamin"
+  },
+  "P36953-Rattus_norvegicus": {
+    "Accession": "P36953",
+    "ID": "AFAM_RAT",
+    "Description": "Afamin"
+  },
+  "Q91274-Petromyzon_marinus_12-489": {
+    "Accession": "Q91274",
+    "ID": "ALBU_PETMA",
+    "Description": "Serum albumin SDS-1"
+  },
+  "Q91274-Petromyzon_marinus_503-912": {
+    "Accession": "Q91274",
+    "ID": "ALBU_PETMA",
+    "Description": "Serum albumin SDS-1"
+  },
+  "Q91274-Petromyzon_marinus_973-1220": {
+    "Accession": "Q91274",
+    "ID": "ALBU_PETMA",
+    "Description": "Serum albumin SDS-1"
+  },
+  "Q91274-Petromyzon_marinus_1232-1421": {
+    "Accession": "Q91274",
+    "ID": "ALBU_PETMA",
+    "Description": "Serum albumin SDS-1"
+  },
+  "P21848-Salmo_salar": {
+    "Accession": "P21848",
+    "ID": "ALBU1_SALSA",
+    "Description": "Albumin 1"
+  },
+  "Q03156-Salmo_salar": {
+    "Accession": "Q03156",
+    "ID": "ALBU2_SALSA",
+    "Description": "Albumin 2"
+  },
+  "P21847-Aquarana_catesbeiana": {
+    "Accession": "P21847",
+    "ID": "ALBU_AQUCT",
+    "Description": "Albumin (Fragment)"
+  },
+  "P04276-Rattus_norvegicus": {
+    "Accession": "P04276",
+    "ID": "VTDB_RAT",
+    "Description": "Vitamin D-binding protein"
+  },
+  "P02774-Homo_sapiens": {
+    "Accession": "P02774",
+    "ID": "VTDB_HUMAN",
+    "Description": "Vitamin D-binding protein"
+  },
+  "Q3MHN5-Bos_taurus": {
+    "Accession": "Q3MHN5",
+    "ID": "VTDB_BOVIN",
+    "Description": "Vitamin D-binding protein"
+  },
+  "P21614-Mus_musculus": {
+    "Accession": "P21614",
+    "ID": "VTDB_MOUSE",
+    "Description": "Vitamin D-binding protein"
+  },
+  "P53789-Oryctolagus_cuniculus": {
+    "Accession": "P53789",
+    "ID": "VTDB_RABIT",
+    "Description": "Vitamin D-binding protein"
+  },
+  "P85295-Capra_hircus_1-19": {
+    "Accession": "P85295",
+    "ID": "ALBU_CAPHI",
+    "Description": "Albumin (Fragments)"
+  },
+  "P85295-Capra_hircus_26-71": {
+    "Accession": "P85295",
+    "ID": "ALBU_CAPHI",
+    "Description": "Albumin (Fragments)"
+  },
+  "P81188-Trachemys_scripta": {
+    "Accession": "P81188",
+    "ID": "ALBU1_TRASC",
+    "Description": "67 kDa serum albumin (Fragment)"
+  },
+  "P83517-Neoceratodus_forsteri_3-27": {
+    "Accession": "P83517",
+    "ID": "ALBU_NEOFS",
+    "Description": "Albumin (Fragments)"
+  },
+  "P83517-Neoceratodus_forsteri_37-82": {
+    "Accession": "P83517",
+    "ID": "ALBU_NEOFS",
+    "Description": "Albumin (Fragments)"
+  }
+}
