@@ -60,6 +60,12 @@ jobs:
         run: pnpm vitest run
         env:
           TEST_JBROWSE_VERSION: nightly
+      # Advisory: nightly moves under us, so drift here is usually a JBrowse UI
+      # change rather than ours, and a hard red would bury the functional signal
+      # this job exists for. It still says so in the log.
+      - name: Screenshot references still match the run
+        run: git diff --exit-code -- test-screenshots/
+        continue-on-error: true
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -21,6 +21,8 @@ jobs:
         run: pnpm build
       - name: Lint
         run: pnpm lint
+      - name: No source file git would call binary
+        run: pnpm check-text-source
       - name: Upload build artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -104,6 +106,18 @@ jobs:
         run: pnpm vitest run
         env:
           TEST_JBROWSE_VERSION: ${{ matrix.jbrowse-version }}
+      # saveStableScreenshot only rewrites a reference that moved more than its
+      # tolerance, so a clean tree is the expected state and a dirty one means
+      # the committed image no longer shows what the app does. 2.10.1 shipped
+      # five references captured between a bug and its fix, still displaying the
+      # eutils CORS error; every run since rewrote them into an artifact nobody
+      # opens. Recapture with a local run and commit rather than muting this.
+      #
+      # Advisory on nightly only, where the host itself moves and a red would be
+      # someone else's UI change; on a pinned host it is ours and it blocks.
+      - name: Screenshot references still match the run
+        run: git diff --exit-code -- test-screenshots/
+        continue-on-error: ${{ matrix.jbrowse-version == 'nightly' }}
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

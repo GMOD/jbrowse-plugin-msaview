@@ -22,6 +22,7 @@
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
     "prebuild": "pnpm clean",
     "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
+    "check-text-source": "node scripts/check-text-source.mjs",
     "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
