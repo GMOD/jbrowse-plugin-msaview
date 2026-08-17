@@ -40,34 +40,51 @@ export default function QuerySpeciesSelect({
   onChange: (taxId: number) => void
   className?: string
 }) {
+  // undefined until the user types, which is what makes the two lookups
+  // exclusive rather than both firing on open
   const [typed, setTyped] = useState<string>()
+  const debounced = useDebounced(typed, 400)
 
   // Opening on `human` for everyone is the same silent wrong answer the fixed
   // species list gave: on a mouse assembly the gene symbol resolves to the HUMAN
   // gene, and the excluded taxon is human too, so mouse appears twice. The
   // assembly being browsed is the one thing here that already knows the answer.
-  // An assembly NCBI does not index leaves the default, so this can only improve
-  // on guessing.
-  const { data: assemblySpecies } = useFetch(
-    assemblyName ? [assemblyName, 'assembly-species'] : null,
+  //
+  // db=assembly already returns the taxon id, so this is the whole lookup — the
+  // taxonomy chain below would be two more requests for an answer we hold. That
+  // is not just waste: eutils allows 3 requests a second and throttles by
+  // answering without CORS headers, so all four fired on open and the browser
+  // reported the throttle as "blocked by CORS policy" in the helper text.
+  const { data: fromAssembly } = useFetch(
+    assemblyName && typed === undefined
+      ? [assemblyName, 'assembly-species']
+      : null,
     () => resolveAssemblySpecies(assemblyName!),
+    {
+      onSuccess: found => {
+        if (found) {
+          onChange(found.taxId)
+        }
+      },
+    },
   )
 
-  // derived, not seeded through an effect: whatever the user typed wins, and
-  // until they type anything the assembly's species does, so a lookup that
-  // lands while they are mid-word cannot overwrite the field
-  const text = typed ?? assemblySpecies?.speciesName ?? 'human'
-  const debounced = useDebounced(text, 400)
-
-  const { data: taxon, error } = useFetch(
-    debounced.trim() ? [debounced.trim(), 'taxon'] : null,
-    () => describeTaxon(debounced),
+  const { data: fromText, error } = useFetch(
+    debounced?.trim() ? [debounced.trim(), 'taxon'] : null,
+    () => describeTaxon(debounced!),
     {
       onSuccess: ({ taxId }) => {
         onChange(taxId)
       },
     },
   )
+
+  // derived, not seeded through an effect: whatever the user typed wins, and
+  // until they type anything the assembly's species does, so a lookup that
+  // lands while they are mid-word cannot overwrite the field
+  const text = typed ?? fromAssembly?.speciesName ?? 'human'
+  const resolved =
+    typed === undefined ? fromAssembly?.speciesName : fromText?.label
 
   return (
     <TextField2
@@ -82,7 +99,7 @@ export default function QuerySpeciesSelect({
       helperText={
         error
           ? `${error}`
-          : (taxon?.label ?? `the species this gene is from (taxon ${value})`)
+          : (resolved ?? `the species this gene is from (taxon ${value})`)
       }
     />
   )
