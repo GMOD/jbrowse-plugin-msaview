@@ -68,6 +68,14 @@ The reasoning and the evidence are in `docs/blast.md`. Read it before touching
   constraint is what rules out Batch CD-Search. NCBI's per-service CORS policies
   differ: eutils sends `ACAO: *`, `api.ncbi.nlm.nih.gov/datasets` echoes the
   origin, and Blast.cgi now sends nothing. Never assume one from another.
+- **A eutils throttle looks exactly like a CORS failure.** The limit is 3
+  requests a second without an API key, and a throttled response comes back
+  without `Access-Control-Allow-Origin`, so the browser reports "blocked by CORS
+  policy: No 'Access-Control-Allow-Origin' header is present" for an endpoint
+  that sends `ACAO: *` all day. Four concurrent calls on one dialog open was
+  enough (2026-08-17, the Orthologs species field). Before believing a eutils
+  CORS error, count the requests in the window and probe the same url alone.
+  Keep concurrent eutils calls on any one screen under the limit.
 - **MafViewer and GWAS are vendored into core**, so newer hosts skip those config
   entries and the external repos no longer need maintaining.
 - **Browser console and autorun logs go missing in the puppeteer tests** unless
