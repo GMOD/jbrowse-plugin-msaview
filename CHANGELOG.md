@@ -1,81 +1,356 @@
-# v1.0.18
+## [2.10.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.10.0...v2.10.1) (2026-08-17)
+
+- Take the query species from the assembly instead of assuming human
+- Do one eutils lookup for the query species rather than four, which the
+  throttled endpoint reported as a CORS failure
+- Replace swr with a vendored useFetch
+- Call the display's super contextMenuItems with a receiver, so Launch MSA view
+  works on both host shapes
+- react-msaview and msa-parsers 5.10.0
+
+## [2.10.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.9.0...v2.10.0) (2026-08-17)
+
+- Align every species NCBI has an ortholog for, rather than a fixed list of 23
+- Name the query row for its species
+- Keep polling an EBI job through a transient status-check failure
+- Gate Launch MSA view on the clicked item, not the host's getter
+- react-msaview and msa-parsers 5.7.3
+
+## [2.9.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.8.2...v2.9.0) (2026-08-11)
+
+- Run BLAST searches on EBI's Job Dispatcher. The direct NCBI query path is gone
+  entirely: Blast.cgi sends no `Access-Control-Allow-Origin` to third-party
+  origins, so no browser can read it. Reaching `nr` now means the Manual panel,
+  which links out to NCBI
+- Let a deployment set its own contact email for EBI
+- Share the Job Dispatcher transport between the MSA and BLAST paths
+- Say what a "Failed to fetch" actually means
+
+## [2.8.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.8.1...v2.8.2) (2026-08-09)
+
+- Build an ortholog alignment from a session spec, not only from the dialog
+
+## [2.8.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.8.0...v2.8.1) (2026-08-09)
+
+- react-msaview 5.7.2, for the gappyness slider's testid
+
+## [2.8.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.7.4...v2.8.0) (2026-08-09)
+
+- Ten more species in the orthologs dialog, in less vertical space
+
+## [2.7.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.7.3...v2.7.4) (2026-08-06)
+
+- Build the MSA from NCBI orthologs instead of a BLAST search
+- react-msaview and msa-parsers 5.7.1
+
+## [2.7.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.7.2...v2.7.3) (2026-08-06)
+
+- Correct the genome<->MSA coordinate conversions in both directions
+- Type the IndexedDB stores and scope the cache clear
+- react-msaview 5.7.0
+
+## [2.7.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.7.1...v2.7.2) (2026-08-01)
+
+- Restore the pre-4.3 context menu path, and stop importing `useLocalStorage`,
+  which `@jbrowse/core/util` no longer exports on nightly
+- Stop translating through the host's codon table
+- Refuse to tag a release when Integration is red on HEAD
+
+## [2.7.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.7.0...v2.7.1) (2026-07-30)
+
+- Boot on released JBrowse hosts again: bundle `@mui/material/SvgIcon` rather
+  than resolving it from the host, whose exported shape varies by MUI major
+
+## [2.7.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.8...v2.7.0) (2026-07-24)
+
+- Adapt Launch MSA view to the canvas-based LinearBasicDisplay
+- Notify instead of silently failing when an MSA feature can't load
+- Drop the legacy contextMenuFeature fallback
+
+## [2.6.8](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.7...v2.6.8) (2026-07-04)
+
+- Simplify the MSA launch flow, and reconnect cached BLAST results to the genome
+
+## [2.6.7](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.6...v2.6.7) (2026-07-04)
+
+- Fix cache bugs, drop dead code, memoize IndexedDB connections
+
+## [2.6.6](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.5...v2.6.6) (2026-07-02)
+
+- Keep the MSA click-selection genome band visible while hovering the LGV
+
+## [2.6.5](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.4...v2.6.5) (2026-06-28)
+
+- react-msaview and msa-parsers 5.5.0
+
+## [2.6.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.3...v2.6.4) (2026-06-27)
+
+- Drop the legacy MSA-driven structure-highlight path
+
+## [2.6.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.2...v2.6.3) (2026-06-27)
+
+- Connect a genome-linked MSA to its 3D structure without requiring a UniProt id
+- Narrow the launch extension point to sources resolved at launch time
+
+## [2.6.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.1...v2.6.2) (2026-06-27)
+
+- Simplify the launch extension point init
+
+## [2.6.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.6.0...v2.6.1) (2026-06-27)
+
+- Replace the tabix-by-locus MSA launch with a name-indexed bgzip read
+
+## [2.6.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.5.2...v2.6.0) (2026-06-27)
+
+- Launch an alignment from a locus-keyed tabix file (msaTabixLocation + msaId)
+
+## [2.5.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.5.1...v2.5.2) (2026-06-27)
+
+- Fix observeProteinHighlights wiping the declarative highlightColumns seed
+
+## [2.5.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.5.0...v2.5.1) (2026-06-26)
+
+- Overlay NCBI CDD protein domain and site annotations on the alignment
+- Support declarative highlightColumns
+- react-msaview 5.4.1
+
+## [2.5.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.4.5...v2.5.0) (2026-05-29)
+
+- Fix the BLAST/MSA polling delay and CDS matching, and wire genome hover to the
+  MSA highlight
+
+## [2.4.5](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.4.4...v2.4.5) (2026-05-28)
+
+- Fix the isoform combobox lookup for MUI 7's div-based InputLabel
+- Simplify the highlight sync derived state
+- Stop shipping source maps
+
+## [2.4.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.4.3...v2.4.4) (2026-05-21)
+
+- Dependency bumps
+
+## [2.4.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.4.2...v2.4.3) (2026-05-21)
+
+- Share scaffolding between the MSA launch panels
+
+## [2.4.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.4.1...v2.4.2) (2026-05-21)
+
+- Re-release
+
+## [2.4.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.4.0...v2.4.1) (2026-05-21)
+
+- Re-release
+
+## [2.4.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.8...v2.4.0) (2026-05-14)
+
+- Suppress the codon highlight in the LGV during genome hover
+- Tighten BLAST types and dialog SWR keys, fixing silent bugs
+- Batch taxonomy cache reads and trim dead code
+- Remove the Ensembl gene tree panel
+- Restore the version-based release pipeline
+
+## [2.3.8](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.7...v2.3.8) (2026-05-06)
+
+- Re-release
+
+## [2.3.7](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.6...v2.3.7) (2026-05-06)
+
+- Move the release steps into `scripts/release.mjs`
+
+## [2.3.6](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.5...v2.3.6) (2026-05-06)
+
+- Use ErrorMessage from `@jbrowse/core/ui` in ConnectStructureDialog
+- Fix a handleClose bug and convert inline styles to makeStyles
+- Type safety and code quality cleanups
+
+## [2.3.5](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.4...v2.3.5) (2026-05-02)
+
+- Fix the publish workflow
+
+## [2.3.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.3...v2.3.4) (2026-05-02)
+
+- Prevent stale async operations from overwriting state in data-fetching effects
+- Migrate CI and the repo to pnpm, and ESLint to flat config with import-x
+- Bump react-msaview
+
+## [2.3.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.2...v2.3.3) (2026-04-16)
+
+- Generate `src/version.ts` on release
+
+## [2.3.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.1...v2.3.2) (2026-04-16)
+
+- Publish from postversion
+
+## [2.3.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.3.0...v2.3.1) (2026-04-16)
+
+- Publish with --provenance
+
+## [2.3.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.11...v2.3.0) (2026-04-15)
+
+- Switch to pnpm, plus simplifications (#57)
+
+## [2.2.11](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.8...v2.2.11) (2026-03-24)
+
+- Run the snapshot tests on a nightly cron job
+
+## [2.2.8](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.7...v2.2.8) (2026-01-30)
+
+- Add a panel for resuming an existing NCBI BLAST RID
+- Cache more of the BLAST results
+
+## [2.2.7](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.5...v2.2.7) (2026-01-30)
+
+- Read the version from a generated `version.ts` rather than package.json
+
+## [2.2.5](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.4...v2.2.5) (2026-01-25)
+
+- Dependency bumps
+
+## [2.2.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.3...v2.2.4) (2026-01-25)
+
+- Save NCBI BLAST results to IndexedDB (#55) and load an MSA from IndexedDB
+  (#51)
+- Connect the MSA view with the protein structure view (#49)
+- Add an extension point for launching an MSA view from e.g. the URL bar (#47)
+- Add MAF viewer integration (#52)
+- Add puppeteer-based testing against multiple JBrowse versions (#53)
+
+## [2.2.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.2...v2.2.3) (2025-10-14)
+
+- Update g2p_mapper, fix tsc errors
+
+## [2.2.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.1...v2.2.2) (2025-10-13)
+
+- Create a general concept of an MSA data adapter (#43)
+- Use a transcript's associated MSA dataset when it has one (#44)
+- Fix the cache key
+
+## [2.2.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.2.0...v2.2.1) (2025-05-29)
+
+- Drop the msa root configuration schema, which broke plugin load
+
+## [2.2.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.1.0...v2.2.0) (2025-05-29)
+
+- Add a quick-blastp option to the in-app NCBI BLAST workflow (#41)
+
+## [2.1.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.6...v2.1.0) (2025-05-23)
+
+- Add the Ensembl GeneTree widget directly in the app (#39)
+
+## [2.0.6](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.5...v2.0.6) (2025-05-19)
+
+- Output distconfig.json
+- Add lint to CI
+
+## [2.0.5](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.4...v2.0.5) (2025-05-19)
+
+- Split the watch script, and fix the plugin import
+
+## [2.0.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.3...v2.0.4) (2024-08-31)
+
+- Improve BLAST error handling and feature sequence fetching
+
+## [2.0.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.2...v2.0.3) (2024-08-09)
+
+- Dependency bumps
+
+## [2.0.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.1...v2.0.2) (2024-07-16)
+
+- Add MAFFT as an alignment option
+- Add error handling to the BLAST job
+
+## [2.0.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.0.0...v2.0.1) (2024-07-09)
+
+- Dependency bumps
+
+## [2.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.18...v2.0.0) (2024-07-08)
+
+- Launch an MSA view for a gene by running an NCBI BLAST search from the
+  browser, against nr or nr_clustered_seq
+- Sync mouseover between the MSA and the linear genome view, and click to
+  navigate to the genome (#29)
+- Map genome<->protein coordinates with g2p_mapper
+- Build with esbuild for both development and production (#37)
+- Relicense as MIT
+
+## [1.0.18](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.17...v1.0.18) (2022-01-10)
 
 - Fix clicking on node labels
 
-# v1.0.17
+## [1.0.17](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.16...v1.0.17) (2021-11-04)
 
 - Avoid Link redirection at react-msaview importform
 
-# v1.0.16
+## [1.0.16](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.15...v1.0.16) (2021-10-22)
 
 - Update to latest react-msaview
 
-# v1.0.15
+## [1.0.15](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.14...v1.0.15) (2021-10-22)
 
 - Change to add to 'Add' top level menu
 
-# v1.0.14
+## [1.0.14](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.13...v1.0.14) (2021-03-17)
 
 - Fix session link loading from distconfig.json
 
-# v1.0.13
+## [1.0.13](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.12...v1.0.13) (2021-03-17)
 
 - Factor out code into the react-msaview package on NPM, and make the plugin
   more of a wrapper around this module
 
-# v1.0.12
+## [1.0.12](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.11...v1.0.12) (2021-02-12)
 
 - Avoid scrolling too far right
 
-# v1.0.11
+## [1.0.11](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.10...v1.0.11) (2021-02-12)
 
 - Add version number from package.json to about panel
 
-# v1.0.10
+## [1.0.10](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.9...v1.0.10) (2021-02-11)
 
 - Fix scrolling for large MSA that loads after tree
 
-# v1.0.9
+## [1.0.9](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.8...v1.0.9) (2021-02-11)
 
 - Fix for MSA loading bar when tree only is displayed
 
-# v1.0.8
+## [1.0.8](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.7...v1.0.8) (2021-02-11)
 
 - Fix for side scrolling half rendered letters in MSA
 - drawNodeBubbles option
 
-# v1.0.7
+## [1.0.7](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.6...v1.0.7) (2021-02-10)
 
 - Move yarn build script to prepare script in package.jsom
 
-# v1.0.6
+## [1.0.6](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.5...v1.0.6) (2021-02-10)
 
 - Use postversion to run build so that the accurate version is encoded into the
   release binary
 
-# v1.0.5
+## [1.0.5](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.3...v1.0.5) (2021-02-10)
 
 - Add prebuild clean
 
-# v1.0.4
+## [1.0.4](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.3...v1.0.5) (2021-02-10)
 
 - Fix running build before release
 
-# v1.0.3
+## [1.0.3](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.2...v1.0.3) (2021-02-10)
 
 - Re-release
 
-# v1.0.2
+## [1.0.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.1...v1.0.2) (2021-02-10)
 
 - Ensure clean build with prebuild rm -rf dist
 
-# v1.0.1
+## [1.0.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.0...v1.0.1) (2021-02-10)
 
 - Fix for making demo config on unpkg
 
-# v1.0.0
+## [1.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v1.0.0...v1.0.0) (2021-02-10)
 
-## Features
+### Features
 
 - Vertical virtualized scrolling of phylogenetic tree
 - Vertical and horizontal virtualized scrolling of multiple sequence alignment
@@ -91,7 +366,7 @@
   links to files to automatically open your results
 - The tree or the MSA panel can be loaded separately from each other
 
-## File format supports
+### File format supports
 
 - FASTA formatted for MSA (e.g. gaps already inserted)
 - Stockholm files (e.g. .stock file, with or without embedded newick tree, uses
