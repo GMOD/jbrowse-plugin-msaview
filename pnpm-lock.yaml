@@ -85,8 +85,8 @@ importers:
         specifier: ^9.2.2
         version: 9.2.2(mobx@6.16.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       msa-parsers:
-        specifier: ^5.7.3
-        version: 5.7.3
+        specifier: ^5.9.0
+        version: 5.9.0
       pixelmatch:
         specifier: ^7.2.0
         version: 7.2.0
@@ -109,8 +109,8 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
       react-msaview:
-        specifier: ^5.7.3
-        version: 5.7.3(717b39ac6824cca44358a2ef8d7f979d)
+        specifier: ^5.9.0
+        version: 5.9.0(717b39ac6824cca44358a2ef8d7f979d)
       rimraf:
         specifier: ^6.1.3
         version: 6.1.3
@@ -511,6 +511,9 @@ packages:
   '@gmod/http-range-fetcher@5.0.7':
     resolution: {integrity: sha512-WEOm5SnRbdhtB5RDXDW7LSUsam/fJH1hiGsyqjdG1vvkn6Ddv4wcCAY8AP4qqxPZicg1KNz53qhifMMksg6eLQ==}
 
+  '@gmod/newick@1.0.2':
+    resolution: {integrity: sha512-Jfn0SRnSmwECuV6Rk1B61k34/kWcghXXlsu8KeP8BsZ8G04kvKF2U47yUs/mkkmzwglVfSDdA/isy18I1OXDxA==}
+
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
     engines: {node: '>=18.18.0'}
@@ -562,8 +565,8 @@ packages:
     resolution: {integrity: sha512-DPEtODWKt+QGmCg+EO36sSmKOmdjJOwtxeV/4PBnf+7jqC/P7R4YIz+/yohtqh9UZ38dbLtXIlmigPlkZy8SAA==}
     engines: {node: '>=18'}
 
-  '@jbrowse/svgcanvas@5.7.3':
-    resolution: {integrity: sha512-T+O+yAscXFDMhdQL2kK3mm3/aPbkhtTy8QAoDSOEIjSonFrcZbeDjWbQuYkGoWLrC2Eq8gzyqvh76dZggw4aAw==}
+  '@jbrowse/svgcanvas@5.9.0':
+    resolution: {integrity: sha512-IObGU7L57ijRMVOBXOA2t4zq+e6/6tT0//wWU3DBJNe1QUB+GtnQnCEnAfDsJA4iexY35Q8dav1lg2b4+4Zjcg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2299,8 +2302,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msa-parsers@5.7.3:
-    resolution: {integrity: sha512-QkJEXXPG0MibOKfzrczREWDUtGLBX4gxBnWqy/3WxP1nGwUoiqAF6IuEVTmVJUwW8JCSe4NuWo6i/AGpgvY+8w==}
+  msa-parsers@5.9.0:
+    resolution: {integrity: sha512-m7sFOSLlJPwXk5x8s8X04fZqX7K6xZLy4bPfBiIf5361c+ZorjsCYTVO6Ku3+ZCjgCDr34ZkJDgQsmrSr6zlpQ==}
 
   nanoid@3.3.16:
     resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
@@ -2522,8 +2525,8 @@ packages:
   react-is@19.2.8:
     resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
 
-  react-msaview@5.7.3:
-    resolution: {integrity: sha512-TpUg2ZGphXNt1iUwLodKg5qHfedypb6WSdDS5ab26g/J2t1le18l4nBK/qz3xTe6dAyUjIUojFLOfEwDolNo8Q==}
+  react-msaview@5.9.0:
+    resolution: {integrity: sha512-r+W0en4Ghk+wyFklJjXpzXSb5bqiPYtPm+tHOhgOpyKt1pyiFFFESfPg6UVrzyn0iEKtncrYMT4K0Kr3AVbYrQ==}
     engines: {node: '>=10'}
     peerDependencies:
       '@jbrowse/core': '>=2.0.0'
@@ -3450,6 +3453,8 @@ snapshots:
     dependencies:
       '@jbrowse/quick-lru': 7.3.5
 
+  '@gmod/newick@1.0.2': {}
+
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -3560,7 +3565,7 @@ snapshots:
 
   '@jbrowse/quick-lru@7.3.5': {}
 
-  '@jbrowse/svgcanvas@5.7.3': {}
+  '@jbrowse/svgcanvas@5.9.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -5342,8 +5347,9 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msa-parsers@5.7.3:
+  msa-parsers@5.9.0:
     dependencies:
+      '@gmod/newick': 1.0.2
       clustal-js: 2.0.17
       emf-js: 2.0.0
 
@@ -5565,18 +5571,19 @@ snapshots:
 
   react-is@19.2.8: {}
 
-  react-msaview@5.7.3(717b39ac6824cca44358a2ef8d7f979d):
+  react-msaview@5.9.0(717b39ac6824cca44358a2ef8d7f979d):
     dependencies:
+      '@gmod/newick': 1.0.2
       '@jbrowse/core': 4.3.0(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
       '@jbrowse/mobx-state-tree': 5.13.0(mobx@6.16.1)
-      '@jbrowse/svgcanvas': 5.7.3
+      '@jbrowse/svgcanvas': 5.9.0
       '@mui/icons-material': 9.2.0(@mui/material@9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react@19.2.17)(react@19.2.8)
       '@mui/material': 9.2.0(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.17)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       colord: 2.9.3
       flatbush: 4.6.2
       mobx: 6.16.1
       mobx-react: 9.2.2(mobx@6.16.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      msa-parsers: 5.7.3
+      msa-parsers: 5.9.0
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
