@@ -132,3 +132,4 @@ debug-*.png
 
 # host-compat probe report (regenerated each run)
 host-compat.json
+.claude/
