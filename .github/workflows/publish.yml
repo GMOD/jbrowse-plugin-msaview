@@ -25,3 +25,27 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm publish --access public --provenance --no-git-checks
+
+  release:
+    name: Create GitHub release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      # to create the release. Kept in its own job so the publish job's token
+      # stays read-only, and behind `needs` so a failed publish can't leave a
+      # release announcing a version nobody can install.
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      # Notes come from the CHANGELOG.md section git-cliff wrote during
+      # `pnpm version`, which is part of the tagged commit — so this needs
+      # neither full history nor a second pass over the git log.
+      - name: Create release
+        run: |
+          ./scripts/release-notes.sh "$GITHUB_REF_NAME" > /tmp/notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --notes-file /tmp/notes.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
