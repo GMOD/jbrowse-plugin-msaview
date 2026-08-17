@@ -4,11 +4,10 @@ import { LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
 import { getEnv, getSession } from '@jbrowse/core/util'
 import { MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
-import useSWR from 'swr'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
-import { staticSwrConfig } from '../../../utils/swrConfig'
+import { useFetch } from '../../../utils/useFetch'
 import { getGeneDisplayName, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
 import SubmitCancelActions from '../SubmitCancelActions'
@@ -51,10 +50,9 @@ const PreLoadedMSA = observer(function ({
     data: msaList,
     isLoading: msaListLoading,
     error: msaListFetchError,
-  } = useSWR(
+  } = useFetch(
     selectedDataset ? `${selectedDataset.datasetId}-msa-list` : null,
     () => fetchMSAList({ config: selectedDataset!.adapter, pluginManager }),
-    staticSwrConfig,
   )
 
   const transcriptSelection = useTranscriptSelection({
@@ -68,7 +66,7 @@ const PreLoadedMSA = observer(function ({
     data: msaData,
     isLoading: msaDataLoading,
     error: msaDataFetchError,
-  } = useSWR(
+  } = useFetch(
     selectedId && selectedDataset && msaList
       ? `${selectedDataset.datasetId}-${selectedId}-msa`
       : null,
@@ -78,7 +76,6 @@ const PreLoadedMSA = observer(function ({
         config: selectedDataset!.adapter,
         pluginManager,
       }),
-    staticSwrConfig,
   )
 
   const e =
