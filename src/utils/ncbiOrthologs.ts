@@ -123,7 +123,7 @@ interface OrthologReport {
  *
  * `taxa` narrows the set when a caller wants specific species; omitted, every
  * species NCBI has an ortholog for is a candidate. `exclude` drops the query
- * taxon, which the QUERY row already represents.
+ * taxon, which already has its own `<species>_query` row.
  */
 export async function fetchOrthologGenes(
   geneId: string,

@@ -73,6 +73,7 @@ const OrthologPanel = observer(function ({
           <QuerySpeciesSelect
             className={classes.selectField}
             value={taxId}
+            assemblyName={view.assemblyNames[0]}
             onChange={setTaxId}
           />
 

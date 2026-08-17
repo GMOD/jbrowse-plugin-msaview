@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 
 import TextField2 from '../../../components/TextField2'
-import { resolveTaxId } from '../../../utils/ncbiTaxonomy'
+import {
+  resolveAssemblySpecies,
+  resolveTaxId,
+} from '../../../utils/ncbiTaxonomy'
 import { fetchTaxonomyInfo } from '../../../utils/taxonomyNames'
 import { useDebounced, useFetch } from '../../../utils/useFetch'
 
@@ -28,14 +31,32 @@ async function describeTaxon(query: string) {
  */
 export default function QuerySpeciesSelect({
   value,
+  assemblyName,
   onChange,
   className,
 }: {
   value: number
+  assemblyName?: string
   onChange: (taxId: number) => void
   className?: string
 }) {
-  const [text, setText] = useState('human')
+  const [typed, setTyped] = useState<string>()
+
+  // Opening on `human` for everyone is the same silent wrong answer the fixed
+  // species list gave: on a mouse assembly the gene symbol resolves to the HUMAN
+  // gene, and the excluded taxon is human too, so mouse appears twice. The
+  // assembly being browsed is the one thing here that already knows the answer.
+  // An assembly NCBI does not index leaves the default, so this can only improve
+  // on guessing.
+  const { data: assemblySpecies } = useFetch(
+    assemblyName ? [assemblyName, 'assembly-species'] : null,
+    () => resolveAssemblySpecies(assemblyName!),
+  )
+
+  // derived, not seeded through an effect: whatever the user typed wins, and
+  // until they type anything the assembly's species does, so a lookup that
+  // lands while they are mid-word cannot overwrite the field
+  const text = typed ?? assemblySpecies?.speciesName ?? 'human'
   const debounced = useDebounced(text, 400)
 
   const { data: taxon, error } = useFetch(
@@ -55,7 +76,7 @@ export default function QuerySpeciesSelect({
       className={className}
       value={text}
       onChange={event => {
-        setText(event.target.value)
+        setTyped(event.target.value)
       }}
       error={!!error}
       helperText={

@@ -55,7 +55,8 @@ export interface OrthologParams {
   /** NCBI taxon id of the assembly the query gene came from */
   taxId: number
   /**
-   * taxon ids to include as rows (the query taxon is represented by QUERY).
+   * taxon ids to include as rows. The query taxon has its own row already, so
+   * it is excluded from this set whether or not it is named.
    * Omitted means every species NCBI has an ortholog for, in its report order,
    * which is what a launch that just wants "this gene across species" wants.
    */
@@ -72,7 +73,8 @@ export interface OrthologParams {
   msaAlgorithm: MsaAlgorithm
   selectedTranscript?: Feature
   /**
-   * The QUERY row. The launch dialog always supplies it, translated from the
+   * The query row, named `<species>_query`. The launch dialog always supplies
+   * it, translated from the
    * transcript the user picked, which is what `connectedFeature` maps genome
    * coordinates through. Omitted — a session spec naming a gene and nothing
    * else — the query row becomes NCBI's representative protein for the resolved
