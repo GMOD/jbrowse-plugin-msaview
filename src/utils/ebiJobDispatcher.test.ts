@@ -38,7 +38,16 @@ describe('waitForEbiJob', () => {
 
   test('failures that do not persist never accumulate to the limit', async () => {
     const blip = new TypeError('Failed to fetch')
-    statuses([blip, 'RUNNING', blip, 'RUNNING', blip, 'RUNNING', blip, 'FINISHED'])
+    statuses([
+      blip,
+      'RUNNING',
+      blip,
+      'RUNNING',
+      blip,
+      'RUNNING',
+      blip,
+      'FINISHED',
+    ])
     await expect(wait()).resolves.toBeUndefined()
   })
 

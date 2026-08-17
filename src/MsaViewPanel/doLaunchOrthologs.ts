@@ -135,8 +135,10 @@ async function queryRowLabel(taxId: number, rows: OrthologRow[]) {
   } catch (e) {
     console.warn('[msaview-orthologs] taxonomy name lookup failed:', e)
   }
-  return dedupeLabels([...rows.map(r => r.label), `${name ?? 'query'}_query`])
-    .at(-1)!
+  return dedupeLabels([
+    ...rows.map(r => r.label),
+    `${name ?? 'query'}_query`,
+  ]).at(-1)!
 }
 
 /**
