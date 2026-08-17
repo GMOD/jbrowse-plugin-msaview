@@ -1,3 +1,24 @@
+## [2.10.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.10.1...v2.10.2) (2026-08-17)
+
+### Bug Fixes
+
+- Write the key separator as an escape, not a raw NUL byte ([cb705d6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/cb705d631c05b75fdb2a0578ae07fd941c65b1c3))
+
+### Chores
+
+- Fail on the two things 2.10.1 shipped that nothing was watching ([632e654](https://github.com/GMOD/jbrowse-plugin-msaview/commit/632e654120bc5923e5e6c76465a0f79333c856d4))
+- Generate the changelog with git-cliff, release from the tag ([bed4b8d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bed4b8d0ee5e6db36db63b72f687e1787476f095))
+
+### Documentation
+
+- Backfill every release, in git-cliff's heading shape ([cafe4a4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/cafe4a42f3992adbb1e4613e26350619119bfaca))
+
+### Tests
+
+- Recapture the five dialog references after the throttle fix ([fc45237](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fc45237b7b0d2b608d6a4064334620516d1127b9))
+- Recapture the v4.3.0 dialog references after the throttle fix ([5c011c1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/5c011c1e3c58172626e950d653fea970da803777))
+- Keep committed references only for the gated hosts ([763a0e3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/763a0e3ebd65d24bba6cd4eb47bc806b835a4ee1))
+
 ## [2.10.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.10.0...v2.10.1) (2026-08-17)
 
 - Take the query species from the assembly instead of assuming human
