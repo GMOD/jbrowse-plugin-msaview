@@ -56,10 +56,17 @@ export interface OrthologParams {
   taxId: number
   /**
    * taxon ids to include as rows (the query taxon is represented by QUERY).
-   * Omitted means every species the launch dialog offers, which is what a
-   * launch that just wants "this gene across species" wants.
+   * Omitted means every species NCBI has an ortholog for, in its report order,
+   * which is what a launch that just wants "this gene across species" wants.
    */
   taxa?: number[]
+  /**
+   * how many ortholog rows to align, `defaultMaxSpecies` when omitted. The
+   * aligner is what this bounds: EBI runs at roughly half a second per row for
+   * a ~1400aa protein, so a gene with 865 orthologs is a 7 minute job at no
+   * cap.
+   */
+  maxSpecies?: number
   /** candidate gene identifiers off the feature, tried in order */
   geneCandidates: string[]
   msaAlgorithm: MsaAlgorithm

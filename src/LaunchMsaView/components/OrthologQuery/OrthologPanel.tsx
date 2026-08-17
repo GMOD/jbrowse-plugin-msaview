@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react'
 
-import { Checkbox, FormControlLabel, MenuItem, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import QuerySpeciesSelect from './QuerySpeciesSelect'
 import { orthologLaunchView } from './orthologLaunchView'
 import TextField2 from '../../../components/TextField2'
-import { COMMON_SPECIES } from '../../../utils/ncbiOrthologs'
+import { defaultMaxSpecies } from '../../../utils/ncbiOrthologs'
 import {
   getGeneDisplayName,
   getGeneIdentifiers,
@@ -26,23 +27,6 @@ const useStyles = makeStyles()({
   selectField: {
     width: 180,
   },
-  // A GRID, not a wrapping flex row of fixed-width items. The old form was three
-  // 160px columns inside a 560px box, which is five rows for thirteen species and
-  // eight for twenty-three -- and the checkbox list is the tallest thing in the
-  // dialog, so those rows are the dialog's height. Five auto-fitted columns is
-  // five rows for twenty-three, i.e. more species in less space, and it reflows
-  // rather than being pinned to a width the dialog may not have.
-  speciesBox: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-    maxWidth: 700,
-    marginTop: 4,
-  },
-  // The label carries the row height; the default control padding is what makes
-  // 23 rows of it tall.
-  species: {
-    marginRight: 0,
-  },
 })
 
 const OrthologPanel = observer(function ({
@@ -59,86 +43,64 @@ const OrthologPanel = observer(function ({
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [taxId, setTaxId] = useState(9606)
   const [msaAlgorithm, setMsaAlgorithm] = useState<MsaAlgorithm>('clustalo')
-  const [excluded, setExcluded] = useState<number[]>([])
+  const [maxSpecies, setMaxSpecies] = useState(String(defaultMaxSpecies))
 
   const geneCandidates = useMemo(() => getGeneIdentifiers(feature), [feature])
   const transcriptSelection = useTranscriptSelection({ feature, view })
   const { selectedTranscript, proteinSequence } = transcriptSelection
   const e = transcriptSelection.error ?? launchViewError
 
-  const taxa = COMMON_SPECIES.map(s => s.taxId).filter(
-    t => !excluded.includes(t),
-  )
+  const rowCount = Number(maxSpecies)
+  const rowCountValid = Number.isInteger(rowCount) && rowCount >= 2
 
   return (
     <>
       <LaunchPanelContent error={e}>
-        {/* One line rather than seven. What a reader needs here is which tab
-            to pick, and that is the seconds-against-minutes comparison; the
-            rest (species labels, CDD overlay, the query row being the selected
-            transcript) is visible in the result or documented, and as prose it
-            was most of the dialog's height. */}
+        {/* One line rather than seven. What a reader needs here is which tab to
+            pick; the rest (species labels, CDD overlay, the query row being the
+            selected transcript) is visible in the result or documented, and as
+            prose it was most of the dialog's height.
+
+            The comparison stays but the number moved: the lookup is still
+            instant, and it is now the aligner that costs the wait, about half a
+            second per row. */}
         <Typography variant="body2">
-          NCBI&apos;s precomputed orthologs, one gene per species, aligned at EBI
-          in seconds rather than the 10+ minutes BLAST takes.
+          NCBI&apos;s precomputed orthologs, one gene per species, looked up
+          rather than searched for. No BLAST job to queue.
         </Typography>
 
         <div>
-          <TextField2
-            variant="outlined"
-            label="Query species"
+          <QuerySpeciesSelect
             className={classes.selectField}
-            select
             value={taxId}
-            onChange={event => {
-              setTaxId(Number(event.target.value))
-            }}
-            helperText="the species this gene is from"
-          >
-            {COMMON_SPECIES.map(s => (
-              <MenuItem value={s.taxId} key={s.taxId}>
-                {s.label}
-              </MenuItem>
-            ))}
-          </TextField2>
+            onChange={setTaxId}
+          />
 
           <MsaAlgorithmSelect
             className={classes.selectField}
             value={msaAlgorithm}
             onChange={setMsaAlgorithm}
           />
-        </div>
 
-        <Typography variant="subtitle2" style={{ marginTop: 8 }}>
-          Species to include (those without an ortholog are skipped)
-        </Typography>
-        <div className={classes.speciesBox}>
-          {COMMON_SPECIES.map(s => (
-            <FormControlLabel
-              className={classes.species}
-              key={s.taxId}
-              control={
-                <Checkbox
-                  checked={!excluded.includes(s.taxId)}
-                  onChange={event => {
-                    setExcluded(
-                      event.target.checked
-                        ? excluded.filter(t => t !== s.taxId)
-                        : [...excluded, s.taxId],
-                    )
-                  }}
-                />
-              }
-              label={s.label}
-            />
-          ))}
+          <TextField2
+            variant="outlined"
+            label="Rows to align"
+            className={classes.selectField}
+            type="number"
+            value={maxSpecies}
+            onChange={event => {
+              setMaxSpecies(event.target.value)
+            }}
+            error={!rowCountValid}
+            helperText="the closest N species NCBI has"
+          />
         </div>
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
       </LaunchPanelContent>
       <SubmitCancelActions
-        submitDisabled={!proteinSequence || taxa.length < 2}
+        submitDisabled={!proteinSequence || !rowCountValid}
         onSubmit={() => {
           try {
             if (selectedTranscript) {
@@ -149,7 +111,7 @@ const OrthologPanel = observer(function ({
                 newViewTitle: `Orthologs - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
                 orthologParams: {
                   taxId,
-                  taxa,
+                  maxSpecies: rowCount,
                   geneCandidates,
                   msaAlgorithm,
                   selectedTranscript,

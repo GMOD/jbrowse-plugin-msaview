@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { doLaunchOrthologs } from './doLaunchOrthologs'
 import { launchMSA } from '../utils/msa'
 import {
-  COMMON_SPECIES,
+  defaultMaxSpecies,
   fetchOrthologRows,
   fetchProteinForGene,
   resolveGeneId,
@@ -13,10 +13,10 @@ import type { JBrowsePluginMsaViewModel } from './model'
 import type { OrthologRow } from '../utils/ncbiOrthologs'
 
 // Every network call is mocked and nothing else is. What is under test is the
-// argument shaping either side of those calls -- which taxa get asked for, what
-// becomes the QUERY row, and whether the row earns the Accession that drives the
-// CDD overlay -- so the real COMMON_SPECIES list and the real
-// cleanProteinSequence stay in the picture.
+// argument shaping either side of those calls -- which species get asked for,
+// what becomes the QUERY row, and whether the row earns the Accession that
+// drives the CDD overlay -- so the real cleanProteinSequence stays in the
+// picture.
 vi.mock('../utils/ncbiOrthologs', async importOriginal => ({
   ...(await importOriginal<Record<string, unknown>>()),
   resolveGeneId: vi.fn(),
@@ -50,10 +50,15 @@ function params(extra: Record<string, unknown> = {}) {
   }
 }
 
-// What fetchOrthologRows was asked for, which is the only place the taxa
-// default is observable.
-function taxaAskedFor() {
-  return [...mockFetchRows.mock.calls[0]![0].taxa].sort((a, b) => a - b)
+// What fetchOrthologRows was asked for, which is the only place the species
+// defaults are observable.
+function rowRequest() {
+  const { taxa, exclude, limit } = mockFetchRows.mock.calls[0]![0]
+  return {
+    taxa: taxa && [...taxa].sort((a, b) => a - b),
+    exclude,
+    limit,
+  }
 }
 
 // The QUERY row as it went to the aligner, read back out of the FASTA rather
@@ -74,26 +79,55 @@ beforeEach(() => {
   mockLaunchMSA.mockResolvedValue({ msa: '', tree: '' })
 })
 
-describe('taxa', () => {
-  test('omitted asks for every species the dialog offers, less the query', async () => {
+describe('which species become rows', () => {
+  test('omitted taxa asks for no restriction at all, which is every ortholog NCBI has', async () => {
     await doLaunchOrthologs({ self: makeModel(params()) })
-    expect(taxaAskedFor()).toEqual(
-      COMMON_SPECIES.map(s => s.taxId as number)
-        .filter(t => t !== HUMAN)
-        .sort((a, b) => a - b),
-    )
+    expect(rowRequest().taxa).toBeUndefined()
   })
 
-  test('given is taken as written, less the query', async () => {
+  test('given taxa is taken as written', async () => {
     await doLaunchOrthologs({
       self: makeModel(params({ taxa: [HUMAN, 10090, 9615] })),
     })
-    expect(taxaAskedFor()).toEqual([9615, 10090])
+    expect(rowRequest().taxa).toEqual([9606, 9615, 10090])
+  })
+
+  // Not folded into the taxa list before the call, so that "restrict to these"
+  // and "the query row already covers this one" stay separable -- an unrestricted
+  // launch still has to drop the query species.
+  test('the query species is excluded whether or not taxa was given', async () => {
+    await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(rowRequest().exclude).toBe(HUMAN)
+    vi.clearAllMocks()
+    mockResolveGeneId.mockResolvedValue({ geneId: GENE_ID, matched: 'NLRP1' })
+    mockFetchProtein.mockResolvedValue(REPRESENTATIVE)
+    mockFetchRows.mockResolvedValue([] as OrthologRow[])
+    mockLaunchMSA.mockResolvedValue({ msa: '', tree: '' })
+    await doLaunchOrthologs({
+      self: makeModel(params({ taxa: [HUMAN, 10090] })),
+    })
+    expect(rowRequest().exclude).toBe(HUMAN)
   })
 
   test('an empty list is a request for no rows, not a request for all of them', async () => {
     await doLaunchOrthologs({ self: makeModel(params({ taxa: [] })) })
-    expect(taxaAskedFor()).toEqual([])
+    expect(rowRequest().taxa).toEqual([])
+  })
+})
+
+// The cap is the only thing standing between a launch and a 7 minute EBI job:
+// NCBI publishes 865 orthologs for CFTR and the aligner runs at roughly half a
+// second a row.
+describe('the row cap', () => {
+  test('is passed through when given', async () => {
+    await doLaunchOrthologs({ self: makeModel(params({ maxSpecies: 12 })) })
+    expect(rowRequest().limit).toBe(12)
+  })
+
+  test('omitted leaves the default to fetchOrthologGenes rather than sending Infinity', async () => {
+    await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(rowRequest().limit).toBeUndefined()
+    expect(defaultMaxSpecies).toBeGreaterThan(2)
   })
 })
 

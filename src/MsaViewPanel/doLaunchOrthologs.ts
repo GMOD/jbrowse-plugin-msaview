@@ -1,7 +1,6 @@
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { launchMSA } from '../utils/msa'
 import {
-  COMMON_SPECIES,
   fetchOrthologRows,
   fetchProteinForGene,
   resolveGeneId,
@@ -30,8 +29,14 @@ export async function doLaunchOrthologs({
 }: {
   self: JBrowsePluginMsaViewModel
 }) {
-  const { taxId, taxa, geneCandidates, msaAlgorithm, proteinSequence } =
-    self.orthologParams!
+  const {
+    taxId,
+    taxa,
+    maxSpecies,
+    geneCandidates,
+    msaAlgorithm,
+    proteinSequence,
+  } = self.orthologParams!
 
   const onProgress = (arg: string) => {
     self.setProgress(arg)
@@ -61,16 +66,16 @@ export async function doLaunchOrthologs({
     )
   }
 
-  // Every species the panel offers, when a launch names none. A spec that wants
-  // a narrower comparison says so; one that just wants "this gene across
-  // species" should not have to enumerate the list the dialog would have
-  // checked for it.
-  const wantedTaxa = taxa ?? COMMON_SPECIES.map(s => s.taxId as number)
-  // the query species is represented by the query row above
-  const wanted = new Set(wantedTaxa.filter(t => t !== taxId))
+  // Every species NCBI has an ortholog for, when a launch names none, capped at
+  // maxSpecies. A launch that wants specific species lists them; one that just
+  // wants "this gene across species" gets NCBI's own order, which leads with the
+  // reference organisms.
   const rows = await fetchOrthologRows({
     geneId: resolved.geneId,
-    taxa: wanted,
+    taxa: taxa ? new Set(taxa) : undefined,
+    // the query species is represented by the query row above
+    exclude: taxId,
+    limit: maxSpecies,
     onProgress,
   })
 

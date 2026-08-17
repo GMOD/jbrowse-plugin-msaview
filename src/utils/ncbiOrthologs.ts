@@ -15,7 +15,7 @@
 // Mirrors jb2hubs' website/src/components/proteinMsa.ts assembler, trimmed to
 // what the launch dialog needs and using this plugin's fetch/eutils helpers.
 
-import { NCBI_EMAIL, NCBI_TOOL } from './eutils'
+import { NCBI_EMAIL, NCBI_TOOL, efetchPost } from './eutils'
 import { jsonfetch, textfetch } from './fetch'
 
 // v2, not v2alpha: the alpha path still answers /orthologs but 404s
@@ -24,64 +24,34 @@ import { jsonfetch, textfetch } from './fetch'
 const DATASETS = 'https://api.ncbi.nlm.nih.gov/datasets/v2'
 const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
-// The species panel offered in the launch dialog, ordered from the reference
-// outward so a run that finds only close relatives still reads as a ladder.
-// Orthologs absent for a given gene are skipped rather than erroring.
+// NCBI's ortholog report IS the species panel. There is no list here to keep in
+// step with what NCBI knows, and the panel widens by itself as NCBI annotates
+// more genomes.
 //
-// The index order is the order the sequences are SUBMITTED in
-// (`COMMON_TAX_RANK` below sorts `fetchOrthologGenes`' return), not the order the
-// rows are drawn in: the view lays rows out by the guide tree the aligner returns,
-// so a run on this list comes out grouped by relatedness rather than by this
-// list's own sequence. Reordering here changes what Clustal is handed, not the
-// picture.
+// It used to be a hand-written 23-species list intersected with the report, and
+// the intersection is what made the alignment thin: NCBI publishes 165 orthologs
+// for human NLRP1 and 865 for CFTR, so the list kept 12 of the first and 19 of
+// the second. It also carried four species -- fruitfly, yeast, C. elegans and
+// arabidopsis -- that the endpoint has never once returned for a human gene:
+// checked against NLRP1, TP53, ACTB, BRCA1, PIK3CA, APOE and NOTCH1, whose fly
+// ortholog is famous and still absent. NCBI's ortholog sets are vertebrate
+// scoped.
 //
-// THE MAMMALS EARN THEIR PLACE, and the reason is measured rather than aesthetic.
-// The thirteen this list used to hold were one per major clade, which reads well
-// on a gene conserved to yeast and produces almost nothing on a gene that is not:
-// NCBI publishes 165 orthologs for human NLRP1 and every one of them is a mammal,
-// so of the old thirteen only Human, Mouse, Cow, Pig and Dog returned a row --
-// five, and Rat not among them, since NLRP1 is absent in Rattus norvegicus. The
-// same query against this list returns twelve. An inflammasome gene is not an
-// unusual case; anything immune, reproductive or lineage-specific behaves the
-// same way, and those are the genes a person opens an ortholog alignment on.
+// The report's OWN order is the ladder the list was hand-built to approximate,
+// and it is per gene. CFTR opens human, mouse, rat, zebrafish, pig, sheep,
+// rabbit, chicken, cattle, ferret, dog, rhesus; NLRP1, which has no ortholog
+// outside placental mammals, opens human, mouse, rhesus, shrew mouse, chimp,
+// dog, cattle, horse. So `limit` takes a prefix and never needs a rank table.
 //
-// Cat, rabbit and opossum are here despite contributing nothing to that gene.
-// They are the three that most often separate "absent in this clade" from
-// "absent in this species", which is the question a gap in the alignment raises.
+// The rows are SUBMITTED in that order, not drawn in it -- the view lays rows out
+// by the guide tree the aligner returns.
 //
-// The cost is the run, and it is roughly linear: one NCBI protein fetch per
-// species and a Clustal Omega job over what comes back, so ~23 rows is about
-// twice the ~13-row wait. Still seconds rather than the minutes BLAST takes,
-// which is the comparison the panel's own text makes.
-export const COMMON_SPECIES = [
-  { label: 'Human', taxId: 9606 },
-  { label: 'Chimpanzee', taxId: 9598 },
-  { label: 'Gorilla', taxId: 9595 },
-  { label: 'Rhesus macaque', taxId: 9544 },
-  { label: 'Marmoset', taxId: 9483 },
-  { label: 'Mouse', taxId: 10090 },
-  { label: 'Rat', taxId: 10116 },
-  { label: 'Guinea pig', taxId: 10141 },
-  { label: 'Rabbit', taxId: 9986 },
-  { label: 'Cat', taxId: 9685 },
-  { label: 'Dog', taxId: 9615 },
-  { label: 'Horse', taxId: 9796 },
-  { label: 'Pig', taxId: 9823 },
-  { label: 'Cow', taxId: 9913 },
-  { label: 'Sheep', taxId: 9940 },
-  { label: 'Opossum', taxId: 13616 },
-  { label: 'Chicken', taxId: 9031 },
-  { label: 'Frog', taxId: 8364 },
-  { label: 'Zebrafish', taxId: 7955 },
-  { label: 'Fruitfly', taxId: 7227 },
-  { label: 'C. elegans', taxId: 6239 },
-  { label: 'Yeast', taxId: 4932 },
-  { label: 'Arabidopsis', taxId: 3702 },
-] as const
-
-export const COMMON_TAX_RANK = new Map(
-  COMMON_SPECIES.map((s, i) => [s.taxId as number, i]),
-)
+// What limits the row count is the aligner, and it is linear in rows at roughly
+// half a second each for a ~1400aa protein: 165 NLRP1 orthologs align at EBI in
+// 88s, 865 CFTR orthologs in 407s. `defaultMaxSpecies` keeps a default run under
+// a minute; EBI's own ceiling is 4000 sequences and 4MB, which even CFTR's full
+// set (1.3MB) sits inside.
+export const defaultMaxSpecies = 100
 
 export interface OrthologRow {
   taxId: number
@@ -148,8 +118,21 @@ interface OrthologReport {
   }[]
 }
 
-/** One ortholog gene per species, restricted to the requested taxa. */
-export async function fetchOrthologGenes(geneId: string, taxa: Set<number>) {
+/**
+ * One ortholog gene per species, in NCBI's report order, capped at `limit`.
+ *
+ * `taxa` narrows the set when a caller wants specific species; omitted, every
+ * species NCBI has an ortholog for is a candidate. `exclude` drops the query
+ * taxon, which the QUERY row already represents.
+ */
+export async function fetchOrthologGenes(
+  geneId: string,
+  {
+    taxa,
+    exclude,
+    limit = defaultMaxSpecies,
+  }: { taxa?: Set<number>; exclude?: number; limit?: number } = {},
+) {
   const json = await jsonfetch<OrthologReport>(
     ncbiUrl(
       `${DATASETS}/gene/id/${geneId}/orthologs?returned_content=COMPLETE`,
@@ -166,7 +149,12 @@ export async function fetchOrthologGenes(geneId: string, taxa: Set<number>) {
   >()
   for (const { gene } of json.reports ?? []) {
     const taxId = Number(gene?.tax_id)
-    if (gene?.gene_id && taxa.has(taxId) && !byTaxon.has(taxId)) {
+    if (
+      gene?.gene_id &&
+      taxId !== exclude &&
+      (taxa?.has(taxId) ?? true) &&
+      !byTaxon.has(taxId)
+    ) {
       byTaxon.set(taxId, {
         taxId,
         geneId: gene.gene_id,
@@ -174,12 +162,11 @@ export async function fetchOrthologGenes(geneId: string, taxa: Set<number>) {
         commonName: gene.common_name,
       })
     }
+    if (byTaxon.size >= limit) {
+      break
+    }
   }
-  return [...byTaxon.values()].sort(
-    (a, b) =>
-      (COMMON_TAX_RANK.get(a.taxId) ?? Infinity) -
-      (COMMON_TAX_RANK.get(b.taxId) ?? Infinity),
-  )
+  return [...byTaxon.values()]
 }
 
 interface ProductReport {
@@ -194,6 +181,21 @@ interface ProductReport {
   }[]
 }
 
+// Two ceilings sit between a gene id list and its product report, and both fail
+// by returning less rather than by erroring, so a caller that ignores them just
+// draws a thinner alignment.
+//
+// The ids go in the URL PATH, and NCBI answers HTTP 414 above roughly 8KB of
+// them -- CFTR's 865 orthologs join to 8609 characters and 414 on the nose.
+// `PRODUCT_REPORT_CHUNK` keeps a request well inside that.
+//
+// Then the endpoint paginates at 20 with the count in `total_count` and the rest
+// behind `next_page_token`, which is invisible to a caller reading `reports`.
+// `page_size` covers a chunk in one request. The old 23-species panel never
+// reached this: the query taxon is excluded and NCBI has no ortholog for the
+// four invertebrate entries, so its ceiling was 19.
+const PRODUCT_REPORT_CHUNK = 150
+
 /**
  * geneId -> representative protein accession: MANE Select where flagged, else
  * the longest isoform. A stable, comparable choice across species — picking
@@ -201,9 +203,12 @@ interface ProductReport {
  */
 export async function fetchRepresentativeProteins(geneIds: string[]) {
   const byGene = new Map<string, string>()
-  if (geneIds.length > 0) {
+  for (let i = 0; i < geneIds.length; i += PRODUCT_REPORT_CHUNK) {
+    const chunk = geneIds.slice(i, i + PRODUCT_REPORT_CHUNK)
     const json = await jsonfetch<ProductReport>(
-      ncbiUrl(`${DATASETS}/gene/id/${geneIds.join(',')}/product_report`),
+      ncbiUrl(
+        `${DATASETS}/gene/id/${chunk.join(',')}/product_report?page_size=${chunk.length}`,
+      ),
     )
     for (const { product } of json.reports ?? []) {
       const candidates = (product?.transcripts ?? [])
@@ -297,17 +302,21 @@ export async function fetchProteinForGene(geneId: string) {
 export async function fetchOrthologRows({
   geneId,
   taxa,
+  exclude,
+  limit,
   onProgress,
 }: {
   geneId: string
-  taxa: Set<number>
+  taxa?: Set<number>
+  exclude?: number
+  limit?: number
   onProgress: (arg: string) => void
 }): Promise<OrthologRow[]> {
   onProgress('Finding orthologs across species...')
-  const genes = await fetchOrthologGenes(geneId, taxa)
+  const genes = await fetchOrthologGenes(geneId, { taxa, exclude, limit })
   if (genes.length < 2) {
     throw new Error(
-      `Only ${genes.length} ortholog(s) found among the selected species — not enough to align`,
+      `Only ${genes.length} ortholog(s) found for this gene — not enough to align`,
     )
   }
 
@@ -326,9 +335,12 @@ export async function fetchOrthologRows({
   const accessions = withProtein.map(g => proteinByGene.get(g.geneId)!)
   const seqByAcc = parseFasta(
     await textfetch(
-      ncbiUrl(
-        `${EUTILS}/efetch.fcgi?db=protein&id=${accessions.join(',')}&rettype=fasta&retmode=text`,
-      ),
+      ...efetchPost({
+        db: 'protein',
+        id: accessions.join(','),
+        rettype: 'fasta',
+        retmode: 'text',
+      }),
     ),
   )
 

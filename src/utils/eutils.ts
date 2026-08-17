@@ -14,3 +14,22 @@ export function efetchUrl(params: Record<string, string>) {
   })
   return `${EUTILS}/efetch.fcgi?${search.toString()}`
 }
+
+/**
+ * The same request as a POST body. An `id` list of a few hundred accessions
+ * exceeds what a URL carries — 865 of them is ~13KB — and NCBI documents POST
+ * as the route above about 200 ids. eutils sends `ACAO: *` on both verbs.
+ */
+export function efetchPost(params: Record<string, string>) {
+  return [
+    `${EUTILS}/efetch.fcgi`,
+    {
+      method: 'POST',
+      body: new URLSearchParams({
+        ...params,
+        tool: NCBI_TOOL,
+        email: NCBI_EMAIL,
+      }),
+    },
+  ] as const
+}
