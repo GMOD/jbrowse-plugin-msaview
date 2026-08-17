@@ -46,6 +46,19 @@ export async function submitEbiJob({
   return jobId.trim()
 }
 
+/**
+ * A status check that could not reach EBI at all says nothing about the job, so
+ * it is not a reason to abandon one. A job the server has accepted keeps running
+ * whatever happens to the poller's connection, and the poll is the long part: an
+ * alignment of a hundred sequences runs for minutes and is checked every ten
+ * seconds, so a single blip anywhere in that window used to throw away a job
+ * that went on to finish.
+ *
+ * Consecutive failures still end it, because an endpoint that has genuinely gone
+ * away must not be polled forever.
+ */
+const MAX_CONSECUTIVE_STATUS_FAILURES = 5
+
 export async function waitForEbiJob({
   tool,
   jobId,
@@ -57,15 +70,31 @@ export async function waitForEbiJob({
   intervalSeconds?: number
   onCountdown: (secondsRemaining: number) => void
 }) {
+  let consecutiveFailures = 0
   await pollLoop({
     intervalSeconds,
     onCountdown,
     check: async () => {
+      let status: string
+      try {
+        status = (await textfetch(`${EBI_BASE}/${tool}/status/${jobId}`)).trim()
+      } catch (e) {
+        consecutiveFailures += 1
+        if (consecutiveFailures >= MAX_CONSECUTIVE_STATUS_FAILURES) {
+          throw new Error(
+            `Could not reach EBI to check ${tool} job ${jobId} after ${consecutiveFailures} tries`,
+            { cause: e },
+          )
+        }
+        console.warn(
+          `[msaview] EBI status check ${consecutiveFailures} failed, retrying:`,
+          e,
+        )
+        return false
+      }
+      consecutiveFailures = 0
       // exact match, not includes(): a job whose status is ERROR must not be
       // able to poll forever waiting for a FINISHED that will never arrive
-      const status = (
-        await textfetch(`${EBI_BASE}/${tool}/status/${jobId}`)
-      ).trim()
       if (status === 'FINISHED') {
         return true
       }
