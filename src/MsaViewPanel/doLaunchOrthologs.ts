@@ -1,10 +1,12 @@
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { launchMSA } from '../utils/msa'
 import {
+  dedupeLabels,
   fetchOrthologRows,
   fetchProteinForGene,
   resolveGeneId,
 } from '../utils/ncbiOrthologs'
+import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { OrthologRow } from '../utils/ncbiOrthologs'
@@ -79,8 +81,27 @@ export async function doLaunchOrthologs({
     onProgress,
   })
 
+  // The query row is named for its species like every other row, with a suffix
+  // marking it as the one the genome view is linked to. A bare `QUERY` among
+  // ninety-nine named species reads as a row whose species failed to resolve,
+  // and there is nothing else in the picture saying which row the hover
+  // highlight travels through -- react-msaview has no notion of a query row, it
+  // only looks one up by name.
+  //
+  // Deduped against the ortholog labels rather than assumed unique: the query
+  // taxon is excluded from that set, but a subspecies can sanitize to the same
+  // token, and a collision would silently point the coordinate mapping at
+  // another animal's row.
+  const queryLabel = await queryRowLabel(taxId, rows)
+  self.setQuerySeqName(queryLabel)
+
   const treeMetadata: Record<string, Record<string, string>> = {
-    QUERY: buildQueryMetadata(self, resolved.geneId, cleanedSeq, representative),
+    [queryLabel]: buildQueryMetadata(
+      self,
+      resolved.geneId,
+      cleanedSeq,
+      representative,
+    ),
   }
   for (const row of rows) {
     treeMetadata[row.label] = buildRowMetadata(row)
@@ -89,7 +110,7 @@ export async function doLaunchOrthologs({
   const result = await launchMSA({
     algorithm: msaAlgorithm,
     sequence: [
-      `>QUERY\n${cleanedSeq}`,
+      `>${queryLabel}\n${cleanedSeq}`,
       ...rows.map(r => `>${r.label}\n${r.sequence}`),
     ].join('\n'),
     onProgress,
@@ -99,6 +120,23 @@ export async function doLaunchOrthologs({
     ...result,
     treeMetadata: JSON.stringify(treeMetadata),
   }
+}
+
+/**
+ * `<species>_query`, unique against the ortholog labels. Falls back to the bare
+ * marker when NCBI cannot name the taxon, which is a naming failure and must not
+ * take down the launch.
+ */
+async function queryRowLabel(taxId: number, rows: OrthologRow[]) {
+  let name: string | undefined
+  try {
+    const info = (await fetchTaxonomyInfo([taxId])).get(taxId)
+    name = info?.commonName ?? info?.sciname
+  } catch (e) {
+    console.warn('[msaview-orthologs] taxonomy name lookup failed:', e)
+  }
+  return dedupeLabels([...rows.map(r => r.label), `${name ?? 'query'}_query`])
+    .at(-1)!
 }
 
 /**

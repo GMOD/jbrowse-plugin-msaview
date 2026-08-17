@@ -8,6 +8,7 @@ import {
   fetchProteinForGene,
   resolveGeneId,
 } from '../utils/ncbiOrthologs'
+import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { OrthologRow } from '../utils/ncbiOrthologs'
@@ -24,20 +25,25 @@ vi.mock('../utils/ncbiOrthologs', async importOriginal => ({
   fetchOrthologRows: vi.fn(),
 }))
 vi.mock('../utils/msa', () => ({ launchMSA: vi.fn() }))
+vi.mock('../utils/taxonomyNames', () => ({ fetchTaxonomyInfo: vi.fn() }))
 
 const mockResolveGeneId = vi.mocked(resolveGeneId)
 const mockFetchProtein = vi.mocked(fetchProteinForGene)
 const mockFetchRows = vi.mocked(fetchOrthologRows)
 const mockLaunchMSA = vi.mocked(launchMSA)
+const mockFetchTaxonomy = vi.mocked(fetchTaxonomyInfo)
 
 const HUMAN = 9606
 const GENE_ID = '22861'
 const REPRESENTATIVE = { accession: 'NP_127497.1', sequence: 'MAGGAWGRLACY' }
 
+const setQuerySeqName = vi.fn()
+
 function makeModel(orthologParams: Record<string, unknown>) {
   return {
     orthologParams,
     setProgress: () => {},
+    setQuerySeqName,
   } as unknown as JBrowsePluginMsaViewModel
 }
 
@@ -67,8 +73,18 @@ function queryRowSent() {
   return mockLaunchMSA.mock.calls[0]![0].sequence.split('\n')[1]
 }
 
+// Keyed by the row's own label, which has to be the name the FASTA header
+// carries -- the tree comes back from the aligner naming its leaves that way,
+// and the metadata is paired to a leaf by name.
 function queryMetadata(result: { treeMetadata: string }) {
-  return JSON.parse(result.treeMetadata).QUERY as Record<string, string>
+  return JSON.parse(result.treeMetadata)[queryRowName()] as Record<
+    string,
+    string
+  >
+}
+
+function queryRowName() {
+  return mockLaunchMSA.mock.calls[0]![0].sequence.split('\n')[0]!.slice(1)
 }
 
 beforeEach(() => {
@@ -77,6 +93,9 @@ beforeEach(() => {
   mockFetchProtein.mockResolvedValue(REPRESENTATIVE)
   mockFetchRows.mockResolvedValue([] as OrthologRow[])
   mockLaunchMSA.mockResolvedValue({ msa: '', tree: '' })
+  mockFetchTaxonomy.mockResolvedValue(
+    new Map([[HUMAN, { sciname: 'Homo sapiens', commonName: 'human' }]]),
+  )
 })
 
 describe('which species become rows', () => {
@@ -131,7 +150,42 @@ describe('the row cap', () => {
   })
 })
 
-describe('the QUERY row', () => {
+// The row's name is load bearing three times over: it is the FASTA header, it
+// is therefore the tree leaf the aligner returns, and it is what
+// `seqPosToVisibleCol` looks up to turn a genome hover into a column. So the
+// model's querySeqName and the header have to be the same string.
+describe('the query row name', () => {
+  test('is the species, marked, rather than a bare QUERY among named rows', async () => {
+    await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(queryRowName()).toBe('human_query')
+    expect(setQuerySeqName).toHaveBeenCalledWith('human_query')
+  })
+
+  test('cannot collide with an ortholog row that sanitizes to the same token', async () => {
+    mockFetchRows.mockResolvedValue([
+      { label: 'human_query', sequence: 'MM' },
+    ] as OrthologRow[])
+    await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(queryRowName()).toBe('human_query_2')
+    expect(setQuerySeqName).toHaveBeenCalledWith('human_query_2')
+  })
+
+  test('falls back rather than throwing when NCBI cannot name the taxon', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mockFetchTaxonomy.mockRejectedValue(new Error('429'))
+    await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(queryRowName()).toBe('query_query')
+  })
+
+  test('the metadata that drives the domain overlay is keyed to that same name', async () => {
+    const result = await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(Object.keys(JSON.parse(result.treeMetadata))).toContain(
+      'human_query',
+    )
+  })
+})
+
+describe('the query row sequence', () => {
   test('omitted proteinSequence falls back to the representative protein', async () => {
     await doLaunchOrthologs({ self: makeModel(params()) })
     expect(queryRowSent()).toBe(REPRESENTATIVE.sequence)
