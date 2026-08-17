@@ -2,11 +2,12 @@ import { getContainingTrack, getSession } from '@jbrowse/core/util'
 import AddIcon from '@mui/icons-material/Add'
 
 import LaunchMsaViewDialog from './components/LaunchMsaViewDialog'
+import { launchTarget } from './launchTarget'
 
+import type { DisplayModel } from './launchTarget'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
 import type DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
-import type { MenuItem } from '@jbrowse/core/ui'
 import type { Feature } from '@jbrowse/core/util'
 import type { IAnyModelType } from '@jbrowse/mobx-state-tree'
 
@@ -14,100 +15,58 @@ function isDisplay(elt: { name: string }): elt is DisplayType {
   return elt.name === 'LinearBasicDisplay'
 }
 
-// The canvas LinearBasicDisplay (JBrowse >=4.3) exposes the right-clicked
-// feature via contextMenuInfo + async fetchFullFeature. Hosts before that -- and
-// the v3.7.0 in the wild that shipped configs still name -- expose it
-// synchronously as contextMenuFeature, and only have that one.
-interface ContextMenuInfo {
-  item: { featureId: string; type?: string }
-  displayedRegionIndex: number
+// Walking to the track and the session at click time, not while the menu is
+// built: contextMenuItems runs on every right-click and, on a host whose base
+// method reads `this`, is the one place a plugin can take the whole menu down.
+// Keeping it to a pure read of the display is also what lets a test call it.
+function openDialog(
+  self: DisplayModel,
+  feature: () => Promise<Feature | undefined>,
+) {
+  const track = getContainingTrack(self)
+  const session = getSession(track)
+  feature()
+    .then(f => {
+      if (f) {
+        session.queueDialog(handleClose => [
+          LaunchMsaViewDialog,
+          { model: track, handleClose, feature: f },
+        ])
+      } else {
+        session.notify('Could not load feature for MSA view', 'warning')
+      }
+    })
+    .catch((e: unknown) => {
+      session.notifyError(`${e}`, e)
+    })
 }
 
-interface DisplayModel {
-  contextMenuItems: () => MenuItem[]
-  contextMenuInfo?: ContextMenuInfo
-  fetchFullFeature?: (
-    featureId: string,
-    displayedRegionIndex: number,
-  ) => Promise<Feature | undefined>
-  contextMenuFeature?: Feature
-}
-
-// Read off the clicked item rather than off the display.
-//
-// LinearBasicDisplay used to publish an `isGeneLike` getter and this gated on
-// it. jbrowse-components 684142b3 (2026-08-16) inlined that getter into its own
-// `contextMenuItems`, and every host built after it returns `undefined` here --
-// so the gate was never satisfied, `onClick` stayed undefined, and the item
-// silently left the right-click menu on every gene track. Nothing failed loudly:
-// the display still had contextMenuInfo and fetchFullFeature, and the menu still
-// opened with its own items in it.
-//
-// A predicate over the type we were already given cannot go the same way, and it
-// costs one comparison. Deliberately the same loose case-insensitive test the
-// host applies (`isGeneLikeType` in collapseIntronsMenu.ts): real GFFs carry
-// 'mRNA', 'lnc_RNA', 'protein_coding_gene', 'transcript'.
-function isGeneLikeType(type: string | undefined) {
-  const t = (type ?? '').toLowerCase()
-  return t.includes('gene') || t.includes('rna') || t.includes('transcript')
-}
-
-const GENE_LIKE_TYPES = new Set(['gene', 'mRNA', 'transcript'])
-
-function extendStateModel(stateModel: IAnyModelType) {
+export function extendStateModel(stateModel: IAnyModelType) {
   return stateModel.views((self: DisplayModel) => {
-    // .call(self), not a bare call: a host's own contextMenuItems may reach its
-    // sibling views through `this`, which is undefined when the captured super
-    // is invoked detached. It throws, the ErrorBoundary the menu builds inside
-    // swallows it, and the user right-clicks a feature and gets no menu at all
-    // -- the host's own rows gone too, which is worse than this plugin
-    // contributing nothing. jbrowse-components hit exactly this with
-    // `this.isGeneLike` and fixed its side in 104bbfc581, but a plugin cannot
-    // choose which host build it runs on.
     const superContextMenuItems = self.contextMenuItems
     return {
       contextMenuItems() {
-        const track = getContainingTrack(self)
-        const session = getSession(track)
-        const launch = (feature: Feature) => {
-          session.queueDialog(handleClose => [
-            LaunchMsaViewDialog,
-            { model: track, handleClose, feature },
-          ])
-        }
-
-        const info = self.contextMenuInfo
-        const fetchFullFeature = self.fetchFullFeature
-        const legacyFeature = self.contextMenuFeature
-        const onClick =
-          info && fetchFullFeature && isGeneLikeType(info.item.type)
-            ? () => {
-                fetchFullFeature(info.item.featureId, info.displayedRegionIndex)
-                  .then(feature => {
-                    if (feature) {
-                      launch(feature)
-                    } else {
-                      session.notify(
-                        'Could not load feature for MSA view',
-                        'warning',
-                      )
-                    }
-                  })
-                  .catch((e: unknown) => {
-                    session.notifyError(`${e}`, e)
-                  })
-              }
-            : legacyFeature &&
-                GENE_LIKE_TYPES.has(String(legacyFeature.get('type')))
-              ? () => {
-                  launch(legacyFeature)
-                }
-              : undefined
-
+        const target = launchTarget(self)
         return [
+          // .call(self), not a bare call: a host's own contextMenuItems may
+          // reach its sibling views through `this`, which is undefined when the
+          // captured super is invoked detached. It throws, the ErrorBoundary the
+          // menu builds inside swallows it, and the user right-clicks a feature
+          // and gets no menu at all -- the host's own rows gone too, which is
+          // worse than this plugin contributing nothing. jbrowse-components hit
+          // exactly this with `this.isGeneLike` and fixed its side in
+          // 104bbfc581, but a plugin cannot choose which host build it runs on.
           ...superContextMenuItems.call(self),
-          ...(onClick
-            ? [{ label: 'Launch MSA view', icon: AddIcon, onClick }]
+          ...(target
+            ? [
+                {
+                  label: 'Launch MSA view',
+                  icon: AddIcon,
+                  onClick: () => {
+                    openDialog(self, target)
+                  },
+                },
+              ]
             : []),
         ]
       },
