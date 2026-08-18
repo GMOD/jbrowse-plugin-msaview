@@ -127,6 +127,22 @@ describe('the click channel', () => {
     expect(calls).toEqual([[5]])
   })
 
+  test('a selection changed during a hover is picked up when the hover releases', () => {
+    const { model, calls } = makeModel()
+    const run = observeProteinHighlights(model)
+
+    // the reaction skips the click channel while hovering, so it is not watching
+    // it; this pins that releasing the hover still lands on the CURRENT selection
+    // rather than on the one that was standing when the hover began
+    session({ click: [{ start: 30, end: 32 }], hover: [{ start: 5, end: 6 }] })
+    run()
+    session({ click: [{ start: 60, end: 62 }], hover: [{ start: 5, end: 6 }] })
+    run()
+    session({ click: [{ start: 60, end: 62 }] })
+    run()
+    expect(calls).toEqual([[5], [60, 61]])
+  })
+
   test('releasing the hover falls back to the click selection, not to nothing', () => {
     const { model, calls } = makeModel()
     const run = observeProteinHighlights(model)

@@ -261,13 +261,10 @@ function genomeHighlightsToVisibleColumns(
 }
 
 function sameColumns(a: number[] | undefined, b: number[] | undefined) {
-  if (a === b) {
-    return true
+  if (!a || !b) {
+    return a === b
   }
-  if (a?.length !== b?.length) {
-    return false
-  }
-  return !a || a.every((col, i) => col === b![i])
+  return a.length === b.length && a.every((col, i) => col === b[i])
 }
 
 /**
@@ -322,6 +319,16 @@ export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
       self,
       'hoverGenomeHighlights',
     )
+    // Skipping the click channel while hovering is worth the subtlety it costs:
+    // a hover recomputes on every mouse move, and a clicked domain can be
+    // hundreds of residues, so translating a selection that cannot win would
+    // walk thousands of genome coordinates per pointer move.
+    //
+    // The subtlety is that not reading clickGenomeHighlights leaves it out of
+    // this reaction's dependencies until the hover clears. Changing the
+    // selection mid-hover therefore does not re-run us -- which is harmless,
+    // because the hover would have outranked it anyway, and releasing the hover
+    // re-runs and picks up whatever the selection now says.
     const click = hover.length
       ? []
       : genomeHighlightsToVisibleColumns(self, 'clickGenomeHighlights')
