@@ -1,3 +1,9 @@
+## [3.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.10.2...v3.0.0) (2026-08-18)
+
+### Features
+
+- **BREAKING** React-msaview 6.0.0 (#60) ([c43a060](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c43a060503a95875bccd4c159b84b2809786fe6d))
+
 ## [2.10.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.10.1...v2.10.2) (2026-08-17)
 
 ### Bug Fixes
