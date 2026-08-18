@@ -223,68 +223,116 @@ export function syncGenomeHoverToMsaColumn(self: JBrowsePluginMsaViewModel) {
 }
 
 /**
- * Mirror a connected 3D protein view's hovered residue onto the MSA's
- * highlighted columns. Returns the autorun body and keeps a flag tracking
- * whether the current highlight was set by THIS sync: when a protein hover ends
- * we restore the declarative highlightColumns seed (or clear) rather than
- * blindly wiping it.
+ * Translate genome regions published by a 3D protein view into this MSA's
+ * visible columns. The genome is the only coordinate space the two plugins
+ * share, so the hops are genome coord -> protein position (the transcript's g2p
+ * map) -> global alignment column -> visible column.
+ */
+function genomeHighlightsToVisibleColumns(
+  self: JBrowsePluginMsaViewModel,
+  field: 'hoverGenomeHighlights' | 'clickGenomeHighlights',
+) {
+  const { connectedViewId, transcriptToMsaMap, querySeqName } = self
+  if (!transcriptToMsaMap) {
+    return []
+  }
+  const { g2p } = transcriptToMsaMap
+  const columns = new Set<number>()
+
+  for (const view of getProteinViews(getSession(self).views)) {
+    for (const structure of view.structures) {
+      if (structure.connectedViewId !== connectedViewId) {
+        continue
+      }
+      for (const highlight of structure[field] ?? []) {
+        for (let coord = highlight.start; coord < highlight.end; coord++) {
+          const proteinPos = g2p[coord]
+          if (proteinPos !== undefined) {
+            columns.add(self.seqPosToGlobalCol(querySeqName, proteinPos))
+          }
+        }
+      }
+    }
+  }
+
+  return [...columns]
+    .map(col => self.globalColToVisibleCol(col))
+    .filter((col): col is number => col !== undefined)
+}
+
+function sameColumns(a: number[] | undefined, b: number[] | undefined) {
+  if (a === b) {
+    return true
+  }
+  if (a?.length !== b?.length) {
+    return false
+  }
+  return !a || a.every((col, i) => col === b![i])
+}
+
+/**
+ * Mirror a connected 3D protein view's highlights onto the MSA's highlighted
+ * columns, from either of the two channels protein3d publishes:
  *
- * Without the flag this autorun fires once on creation — with the view connected
- * to a *genome* LGV but no 3D protein structure attached — computes zero columns,
- * and calls setHighlightedColumns(undefined), clobbering the seed that
- * MSAModelF.afterCreate just set from the declarative `highlightColumns`. That is
- * the bug that made the BRAF/TP53 genome-browser links open with no V600/R248
- * column lit (SRC has no highlightColumns, so nothing was there to wipe).
+ * - `hoverGenomeHighlights` — the residue under the pointer, transient.
+ * - `clickGenomeHighlights` — the domain the user clicked, persistent. Also
+ *   what protein3d's declarative `initialSelection` lights on load, so a session
+ *   spec that pre-selects a domain in the structure now lands in the alignment
+ *   too, instead of the caller having to author the same range a second time as
+ *   the MSA's own `highlightColumns`.
+ *
+ * Highest-priority non-empty source wins: a hover reads as a transient probe on
+ * top of the standing selection, and letting it win means moving the pointer
+ * over the structure previews a residue without destroying what was selected.
+ * Releasing the hover falls back to the click selection, then to the declarative
+ * `highlightColumns` seed.
+ *
+ * Resolving the seed as the last rung of that stack is what replaced a
+ * `proteinDriven` flag this function used to carry. The flag existed because the
+ * body could not otherwise tell "no protein highlight, leave the seed alone"
+ * from "the protein highlight ended, restore the seed", and getting that wrong
+ * wiped the seed on the very first run — the bug that made the BRAF/TP53
+ * genome-browser links open with no V600/R248 column lit. Now every source is in
+ * one expression, so the result depends only on what the sources currently say
+ * and there is no ordering to get wrong.
+ *
+ * A closure remains, but it decides nothing: `written` only suppresses a
+ * redundant redraw. Delete it and the highlight is identical, just recomputed
+ * more often — where deleting the old flag changed which columns lit.
  */
 export function observeProteinHighlights(self: JBrowsePluginMsaViewModel) {
-  let proteinDriven = false
+  // The columns this reaction last wrote, kept to skip a write that would not
+  // change anything: protein3d recomputes hoverGenomeHighlights on every mouse
+  // move over the structure, and moving within one codon yields a fresh array of
+  // the same columns, which would redraw the overlay canvas for nothing.
+  //
+  // Deliberately a closure rather than a read of `self.highlightedColumns` --
+  // reading it would put this reaction's own output in its dependency set, so
+  // every write would re-trigger it. It converges, but the dependencies should be
+  // the sources the highlight derives FROM, not the highlight itself.
+  let written: number[] | undefined
   return () => {
-    const { connectedViewId, transcriptToMsaMap, querySeqName } = self
+    const { connectedViewId, transcriptToMsaMap } = self
 
     if (!connectedViewId || !transcriptToMsaMap) {
       return
     }
 
-    const columns = new Set<number>()
+    const hover = genomeHighlightsToVisibleColumns(
+      self,
+      'hoverGenomeHighlights',
+    )
+    const click = hover.length
+      ? []
+      : genomeHighlightsToVisibleColumns(self, 'clickGenomeHighlights')
+    const seed = self.highlightColumns ?? []
 
-    for (const view of getProteinViews(getSession(self).views)) {
-      for (const structure of view.structures) {
-        if (structure.connectedViewId !== connectedViewId) {
-          continue
-        }
+    const winner = hover.length ? hover : click.length ? click : seed
+    const next = winner.length > 0 ? winner : undefined
 
-        const highlights = structure.hoverGenomeHighlights
-        if (!highlights || highlights.length === 0) {
-          continue
-        }
-
-        const { g2p } = transcriptToMsaMap
-        for (const highlight of highlights) {
-          for (let coord = highlight.start; coord < highlight.end; coord++) {
-            const proteinPos = g2p[coord]
-            if (proteinPos !== undefined) {
-              const col = self.seqPosToGlobalCol(querySeqName, proteinPos)
-              columns.add(col)
-            }
-          }
-        }
-      }
-    }
-
-    const visibleColumns = Array.from(columns)
-      .map(col => self.globalColToVisibleCol(col))
-      .filter((col): col is number => col !== undefined)
-
-    if (visibleColumns.length > 0) {
-      self.setHighlightedColumns(visibleColumns)
-      proteinDriven = true
-    } else if (proteinDriven) {
-      // our protein-hover highlight ended — fall back to the declarative seed
-      // instead of wiping a column the URL/user asked to keep lit
-      self.setHighlightedColumns(
-        self.highlightColumns?.length ? self.highlightColumns : undefined,
-      )
-      proteinDriven = false
+    if (!sameColumns(written, next)) {
+      written = next
+      self.setHighlightedColumns(next)
     }
   }
 }
