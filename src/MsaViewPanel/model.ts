@@ -180,7 +180,7 @@ export default function stateModelFactory() {
         /**
          * #volatile
          * guards the one-shot auto-fetch of protein domains so it doesn't refire
-         * when NCBI returns no domains (leaving interProAnnotations undefined)
+         * when NCBI returns no domains (leaving the annotation list empty)
          */
         domainsRequested: false,
       }),
