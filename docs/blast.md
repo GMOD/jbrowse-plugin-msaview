@@ -66,6 +66,16 @@ the manual route below covers the occasional case without any of that.
   `uniprotkb_swissprot`: curated, so it returns roughly one good sequence per
   species instead of the many near-identical entries that make a TrEMBL
   alignment hard to read.
+
+  EBI validates the database name and answers a submission naming one it does
+  not have with a 400, at the point the user presses go. `pnpm check-ebi-params`
+  reads `blastDatabaseOptions` and `msaAlgorithms` and asks EBI whether it still
+  accepts each one; it runs on push and daily, because the list can break from
+  either side -- a value we invent, or one EBI retires while this repo sits
+  still. 3.0.0 shipped `uniprotkb_reference_proteomes`, which EBI has never had
+  and which nothing in CI could see, since the string typechecks and the panel
+  only fails at submit time.
+
 - `blastp` only — EBI exposes no `quick-blastp` equivalent. In practice this
   costs nothing, since a swissprot search finishes in well under a minute.
 - Taxon ids come from `hit_uni_ox` and are absent on hits from non-UniProt

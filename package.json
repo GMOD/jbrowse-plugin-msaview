@@ -23,6 +23,7 @@
     "prebuild": "pnpm clean",
     "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
     "check-text-source": "node scripts/check-text-source.mjs",
+    "check-ebi-params": "node scripts/check-ebi-params.mjs",
     "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
