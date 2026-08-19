@@ -1,3 +1,26 @@
+## [3.1.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.0.0...v3.1.0) (2026-08-19)
+
+### Bug Fixes
+
+- Swap the dead uniprotkb_reference_proteomes option for pan_proteomes ([42b624c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/42b624c6336fea8bb8d62b989060ded3cd1a34ab))
+
+### Chores
+
+- Check the panel's databases and tools against EBI's own lists ([300f948](https://github.com/GMOD/jbrowse-plugin-msaview/commit/300f948afd194bef0c7b391bbd589fdd28c8fb5b))
+
+### Features
+
+- Mirror the clicked domain onto the alignment, not just the hover ([b8d0d3e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b8d0d3e39efdef221d54ca4a63cb73b8d89efd5c))
+- Finish the manual BLAST round trip in the panel, and find the query row by sequence ([fb8f049](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fb8f049672f5fbc46a08da6ea16b0aff0e66e329))
+
+### Refactoring
+
+- Say why the click channel is skipped mid-hover, unpick sameColumns ([1ff441b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/1ff441b28f8883bc53a850fc723f4e03491641e3))
+
+### Tests
+
+- Recapture the v4.3.0 references for the new row selector ([0e11523](https://github.com/GMOD/jbrowse-plugin-msaview/commit/0e1152371f33112fb1857fc32231f593835ecf6a))
+
 ## [3.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v2.10.2...v3.0.0) (2026-08-18)
 
 ### Features
