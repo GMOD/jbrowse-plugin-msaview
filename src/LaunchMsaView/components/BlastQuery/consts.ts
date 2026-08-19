@@ -9,10 +9,17 @@ export const BASE_BLAST_URL = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi'
 export const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft'] as const
 export type MsaAlgorithm = (typeof msaAlgorithms)[number]
 
+/**
+ * EBI rejects a submission naming a database outside its own list with a 400,
+ * so every value here has to appear in
+ * https://www.ebi.ac.uk/Tools/services/rest/ncbiblast/parameterdetails/database
+ * -- `uniprotkb_reference_proteomes` did not, and 3.0.0 shipped it as a dead
+ * menu entry.
+ */
 export const blastDatabaseOptions = [
   'uniprotkb_swissprot',
   'uniprotkb',
-  'uniprotkb_reference_proteomes',
+  'pan_proteomes',
   'uniprotkb_trembl',
 ] as const
 export type BlastDatabase = (typeof blastDatabaseOptions)[number]
