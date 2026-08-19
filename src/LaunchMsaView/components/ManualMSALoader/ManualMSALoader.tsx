@@ -1,20 +1,16 @@
 import React, { useState } from 'react'
 
 import { FileSelector } from '@jbrowse/core/ui'
-import {
-  Alert,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-} from '@mui/material'
+import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { launchView } from './launchView'
 import TextField2 from '../../../components/TextField2'
+import { useQueryRowName } from '../../useQueryRowName'
 import { getGeneDisplayName, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import QueryRowSelector from '../QueryRowSelector'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -38,12 +34,6 @@ const useStyles = makeStyles()({
   msaInput: {
     marginBottom: 20,
   },
-  queryNameInput: {
-    marginTop: 20,
-  },
-  warningAlert: {
-    marginTop: 10,
-  },
 })
 
 const ManualMSALoader = observer(function PreLoadedMSA2({
@@ -63,9 +53,9 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [treeText, setTreeText] = useState('')
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
-  const [querySeqName, setQuerySeqName] = useState('')
   const transcriptSelection = useTranscriptSelection({ feature, view })
-  const { selectedTranscript, error } = transcriptSelection
+  const { selectedTranscript, proteinSequence, error } = transcriptSelection
+  const queryRow = useQueryRowName(msaText, proteinSequence)
 
   const e = launchViewError ?? error
   return (
@@ -143,27 +133,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
-        <TextField2
-          variant="outlined"
-          name="MSA row name"
-          fullWidth
-          required
-          className={classes.queryNameInput}
-          placeholder="Row name in MSA that corresponds to the selected transcript"
-          helperText="Required: Specify the name of the row in your MSA that should be aligned with the selected transcript"
-          value={querySeqName}
-          onChange={event => {
-            setQuerySeqName(event.target.value)
-          }}
-        />
-
-        {!querySeqName.trim() ? (
-          <Alert severity="warning" className={classes.warningAlert}>
-            Without specifying the MSA row name, clicking on the MSA will not
-            navigate to the corresponding genome position, and hovering
-            highlights will not work.
-          </Alert>
-        ) : null}
+        <QueryRowSelector {...queryRow} />
       </LaunchPanelContent>
 
       <SubmitCancelActions
@@ -180,7 +150,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
                 feature: selectedTranscript,
-                querySeqName: querySeqName.trim(),
+                querySeqName: queryRow.querySeqName,
                 ...(inputMethod === 'file'
                   ? {
                       msaFilehandle: msaFileLocation,

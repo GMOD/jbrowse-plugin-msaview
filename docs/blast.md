@@ -82,6 +82,35 @@ the manual route below covers the occasional case without any of that.
   databases, so those rows fall back to `hit_os` for a species name and get no
   common name.
 
+## The manual route walks the whole round trip
+
+Reaching NCBI's `nr` means running the search on NCBI's own site, because no
+plugin version can query Blast.cgi from a browser. The panel used to hand over a
+link, say "paste the results into JBrowse", and offer only a Close button --
+leaving the user to find the Manual upload tab, re-pick the transcript they had
+already chosen, and hand-type the name of the MSA row holding their gene.
+
+That last step is the one that hurt. The MsaView ties alignment columns to
+genome coordinates through that row name, and a wrong one fails silently: the
+view opens, renders correctly, and simply never navigates or highlights. It
+reads as a broken feature rather than a wrong field.
+
+So the panel now carries all three steps, and `detectQueryRow` finds the row by
+sequence instead of asking. The plugin already knows the protein it sent, so it
+ungaps each row and compares. Both aligners rename the query on the way through
+-- COBALT emits `Query_1`, EBI's carry the accession -- which is why the name is
+no help and the residues are.
+
+Detection only claims a match it can defend: an exact hit, a row that is the
+query trimmed to the aligned region and still covering half of it, or a 90%+
+identity. An alignment of homologs is full of rows in the 40-70% range, and
+picking the best of those would wire the view to a paralog from another species
+with total confidence. When nothing matches, the field becomes a dropdown of the
+alignment's own row names -- still not a free text box to typo.
+
+The Manual upload tab uses the same detection, which is what let its "you must
+specify the row name" warning go away.
+
 ## Set a contact email if your site sends volume
 
 EBI wants a contact address on every submission so they can reach whoever is

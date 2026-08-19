@@ -1,14 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { shorten2 } from '@jbrowse/core/util'
-import { Button, DialogActions, Typography } from '@mui/material'
+import { Alert, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import { BASE_BLAST_URL } from './consts'
 import ExternalLink from '../../../components/ExternalLink'
-import { cleanProteinSequence, getLinearGenomeView } from '../../util'
+import TextField2 from '../../../components/TextField2'
+import { useQueryRowName } from '../../useQueryRowName'
+import {
+  cleanProteinSequence,
+  getGeneDisplayName,
+  getLinearGenomeView,
+} from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import { launchView } from '../ManualMSALoader/launchView'
+import QueryRowSelector from '../QueryRowSelector'
+import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
@@ -17,14 +26,33 @@ import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 const useStyles = makeStyles()({
   ncbiLink: {
     wordBreak: 'break-all',
-    margin: 30,
-    maxWidth: 600,
   },
-  infoText: {
+  textAreaFont: {
+    fontFamily: 'Courier New',
+  },
+  msaInput: {
+    marginBottom: 20,
+  },
+  step: {
     marginTop: 20,
+  },
+  stepBody: {
+    marginLeft: 20,
+    marginTop: 8,
   },
 })
 
+/**
+ * The route to NCBI's `nr`, which no plugin version can query directly: NCBI
+ * stopped sending Access-Control-Allow-Origin to third-party origins, so the
+ * browser cannot read Blast.cgi at all (see docs/blast.md).
+ *
+ * That makes the round trip through NCBI's own site the whole feature rather
+ * than a fallback, so the panel walks it end to end. It used to hand the user a
+ * link, tell them to "paste the results into JBrowse", and offer only a Close
+ * button -- leaving them to find the Manual upload tab, re-pick the transcript
+ * they had already chosen here, and hand-type the row name.
+ */
 const BlastManualPanel = observer(function ({
   handleClose,
   feature,
@@ -38,8 +66,13 @@ const BlastManualPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
+  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const [msaText, setMsaText] = useState('')
+  const [treeText, setTreeText] = useState('')
+
   const transcriptSelection = useTranscriptSelection({ feature, view })
-  const { proteinSequence, error } = transcriptSelection
+  const { proteinSequence, selectedTranscript, error } = transcriptSelection
+  const queryRow = useQueryRowName(msaText, proteinSequence)
 
   const s2 = cleanProteinSequence(proteinSequence)
   // a link the user follows to NCBI's own site, not something we fetch — which
@@ -49,37 +82,100 @@ const BlastManualPanel = observer(function ({
 
   return (
     <>
-      <LaunchPanelContent error={error}>
+      <LaunchPanelContent error={launchViewError ?? error}>
         {children}
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
-        {proteinSequence ? (
-          <div className={classes.ncbiLink}>
-            Link to NCBI BLAST: <ExternalLink href={link}>{link2}</ExternalLink>
+        <div className={classes.step}>
+          <Typography variant="subtitle2">1. Run the search at NCBI</Typography>
+          <div className={classes.stepBody}>
+            {proteinSequence ? (
+              <div className={classes.ncbiLink}>
+                <ExternalLink href={link}>{link2}</ExternalLink>
+              </div>
+            ) : (
+              <Alert severity="info">
+                Pick a transcript above to get a link carrying its protein
+                sequence.
+              </Alert>
+            )}
           </div>
-        ) : null}
+        </div>
 
-        <Typography className={classes.infoText}>
-          Click the link above and run your BLAST query, and once you have
-          results, click "Multiple Alignment" at the top of the results page to
-          be redirected to COBALT, NCBI's multiple sequence aligner. Once COBALT
-          completes, you can download an MSA (.aln file) and optionally a Newick
-          tree (.nh) and paste the results into JBrowse
-        </Typography>
+        <div className={classes.step}>
+          <Typography variant="subtitle2">2. Align the hits</Typography>
+          <div className={classes.stepBody}>
+            <Typography>
+              On the results page click "Multiple Alignment" to run COBALT,
+              NCBI's aligner. Download the alignment (.aln) and, if you want the
+              tree drawn, the Newick tree (.nh).
+            </Typography>
+          </div>
+        </div>
+
+        <div className={classes.step}>
+          <Typography variant="subtitle2">
+            3. Paste the results back here
+          </Typography>
+          <div className={classes.stepBody}>
+            <TextField2
+              variant="outlined"
+              label="Alignment"
+              multiline
+              minRows={5}
+              maxRows={10}
+              fullWidth
+              className={classes.msaInput}
+              slotProps={{ input: { className: classes.textAreaFont } }}
+              placeholder="Paste the .aln contents here"
+              value={msaText}
+              onChange={event => {
+                setMsaText(event.target.value)
+              }}
+            />
+            <TextField2
+              variant="outlined"
+              label="Tree (optional)"
+              multiline
+              minRows={3}
+              maxRows={10}
+              fullWidth
+              slotProps={{ input: { className: classes.textAreaFont } }}
+              placeholder="Paste the .nh Newick tree here"
+              value={treeText}
+              onChange={event => {
+                setTreeText(event.target.value)
+              }}
+            />
+
+            <QueryRowSelector {...queryRow} />
+          </div>
+        </div>
       </LaunchPanelContent>
 
-      <DialogActions>
-        <Button
-          color="primary"
-          variant="contained"
-          onClick={() => {
-            handleClose()
-          }}
-        >
-          Close
-        </Button>
-      </DialogActions>
+      <SubmitCancelActions
+        submitDisabled={!selectedTranscript || !msaText.trim()}
+        onSubmit={() => {
+          try {
+            if (selectedTranscript) {
+              setLaunchViewError(undefined)
+              launchView({
+                newViewTitle: getGeneDisplayName(selectedTranscript),
+                view,
+                feature: selectedTranscript,
+                querySeqName: queryRow.querySeqName,
+                data: { msa: msaText, tree: treeText },
+              })
+              handleClose()
+            }
+          } catch (e) {
+            console.error(e)
+            setLaunchViewError(e)
+          }
+        }}
+        onCancel={handleClose}
+      />
     </>
   )
 })
