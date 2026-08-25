@@ -4,10 +4,14 @@ import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
+import OrthologSourceSelect, {
+  ORTHOLOG_SOURCE_STORAGE_KEY,
+} from './OrthologSourceSelect'
 import QuerySpeciesSelect from './QuerySpeciesSelect'
 import { orthologLaunchView } from './orthologLaunchView'
 import TextField2 from '../../../components/TextField2'
 import { defaultMaxSpecies } from '../../../utils/ncbiOrthologs'
+import { useLocalStorage } from '../../../utils/useLocalStorage'
 import {
   getGeneDisplayName,
   getGeneIdentifiers,
@@ -20,6 +24,7 @@ import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 
+import type { OrthologSource } from '../../../MsaViewPanel/model'
 import type { MsaAlgorithm } from '../BlastQuery/consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
@@ -42,6 +47,10 @@ const OrthologPanel = observer(function ({
   const view = getLinearGenomeView(model)
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [taxId, setTaxId] = useState(9606)
+  const [source, setSource] = useLocalStorage<OrthologSource>(
+    ORTHOLOG_SOURCE_STORAGE_KEY,
+    'ncbi',
+  )
   const [msaAlgorithm, setMsaAlgorithm] = useState<MsaAlgorithm>('clustalo')
   const [maxSpecies, setMaxSpecies] = useState(String(defaultMaxSpecies))
 
@@ -65,11 +74,17 @@ const OrthologPanel = observer(function ({
             instant, and it is now the aligner that costs the wait, about half a
             second per row. */}
         <Typography variant="body2">
-          NCBI&apos;s precomputed orthologs, one gene per species, looked up
-          rather than searched for. No BLAST job to queue.
+          Precomputed orthologs, one gene per species, looked up rather than
+          searched for. No BLAST job to queue.
         </Typography>
 
         <div>
+          <OrthologSourceSelect
+            className={classes.selectField}
+            value={source}
+            onChange={setSource}
+          />
+
           <QuerySpeciesSelect
             className={classes.selectField}
             value={taxId}
@@ -93,7 +108,7 @@ const OrthologPanel = observer(function ({
               setMaxSpecies(event.target.value)
             }}
             error={!rowCountValid}
-            helperText="the closest N species NCBI has"
+            helperText={`the closest N species ${source === 'panther' ? 'PANTHER' : 'NCBI'} has`}
           />
         </div>
 
@@ -112,6 +127,7 @@ const OrthologPanel = observer(function ({
                 newViewTitle: `Orthologs - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
                 orthologParams: {
                   taxId,
+                  source,
                   maxSpecies: rowCount,
                   geneCandidates,
                   msaAlgorithm,

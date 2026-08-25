@@ -51,9 +51,19 @@ export interface BlastParams {
   proteinSequence: string
 }
 
+/**
+ * Where the ortholog set comes from. NCBI's sets cover vertebrates and
+ * insects; PANTHER's span its 144 reference proteomes, human to yeast to
+ * Arabidopsis, so a gene from outside NCBI's scope aligns only through it.
+ */
+export const orthologSources = ['ncbi', 'panther'] as const
+export type OrthologSource = (typeof orthologSources)[number]
+
 export interface OrthologParams {
   /** NCBI taxon id of the assembly the query gene came from */
   taxId: number
+  /** `ncbi` when omitted, so every launch written before this key keeps its meaning */
+  source?: OrthologSource
   /**
    * taxon ids to include as rows. The query taxon has its own row already, so
    * it is excluded from this set whether or not it is named.

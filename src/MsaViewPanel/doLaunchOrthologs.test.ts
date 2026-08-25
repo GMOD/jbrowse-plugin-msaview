@@ -8,6 +8,7 @@ import {
   fetchProteinForGene,
   resolveGeneId,
 } from '../utils/ncbiOrthologs'
+import { fetchPantherOrthologs } from '../utils/pantherOrthologs'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
 import type { JBrowsePluginMsaViewModel } from './model'
@@ -24,12 +25,16 @@ vi.mock('../utils/ncbiOrthologs', async importOriginal => ({
   fetchProteinForGene: vi.fn(),
   fetchOrthologRows: vi.fn(),
 }))
+vi.mock('../utils/pantherOrthologs', () => ({
+  fetchPantherOrthologs: vi.fn(),
+}))
 vi.mock('../utils/msa', () => ({ launchMSA: vi.fn() }))
 vi.mock('../utils/taxonomyNames', () => ({ fetchTaxonomyInfo: vi.fn() }))
 
 const mockResolveGeneId = vi.mocked(resolveGeneId)
 const mockFetchProtein = vi.mocked(fetchProteinForGene)
 const mockFetchRows = vi.mocked(fetchOrthologRows)
+const mockFetchPanther = vi.mocked(fetchPantherOrthologs)
 const mockLaunchMSA = vi.mocked(launchMSA)
 const mockFetchTaxonomy = vi.mocked(fetchTaxonomyInfo)
 
@@ -243,5 +248,117 @@ describe('the Accession that drives the domain overlay', () => {
       self: makeModel(params({ proteinSequence: REPRESENTATIVE.sequence })),
     })
     expect(queryMetadata(result).Accession).toBeUndefined()
+  })
+})
+
+// The second source. What is under test is the dispatch and what the PANTHER
+// result becomes on the query row -- the rows themselves are shaped upstream,
+// and the tail of the launch (labels, aligner, metadata) is the same code the
+// NCBI tests above already cover.
+describe('the PANTHER source', () => {
+  const YEAST = 559292
+  const found = {
+    matched: 'CDC28',
+    query: {
+      code: 'YEAST',
+      accession: 'P00546',
+      geneRef: 'SGD=S000000364',
+      sequence: 'MSGELANYKRLEKVGEGTYGVVYKA',
+    },
+    rows: [
+      {
+        taxId: HUMAN,
+        label: 'human',
+        scientificName: 'Homo sapiens',
+        commonName: 'human',
+        geneId: 'HGNC=1771',
+        protein: 'P24941',
+        sequence: 'MENFQKVEKIGEGTYGVVYKARNK',
+      },
+    ] as OrthologRow[],
+  }
+
+  beforeEach(() => {
+    mockFetchPanther.mockResolvedValue(found)
+    mockFetchTaxonomy.mockResolvedValue(
+      new Map([[YEAST, { sciname: 'Saccharomyces cerevisiae' }]]),
+    )
+  })
+
+  test('source omitted is NCBI, so an old launch never reaches PANTHER', async () => {
+    await doLaunchOrthologs({ self: makeModel(params()) })
+    expect(mockFetchPanther).not.toHaveBeenCalled()
+    expect(mockResolveGeneId).toHaveBeenCalled()
+  })
+
+  test('source panther asks PANTHER with the same species semantics, and skips NCBI', async () => {
+    await doLaunchOrthologs({
+      self: makeModel({
+        taxId: YEAST,
+        source: 'panther',
+        geneCandidates: ['CDC28'],
+        msaAlgorithm: 'clustalo',
+        taxa: [HUMAN, YEAST],
+        maxSpecies: 7,
+      }),
+    })
+    expect(mockResolveGeneId).not.toHaveBeenCalled()
+    expect(mockFetchRows).not.toHaveBeenCalled()
+    const { candidates, taxId, taxa, exclude, limit } =
+      mockFetchPanther.mock.calls[0]![0]
+    expect(candidates).toEqual(['CDC28'])
+    expect(taxId).toBe(YEAST)
+    expect([...taxa!]).toEqual([HUMAN, YEAST])
+    expect(exclude).toBe(YEAST)
+    expect(limit).toBe(7)
+  })
+
+  test("the query row is PANTHER's own entry for the gene when no sequence was supplied, and carries its UniProt accession for the domain overlay", async () => {
+    const result = await doLaunchOrthologs({
+      self: makeModel({
+        taxId: YEAST,
+        source: 'panther',
+        geneCandidates: ['CDC28'],
+        msaAlgorithm: 'clustalo',
+      }),
+    })
+    expect(queryRowName()).toBe('Saccharomyces_cerevisiae_query')
+    expect(queryRowSent()).toBe(found.query.sequence)
+    expect(queryMetadata(result)).toEqual({
+      'Gene ID': 'SGD=S000000364',
+      Accession: 'P00546',
+    })
+    expect(JSON.parse(result.treeMetadata).human).toMatchObject({
+      Accession: 'P24941',
+      'Gene ID': 'HGNC=1771',
+    })
+  })
+
+  test('a supplied sequence still wins, and a different isoform earns no Accession', async () => {
+    const result = await doLaunchOrthologs({
+      self: makeModel({
+        taxId: YEAST,
+        source: 'panther',
+        geneCandidates: ['CDC28'],
+        msaAlgorithm: 'clustalo',
+        proteinSequence: 'MDIFFERENTISOFORM',
+      }),
+    })
+    expect(queryRowSent()).toBe('MDIFFERENTISOFORM')
+    expect(queryMetadata(result).Accession).toBeUndefined()
+  })
+
+  test('names PANTHER when it has no protein for the query row', async () => {
+    mockFetchPanther.mockResolvedValue({ ...found, query: undefined })
+    await expect(
+      doLaunchOrthologs({
+        self: makeModel({
+          taxId: YEAST,
+          source: 'panther',
+          geneCandidates: ['CDC28'],
+          msaAlgorithm: 'clustalo',
+        }),
+      }),
+    ).rejects.toThrow(/PANTHER returned no representative protein/)
   })
 })
