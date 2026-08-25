@@ -66,27 +66,34 @@ export default function SubmitCancelActions({
   model?: AbstractTrackModel
 }) {
   return (
-    <DialogActions>
+    // The buttons are one child rather than two, so a dialog too narrow for
+    // the whole row wraps them together underneath the option instead of
+    // breaking Cancel away from Submit or shrinking both out of shape.
+    <DialogActions sx={{ flexWrap: 'wrap', rowGap: 1 }}>
       {model ? <PlacementToggle model={model} /> : null}
-      <Button
-        color="primary"
-        variant="contained"
-        disabled={submitDisabled}
-        onClick={() => {
-          onSubmit()
-        }}
-      >
-        {submitLabel}
-      </Button>
-      <Button
-        color="secondary"
-        variant="contained"
-        onClick={() => {
-          onCancel()
-        }}
-      >
-        {cancelLabel}
-      </Button>
+      <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+        <Button
+          sx={{ flexShrink: 0 }}
+          color="primary"
+          variant="contained"
+          disabled={submitDisabled}
+          onClick={() => {
+            onSubmit()
+          }}
+        >
+          {submitLabel}
+        </Button>
+        <Button
+          sx={{ flexShrink: 0 }}
+          color="secondary"
+          variant="contained"
+          onClick={() => {
+            onCancel()
+          }}
+        >
+          {cancelLabel}
+        </Button>
+      </div>
     </DialogActions>
   )
 }
