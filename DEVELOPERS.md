@@ -89,6 +89,17 @@ all TrEMBL would 400 the whole batch and log "auto-load failed"; the alignment
 itself is unaffected. `source` omitted, or an old link without the key, runs the
 NCBI path unchanged.
 
+Two sources is the ceiling `source` is meant to reach. The plugin has two ways
+to put an alignment on screen for a gene, and only one of them costs per-source
+code: an interactive lookup against a live ortholog service, and
+`msaIndexedLocation` — a hosted bgzip alignment random-read by gene name, which
+costs none. New species coverage belongs in the second. A build script derives
+the alignment offline (react-msaview's `scripts/gene-explorer/build-data.mjs`
+does it for UCSC multiz) and the session names a URL, so the plugin renders it
+without knowing where the rows came from. A third live source would buy the same
+rows for another bespoke API client, another host on every launch's critical
+path, and another ~10s EBI alignment per visitor.
+
 `allowedGappyness` is worth setting alongside it. Proteins that differ in length
 put one row's private N-terminal extension at column 0 with every other row gap
 underneath, so a launch that does not say otherwise can open on columns the link
