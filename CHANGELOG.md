@@ -1,3 +1,23 @@
+## [3.2.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.1.0...v3.2.0) (2026-08-25)
+
+### Bug Fixes
+
+- Stop the placement checkbox squeezing the dialog's buttons ([fb00406](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fb0040641d37c4eaf5fd67310ce18de0e96dbb5b))
+
+### Documentation
+
+- The placement key, and the spec that puts an alignment beside its genome ([0658e24](https://github.com/GMOD/jbrowse-plugin-msaview/commit/0658e24e503709af312c71a6a78d14bd8cbcfc3e))
+
+### Features
+
+- Say where a launched MSA view goes, instead of always stacking it ([92fa38a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/92fa38a3f7233fad2e3bd4f0061af2445286d707))
+
+### Tests
+
+- Prove the split on a real host, not just on a stub session ([91bedc6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/91bedc63a81d1771d81ac83d43919e6620604d6c))
+- Cover the placement checkbox, in the two places it can be covered ([a0637e7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a0637e7f41232b2fb099d64f638820cf6324346c))
+- The placement spec test has to survive hosts that cannot tile ([67617ad](https://github.com/GMOD/jbrowse-plugin-msaview/commit/67617ad54cd4a19172fdc970defe1d63a546d8cb))
+
 ## [3.1.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.0.0...v3.1.0) (2026-08-19)
 
 ### Bug Fixes
