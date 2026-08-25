@@ -1,3 +1,19 @@
+## [3.3.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.2.0...v3.3.0) (2026-08-25)
+
+### Documentation
+
+- Every matrix leg runs the whole suite, so tests feature-detect too ([7d2bf39](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7d2bf3966a84b3a3b5e8abf0a359ea075f9fb424))
+- The source key, and what the CDD overlay does with UniProt accessions ([b735837](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b735837faa5321ba916631e606a3ed8cad77cd6b))
+- Two live ortholog sources is the ceiling, new coverage is build-time data ([3aabcd3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3aabcd36af22889b37bb0b1039ea20ac9ee9b3cb))
+
+### Features
+
+- PANTHER as a second source, for the species NCBI's sets leave out ([380b512](https://github.com/GMOD/jbrowse-plugin-msaview/commit/380b5127c303b282bf0f686929b98f6642b59ffd))
+
+### Tests
+
+- Refresh the launch-dialog references for the Source select ([c4c94ce](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c4c94ce700d9645c80e99a02ea7ff83a89e715ec))
+
 ## [3.2.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.1.0...v3.2.0) (2026-08-25)
 
 ### Bug Fixes
