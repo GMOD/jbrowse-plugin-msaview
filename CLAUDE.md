@@ -63,6 +63,21 @@ the class of failure where a plugin reads only `main`'s API shape and silently
 renders no menu item on every host a user actually runs. Nothing else in CI is
 sensitive to it.
 
+**The corollary catches tests, not just source: every leg runs the WHOLE
+suite.** `pnpm vitest run` executes against nightly, v4.3.0 and v3.7.0 in turn,
+so a test that asserts a feature only `main` has fails on two legs out of three.
+Workspaces are the live example — v4.3.0 and v3.7.0 have no tiling at all, and
+`test/placement.test.ts` asserting two grid cells would have been asserting that
+an old release grew a feature. A test over host-dependent behaviour has to
+feature-detect exactly as the source does, then assert the documented
+degradation on the hosts that lack it.
+
+Detect on the session, never on `TEST_JBROWSE_VERSION`: the version tells you
+what was downloaded, the session tells you what the plugin will actually find,
+and only the second is the thing under test. Guard the _reads_ too —
+`panelContainingView` does not exist on v4.3.0, so a helper reaching for it
+throws there rather than returning nothing.
+
 ## BLAST runs on EBI, not NCBI, and that is not a preference
 
 `blast.ncbi.nlm.nih.gov/Blast.cgi` returns no `Access-Control-Allow-Origin` to
