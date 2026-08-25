@@ -1,5 +1,8 @@
 import { getSession } from '@jbrowse/core/util'
 
+import { launchMsaView } from '../../../utils/launchMsaView'
+import { readLaunchPlacement } from '../../../utils/workspaces'
+
 import type { BlastParams } from '../../../MsaViewPanel/model'
 import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { Feature } from '@jbrowse/core/util'
@@ -16,8 +19,8 @@ export function blastLaunchView({
   feature: Feature
   blastParams: BlastParams
 }) {
-  getSession(view).addView('MsaView', {
-    type: 'MsaView',
+  launchMsaView(getSession(view), {
+    placement: readLaunchPlacement(),
     displayName: newViewTitle,
     connectedViewId: view.id,
     connectedFeature: feature.toJSON(),
@@ -39,8 +42,8 @@ export function blastLaunchViewFromCache({
   cached: CachedBlastResult
   connectedFeature?: ReturnType<Feature['toJSON']>
 }) {
-  getSession(view).addView('MsaView', {
-    type: 'MsaView',
+  launchMsaView(getSession(view), {
+    placement: readLaunchPlacement(),
     displayName: newViewTitle,
     connectedViewId: view.id,
     connectedFeature,

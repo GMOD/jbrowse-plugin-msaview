@@ -130,6 +130,7 @@ const PreLoadedMSA = observer(function ({
       </LaunchPanelContent>
 
       <SubmitCancelActions
+        model={model}
         submitDisabled={!selectedTranscript || !msaData?.length}
         onSubmit={() => {
           try {

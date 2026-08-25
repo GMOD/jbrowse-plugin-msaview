@@ -137,6 +137,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
       </LaunchPanelContent>
 
       <SubmitCancelActions
+        model={model}
         submitDisabled={
           !selectedTranscript ||
           (inputMethod === 'file' && !msaFileLocation) ||

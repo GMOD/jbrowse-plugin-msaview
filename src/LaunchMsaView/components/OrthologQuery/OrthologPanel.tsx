@@ -98,9 +98,9 @@ const OrthologPanel = observer(function ({
         </div>
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
-
       </LaunchPanelContent>
       <SubmitCancelActions
+        model={model}
         submitDisabled={!proteinSequence || !rowCountValid}
         onSubmit={() => {
           try {

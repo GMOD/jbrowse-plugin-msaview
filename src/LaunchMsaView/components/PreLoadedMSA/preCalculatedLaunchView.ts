@@ -1,5 +1,8 @@
 import { getSession } from '@jbrowse/core/util'
 
+import { launchMsaView } from '../../../utils/launchMsaView'
+import { readLaunchPlacement } from '../../../utils/workspaces'
+
 import type { Feature } from '@jbrowse/core/util'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -16,8 +19,8 @@ export function preCalculatedLaunchView({
   feature: Feature
   querySeqName: string
 }) {
-  getSession(view).addView('MsaView', {
-    type: 'MsaView',
+  launchMsaView(getSession(view), {
+    placement: readLaunchPlacement(),
     displayName: newViewTitle,
     treeAreaWidth: 200,
     querySeqName,

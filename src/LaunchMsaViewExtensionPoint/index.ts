@@ -1,4 +1,7 @@
+import { launchMsaView } from '../utils/launchMsaView'
+
 import type { OrthologParams } from '../MsaViewPanel/model'
+import type { MsaViewPlacement } from '../utils/workspaces'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AbstractSessionModel } from '@jbrowse/core/util'
 
@@ -39,6 +42,23 @@ interface LaunchMsaViewArgs {
    * snapshot property passes through the same way.
    */
   allowedGappyness?: number
+  /**
+   * Where the view lands: `stack` (default), `splitRight` or `newTab`. The
+   * declarative half of the launch — a link states the arrangement it wants
+   * instead of the reader dragging the view into place.
+   *
+   * The default is `stack` and has to stay `stack`: it is what every link
+   * written before this key existed already does, and the only thing an
+   * embedded session can do. The launch DIALOG defaults to `splitRight`
+   * instead (see `DEFAULT_LAUNCH_PLACEMENT`), because a launch from a gene
+   * feature is a connected pair and reads as a split.
+   *
+   * A spec that arranges more than these two views should use the host's own
+   * `layout` key instead, which states the whole tree and is applied after
+   * every view in the spec has launched. Both may be given; `layout` wins,
+   * being the later and more specific statement.
+   */
+  placement?: MsaViewPlacement
 }
 
 export default function LaunchMsaViewExtensionPointF(
@@ -76,8 +96,7 @@ export default function LaunchMsaViewExtensionPointF(
       // directly, and so is orthologParams (the model's own autorun picks it up).
       // Only sources needing launch-time resolution go through `init`: msaUrl
       // (AlphaFold sniff) and the name-indexed bgzip block (no native loader).
-      session.addView('MsaView', {
-        type: 'MsaView',
+      launchMsaView(session, {
         ...rest,
         data,
         ...(treeFileLocation

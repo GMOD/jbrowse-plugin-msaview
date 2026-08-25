@@ -123,6 +123,7 @@ const BlastAutomaticPanel = observer(function ({
         ) : null}
       </LaunchPanelContent>
       <SubmitCancelActions
+        model={model}
         submitDisabled={!proteinSequence}
         onSubmit={() => {
           try {

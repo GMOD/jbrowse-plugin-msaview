@@ -155,6 +155,7 @@ const BlastManualPanel = observer(function ({
       </LaunchPanelContent>
 
       <SubmitCancelActions
+        model={model}
         submitDisabled={!selectedTranscript || !msaText.trim()}
         onSubmit={() => {
           try {
