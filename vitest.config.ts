@@ -10,6 +10,8 @@ export default defineConfig({
     fileParallelism: false,
     testTimeout: 120_000,
     hookTimeout: 60_000,
-    include: ['test/**/*.test.ts', 'src/**/*.test.ts'],
+    // .tsx for the component tests, which declare `@vitest-environment jsdom`
+    // per file -- the rest run in node, where the puppeteer suites want to be
+    include: ['test/**/*.test.ts', 'src/**/*.test.{ts,tsx}'],
   },
 })
