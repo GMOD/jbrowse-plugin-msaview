@@ -27,23 +27,24 @@ builds one at launch (see below).
 
 Everything else is optional.
 
-| Parameter          | Description                                            |
-| ------------------ | ------------------------------------------------------ |
-| `treeFileLocation` | `{ uri: string }` for tree file                        |
-| `connectedViewId`  | ID of connected LinearGenomeView                       |
-| `connectedFeature` | Feature for cross-linking                              |
-| `displayName`      | Custom view display name                               |
-| `colorSchemeName`  | Color scheme (e.g., 'percent_identity_dynamic')        |
-| `colWidth`         | Column width in pixels                                 |
-| `rowHeight`        | Row height in pixels                                   |
-| `allowedGappyness` | Hide any column gappier than this percent, 100 to keep |
-| `treeAreaWidth`    | Tree area width                                        |
-| `treeWidth`        | Tree width                                             |
-| `drawNodeBubbles`  | Show node bubbles on tree                              |
-| `labelsAlignRight` | Align labels to the right                              |
-| `showBranchLen`    | Show branch lengths                                    |
-| `querySeqName`     | Name for query sequence                                |
-| `highlightColumns` | Visible column indices to highlight on open            |
+| Parameter          | Description                                                     |
+| ------------------ | --------------------------------------------------------------- |
+| `treeFileLocation` | `{ uri: string }` for tree file                                 |
+| `connectedViewId`  | ID of connected LinearGenomeView                                |
+| `connectedFeature` | Feature for cross-linking                                       |
+| `displayName`      | Custom view display name                                        |
+| `colorSchemeName`  | Color scheme (e.g., 'percent_identity_dynamic')                 |
+| `colWidth`         | Column width in pixels                                          |
+| `rowHeight`        | Row height in pixels                                            |
+| `allowedGappyness` | Hide any column gappier than this percent, 100 to keep          |
+| `treeAreaWidth`    | Tree area width                                                 |
+| `treeWidth`        | Tree width                                                      |
+| `drawNodeBubbles`  | Show node bubbles on tree                                       |
+| `labelsAlignRight` | Align labels to the right                                       |
+| `showBranchLen`    | Show branch lengths                                             |
+| `querySeqName`     | Name for query sequence                                         |
+| `highlightColumns` | Visible column indices to highlight on open                     |
+| `placement`        | Where the view lands: `stack` (default), `splitRight`, `newTab` |
 
 ### Building an alignment from a gene: `orthologParams`
 
@@ -81,6 +82,59 @@ session=spec-{"views":[{
   "allowedGappyness": 80
 }]}
 ```
+
+### Where the view lands: `placement`
+
+A launch states its arrangement instead of leaving the reader to drag the view
+into place. `placement` takes one of three values:
+
+| Value        | Effect                                                              |
+| ------------ | ------------------------------------------------------------------- |
+| `stack`      | append below whatever is on screen. The default                     |
+| `splitRight` | its own cell to the right, so a connected genome view stays visible |
+| `newTab`     | its own tab in the current cell, a click away from the rest         |
+
+Anything other than `stack` needs a host with tiled workspaces (jbrowse-web or
+desktop, v5 and later), and turns workspaces on for that session while leaving
+the visitor's own default untouched. An embedded session, or a release that
+places views its own way, stacks and says so in the console.
+
+The default is `stack` and stays `stack`: it is what every link written before
+this key existed already does. The launch **dialog** defaults to `splitRight`
+instead, remembered per browser, because a launch from a gene feature carries
+`connectedViewId` and the pair reads as a left/right split.
+
+```
+session=spec-{"views":[
+  {"type":"LinearGenomeView","id":"lgv1","assembly":"hg38","loc":"chr1:100-200"},
+  {"type":"MsaView","connectedViewId":"lgv1","placement":"splitRight",
+   "msaFileLocation":{"uri":"https://example.com/alignment.fa"}}
+]}
+```
+
+`id` on the genome view is what lets the MSA view name it — the two are then
+connected, so a hover in one highlights the other, and `splitRight` puts them
+where both are visible.
+
+For anything richer than "this view, over there", state the whole arrangement
+with the host's own
+[`layout`](https://jbrowse.org/jb2/docs/urlparams/#tiled-views--workspaces) key,
+which is a tree of panels and sizes applied once every view in the spec has
+launched:
+
+```
+session=spec-{
+  "views":[
+    {"type":"LinearGenomeView","id":"lgv1","assembly":"hg38","loc":"chr1:100-200"},
+    {"type":"MsaView","connectedViewId":"lgv1",
+     "msaFileLocation":{"uri":"https://example.com/alignment.fa"}}
+  ],
+  "layout":{"direction":"horizontal","children":[{"views":[0],"size":40},{"views":[1],"size":60}]}
+}
+```
+
+`layout` wins over `placement`, being the later and more specific statement, so
+a spec carrying both gets the tree it drew.
 
 ### URL example
 

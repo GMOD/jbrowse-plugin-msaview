@@ -1,39 +1,29 @@
 import type { AbstractSessionModel } from '@jbrowse/core/util'
 
 /**
- * Where a launched MSA view lands, stated rather than performed.
+ * Where a launched MSA view lands. Every launch names one of these and stops
+ * there, so a host that arranges views differently is one function to teach.
  *
- * Every launch — the dialog's four tabs, the extension point a session spec
- * goes through — names one of these and stops there. Nothing else in the plugin
- * reaches for a layout action, so a host that arranges views differently is one
- * function to teach, not six call sites to find.
- *
- *   stack       append below whatever is on screen. The classic behaviour, and
- *               the only thing an embedded session can do
- *   splitRight  its own cell to the right of everything else, so the genome
- *               view it is connected to stays visible beside it
- *   newTab      its own tab in the current cell, a click away from the rest
+ *   stack       append below whatever is on screen
+ *   splitRight  its own cell to the right, beside the view it is connected to
+ *   newTab      its own tab in the current cell
  */
 export type MsaViewPlacement = 'stack' | 'splitRight' | 'newTab'
 
 const PLACEMENTS: MsaViewPlacement[] = ['stack', 'splitRight', 'newTab']
 
 /**
- * What the launch dialog does when the user has said nothing.
- *
- * Side-by-side, because a launch from a gene feature sets `connectedViewId` and
- * `connectedFeature`: the two views share a hover and a highlight, and a pair
- * that talks to each other reads as a left/right split. A session spec defaults
- * to `stack` instead — see the extension point.
+ * What the dialog does unasked. Side-by-side, because a launch from a gene
+ * feature sets `connectedViewId`: the pair shares a hover and a highlight, and
+ * reads as a split. A session spec defaults to `stack` instead.
  */
 export const DEFAULT_LAUNCH_PLACEMENT: MsaViewPlacement = 'splitRight'
 
 export const LAUNCH_PLACEMENT_KEY = 'msaView-launchPlacement'
 
 /**
- * The two session actions that place a view in a tiled workspace. Only
- * jbrowse-web and desktop have them (MultipleViews + WorkspaceLayout mixins);
- * an embedded session has neither, so feature-detect rather than import.
+ * The session actions that place a view in a tiled workspace. Only jbrowse-web
+ * and desktop have them, so feature-detect rather than import.
  */
 interface SessionWithWorkspaces {
   setUseWorkspaces: (useWorkspaces: boolean) => void
@@ -59,11 +49,8 @@ export function resetWorkspacesWarning() {
 }
 
 /**
- * Whether this host can honor anything other than `stack`.
- *
- * Silent, because the launch dialog asks this on every render to decide whether
- * to offer the choice at all. `isSessionWithWorkspaces` is the same question
- * asked at launch time, where a half-supported host is worth saying out loud.
+ * Whether this host can honor anything other than `stack`. Silent: the dialog
+ * asks on every render, and only a launch is worth warning about.
  */
 export function sessionSupportsPlacement(session: AbstractSessionModel) {
   return (
@@ -114,11 +101,8 @@ function isSessionWithWorkspaces(
 }
 
 /**
- * Put a freshly added view where the launch said to.
- *
- * `stack` is not "no placement available", it is a placement — so it returns
- * without touching the session on every host, and a caller never has to ask
- * which host it is on.
+ * Put a freshly added view where the launch said to. `stack` is a placement
+ * rather than the absence of one, so no caller has to ask what host it is on.
  */
 export function placeMsaView(
   session: AbstractSessionModel,
@@ -140,11 +124,8 @@ function isPlacement(value: unknown): value is MsaViewPlacement {
 }
 
 /**
- * The launch dialog's own remembered choice.
- *
- * Deliberately NOT the host's preferences system: this is where *this plugin's*
- * launches go, not whether the user likes workspaces, and it has to work on
- * hosts that have no preferences to write to.
+ * The dialog's own remembered choice — not the host's preferences system, which
+ * records whether the user likes workspaces and does not exist everywhere.
  */
 export function readLaunchPlacement(): MsaViewPlacement {
   try {

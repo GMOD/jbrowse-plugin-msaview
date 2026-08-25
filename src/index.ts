@@ -9,6 +9,7 @@ import BgzipFastaMsaAdapterF from './BgzipFastaMsaAdapter'
 import LaunchMsaViewF from './LaunchMsaView'
 import LaunchMsaViewExtensionPointF from './LaunchMsaViewExtensionPoint'
 import MsaViewF from './MsaViewPanel'
+import { launchMsaView } from './utils/launchMsaView'
 import { version } from './version'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
@@ -32,7 +33,9 @@ export default class MsaViewPlugin extends Plugin {
         label: 'Multiple sequence alignment view',
         icon: GridOn,
         onClick: (session: AbstractSessionModel) => {
-          session.addView('MsaView', {})
+          // stacked, by default: nothing was launched from, so there is no
+          // connected view for it to sit beside
+          launchMsaView(session, {})
         },
       })
     }
