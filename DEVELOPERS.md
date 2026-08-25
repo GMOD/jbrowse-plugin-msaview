@@ -18,12 +18,12 @@ Exactly one of the four **sources** is required. The first three name an
 alignment that already exists; `orthologParams` names no alignment at all and
 builds one at launch (see below).
 
-| Source               | Description                                       |
-| -------------------- | ------------------------------------------------- |
-| `data`               | `{ msa: string, tree?: string }`                  |
-| `msaFileLocation`    | `{ uri: string }` for MSA file                    |
-| `msaIndexedLocation` | `{ uri: string }` for a name-indexed bgzip block  |
-| `orthologParams`     | build the alignment from NCBI orthologs at launch |
+| Source               | Description                                      |
+| -------------------- | ------------------------------------------------ |
+| `data`               | `{ msa: string, tree?: string }`                 |
+| `msaFileLocation`    | `{ uri: string }` for MSA file                   |
+| `msaIndexedLocation` | `{ uri: string }` for a name-indexed bgzip block |
+| `orthologParams`     | build the alignment from precomputed orthologs   |
 
 Everything else is optional.
 
@@ -52,14 +52,15 @@ This is the launch dialog's **Orthologs (fast)** tab reached declaratively, so a
 link can say "NLRP1 across species" and the view builds it. Two of its fields
 default so that a spec stays short.
 
-| Field                | Required | Description                                                         |
-| -------------------- | -------- | ------------------------------------------------------------------- |
-| `taxId`              | Yes      | NCBI taxon id of the assembly the query gene came from              |
-| `geneCandidates`     | Yes      | Gene identifiers, tried in order until one resolves                 |
-| `msaAlgorithm`       | Yes      | `clustalo`, `muscle`, `kalign` or `mafft`                           |
-| `taxa`               | No       | Taxon ids to include. Omitted means every species the dialog offers |
-| `proteinSequence`    | No       | The QUERY row. Omitted means NCBI's representative protein          |
-| `selectedTranscript` | No       | The transcript the query row was translated from                    |
+| Field                | Required | Description                                                      |
+| -------------------- | -------- | ---------------------------------------------------------------- |
+| `taxId`              | Yes      | NCBI taxon id of the assembly the query gene came from           |
+| `geneCandidates`     | Yes      | Gene identifiers, tried in order until one resolves              |
+| `msaAlgorithm`       | Yes      | `clustalo`, `muscle`, `kalign` or `mafft`                        |
+| `taxa`               | No       | Taxon ids to include. Omitted means every species the source has |
+| `proteinSequence`    | No       | The QUERY row. Omitted means the source's representative protein |
+| `selectedTranscript` | No       | The transcript the query row was translated from                 |
+| `source`             | No       | `ncbi` (the default) or `panther`, see below                     |
 
 `proteinSequence` is what the launch dialog always supplies, translated from the
 transcript the user picked, because that is the row `connectedFeature` maps
@@ -69,6 +70,24 @@ representative protein instead, which is also the choice every other row makes.
 A query row taken from the representative additionally passes the byte-identity
 test that attaches its `Accession`, so the CDD domain overlay is there by
 construction.
+
+`source` picks which precomputed ortholog set answers. NCBI Datasets computes
+orthologs for vertebrates and insects only, so a yeast gene gets three yeast
+rows there and a fly gene only insects. PANTHER's sets span its 144 reference
+proteomes, human to yeast to Arabidopsis: `source: "panther"` for yeast CDC28
+returns 94 rows with human among them, for fly Antp 26 rows from human to worm
+(measured 2026-08-25). A PANTHER launch names the gene by symbol, resolves it
+with one `matchortho` call, prefers each genome's LDO (PANTHER's one-to-one
+pick) and takes the sequences from UniProt, so every row's `Accession` is a
+UniProt accession rather than a RefSeq one. The CDD overlay reads those through
+the same `efetch` GenPept path: it serves Swiss-Prot accessions, with CDD Region
+features, exactly as it serves RefSeq ones (P00546 carries three), and it
+answers a TrEMBL accession with HTTP 400. A batch mixing the two returns the
+Swiss-Prot records and drops the rest, so the overlay lands on the reviewed rows
+(the model organisms) and not on the unreviewed ones. A launch whose rows are
+all TrEMBL would 400 the whole batch and log "auto-load failed"; the alignment
+itself is unaffected. `source` omitted, or an old link without the key, runs the
+NCBI path unchanged.
 
 `allowedGappyness` is worth setting alongside it. Proteins that differ in length
 put one row's private N-terminal extension at column 0 with every other row gap
@@ -309,8 +328,9 @@ The MSA view can be launched from the Linear Genome View via right-click context
 menu on gene/mRNA/transcript features. The dialog that opens carries one tab per
 data source:
 
-1. **Orthologs (fast)**: look up NCBI's precomputed ortholog gene per species
-   and align what comes back. No search job to queue, so this returns in seconds
+1. **Orthologs (fast)**: look up a precomputed ortholog gene per species (NCBI,
+   or PANTHER for the species NCBI's sets leave out) and align what comes back.
+   No search job to queue, so this returns in seconds
 2. **NCBI BLAST query**: submit the protein sequence to NCBI BLAST and align the
    hits. The route for a gene with no resolvable symbol
 3. **Pre-loaded MSA datasets**: use pre-calculated alignments from configuration
