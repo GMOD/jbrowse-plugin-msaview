@@ -47,6 +47,34 @@ async function panelBoxes(page: Page) {
   )
 }
 
+// Whether THIS host can tile at all -- the same two actions the plugin itself
+// feature-detects. The test matrix runs every leg against v4.3.0 and v3.7.0 as
+// well as nightly, and those hosts have no workspaces: asserting a split there
+// would be asserting that an old release grew a feature.
+async function hostCanTile(page: Page) {
+  return page.evaluate(() => {
+    const session = (
+      window as unknown as { JBrowseSession?: Record<string, unknown> }
+    ).JBrowseSession
+    return (
+      typeof session?.setPendingMove === 'function' &&
+      typeof session?.setUseWorkspaces === 'function'
+    )
+  })
+}
+
+// What the spec actually launched. Separate from the panel lookup below
+// because `panelContainingView` is a workspaces-only action and does not exist
+// on the older matrix legs at all.
+async function viewTypes(page: Page) {
+  return page.evaluate(
+    () =>
+      (
+        window as unknown as { JBrowseSession?: { views: { type: string }[] } }
+      ).JBrowseSession?.views.map(v => v.type) ?? [],
+  )
+}
+
 // Which grid cell each view sits in, straight off the session model that owns
 // the layout -- the DOM says two cells exist, this says the alignment is in the
 // one that is not the genome view's.
@@ -96,6 +124,20 @@ describe('spec placement', () => {
   it('splitRight puts the alignment in its own cell beside the genome view', async () => {
     const page = await createJBrowsePage(browser)
     await load(page, specUrl('splitRight'))
+
+    // Both views launched, whatever the host then does with them -- without
+    // this the older legs below would pass just as well on a page that failed
+    // to load anything at all.
+    expect(await viewTypes(page)).toEqual(['LinearGenomeView', 'MsaView'])
+
+    // The documented degradation, and what the older matrix legs assert: a host
+    // with no workspaces stacks, and the link still opens.
+    if (!(await hostCanTile(page))) {
+      expect(await panelBoxes(page)).toHaveLength(0)
+      await page.close()
+      return
+    }
+
     const boxes = await panelBoxes(page)
     expect(boxes).toHaveLength(2)
     expect(boxes[0]!.left + boxes[0]!.width).toBeLessThanOrEqual(
@@ -103,7 +145,6 @@ describe('spec placement', () => {
     )
 
     const placed = await panelOfEachView(page)
-    expect(placed.map(v => v.type)).toEqual(['LinearGenomeView', 'MsaView'])
     expect(placed[0]!.panel).toBeDefined()
     expect(placed[1]!.panel).toBeDefined()
     expect(placed[1]!.panel).not.toBe(placed[0]!.panel)
