@@ -21,14 +21,11 @@ export async function doLaunchBlast({
 }: {
   self: JBrowsePluginMsaViewModel
 }) {
-  const {
-    blastDatabase,
-    msaAlgorithm,
-    proteinSequence,
-    searchProgram,
-    selectedTranscript,
-  } = self.blastParams!
-  const cleanedSeq = cleanProteinSequence(proteinSequence)
+  // kept whole rather than destructured: the database's type depends on
+  // searchProgram, and pulling the two apart loses the link between them
+  const params = self.blastParams!
+  const { selectedTranscript } = params
+  const cleanedSeq = cleanProteinSequence(params.proteinSequence)
 
   const onProgress = (arg: string) => {
     self.setProgress(arg)
@@ -40,17 +37,17 @@ export async function doLaunchBlast({
   }
 
   const { msa, tree, treeMetadata, rid } =
-    searchProgram === 'phmmer'
+    params.searchProgram === 'phmmer'
       ? await runPhmmer({
           query: cleanedSeq,
-          database: blastDatabase as PhmmerDatabase,
+          database: params.blastDatabase,
           onProgress,
           onRid,
         })
       : await runBlast({
           query: cleanedSeq,
-          blastDatabase: blastDatabase as BlastDatabase,
-          msaAlgorithm: msaAlgorithm ?? 'clustalo',
+          blastDatabase: params.blastDatabase,
+          msaAlgorithm: params.msaAlgorithm,
           onProgress,
           onRid,
         })
@@ -59,9 +56,9 @@ export async function doLaunchBlast({
 
   await saveBlastResult({
     proteinSequence: cleanedSeq,
-    blastDatabase,
-    msaAlgorithm,
-    searchProgram,
+    blastDatabase: params.blastDatabase,
+    msaAlgorithm: params.msaAlgorithm,
+    searchProgram: params.searchProgram,
     msa,
     tree,
     treeMetadata: treeMetadataJson,

@@ -48,8 +48,22 @@ export type PhmmerDatabase = (typeof phmmerDatabaseOptions)[number]
 
 export const defaultPhmmerDatabase: PhmmerDatabase = 'swissprot'
 
-export function defaultDatabaseFor(program: SearchProgram) {
-  return program === 'phmmer' ? defaultPhmmerDatabase : defaultBlastDatabase
+/**
+ * A program together with a database that program actually has.
+ *
+ * The pair travels as one value because neither service knows the other's
+ * database names — `swissprot` is a phmmer database and `uniprotkb_swissprot` a
+ * blastp one — so a program held apart from its database can drift into a
+ * combination EBI answers with a 400, minutes after the user pressed Submit.
+ */
+export type SearchChoice =
+  | { program: 'blastp'; database: BlastDatabase }
+  | { program: 'phmmer'; database: PhmmerDatabase }
+
+export function defaultSearchFor(program: SearchProgram): SearchChoice {
+  return program === 'phmmer'
+    ? { program, database: defaultPhmmerDatabase }
+    : { program, database: defaultBlastDatabase }
 }
 
 export function databaseOptionsFor(program: SearchProgram) {

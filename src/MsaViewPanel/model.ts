@@ -29,7 +29,6 @@ import type {
   BlastDatabase,
   MsaAlgorithm,
   PhmmerDatabase,
-  SearchProgram,
 } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { Feature } from '@jbrowse/core/util'
@@ -46,21 +45,34 @@ export interface IRegion {
   end: number
 }
 
-export interface BlastParams {
-  /**
-   * Still named blastDatabase, not database: it is persisted in session
-   * snapshots and in the IndexedDB result cache, so renaming it would orphan
-   * every row already written. phmmer names its databases differently
-   * ('swissprot' rather than 'uniprotkb_swissprot'), hence the union.
-   */
-  blastDatabase: BlastDatabase | PhmmerDatabase
-  /** absent on params written before phmmer existed, which were all blastp */
-  searchProgram?: SearchProgram
-  /** unused by the phmmer path, which aligns as it searches */
-  msaAlgorithm?: MsaAlgorithm
+/**
+ * A search to run, discriminated by the program that runs it: the two arms
+ * differ in which databases they name and in whether an aligner runs at all, so
+ * splitting them is what lets doLaunchBlast read the database without asserting
+ * whose it is.
+ *
+ * The field is still `blastDatabase` rather than `database`: it is persisted in
+ * session snapshots and in the IndexedDB result cache, so renaming it would
+ * orphan every row already written.
+ */
+export type BlastParams = {
   selectedTranscript?: Feature
   proteinSequence: string
-}
+} & (
+  | {
+      /** absent on params written before phmmer existed, which were all blastp */
+      searchProgram?: 'blastp'
+      blastDatabase: BlastDatabase
+      msaAlgorithm: MsaAlgorithm
+    }
+  | {
+      searchProgram: 'phmmer'
+      /** phmmer names its databases its own way: `swissprot`, not `uniprotkb_swissprot` */
+      blastDatabase: PhmmerDatabase
+      /** phmmer aligns as it searches, so there is no aligner to choose */
+      msaAlgorithm?: undefined
+    }
+)
 
 /**
  * Where the ortholog set comes from. NCBI's sets cover vertebrates and

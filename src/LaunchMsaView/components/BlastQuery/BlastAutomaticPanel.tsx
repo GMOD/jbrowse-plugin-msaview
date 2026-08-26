@@ -27,18 +27,12 @@ import { blastLaunchView } from './blastLaunchView'
 import {
   databaseOptionsFor,
   defaultBlastDatabase,
-  defaultDatabaseFor,
-  defaultSearchProgram,
+  defaultSearchFor,
   searchPrograms,
 } from './consts'
 import { useCachedBlastResults } from './useCachedBlastResults'
 
-import type {
-  BlastDatabase,
-  MsaAlgorithm,
-  PhmmerDatabase,
-  SearchProgram,
-} from './consts'
+import type { MsaAlgorithm, SearchChoice, SearchProgram } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
@@ -67,14 +61,16 @@ const BlastAutomaticPanel = observer(function ({
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
   const [launchViewError, setLaunchViewError] = useState<unknown>()
-  const [selectedSearchProgram, setSelectedSearchProgram] =
-    useState<SearchProgram>(defaultSearchProgram)
-  const [selectedDatabase, setSelectedDatabase] = useState<
-    BlastDatabase | PhmmerDatabase
-  >(defaultBlastDatabase)
+  // one piece of state, not two: a program and a database that program does not
+  // have is a 400 from EBI minutes after Submit, and holding them apart is what
+  // would let them drift into that
+  const [search, setSearch] = useState<SearchChoice>({
+    program: 'blastp',
+    database: defaultBlastDatabase,
+  })
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
     useState<MsaAlgorithm>('clustalo')
-  const isPhmmer = selectedSearchProgram === 'phmmer'
+  const isPhmmer = search.program === 'phmmer'
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
   const { results: cachedResults, error: cachedResultsError } =
@@ -92,13 +88,12 @@ const BlastAutomaticPanel = observer(function ({
           label="Search program"
           className={classes.selectField}
           select
-          value={selectedSearchProgram}
+          value={search.program}
           onChange={event => {
-            const program = event.target.value as SearchProgram
-            setSelectedSearchProgram(program)
-            // the two services name their databases differently, so the current
-            // selection is meaningless to the other one
-            setSelectedDatabase(defaultDatabaseFor(program))
+            // the two services name their databases differently, so switching
+            // program replaces the database rather than keeping a name the new
+            // one has never heard of
+            setSearch(defaultSearchFor(event.target.value as SearchProgram))
           }}
         >
           {searchPrograms.map(val => (
@@ -113,12 +108,15 @@ const BlastAutomaticPanel = observer(function ({
           label="Database"
           className={classes.selectField}
           select
-          value={selectedDatabase}
+          value={search.database}
           onChange={event => {
-            setSelectedDatabase(event.target.value as BlastDatabase)
+            setSearch({
+              program: search.program,
+              database: event.target.value,
+            } as SearchChoice)
           }}
         >
-          {databaseOptionsFor(selectedSearchProgram).map(val => (
+          {databaseOptionsFor(search.program).map(val => (
             <MenuItem value={val} key={val}>
               {val}
             </MenuItem>
@@ -178,13 +176,21 @@ const BlastAutomaticPanel = observer(function ({
                 feature: selectedTranscript,
                 view,
                 newViewTitle: getBlastViewTitle(feature, selectedTranscript),
-                blastParams: {
-                  blastDatabase: selectedDatabase,
-                  searchProgram: selectedSearchProgram,
-                  msaAlgorithm: isPhmmer ? undefined : selectedMsaAlgorithm,
-                  selectedTranscript,
-                  proteinSequence,
-                },
+                blastParams:
+                  search.program === 'phmmer'
+                    ? {
+                        searchProgram: 'phmmer',
+                        blastDatabase: search.database,
+                        selectedTranscript,
+                        proteinSequence,
+                      }
+                    : {
+                        searchProgram: 'blastp',
+                        blastDatabase: search.database,
+                        msaAlgorithm: selectedMsaAlgorithm,
+                        selectedTranscript,
+                        proteinSequence,
+                      },
               })
               handleClose()
             }
