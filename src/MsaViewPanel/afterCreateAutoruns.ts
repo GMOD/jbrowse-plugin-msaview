@@ -12,7 +12,7 @@ import {
   storeMsaData,
 } from './msaDataStore'
 import { getProteinViews } from './structureConnection'
-import { getUniprotIdFromAlphaFoldUrl } from './util'
+import { getUniprotIdFromAlphaFoldUrl, hasQueryRow } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 
@@ -233,7 +233,7 @@ function genomeHighlightsToVisibleColumns(
   field: 'hoverGenomeHighlights' | 'clickGenomeHighlights',
 ) {
   const { connectedViewId, transcriptToMsaMap, querySeqName } = self
-  if (!transcriptToMsaMap) {
+  if (!transcriptToMsaMap || !hasQueryRow(self)) {
     return []
   }
   const { g2p } = transcriptToMsaMap

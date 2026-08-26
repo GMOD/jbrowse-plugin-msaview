@@ -1,6 +1,6 @@
 import { getSession } from '@jbrowse/core/util'
 
-import { hasHoverPosition } from './util'
+import { hasHoverPosition, hasQueryRow } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 
@@ -8,7 +8,11 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   const { hovered } = getSession(model)
   const { querySeqName, transcriptToMsaMap, connectedView, mafRegion } = model
 
-  if (!connectedView?.initialized || !hasHoverPosition(hovered)) {
+  if (
+    !connectedView?.initialized ||
+    !hasHoverPosition(hovered) ||
+    !hasQueryRow(model)
+  ) {
     return undefined
   }
 

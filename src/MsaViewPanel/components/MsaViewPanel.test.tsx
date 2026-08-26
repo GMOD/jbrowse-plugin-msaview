@@ -62,7 +62,7 @@ test('a failed ortholog launch shows why', () => {
 
 test('a failed init shows why', () => {
   panel({
-    init: { msaName: 'ENST00000288602' } as never,
+    init: { msaName: 'ENST00000288602' },
     progress: '',
     error: new Error('No alignment named ENST00000288602 in msa.fa.gz'),
   })

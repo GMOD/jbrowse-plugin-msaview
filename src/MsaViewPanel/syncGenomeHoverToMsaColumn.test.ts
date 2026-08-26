@@ -28,6 +28,7 @@ function makeModel() {
   const calls: (number | undefined)[] = []
   const model = {
     querySeqName: 'hg38.chr1',
+    rows: [['hg38.chr1', 'ACGTACGTAC']],
     transcriptToMsaMap: undefined,
     mafRegion,
     connectedView: { initialized: true, assemblyNames: ['hg38'] },

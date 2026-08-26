@@ -25,6 +25,7 @@ describe('genomeToMSA', () => {
 
     const model = {
       querySeqName: 'hg38.chr1',
+      rows: [['hg38.chr1', 'ACGTACGTAC']],
       transcriptToMsaMap: undefined,
       mafRegion: {
         refName: 'chr1',
@@ -47,6 +48,7 @@ describe('genomeToMSA', () => {
 
     const model = {
       querySeqName: 'hg38.chr1',
+      rows: [['hg38.chr1', 'ACGTACGTAC']],
       transcriptToMsaMap: undefined,
       mafRegion: {
         refName: 'chr1',
@@ -75,6 +77,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -107,6 +110,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -136,6 +140,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -165,6 +170,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -193,6 +199,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
+        rows: [['hg38.chr1', 'ACGTACGTAC']],
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -225,6 +232,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'QUERY',
+        rows: [['QUERY', 'MKVLTAEEK']],
         transcriptToMsaMap: {
           refName: 'chr1',
           // g2p is keyed by 0-based genome position, the hover coord is 1-based
@@ -254,6 +262,7 @@ describe('genomeToMSA', () => {
       const mockSeqPosToVisibleCol = vi.fn()
       const model = {
         querySeqName: 'QUERY',
+        rows: [['QUERY', 'MKVLTAEEK']],
         transcriptToMsaMap: {
           refName: 'chr1',
           g2p: { 1004: 10 },
@@ -277,6 +286,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'QUERY',
+        rows: [['QUERY', 'MKVLTAEEK']],
         transcriptToMsaMap: {
           refName: 'chr1',
           g2p: { 1000: 0 }, // No entry for 1004
@@ -301,6 +311,7 @@ describe('genomeToMSA', () => {
 
     const model = {
       querySeqName: 'QUERY',
+      rows: [['QUERY', 'MKVLTAEEK']],
       transcriptToMsaMap: undefined,
       mafRegion: undefined,
       connectedView: { initialized: true },
@@ -309,5 +320,31 @@ describe('genomeToMSA', () => {
 
     const result = genomeToMSA({ model })
     expect(result).toBeUndefined()
+  })
+
+  // seqPosToVisibleCol answers 0 for a row name it does not know, so without a
+  // guard an alignment whose query row is missing -- the default 'QUERY' on an
+  // uploaded file, or the empty name the manual panel leaves when it matches
+  // nothing -- lights column 0 on every genome hover
+  test('returns undefined when querySeqName names no row here', () => {
+    mockGetSession.mockReturnValue({
+      hovered: {
+        hoverFeature: {},
+        hoverPosition: { coord: 1005, refName: 'chr1' },
+      },
+    } as any)
+
+    const seqPosToVisibleCol = vi.fn(() => 0)
+    const model = {
+      querySeqName: 'QUERY',
+      rows: [['some_other_row', 'MKVLTAEEK']],
+      transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 3 } },
+      mafRegion: undefined,
+      connectedView: { initialized: true },
+      seqPosToVisibleCol,
+    } as any
+
+    expect(genomeToMSA({ model })).toBeUndefined()
+    expect(seqPosToVisibleCol).not.toHaveBeenCalled()
   })
 })
