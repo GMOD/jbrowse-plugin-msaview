@@ -94,8 +94,8 @@ importers:
         specifier: ^9.2.2
         version: 9.2.2(mobx@6.16.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       msa-parsers:
-        specifier: ^6.1.0
-        version: 6.1.0
+        specifier: ^6.2.0
+        version: 6.2.0
       oxfmt:
         specifier: ^0.65.0
         version: 0.65.0
@@ -115,8 +115,8 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1
       puppeteer:
-        specifier: ^25.8.0
-        version: 25.8.0
+        specifier: ^25.9.0
+        version: 25.9.0
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -124,8 +124,8 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
       react-msaview:
-        specifier: ^6.1.0
-        version: 6.1.0(ed4f33ad770ac56c8a75b0638a58724b)
+        specifier: ^6.2.0
+        version: 6.2.0(ed4f33ad770ac56c8a75b0638a58724b)
       rimraf:
         specifier: ^6.1.3
         version: 6.1.3
@@ -637,8 +637,8 @@ packages:
     resolution: {integrity: sha512-DPEtODWKt+QGmCg+EO36sSmKOmdjJOwtxeV/4PBnf+7jqC/P7R4YIz+/yohtqh9UZ38dbLtXIlmigPlkZy8SAA==}
     engines: {node: '>=18'}
 
-  '@jbrowse/svgcanvas@6.1.0':
-    resolution: {integrity: sha512-zN1m+WWIAM9XzTXPCvNNTDX4Ppp9wjnv+4MsmurlIamXnRBZL2dkGReK4jsDsI3+04mBm6mpJiS8WG9L5rvapQ==}
+  '@jbrowse/svgcanvas@6.2.0':
+    resolution: {integrity: sha512-90R8Z+Wr94kPoxZ0mk9V62/5JaBrMVIugs+rPKCZxbK0NLTVZnRd/BmDzKFNEPkmnxtrwhmdGCzEIxjvWhxBEQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1952,8 +1952,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  electron-to-chromium@1.5.413:
-    resolution: {integrity: sha512-F1XPKvt7HVfly5WND90ec16nFsdr4g5x/cVUP3EqjeyXynupabGDqpMa84wwvuYGDnldXLBz6DLXyZXWO9TPvw==}
+  electron-to-chromium@1.5.414:
+    resolution: {integrity: sha512-aYlviXiaXBbzvKgyALpcMmqa3Np3sDr0XnZbEG62n2UpZFbEcjQ4EEMOLGzVPhwVnwTz0lvKY+GcARbunuHekw==}
 
   emf-js@2.0.0:
     resolution: {integrity: sha512-Ep9r0/maTQLhZADOrPK34KYRd2uFvnWuFXkeHWpk6ttQC2Sl3xTk0EsZTHMrdR655HO/S6zUfyGNt7MM0PJ1Gw==}
@@ -2791,8 +2791,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msa-parsers@6.1.0:
-    resolution: {integrity: sha512-JX+h/ArVK8Rd0sohGlcgwd/9K9AzNjrP6b7/m2L3YRlVN+2of6kV3JRa/DQl0oN6jq/S78zD4ANfrWzkS0vLng==}
+  msa-parsers@6.2.0:
+    resolution: {integrity: sha512-sxTVMrv8dtGLxopwYfVPFzKBkenrtwzXimu+TjD5AipvuAqg0JT+qtz4VOaJiVpgDl7KZnRLeO0W6SiWasOoBw==}
 
   nanoid@3.3.16:
     resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
@@ -3024,12 +3024,12 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
-  puppeteer-core@25.8.0:
-    resolution: {integrity: sha512-LDOrawV8vfCVk+yLj2ozvajNP4Sv3OV9y3Tpiyy2g2Z+aQlbcozP6KJfI4iSBq7YQER+86ihEtPa5ioiZyWxMQ==}
+  puppeteer-core@25.9.0:
+    resolution: {integrity: sha512-U61rCwSMha62CA/Opy6tCx2Fx+ck7ouiKnbpEApzSoLYMoEu9F71nuFpHL55vmIt33/GYm6eKZVhH2ev0nAIeg==}
     engines: {node: '>=22.12.0'}
 
-  puppeteer@25.8.0:
-    resolution: {integrity: sha512-3gcUJ+Jfodb5zNa/lWLZukBUwYiRIwAc8WRICoqfi+ZYmNWqpsPFyanTU3Gw/lhgII9aotVbAmhT6/NKHWgyUA==}
+  puppeteer@25.9.0:
+    resolution: {integrity: sha512-2JqQszD2pyDTpIvBH1ZCXdrHgENVNdJIeOM6asbwHRgWknFiaLd1gNB91w/B/0hQHNpafkpxa90lPpBaJM87Hw==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -3065,8 +3065,8 @@ packages:
   react-is@19.2.8:
     resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
 
-  react-msaview@6.1.0:
-    resolution: {integrity: sha512-6nMbp92NF5LBn7XYJ3/Tl4NLfHpr0GHULsbcC4B8l7teT1FR2iYjjrpUXKnexztkXiVoFC9Xz5nmlti4mlZTfA==}
+  react-msaview@6.2.0:
+    resolution: {integrity: sha512-V0085wWoQfjeA4BlnqWTbHIhBhcpvI3x+zLrZx7rKlheCZJhoZWwMVNh7kZlimeANKMuFKXd4OpfuxW46VYtgw==}
     engines: {node: '>=10'}
     peerDependencies:
       '@jbrowse/core': '>=2.0.0'
@@ -4222,7 +4222,7 @@ snapshots:
 
   '@jbrowse/quick-lru@7.3.5': {}
 
-  '@jbrowse/svgcanvas@6.1.0': {}
+  '@jbrowse/svgcanvas@6.2.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -5121,7 +5121,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.11.19
       caniuse-lite: 1.0.30001810
-      electron-to-chromium: 1.5.413
+      electron-to-chromium: 1.5.414
       node-releases: 2.0.53
       update-browserslist-db: 1.3.1(browserslist@4.28.8)
 
@@ -5358,7 +5358,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  electron-to-chromium@1.5.413: {}
+  electron-to-chromium@1.5.414: {}
 
   emf-js@2.0.0: {}
 
@@ -6284,7 +6284,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msa-parsers@6.1.0:
+  msa-parsers@6.2.0:
     dependencies:
       '@gmod/newick': 1.0.2
       clustal-js: 2.0.18
@@ -6530,7 +6530,7 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  puppeteer-core@25.8.0:
+  puppeteer-core@25.9.0:
     dependencies:
       '@puppeteer/browsers': 3.2.1
       chromium-bidi: 17.0.2(devtools-protocol@0.0.1666840)
@@ -6544,13 +6544,13 @@ snapshots:
       - utf-8-validate
       - yauzl
 
-  puppeteer@25.8.0:
+  puppeteer@25.9.0:
     dependencies:
       '@puppeteer/browsers': 3.2.1
       chromium-bidi: 17.0.2(devtools-protocol@0.0.1666840)
       devtools-protocol: 0.0.1666840
       lilconfig: 3.1.3
-      puppeteer-core: 25.8.0
+      puppeteer-core: 25.9.0
       typed-query-selector: 2.12.2
     transitivePeerDependencies:
       - bufferutil
@@ -6587,19 +6587,19 @@ snapshots:
 
   react-is@19.2.8: {}
 
-  react-msaview@6.1.0(ed4f33ad770ac56c8a75b0638a58724b):
+  react-msaview@6.2.0(ed4f33ad770ac56c8a75b0638a58724b):
     dependencies:
       '@gmod/newick': 1.0.2
       '@jbrowse/core': 4.3.0(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
       '@jbrowse/mobx-state-tree': 5.13.0(mobx@6.16.1)
-      '@jbrowse/svgcanvas': 6.1.0
+      '@jbrowse/svgcanvas': 6.2.0
       '@mui/icons-material': 9.3.1(@mui/material@9.3.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
       '@mui/material': 9.3.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       colord: 2.10.0
       flatbush: 4.6.2
       mobx: 6.16.1
       mobx-react: 9.2.2(mobx@6.16.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      msa-parsers: 6.1.0
+      msa-parsers: 6.2.0
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
