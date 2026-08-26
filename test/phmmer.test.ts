@@ -4,11 +4,14 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
 
+import { buildPhmmerMsa } from '../src/utils/msaRows'
 import {
   isPhmmerJobId,
   parsePhmmerAlignment,
   phmmerResultUrl,
 } from '../src/utils/phmmer'
+
+import type { TaxonomyInfo } from '../src/utils/taxonomyNames'
 
 function fixture(name: string) {
   return readFileSync(
@@ -104,6 +107,54 @@ describe('parsePhmmerAlignment', () => {
         query,
       }),
     ).toThrow(/no #=GC RF line/)
+  })
+})
+
+// The row names are load bearing twice over: they key treeMetadata, and they
+// are what the tree's leaves are labelled with, so two rows sharing one name
+// collapse into one in both the alignment and the tree. Only the live test
+// covered this, and that one is opt-in.
+describe('buildPhmmerMsa', () => {
+  const noTaxonomy = new Map<number, TaxonomyInfo>()
+
+  function build() {
+    const { rows, queryRow } = parsePhmmerAlignment({ stockholm, query })
+    return buildPhmmerMsa({ rows, queryRow, taxonomyInfo: noTaxonomy })
+  }
+
+  test('gives the query the first row, under the name the model looks for', () => {
+    expect(build().msa.split('\n')[0]).toBe('>QUERY')
+  })
+
+  test('names the two matched regions of one target apart, by envelope', () => {
+    const names = build()
+      .msa.split('\n')
+      .filter(l => l.startsWith('>'))
+      .map(l => l.slice(1))
+
+    expect(names.filter(n => n.startsWith('Q91274'))).toEqual([
+      'Q91274-Petromyzon_marinus_12-489',
+      'Q91274-Petromyzon_marinus_503-912',
+    ])
+    expect(new Set(names).size).toBe(names.length)
+  })
+
+  test('a target matched once is named without an envelope', () => {
+    expect(build().msa).toContain('>P02769-Bos_taurus\n')
+  })
+
+  test('keys the metadata by the same names the alignment uses', () => {
+    const { msa, treeMetadata } = build()
+    const rowNames = msa
+      .split('\n')
+      .filter(l => l.startsWith('>'))
+      .map(l => l.slice(1))
+
+    // every row but the query, which is described by the launch rather than by
+    // a search hit
+    expect(Object.keys(treeMetadata).toSorted()).toEqual(
+      rowNames.slice(1).toSorted(),
+    )
   })
 })
 
