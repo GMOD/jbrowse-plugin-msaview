@@ -17,7 +17,7 @@
 
 ### Documentation
 
-- Docs: the phmmer query row must throw, and a real change can hide under the ([736bc67](https://github.com/GMOD/jbrowse-plugin-msaview/commit/736bc674a57249c23086953330c83cfbb2d48974))
+- The phmmer query row must throw, and a real change can hide under the screenshot tolerance ([736bc67](https://github.com/GMOD/jbrowse-plugin-msaview/commit/736bc674a57249c23086953330c83cfbb2d48974))
 
 ### Features
 
