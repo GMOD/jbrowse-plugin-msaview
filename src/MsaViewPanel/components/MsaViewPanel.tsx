@@ -6,7 +6,7 @@ import { MSAView } from 'react-msaview'
 import { makeStyles } from 'tss-react/mui'
 
 import { ErrorBoundary } from './ErrorBoundary'
-import LoadingBLAST from './LoadingBLAST'
+import LaunchProgress from './LaunchProgress'
 
 import type { JBrowsePluginMsaViewModel } from '../model'
 
@@ -22,12 +22,15 @@ const MsaViewPanel = observer(function MsaViewPanel2({
   model: JBrowsePluginMsaViewModel
 }) {
   const { classes } = useStyles()
-  const { blastParams, loadingStoredData } = model
+  const { blastParams, orthologParams, init, loadingStoredData } = model
+  // an unresolved launch request means there is no alignment to draw yet, so all
+  // three gate the same panel -- see LaunchProgress
+  const launching = !!(blastParams ?? orthologParams ?? init)
   return (
     <ErrorBoundary>
       <div>
-        {blastParams ? (
-          <LoadingBLAST model={model} />
+        {launching ? (
+          <LaunchProgress model={model} />
         ) : loadingStoredData ? (
           <div className={classes.loadingContainer}>
             <LoadingEllipses message="Loading MSA data" variant="h6" />
