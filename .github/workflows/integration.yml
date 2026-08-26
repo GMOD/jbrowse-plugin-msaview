@@ -1,6 +1,20 @@
 name: Integration
 
-on: push
+# Branches only. `pnpm version` pushes the bump commit and its tag together, so
+# a bare `on: push` ran this whole matrix twice over one tree — and the second
+# copy raced the Publish workflow for GitHub's UNAUTHENTICATED api limit, which
+# `@jbrowse/cli create --tag` needs to resolve a jbrowse release. v3.4.0 lost
+# that race on the v3.7.0 leg and reported `Could not find version: rate limit
+# exceeded` from a step that runs before any of this plugin's code does, on a
+# commit that had just passed the identical matrix on `main`.
+#
+# A token would not help: the cli fetches api.github.com with no Authorization
+# header, so there is nothing to raise the limit with. Not running the duplicate
+# is the fix.
+on:
+  push:
+    tags-ignore:
+      - '**'
 
 jobs:
   build-and-lint:
