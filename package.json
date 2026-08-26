@@ -25,6 +25,7 @@
     "check-text-source": "node scripts/check-text-source.mjs",
     "check-ebi-params": "node scripts/check-ebi-params.mjs",
     "check-mui-imports": "node scripts/check-mui-imports.mjs",
+    "check-host-dep-pins": "node scripts/check-host-dep-pins.mjs",
     "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -35,7 +36,7 @@
     "host-compat": "node scripts/host-compat-probe.mjs --bundle dist/jbrowse-plugin-msaview.umd.production.min.js",
     "prepack": "pnpm build",
     "check-ci": "node scripts/require-green-ci.mjs",
-    "preversion": "pnpm check-ci && pnpm lint && pnpm build && pnpm host-compat",
+    "preversion": "pnpm check-ci && pnpm check-host-dep-pins && pnpm lint && pnpm build && pnpm host-compat",
     "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git-cliff --tag v$npm_package_version --unreleased --prepend CHANGELOG.md && git add src/version.ts CHANGELOG.md",
     "postversion": "git push --follow-tags"
   },

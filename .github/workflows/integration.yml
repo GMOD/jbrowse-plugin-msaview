@@ -17,6 +17,11 @@ jobs:
           node-version: 24.x
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Runs before Build and Lint because it explains their failure modes: a
+      # forked mobx breaks tsc, and a typescript past typescript-eslint's peer
+      # range stops eslint loading at all
+      - name: Host-supplied deps agree with the host, typescript with eslint
+        run: pnpm check-host-dep-pins
       - name: Build
         run: pnpm build
       - name: Lint

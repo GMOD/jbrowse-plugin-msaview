@@ -56,6 +56,38 @@ deep path (`@mui/material/StepContent`) is not in ReExports and so gets bundled
 -- at the cost of shipping that component's MUI internals, and the shape risk in
 the root CLAUDE.md's SvgIcon note.
 
+## A dep bump is a host-compatibility decision for mobx and typescript
+
+`mobx`, `mobx-react` and `@jbrowse/mobx-state-tree` are in ReExports, so none of
+them ships in the bundle -- each is a one-line shim handing off to the host's
+`JBrowseExports[...]`, and the browser gets the host's copy whatever we declare.
+That makes them look free to bump. They are not: the declared version is the API
+surface tsc checks the source against, standing in for a host we cannot see, so
+declaring a major the host does not serve turns tsc from a host-compatibility
+check into a rubber stamp. Track what `@jbrowse/core` declares, not npm latest.
+
+The local symptom is louder than the real risk and easy to mistake for a test
+problem. A 2026-08 update to mst 6 / mobx 7 forked the package in two, because
+`@jbrowse/core` keeps its own copy: 9 `[$type]` type errors, and
+`multiple, different versions of MobX active` under vitest. None of that could
+reach a browser -- but the fix is the pin, not a dedupe override, because an
+override would silence the symptom and keep the rubber stamp.
+
+**typescript stays on 6.x** for an unrelated reason with the same shape.
+TypeScript 7's package entry is a stub -- `require('typescript')` yields
+`{version, versionMajorMinor}` and nothing else -- so everything reading the
+compiler API through it breaks at once. Here that is typescript-eslint, which
+refuses to load and takes `pnpm lint` with it, and `preversion` runs lint.
+oxlint is not an escape hatch: jbrowse-components found its type-aware pass read
+every `ts.Node` as an error type under TS 7, alongside typescript-eslint and two
+docs generators (see its `scripts/check-typescript-pin.ts`).
+
+`pnpm check-host-dep-pins` enforces both, and runs in CI and from `preversion`.
+It resolves each package from the plugin and from `@jbrowse/core` and compares
+the directories on disk, so it catches a second copy however it arrives; the
+typescript half reads typescript-eslint's own peer range and so lifts itself
+once a release supports the newer compiler.
+
 ## Don't drop the v3.7.0 leg from the integration matrix
 
 It is the only check that has ever caught the legacy context-menu regression —
