@@ -10,6 +10,12 @@
 // dither-free, byte-identical run-to-run) and then only overwrites the committed
 // reference when it differs by more than a tolerance. Below the tolerance the
 // existing file is left byte-for-byte intact, so git stays clean.
+//
+// The cost of that is worth knowing when you are LOOKING at a capture to check a
+// change: a real edit can sit under the tolerance and leave the old bytes in
+// place, so the screenshot shows the old UI and the change reads as not having
+// taken. Widening one 150px field to 230px is 0.28% of a 1280x900 frame, well
+// under the 1% default. `git checkout -- test-screenshots/` first, then run.
 
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'

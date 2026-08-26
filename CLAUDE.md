@@ -163,6 +163,18 @@ anything.
 The reasoning and the evidence are in `docs/blast.md`. Read it before touching
 `utils/ebiBlast.ts` or reaching for NCBI again.
 
+**phmmer is a second search program, and its query row is derived rather than
+aligned.** blastp stays the default; phmmer earns its place by aligning as it
+searches, so its output is the MSA and no realignment can mis-pair one hit's
+domain against another's. The catch is that phmmer leaves the query out of that
+alignment unless the query is itself in the target database. `buildQueryRow`
+recovers it from `#=GC RF`, which marks one column per query residue, and
+**throws when the match columns do not account for the query exactly** — a query
+row off by one residue would silently mis-map every column to the genome, which
+is worse than no result. Do not soften that into a best effort. The measured
+comparison of the two pipelines, including where phmmer is worse, is in
+`docs/blast.md`.
+
 **Job Dispatcher is the part of EBI that is reachable, not EBI generally.** The
 HMMER web server at `www.ebi.ac.uk/Tools/hmmer` — a separate service from the
 `hmmer3_phmmer` Job Dispatcher tool `utils/phmmer.ts` uses — serves its
