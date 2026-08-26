@@ -31,8 +31,6 @@ export const defaultBlastDatabase: BlastDatabase = 'uniprotkb_swissprot'
 export const searchPrograms = ['blastp', 'phmmer'] as const
 export type SearchProgram = (typeof searchPrograms)[number]
 
-export const defaultSearchProgram: SearchProgram = 'blastp'
-
 /**
  * phmmer offers PDB, AlphaFold, Ensembl Genomes, MEROPS and ChEMBL too, but
  * targets outside UniProt carry no OS=/OX= in their description, so those rows
