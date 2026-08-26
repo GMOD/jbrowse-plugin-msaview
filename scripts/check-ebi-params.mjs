@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /* global process, console, fetch, AbortSignal */
 /* eslint-disable no-console */
-// Every value the BLAST panel offers is validated by EBI, not by us: a database
-// or tool name outside their list comes back as a 400 from `/run` at submit
-// time, after the user has picked a transcript and pressed go. Nothing else in
-// CI can see it -- the strings are well-typed, the bundle builds, the host-compat
-// probe never submits a job -- so 3.0.0 shipped `uniprotkb_reference_proteomes`,
-// a menu entry that had never worked and that EBI has no database for.
+// Every value the search panel offers is validated by EBI, not by us: a
+// database or tool name outside their list comes back as a 400 from `/run` at
+// submit time, after the user has picked a transcript and pressed go. Nothing
+// else in CI can see it -- the strings are well-typed, the bundle builds, the
+// host-compat probe never submits a job -- so 3.0.0 shipped
+// `uniprotkb_reference_proteomes`, a menu entry that had never worked and that
+// EBI has no database for.
 //
 // This reads the same constants the plugin ships and asks EBI what it accepts.
 // It runs on push, so a value we invent is caught before release, and daily, so
@@ -18,10 +19,23 @@
 import {
   blastDatabaseOptions,
   msaAlgorithms,
+  phmmerDatabaseOptions,
 } from '../src/LaunchMsaView/components/BlastQuery/consts.ts'
 
 const EBI_BASE = 'https://www.ebi.ac.uk/Tools/services/rest'
-const BLAST_TOOL = 'ncbiblast'
+
+// Each search program has its own catalogue and its own names for the same
+// data: `uniprotkb_swissprot` at ncbiblast is `swissprot` at phmmer, so neither
+// list can stand in for the other.
+const SEARCH_TOOLS = [
+  { tool: 'ncbiblast', databases: blastDatabaseOptions },
+  { tool: 'hmmer3_phmmer', databases: phmmerDatabaseOptions },
+]
+
+// Tools the plugin submits to that take no database: an aligner per msa
+// algorithm, plus the tree builder the phmmer path runs instead of taking a
+// guide tree from an aligner it never ran.
+const PLAIN_TOOLS = [...msaAlgorithms, 'simple_phylogeny']
 
 // EBI drops the occasional request, and one blip should not turn a push red
 // when the check is about the shape of their catalogue rather than its uptime.
@@ -86,29 +100,31 @@ function suggest(missing, accepted) {
 
 const problems = []
 
-const acceptedDatabases = await fetchAcceptedValues(BLAST_TOOL, 'database')
-for (const database of blastDatabaseOptions) {
-  if (!acceptedDatabases.has(database)) {
-    const nearest = suggest(database, acceptedDatabases)
-    problems.push(
-      `${BLAST_TOOL} rejects database "${database}"` +
-        (nearest.length > 0
-          ? `; closest EBI offers: ${nearest.join(', ')}`
-          : ''),
-    )
+let databaseCount = 0
+for (const { tool, databases } of SEARCH_TOOLS) {
+  const accepted = await fetchAcceptedValues(tool, 'database')
+  databaseCount += databases.length
+  for (const database of databases) {
+    if (!accepted.has(database)) {
+      const nearest = suggest(database, accepted)
+      problems.push(
+        `${tool} rejects database "${database}"` +
+          (nearest.length > 0
+            ? `; closest EBI offers: ${nearest.join(', ')}`
+            : ''),
+      )
+    }
   }
 }
 
-// The alignment step submits to a service per algorithm, so a name that is not
-// a tool is a 400 from a different endpoint than the BLAST one.
+// These are submitted to by name, so a name that is not a service is a 400 from
+// a different endpoint than the database one.
 await Promise.all(
-  msaAlgorithms.map(async tool => {
+  PLAIN_TOOLS.map(async tool => {
     try {
       await fetchWithRetry(`${EBI_BASE}/${tool}/parameters`)
     } catch (e) {
-      problems.push(
-        `msa algorithm "${tool}" is not an EBI service: ${e.message}`,
-      )
+      problems.push(`"${tool}" is not an EBI service: ${e.message}`)
     }
   }),
 )
@@ -119,11 +135,11 @@ if (problems.length > 0) {
     console.error(`  ${problem}`)
   }
   console.error(
-    `\nEBI's own lists are at ${EBI_BASE}/${BLAST_TOOL}/parameterdetails/<parameter>.`,
+    `\nEBI's own lists are at ${EBI_BASE}/<tool>/parameterdetails/<parameter>.`,
   )
   process.exit(1)
 }
 
 console.log(
-  `EBI accepts all ${blastDatabaseOptions.length} databases and ${msaAlgorithms.length} alignment tools the plugin offers.`,
+  `EBI accepts all ${databaseCount} databases and ${PLAIN_TOOLS.length} alignment and tree tools the plugin offers.`,
 )
