@@ -65,27 +65,48 @@ const SIMILARITY_FLOOR = 0.9
  */
 const PARTIAL_COVERAGE_FLOOR = 0.5
 
-export function detectQueryRow(
+export interface MsaQueryRow {
+  /** every row name, in file order, for the picker to offer */
+  names: string[]
+  /** the row whose residues are the query's, if one of them is */
+  match?: QueryRowMatch
+}
+
+/**
+ * The picker's whole answer for a pasted alignment: its row names, and which of
+ * them is the query.
+ *
+ * One function rather than two because there is one parse. Both answers were
+ * wanted on every keystroke in the paste box, and asking separately parsed a
+ * few-hundred-row alignment twice per character.
+ */
+export function findQueryRow(
   msaText: string,
   proteinSequence: string,
-): QueryRowMatch | undefined {
-  const query = normalize(proteinSequence)
-  if (!query || !msaText.trim()) {
-    return undefined
+): MsaQueryRow {
+  if (!msaText.trim()) {
+    return { names: [] }
   }
 
-  let names: string[]
-  let parsed: { getRow: (name: string) => string }
+  let parsed
   try {
-    const msa = parseMSA(msaText)
-    names = msa.getNames()
-    parsed = msa
+    parsed = parseMSA(msaText)
   } catch {
     // a half-pasted alignment throws here on every keystroke; the caller shows
     // the field rather than an error
-    return undefined
+    return { names: [] }
   }
 
+  const names = parsed.getNames()
+  const query = normalize(proteinSequence)
+  return { names, match: query ? bestMatch(parsed, names, query) : undefined }
+}
+
+function bestMatch(
+  parsed: { getRow: (name: string) => string },
+  names: string[],
+  query: string,
+): QueryRowMatch | undefined {
   const candidates: QueryRowMatch[] = []
   for (const name of names) {
     const row = normalize(getUngappedSequence(parsed.getRow(name)))
@@ -112,21 +133,11 @@ export function detectQueryRow(
     }
   }
 
-  const order: MatchQuality[] = ['exact', 'partial', 'similar']
+  // an exact match returns above, so only these two can be here
+  const order: MatchQuality[] = ['partial', 'similar']
   return candidates.sort(
     (a, b) =>
       order.indexOf(a.quality) - order.indexOf(b.quality) ||
       b.identity - a.identity,
   )[0]
-}
-
-export function getMsaRowNames(msaText: string): string[] {
-  if (!msaText.trim()) {
-    return []
-  }
-  try {
-    return parseMSA(msaText).getNames()
-  } catch {
-    return []
-  }
 }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { detectQueryRow, getMsaRowNames } from './detectQueryRow'
+import { findQueryRow } from './detectQueryRow'
 
 /**
  * The MSA row name to launch with, found by sequence rather than typed.
@@ -15,19 +15,16 @@ export function useQueryRowName(msaText: string, proteinSequence: string) {
 
   // parsing runs on every keystroke in the paste box otherwise, and an
   // alignment of a few hundred rows is not free
-  const { detected, names } = useMemo(
-    () => ({
-      detected: detectQueryRow(msaText, proteinSequence),
-      names: getMsaRowNames(msaText),
-    }),
+  const { names, match } = useMemo(
+    () => findQueryRow(msaText, proteinSequence),
     [msaText, proteinSequence],
   )
 
   return {
-    detected,
+    detected: match,
     names,
-    querySeqName: override ?? detected?.name ?? '',
+    querySeqName: override ?? match?.name ?? '',
     setQuerySeqName: setOverride,
-    isAutoDetected: override === undefined && !!detected,
+    isAutoDetected: override === undefined && !!match,
   }
 }
