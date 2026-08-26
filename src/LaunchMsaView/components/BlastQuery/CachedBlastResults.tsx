@@ -51,6 +51,26 @@ function getResultDisplayName(result: CachedBlastResult): string {
     : (result.geneId ?? result.transcriptId ?? 'Unknown')
 }
 
+/**
+ * How the row was produced: `uniprotkb_swissprot / blastp / clustalo`, or
+ * `swissprot / phmmer` for a row phmmer aligned as it searched and that
+ * therefore ran no aligner. Each part is dropped when absent rather than
+ * printed empty — `msaAlgorithm` became optional when phmmer arrived, and a
+ * phmmer row read `(undefined)` until this stopped assuming one.
+ *
+ * `blastProgram` is the older field, written only while the plugin still
+ * queried NCBI directly and blastp/quick-blastp was a real choice.
+ */
+export function describeSearch(result: CachedBlastResult) {
+  return [
+    result.blastDatabase,
+    result.searchProgram ?? result.blastProgram ?? 'blastp',
+    result.msaAlgorithm,
+  ]
+    .filter(Boolean)
+    .join(' / ')
+}
+
 const CachedBlastResults = observer(function ({
   model,
   handleClose,
@@ -149,7 +169,7 @@ const CachedBlastResults = observer(function ({
               }}
             >
               <ListItemText
-                primary={`${getResultDisplayName(result)} - ${result.blastDatabase}${result.blastProgram ? `/${result.blastProgram}` : ''} (${result.msaAlgorithm})`}
+                primary={`${getResultDisplayName(result)} - ${describeSearch(result)}`}
                 secondary={`${new Date(result.timestamp).toLocaleString()} - Seq: ${result.proteinSequence.slice(0, 30)}...`}
               />
             </ListItemButton>
