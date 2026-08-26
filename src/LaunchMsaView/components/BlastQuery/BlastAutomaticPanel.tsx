@@ -39,6 +39,12 @@ const useStyles = makeStyles()({
   selectField: {
     width: 150,
   },
+  // wider than the rest because the values are what the user came to read, and
+  // `uniprotkb_swissprot` is 19 characters — at 150 the field showed
+  // `uniprotkb_swis…`, which does not distinguish it from `uniprotkb_trembl`
+  databaseField: {
+    width: 230,
+  },
   cachedResultsAccordion: {
     marginTop: 20,
   },
@@ -106,7 +112,7 @@ const BlastAutomaticPanel = observer(function ({
         <TextField2
           variant="outlined"
           label="Database"
-          className={classes.selectField}
+          className={classes.databaseField}
           select
           value={search.database}
           onChange={event => {
