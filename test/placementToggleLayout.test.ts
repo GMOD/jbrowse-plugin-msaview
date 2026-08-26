@@ -71,7 +71,7 @@ beforeAll(async () => {
 }, 120_000)
 
 afterAll(async () => {
-  await browser.close()
+  await browser?.close()
   fs.rmSync(dir, { recursive: true, force: true })
 })
 

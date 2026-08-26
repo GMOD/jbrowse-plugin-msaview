@@ -51,8 +51,13 @@ export interface TaxonomyInfo {
 }
 
 export async function fetchTaxonomyInfo(
-  taxids: number[],
+  taxidsWithRepeats: number[],
 ): Promise<Map<number, TaxonomyInfo>> {
+  // callers pass one taxid per alignment row, and a BLAST hit list is several
+  // rows per species: 100 albumin hits are maybe 50 taxa, and asking as they
+  // came did 100 IndexedDB reads and sent eutils 100 ids for 50 answers. The
+  // result is keyed by taxid, so no caller can tell the difference
+  const taxids = [...new Set(taxidsWithRepeats)]
   const result = new Map<number, TaxonomyInfo>()
   const uncachedTaxids: number[] = []
   const cachedResults = await getCachedTaxonomies(taxids)

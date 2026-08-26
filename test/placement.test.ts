@@ -117,8 +117,10 @@ describe('spec placement', () => {
   }, 180_000)
 
   afterAll(async () => {
-    await browser.close()
-    await stopServer(server)
+    await browser?.close()
+    if (server) {
+      await stopServer(server)
+    }
   })
 
   it('splitRight puts the alignment in its own cell beside the genome view', async () => {

@@ -56,16 +56,10 @@ export async function launchMSA({
       onProgress(`Re-checking MSA status in... ${s}`)
     },
   })
-  return {
-    msa: await fetchEbiResult({
-      tool: algorithm,
-      jobId,
-      type: config.msaResult,
-    }),
-    tree: await fetchEbiResult({
-      tool: algorithm,
-      jobId,
-      type: config.treeResult,
-    }),
-  }
+  // one finished job, two result files, neither derived from the other
+  const [msa, tree] = await Promise.all([
+    fetchEbiResult({ tool: algorithm, jobId, type: config.msaResult }),
+    fetchEbiResult({ tool: algorithm, jobId, type: config.treeResult }),
+  ])
+  return { msa, tree }
 }
