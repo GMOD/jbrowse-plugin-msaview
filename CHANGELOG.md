@@ -1,3 +1,44 @@
+## [3.4.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.3.0...v3.4.0) (2026-08-26)
+
+### Bug Fixes
+
+- Show progress and errors for an ortholog launch, not just BLAST ([32471f8](https://github.com/GMOD/jbrowse-plugin-msaview/commit/32471f8bc2b94bbaaa2c1ac1c867e9fb23575a87))
+- A query row the alignment does not have maps to nothing, not column 0 ([2e4d6df](https://github.com/GMOD/jbrowse-plugin-msaview/commit/2e4d6df5f3a6d4ec27f3026f57c2e849659ddc56))
+- A cached phmmer result no longer lists its aligner as "(undefined)" ([e816bde](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e816bdeec3ce86cab71a493a21fced6c78b919e4))
+- Widen the database field so its value is readable ([59b8492](https://github.com/GMOD/jbrowse-plugin-msaview/commit/59b8492272f73fd51a7624f7569fefe854340129))
+
+### Chores
+
+- Guard the deps the host supplies, and the typescript eslint can load ([8484ad6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/8484ad63c4b6d41108f75ba0b13002f19c241362))
+- Replace eslint and prettier with oxlint and oxfmt ([e2de8bf](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e2de8bfc38af19eeb2f79a4f0dd02f0996ba2ec1))
+- Format the captured metadata fixture ([cb6e7dd](https://github.com/GMOD/jbrowse-plugin-msaview/commit/cb6e7dd3261a0053380d91883cd16c2fb88c4940))
+- Check phmmer's databases and the tree tool against EBI too ([6fd6b86](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6fd6b86d9f4f1fb5daef02ab3e57f1cc8dcdc8bc))
+- Drop defaultSearchProgram, which nothing reads ([290e3e1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/290e3e150d68642a789c4dc095a1cbe259f14496))
+
+### Documentation
+
+- Docs: the phmmer query row must throw, and a real change can hide under the ([736bc67](https://github.com/GMOD/jbrowse-plugin-msaview/commit/736bc674a57249c23086953330c83cfbb2d48974))
+
+### Features
+
+- Add phmmer as a search program, and use its alignment as-is ([c36882d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c36882d935e55eed832f9a39d09ec3af82ef14e3))
+
+### Performance Improvements
+
+- Ask NCBI and EBI once for what they were asked twice for ([f15bdc7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f15bdc70a361000a5127b9bef67df58ca2a634b9))
+
+### Refactoring
+
+- Parse a pasted alignment once per keystroke, not twice ([4bde79a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4bde79a6d41f187436071547323adfa1ea6e5cc1))
+- Let the program decide the database's type, not a cast ([54579d5](https://github.com/GMOD/jbrowse-plugin-msaview/commit/54579d5104694136ebbed038e74ce0662ea03672))
+
+### Tests
+
+- Check the pipeline end to end against EBI, and measure it ([3db0b5b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3db0b5b9918abd8f640ea465089376579f336fdf))
+- Screenshot the rendered alignment and the launch dialog ([65088e4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/65088e435239f6cf770e11b606818ed93434c3fd))
+- Cover the row naming without needing the network ([7446339](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7446339f737c3f2e2ca483fd0ca922894ac7a316))
+- Recapture the references against the rebased panel ([eab3a34](https://github.com/GMOD/jbrowse-plugin-msaview/commit/eab3a349234ce10c8de8bbf63f1e5adba6b1c2ca))
+
 ## [3.3.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.2.0...v3.3.0) (2026-08-25)
 
 ### Documentation
