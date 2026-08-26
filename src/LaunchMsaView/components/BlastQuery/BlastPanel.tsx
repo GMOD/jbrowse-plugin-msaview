@@ -4,15 +4,15 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import { IconButton } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
-import BlastAutomaticPanel from './BlastAutomaticPanel'
-import BlastManualPanel from './BlastManualPanel'
-import BlastMethodSelector from './BlastMethodSelector'
-import BlastSettingsDialog from './BlastSettingsDialog'
 import {
   DEFAULT_EBI_EMAIL,
   EBI_EMAIL_STORAGE_KEY,
 } from '../../../utils/ebiJobDispatcher'
 import { useLocalStorage } from '../../../utils/useLocalStorage'
+import BlastAutomaticPanel from './BlastAutomaticPanel'
+import BlastManualPanel from './BlastManualPanel'
+import BlastMethodSelector from './BlastMethodSelector'
+import BlastSettingsDialog from './BlastSettingsDialog'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 

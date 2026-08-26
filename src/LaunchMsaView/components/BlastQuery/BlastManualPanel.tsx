@@ -5,7 +5,6 @@ import { Alert, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { BASE_BLAST_URL } from './consts'
 import ExternalLink from '../../../components/ExternalLink'
 import TextField2 from '../../../components/TextField2'
 import { useQueryRowName } from '../../useQueryRowName'
@@ -20,6 +19,7 @@ import QueryRowSelector from '../QueryRowSelector'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
+import { BASE_BLAST_URL } from './consts'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 

@@ -5,7 +5,6 @@ import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { launchView } from './launchView'
 import TextField2 from '../../../components/TextField2'
 import { useQueryRowName } from '../../useQueryRowName'
 import { getGeneDisplayName, getLinearGenomeView } from '../../util'
@@ -14,6 +13,7 @@ import QueryRowSelector from '../QueryRowSelector'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
+import { launchView } from './launchView'
 
 import type {
   AbstractTrackModel,

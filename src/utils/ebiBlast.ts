@@ -1,7 +1,7 @@
 import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
-import type { BlastHit } from './types'
 import type { BlastDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
+import type { BlastHit } from './types'
 
 const TOOL = 'ncbiblast'
 

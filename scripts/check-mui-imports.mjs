@@ -14,9 +14,8 @@
 // probe that way, and error-paged the launch dialog on every host.
 //
 // So compare what src/ imports against what the host actually re-exports.
-import fs from 'node:fs'
-import path from 'node:path'
 import { execSync } from 'node:child_process'
+import fs from 'node:fs'
 
 const MUI_REEXPORTS = 'node_modules/@jbrowse/core/esm/ReExports/MuiReExports.js'
 

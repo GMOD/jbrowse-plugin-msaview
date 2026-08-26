@@ -26,6 +26,8 @@ jobs:
         run: pnpm build
       - name: Lint
         run: pnpm lint
+      - name: Format
+        run: pnpm check-format
       - name: No source file git would call binary
         run: pnpm check-text-source
       - name: EBI still accepts every database and tool the panel offers

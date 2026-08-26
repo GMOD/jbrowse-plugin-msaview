@@ -11,11 +11,6 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import CachedBlastResults from './CachedBlastResults'
-import MsaAlgorithmSelect from './MsaAlgorithmSelect'
-import { blastLaunchView } from './blastLaunchView'
-import { blastDatabaseOptions, defaultBlastDatabase } from './consts'
-import { useCachedBlastResults } from './useCachedBlastResults'
 import TextField2 from '../../../components/TextField2'
 import {
   getBlastViewTitle,
@@ -26,6 +21,11 @@ import LaunchPanelContent from '../LaunchPanelContent'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
+import CachedBlastResults from './CachedBlastResults'
+import MsaAlgorithmSelect from './MsaAlgorithmSelect'
+import { blastLaunchView } from './blastLaunchView'
+import { blastDatabaseOptions, defaultBlastDatabase } from './consts'
+import { useCachedBlastResults } from './useCachedBlastResults'
 
 import type { BlastDatabase, MsaAlgorithm } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'

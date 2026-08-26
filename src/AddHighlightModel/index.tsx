@@ -2,8 +2,8 @@ import React from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 
-import HighlightComponents from './HighlightComponents'
 import { isMsaView } from '../MsaViewPanel/model'
+import HighlightComponents from './HighlightComponents'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'

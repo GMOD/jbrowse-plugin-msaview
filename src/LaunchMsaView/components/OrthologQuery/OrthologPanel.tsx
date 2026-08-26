@@ -4,11 +4,6 @@ import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import OrthologSourceSelect, {
-  ORTHOLOG_SOURCE_STORAGE_KEY,
-} from './OrthologSourceSelect'
-import QuerySpeciesSelect from './QuerySpeciesSelect'
-import { orthologLaunchView } from './orthologLaunchView'
 import TextField2 from '../../../components/TextField2'
 import { defaultMaxSpecies } from '../../../utils/ncbiOrthologs'
 import { useLocalStorage } from '../../../utils/useLocalStorage'
@@ -23,6 +18,11 @@ import LaunchPanelContent from '../LaunchPanelContent'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
+import OrthologSourceSelect, {
+  ORTHOLOG_SOURCE_STORAGE_KEY,
+} from './OrthologSourceSelect'
+import QuerySpeciesSelect from './QuerySpeciesSelect'
+import { orthologLaunchView } from './orthologLaunchView'
 
 import type { OrthologSource } from '../../../MsaViewPanel/model'
 import type { MsaAlgorithm } from '../BlastQuery/consts'

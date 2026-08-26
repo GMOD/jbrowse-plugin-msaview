@@ -2,8 +2,8 @@ import React from 'react'
 
 import { MenuItem } from '@mui/material'
 
-import { msaAlgorithms } from './consts'
 import TextField2 from '../../../components/TextField2'
+import { msaAlgorithms } from './consts'
 
 import type { MsaAlgorithm } from './consts'
 

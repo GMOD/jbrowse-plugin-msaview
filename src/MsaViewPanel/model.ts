@@ -25,11 +25,11 @@ import {
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
 
-import type { MafRegion, MsaViewInitState } from './types'
 import type {
   BlastDatabase,
   MsaAlgorithm,
 } from '../LaunchMsaView/components/BlastQuery/consts'
+import type { MafRegion, MsaViewInitState } from './types'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'

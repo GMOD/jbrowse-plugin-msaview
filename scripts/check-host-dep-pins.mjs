@@ -23,18 +23,24 @@
 //
 // typescript is a separate pin with the same "looks harmless" quality.
 // TypeScript 7's package entry is a stub -- `require('typescript')` yields
-// `{version, versionMajorMinor}` and nothing else -- so everything reading the
-// compiler API through it breaks at once. Here that is typescript-eslint, which
-// refuses to load and takes `pnpm lint` with it, and preversion runs lint.
-// jbrowse-components hit the same wall across six packages and split the
-// versions (see its scripts/check-typescript-pin.ts). The check reads
-// typescript-eslint's own peer range, so it lifts itself once a release
-// supports the newer compiler.
+// `{version, versionMajorMinor}` and nothing else -- so anything reading the
+// compiler API through the ambient install breaks at once. jbrowse-components
+// hit that across six packages (see its scripts/check-typescript-pin.ts).
+//
+// Here the only thing still reading it is typescript-eslint, which backs the
+// `lint:eslint` fallback: it refuses to load against TS 7 outright. Measured
+// 2026-08-25, `oxlint --type-aware` is NOT affected -- oxlint-tsgolint carries
+// its own compiler, and caught a planted no-unnecessary-type-assertion under
+// both 6.0.3 and 7.0.2. So dropping the eslint fallback would free typescript
+// to move; keeping it is what holds this pin.
+//
+// The check reads typescript-eslint's own peer range rather than hardcoding a
+// major, so it lifts itself once a release supports the newer compiler.
 //
 // Run: pnpm check-host-dep-pins
 import fs from 'node:fs'
-import path from 'node:path'
 import { createRequire } from 'node:module'
+import path from 'node:path'
 
 const HOST_SUPPLIED = ['mobx', 'mobx-react', '@jbrowse/mobx-state-tree']
 
@@ -117,7 +123,7 @@ if (
 ) {
   problems.push(
     `typescript ${tsVersion} is outside typescript-eslint's peer range ` +
-      `"${tsEslintPeer}", so it will refuse to load and pnpm lint will fail. ` +
+      `"${tsEslintPeer}", so it refuses to load and pnpm lint:eslint fails. ` +
       `Hold typescript below ${upperBound} until typescript-eslint supports it.`,
   )
 }

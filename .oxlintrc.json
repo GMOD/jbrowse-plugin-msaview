@@ -1,0 +1,113 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "import", "react", "oxc", "vitest"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "es2026": true,
+    "node": true
+  },
+  "rules": {
+    "eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrors": "none",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "eslint/curly": "error",
+    "eslint/object-shorthand": "error",
+    "eslint/one-var": ["error", "never"],
+    "eslint/no-empty": "off",
+    "eslint/no-console": ["warn", { "allow": ["error", "warn"] }],
+    "eslint/no-unsafe-optional-chaining": "off",
+
+    "import/export": "off",
+
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/no-conditional-expect": "off",
+    "vitest/no-standalone-expect": "off",
+    "vitest/no-focused-tests": "error",
+    "vitest/no-identical-title": "error",
+
+    "react/no-unescaped-entities": "off",
+    "react/no-is-mounted": "off",
+    "react/rules-of-hooks": "error",
+    "react/no-unstable-nested-components": ["error", { "allowAsProps": true }],
+
+    "unicorn/no-new-array": "off",
+    "unicorn/no-empty-file": "off",
+    "unicorn/no-useless-spread": "off",
+    "oxc/erasing-op": "off",
+    "oxc/no-accumulating-spread": "error",
+
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-unnecessary-boolean-literal-compare": "error",
+    "typescript/no-unnecessary-template-expression": "error",
+    "typescript/no-unnecessary-type-arguments": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/non-nullable-type-assertion-style": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-find": "error",
+    "typescript/prefer-includes": "error",
+    "typescript/prefer-string-starts-ends-with": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+
+    "typescript/no-deprecated": "off",
+    "typescript/no-explicit-any": "off",
+    "typescript/explicit-module-boundary-types": "off",
+    "typescript/ban-ts-comment": "off",
+    "typescript/no-unnecessary-type-parameters": "off",
+    "typescript/no-misused-promises": "off",
+    "typescript/no-base-to-string": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-return": "off",
+    "typescript/restrict-plus-operands": "off",
+    "typescript/restrict-template-expressions": "off",
+    "typescript/prefer-nullish-coalescing": "off",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/require-await": "off",
+    "typescript/no-empty-function": "off",
+    "typescript/no-extraneous-class": "off",
+    "typescript/unbound-method": "off",
+    "typescript/no-dynamic-delete": "off",
+    "typescript/return-await": "off"
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "rules": {
+        "eslint/no-restricted-globals": ["error", "Buffer"]
+      }
+    },
+    {
+      "files": ["scripts/**", "test/**", "ucsc/**"],
+      "rules": {
+        "eslint/no-console": "off"
+      }
+    },
+    {
+      "files": ["test/**"],
+      "rules": {
+        "typescript/no-unnecessary-condition": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist",
+    ".test-jbrowse*",
+    "test-screenshots",
+    "esbuild.mjs",
+    "eslint.config.mjs"
+  ]
+}

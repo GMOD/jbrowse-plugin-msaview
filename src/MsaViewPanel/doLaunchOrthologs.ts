@@ -9,8 +9,8 @@ import {
 import { fetchPantherOrthologs } from '../utils/pantherOrthologs'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
-import type { JBrowsePluginMsaViewModel } from './model'
 import type { OrthologRow } from '../utils/ncbiOrthologs'
+import type { JBrowsePluginMsaViewModel } from './model'
 
 interface Representative {
   accession: string

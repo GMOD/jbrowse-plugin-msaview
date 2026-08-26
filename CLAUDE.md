@@ -75,18 +75,52 @@ override would silence the symptom and keep the rubber stamp.
 
 **typescript stays on 6.x** for an unrelated reason with the same shape.
 TypeScript 7's package entry is a stub -- `require('typescript')` yields
-`{version, versionMajorMinor}` and nothing else -- so everything reading the
-compiler API through it breaks at once. Here that is typescript-eslint, which
-refuses to load and takes `pnpm lint` with it, and `preversion` runs lint.
-oxlint is not an escape hatch: jbrowse-components found its type-aware pass read
-every `ts.Node` as an error type under TS 7, alongside typescript-eslint and two
-docs generators (see its `scripts/check-typescript-pin.ts`).
+`{version, versionMajorMinor}` and nothing else -- so anything reading the
+compiler API through the ambient install breaks at once. jbrowse-components hit
+that across six packages (see its `scripts/check-typescript-pin.ts`).
+
+Here exactly one thing still reads it: typescript-eslint, which backs the
+`lint:eslint` fallback and refuses to load against TS 7. `oxlint --type-aware`
+is not affected -- measured 2026-08-25, oxlint-tsgolint carries its own compiler
+and caught a planted `no-unnecessary-type-assertion` under both 6.0.3 and 7.0.2.
+So the pin is the price of keeping the eslint fallback, and dropping that
+fallback is the one-step way to free typescript. Decide it deliberately rather
+than discovering it during a bump.
 
 `pnpm check-host-dep-pins` enforces both, and runs in CI and from `preversion`.
 It resolves each package from the plugin and from `@jbrowse/core` and compares
 the directories on disk, so it catches a second copy however it arrives; the
 typescript half reads typescript-eslint's own peer range and so lifts itself
 once a release supports the newer compiler.
+
+## oxlint is the linter, and `test/` needs its own tsconfig to be type-checked
+
+`pnpm lint` is `oxlint --type-aware`; `pnpm format` and `pnpm check-format` are
+oxfmt, which handles md/json/yaml here as well as ts/tsx, so prettier is gone.
+`pnpm lint:eslint` keeps the old eslint config as a fallback -- it is what pins
+typescript, per the section above.
+
+**oxlint lints `test/`, `scripts/` and `ucsc/`; eslint only ever linted
+`src/`.** Turning it on found a dead import and an unused mock that had sat in
+`test/` for as long as those files existed. Expect the same the next time
+coverage widens.
+
+**`tsconfig.json` has `"include": ["src"]`, so type-aware rules read `test/`
+under default compiler options unless `test/tsconfig.json` extends the root
+one.** Without it the repo's `noUncheckedIndexedAccess` does not apply, every
+`arr[0]` looks non-nullable, and oxlint reports 28 bogus
+`no-unnecessary-type-assertion` errors telling you to delete `!` that is load
+bearing. The findings look exactly like real ones. If a type-aware rule suddenly
+lights up a directory, check that directory is in a tsconfig before believing
+it.
+
+**`typescript/no-unnecessary-condition` is off for `test/`** because the types
+there describe the happy path and the tests exist to survive its absence. Two
+concrete cases: `let browser: Browser` is a lie until `beforeAll` succeeds, so
+`await browser?.close()` is what keeps a setup failure from being buried under
+`Cannot read properties of undefined (reading 'close')`; and the host feature
+detects deliberately probe for members the types claim are always there. The
+rule is right about the types and wrong about the code.
 
 ## Don't drop the v3.7.0 leg from the integration matrix
 

@@ -22,14 +22,9 @@ vi.mock('../src/LaunchMsaView/components/useFeatureSequence', () => ({
   })),
 }))
 
-import {
-  featureMatchesId,
-  getId,
-  getSortedTranscriptFeatures,
-} from '../src/LaunchMsaView/util'
 import { useFeatureSequence } from '../src/LaunchMsaView/components/useFeatureSequence'
+import { getId, getSortedTranscriptFeatures } from '../src/LaunchMsaView/util'
 
-const mockFeatureMatchesId = vi.mocked(featureMatchesId)
 const mockGetId = vi.mocked(getId)
 const mockGetSortedTranscriptFeatures = vi.mocked(getSortedTranscriptFeatures)
 const mockUseFeatureSequence = vi.mocked(useFeatureSequence)

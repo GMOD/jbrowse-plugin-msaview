@@ -3,8 +3,8 @@ import React from 'react'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
-import { hasHoverPosition, useStyles } from './util'
 import { isMsaView } from '../MsaViewPanel/model'
+import { hasHoverPosition, useStyles } from './util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 

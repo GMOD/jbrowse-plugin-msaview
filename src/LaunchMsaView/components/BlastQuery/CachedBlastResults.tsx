@@ -14,14 +14,14 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import { blastLaunchViewFromCache } from './blastLaunchView'
-import { useCachedBlastResults } from './useCachedBlastResults'
 import {
   featureMatchesId,
   getGeneIdentifiers,
   getLinearGenomeView,
   getSortedTranscriptFeatures,
 } from '../../util'
+import { blastLaunchViewFromCache } from './blastLaunchView'
+import { useCachedBlastResults } from './useCachedBlastResults'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'

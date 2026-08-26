@@ -5,9 +5,9 @@ import { queryEbiBlast } from '../utils/ebiBlast'
 import { launchMSA } from '../utils/msa'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
-import type { JBrowsePluginMsaViewModel } from './model'
 import type { TaxonomyInfo } from '../utils/taxonomyNames'
 import type { BlastHitDescription } from '../utils/types'
+import type { JBrowsePluginMsaViewModel } from './model'
 
 export async function doLaunchBlast({
   self,

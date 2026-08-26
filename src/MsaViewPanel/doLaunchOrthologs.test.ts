@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { doLaunchOrthologs } from './doLaunchOrthologs'
 import { launchMSA } from '../utils/msa'
 import {
   defaultMaxSpecies,
@@ -10,9 +9,10 @@ import {
 } from '../utils/ncbiOrthologs'
 import { fetchPantherOrthologs } from '../utils/pantherOrthologs'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
+import { doLaunchOrthologs } from './doLaunchOrthologs'
 
-import type { JBrowsePluginMsaViewModel } from './model'
 import type { OrthologRow } from '../utils/ncbiOrthologs'
+import type { JBrowsePluginMsaViewModel } from './model'
 
 // Every network call is mocked and nothing else is. What is under test is the
 // argument shaping either side of those calls -- which species get asked for,

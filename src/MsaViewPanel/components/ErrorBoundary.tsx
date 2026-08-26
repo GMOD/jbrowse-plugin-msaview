@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react'
 import React, { Component } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
+
+import type { ReactNode } from 'react'
 
 interface Props {
   children: ReactNode

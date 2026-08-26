@@ -4,8 +4,8 @@ import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
-import SubmitCancelActions from './SubmitCancelActions'
 import { LAUNCH_PLACEMENT_KEY } from '../../utils/workspaces'
+import SubmitCancelActions from './SubmitCancelActions'
 
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 

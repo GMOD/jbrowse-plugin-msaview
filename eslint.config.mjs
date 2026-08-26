@@ -1,8 +1,8 @@
 import eslint from '@eslint/js'
-import { defineConfig } from 'eslint/config'
 import { importX } from 'eslint-plugin-import-x'
 import eslintPluginReact from 'eslint-plugin-react'
 import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
+import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
@@ -60,36 +60,9 @@ export default defineConfig(
       ],
 
       'import-x/no-unresolved': 'off',
-      'import-x/order': [
-        'error',
-        {
-          named: true,
-          'newlines-between': 'always',
-          alphabetize: {
-            order: 'asc',
-          },
-          groups: [
-            'builtin',
-            ['external', 'internal'],
-            ['parent', 'sibling', 'index', 'object'],
-            'type',
-          ],
-          pathGroups: [
-            {
-              group: 'builtin',
-              pattern: 'react',
-              position: 'before',
-            },
-            {
-              group: 'external',
-              pattern: '@mui/icons-material',
-              position: 'after',
-            },
-          ],
-
-          pathGroupsExcludedImportTypes: ['react'],
-        },
-      ],
+      // oxfmt sorts imports (see .oxfmtrc.json sortImports); a lint rule
+      // asserting a different order just fights the formatter
+      'import-x/order': 'off',
 
       'one-var': ['error', 'never'],
       'react/no-unescaped-entities': 'off',

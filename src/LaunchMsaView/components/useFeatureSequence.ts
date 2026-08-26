@@ -1,8 +1,8 @@
 import { getSession } from '@jbrowse/core/util'
 
+import { useFetch } from '../../utils/useFetch'
 import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { fetchSeq } from './fetchSeq'
-import { useFetch } from '../../utils/useFetch'
 
 import type { Feature } from '@jbrowse/core/util'
 

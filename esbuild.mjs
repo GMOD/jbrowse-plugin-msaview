@@ -1,8 +1,9 @@
 import fs from 'node:fs'
 import http from 'node:http'
-import * as esbuild from 'esbuild'
+
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import JBrowseReExports from '@jbrowse/core/ReExports/list'
+import * as esbuild from 'esbuild'
 import prettyBytes from 'pretty-bytes'
 
 const isWatch = process.argv.includes('--watch')
