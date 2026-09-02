@@ -45,6 +45,30 @@ export async function jsonfetch<T>(url: string, args?: RequestInit) {
   return response.json() as Promise<T>
 }
 
-export function timeout(time: number) {
-  return new Promise(res => setTimeout(res, time))
+export function timeout(time: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'))
+      return
+    }
+    const id = setTimeout(resolve, time)
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(id)
+        reject(new DOMException('Aborted', 'AbortError'))
+      },
+      { once: true },
+    )
+  })
+}
+
+/**
+ * A cancelled launch has to be told apart from a failed one: it must not render
+ * the "failed" panel, and it must not touch a model that may already be gone.
+ * `fetch` and the sleep above both reject with a DOMException named AbortError,
+ * which subclasses Error.
+ */
+export function isAbortError(e: unknown) {
+  return e instanceof Error && e.name === 'AbortError'
 }

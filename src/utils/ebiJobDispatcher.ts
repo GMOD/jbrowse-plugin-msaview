@@ -1,4 +1,4 @@
-import { textfetch } from './fetch'
+import { isAbortError, textfetch } from './fetch'
 import { pollLoop } from './poll'
 import { readLocalStorage } from './useLocalStorage'
 
@@ -35,13 +35,16 @@ const FAILED_STATUSES = new Set(['ERROR', 'FAILURE', 'NOT_FOUND'])
 export async function submitEbiJob({
   tool,
   params,
+  signal,
 }: {
   tool: string
   params: Record<string, string>
+  signal?: AbortSignal
 }) {
   const jobId = await textfetch(`${EBI_BASE}/${tool}/run`, {
     method: 'POST',
     body: new URLSearchParams({ email: getEbiEmail(), ...params }),
+    signal,
   })
   return jobId.trim()
 }
@@ -64,21 +67,31 @@ export async function waitForEbiJob({
   jobId,
   intervalSeconds = 10,
   onCountdown,
+  signal,
 }: {
   tool: string
   jobId: string
   intervalSeconds?: number
   onCountdown: (secondsRemaining: number) => void
+  signal?: AbortSignal
 }) {
   let consecutiveFailures = 0
   await pollLoop({
     intervalSeconds,
     onCountdown,
+    signal,
     check: async () => {
       let status: string
       try {
-        status = (await textfetch(`${EBI_BASE}/${tool}/status/${jobId}`)).trim()
+        status = (
+          await textfetch(`${EBI_BASE}/${tool}/status/${jobId}`, { signal })
+        ).trim()
       } catch (e) {
+        // a cancelled request is the caller giving up, not EBI being
+        // unreachable, so it must end the poll rather than be retried
+        if (isAbortError(e)) {
+          throw e
+        }
         consecutiveFailures += 1
         if (consecutiveFailures >= MAX_CONSECUTIVE_STATUS_FAILURES) {
           throw new Error(
@@ -111,10 +124,12 @@ export async function fetchEbiResult({
   tool,
   jobId,
   type,
+  signal,
 }: {
   tool: string
   jobId: string
   type: string
+  signal?: AbortSignal
 }) {
-  return textfetch(`${EBI_BASE}/${tool}/result/${jobId}/${type}`)
+  return textfetch(`${EBI_BASE}/${tool}/result/${jobId}/${type}`, { signal })
 }

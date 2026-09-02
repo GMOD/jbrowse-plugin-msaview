@@ -43,9 +43,11 @@ const algorithms: Record<
 export async function launchTree({
   alignment,
   onProgress,
+  signal,
 }: {
   alignment: string
   onProgress: (arg: string) => void
+  signal?: AbortSignal
 }) {
   const tool = 'simple_phylogeny'
   onProgress('Building tree...')
@@ -58,25 +60,29 @@ export async function launchTree({
       clustering: 'Neighbour-joining',
       kimura: 'true',
     },
+    signal,
   })
   await waitForEbiJob({
     tool,
     jobId,
+    signal,
     onCountdown: s => {
       onProgress(`Re-checking tree status in... ${s}`)
     },
   })
-  return fetchEbiResult({ tool, jobId, type: 'tree' })
+  return fetchEbiResult({ tool, jobId, type: 'tree', signal })
 }
 
 export async function launchMSA({
   algorithm,
   sequence,
   onProgress,
+  signal,
 }: {
   algorithm: MsaAlgorithm
   sequence: string
   onProgress: (arg: string) => void
+  signal?: AbortSignal
 }) {
   const config = algorithms[algorithm]
 
@@ -85,18 +91,20 @@ export async function launchMSA({
   const jobId = await submitEbiJob({
     tool: algorithm,
     params: { ...config.params, sequence },
+    signal,
   })
   await waitForEbiJob({
     tool: algorithm,
     jobId,
+    signal,
     onCountdown: s => {
       onProgress(`Re-checking MSA status in... ${s}`)
     },
   })
   // one finished job, two result files, neither derived from the other
   const [msa, tree] = await Promise.all([
-    fetchEbiResult({ tool: algorithm, jobId, type: config.msaResult }),
-    fetchEbiResult({ tool: algorithm, jobId, type: config.treeResult }),
+    fetchEbiResult({ tool: algorithm, jobId, type: config.msaResult, signal }),
+    fetchEbiResult({ tool: algorithm, jobId, type: config.treeResult, signal }),
   ])
   return { msa, tree }
 }

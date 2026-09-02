@@ -64,14 +64,17 @@ export function ebiBlastResultUrl(jobId: string) {
 export async function queryEbiBlastFromJobId({
   jobId,
   onProgress,
+  signal,
 }: {
   jobId: string
   onProgress: (arg: string) => void
+  signal?: AbortSignal
 }) {
   onProgress(`Checking BLAST status for job: ${jobId}...`)
   await waitForEbiJob({
     tool: TOOL,
     jobId,
+    signal,
     onCountdown: s => {
       onProgress(`Re-checking BLAST status in... ${s}`)
     },
@@ -79,7 +82,7 @@ export async function queryEbiBlastFromJobId({
 
   const hits = normalizeEbiBlastHits(
     JSON.parse(
-      await fetchEbiResult({ tool: TOOL, jobId, type: 'json' }),
+      await fetchEbiResult({ tool: TOOL, jobId, type: 'json', signal }),
     ) as EbiBlastJson,
   )
   if (hits.length === 0) {
@@ -93,11 +96,13 @@ export async function queryEbiBlast({
   blastDatabase,
   onProgress,
   onRid,
+  signal,
 }: {
   query: string
   blastDatabase: BlastDatabase
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
+  signal?: AbortSignal
 }) {
   onProgress('Submitting to EBI BLAST...')
   const jobId = await submitEbiJob({
@@ -108,7 +113,8 @@ export async function queryEbiBlast({
       database: blastDatabase,
       sequence: query,
     },
+    signal,
   })
   onRid(jobId)
-  return queryEbiBlastFromJobId({ jobId, onProgress })
+  return queryEbiBlastFromJobId({ jobId, onProgress, signal })
 }

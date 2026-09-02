@@ -137,11 +137,13 @@ export async function queryPhmmer({
   database,
   onProgress,
   onRid,
+  signal,
 }: {
   query: string
   database: PhmmerDatabase
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
+  signal?: AbortSignal
 }) {
   onProgress('Submitting to EBI phmmer...')
   const jobId = await submitEbiJob({
@@ -152,19 +154,21 @@ export async function queryPhmmer({
       // the alignment is the whole point of using phmmer here
       alignView: 'true',
     },
+    signal,
   })
   onRid(jobId)
 
   await waitForEbiJob({
     tool: TOOL,
     jobId,
+    signal,
     onCountdown: s => {
       onProgress(`Re-checking phmmer status in... ${s}`)
     },
   })
 
   const alignment = parsePhmmerAlignment({
-    stockholm: await fetchEbiResult({ tool: TOOL, jobId, type: 'sto' }),
+    stockholm: await fetchEbiResult({ tool: TOOL, jobId, type: 'sto', signal }),
     query,
   })
   if (alignment.rows.length === 0) {
