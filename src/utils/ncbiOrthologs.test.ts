@@ -32,6 +32,22 @@ describe('dedupeLabels', () => {
   test('falls back for a name with no usable characters', () => {
     expect(dedupeLabels(['...', '...'])).toEqual(['row', 'row_2'])
   })
+
+  test('climbs past a suffix a literal name already took', () => {
+    // a label pairs a tree leaf to its alignment row, so handing the same one
+    // to two rows merges two species into one silently. The third label is ugly
+    // and unique, which is the trade
+    expect(dedupeLabels(['human', 'human', 'human_2'])).toEqual([
+      'human',
+      'human_2',
+      'human_2_2',
+    ])
+    expect(dedupeLabels(['human_2', 'human', 'human'])).toEqual([
+      'human_2',
+      'human',
+      'human_3',
+    ])
+  })
 })
 
 describe('cleanGeneCandidate', () => {

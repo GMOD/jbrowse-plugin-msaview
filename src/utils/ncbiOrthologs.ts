@@ -273,15 +273,23 @@ function sanitize(name: string) {
  * Sanitized, unique single-token labels used identically in the FASTA headers,
  * the tree leaf names and the domain GFF seq_ids — that identity is how the
  * viewer pairs a tree leaf to its alignment row to its domain track. Collisions
- * get a numeric suffix rather than silently overwriting a row.
+ * get a numeric suffix rather than silently overwriting a row, and the suffix
+ * climbs past labels already emitted: a species genuinely named `human_2` would
+ * otherwise take the label the second `human` is about to get, merging two rows
+ * into one.
  */
 export function dedupeLabels(names: string[]) {
-  const seen = new Map<string, number>()
+  const used = new Set<string>()
   return names.map(name => {
     const base = sanitize(name) || 'row'
-    const n = seen.get(base) ?? 0
-    seen.set(base, n + 1)
-    return n === 0 ? base : `${base}_${n + 1}`
+    let label = base
+    let n = 1
+    while (used.has(label)) {
+      n += 1
+      label = `${base}_${n}`
+    }
+    used.add(label)
+    return label
   })
 }
 
