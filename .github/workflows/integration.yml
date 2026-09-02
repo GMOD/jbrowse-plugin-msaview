@@ -10,10 +10,12 @@ name: Integration
 #
 # A token would not help: the cli fetches api.github.com with no Authorization
 # header, so there is nothing to raise the limit with. Not running the duplicate
-# is the fix.
+# is the fix. Naming the branches is what does it: a push filter that only
+# ignores tags matched nothing, and no Integration run started for any of the
+# sixteen pushes to main after v3.4.0, which the release gate then refused.
 on:
   push:
-    tags-ignore:
+    branches:
       - '**'
 
 jobs:
