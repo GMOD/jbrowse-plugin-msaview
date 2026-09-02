@@ -51,15 +51,18 @@ export function timeout(time: number, signal?: AbortSignal) {
       reject(new DOMException('Aborted', 'AbortError'))
       return
     }
-    const id = setTimeout(resolve, time)
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(id)
-        reject(new DOMException('Aborted', 'AbortError'))
-      },
-      { once: true },
-    )
+    // the listener is removed on the natural path too: one signal serves every
+    // tick of a poll, and a 10-minute job is ~600 sleeps -- leaving each
+    // listener behind accumulates them all on that one signal
+    const onAbort = () => {
+      clearTimeout(id)
+      reject(new DOMException('Aborted', 'AbortError'))
+    }
+    const id = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort)
+      resolve()
+    }, time)
+    signal?.addEventListener('abort', onAbort, { once: true })
   })
 }
 
