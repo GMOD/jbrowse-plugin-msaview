@@ -11,6 +11,7 @@ import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 
 import type { OrthologRow } from '../utils/ncbiOrthologs'
 import type { JBrowsePluginMsaViewModel } from './model'
+import type { LaunchScope } from './runLaunch'
 
 interface Representative {
   accession: string
@@ -44,8 +45,10 @@ interface FoundOrthologs {
  */
 export async function doLaunchOrthologs({
   self,
+  scope,
 }: {
   self: JBrowsePluginMsaViewModel
+  scope: LaunchScope
 }) {
   const {
     taxId,
@@ -57,9 +60,7 @@ export async function doLaunchOrthologs({
     source = 'ncbi',
   } = self.orthologParams!
 
-  const onProgress = (arg: string) => {
-    self.setProgress(arg)
-  }
+  const { onProgress, act, signal } = scope
 
   const request = {
     taxId,
@@ -103,7 +104,9 @@ export async function doLaunchOrthologs({
   // token, and a collision would silently point the coordinate mapping at
   // another animal's row.
   const queryLabel = await queryRowLabel(taxId, rows)
-  self.setQuerySeqName(queryLabel)
+  act(() => {
+    self.setQuerySeqName(queryLabel)
+  })
 
   const treeMetadata: Record<string, Record<string, string>> = {
     [queryLabel]: buildQueryMetadata(self, geneId, cleanedSeq, representative),
@@ -119,6 +122,7 @@ export async function doLaunchOrthologs({
       ...rows.map(r => `>${r.label}\n${r.sequence}`),
     ].join('\n'),
     onProgress,
+    signal,
   })
 
   return {

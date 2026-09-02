@@ -13,28 +13,23 @@ import type {
   PhmmerDatabase,
 } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { JBrowsePluginMsaViewModel } from './model'
+import type { LaunchScope } from './runLaunch'
 
 type TreeMetadata = Record<string, Record<string, string>>
 
 export async function doLaunchBlast({
   self,
+  scope,
 }: {
   self: JBrowsePluginMsaViewModel
+  scope: LaunchScope
 }) {
   // kept whole rather than destructured: the database's type depends on
   // searchProgram, and pulling the two apart loses the link between them
   const params = self.blastParams!
   const { selectedTranscript } = params
   const cleanedSeq = cleanProteinSequence(params.proteinSequence)
-
-  const onProgress = (arg: string) => {
-    self.setProgress(arg)
-  }
-  // publish the job id before the first poll so the view can link out while the
-  // job is still running
-  const onRid = (r: string) => {
-    self.setRid(r)
-  }
+  const { onProgress, onRid, signal } = scope
 
   const { msa, tree, treeMetadata, rid } =
     params.searchProgram === 'phmmer'
@@ -43,6 +38,7 @@ export async function doLaunchBlast({
           database: params.blastDatabase,
           onProgress,
           onRid,
+          signal,
         })
       : await runBlast({
           query: cleanedSeq,
@@ -50,6 +46,7 @@ export async function doLaunchBlast({
           msaAlgorithm: params.msaAlgorithm,
           onProgress,
           onRid,
+          signal,
         })
 
   const treeMetadataJson = JSON.stringify(treeMetadata)
@@ -86,18 +83,21 @@ async function runBlast({
   msaAlgorithm,
   onProgress,
   onRid,
+  signal,
 }: {
   query: string
   blastDatabase: BlastDatabase
   msaAlgorithm: MsaAlgorithm
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
+  signal?: AbortSignal
 }) {
   const { hits, rid } = await queryEbiBlast({
     query,
     blastDatabase,
     onProgress,
     onRid,
+    signal,
   })
 
   onProgress('Fetching species taxonomy info...')
@@ -123,6 +123,7 @@ async function runBlast({
     algorithm: msaAlgorithm,
     sequence: [`>QUERY\n${query}`, ...sequences].join('\n'),
     onProgress,
+    signal,
   })
   return { ...result, treeMetadata, rid }
 }
@@ -139,17 +140,20 @@ async function runPhmmer({
   database,
   onProgress,
   onRid,
+  signal,
 }: {
   query: string
   database: PhmmerDatabase
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
+  signal?: AbortSignal
 }) {
   const { rows, queryRow, rid } = await queryPhmmer({
     query,
     database,
     onProgress,
     onRid,
+    signal,
   })
 
   onProgress('Fetching species taxonomy info...')
@@ -164,7 +168,7 @@ async function runPhmmer({
   })
   return {
     msa,
-    tree: await launchTree({ alignment: msa, onProgress }),
+    tree: await launchTree({ alignment: msa, onProgress, signal }),
     treeMetadata,
     rid,
   }

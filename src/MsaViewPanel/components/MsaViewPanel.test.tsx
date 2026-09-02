@@ -70,6 +70,27 @@ test('a failed init shows why', () => {
   expect(screen.getByText(/No alignment named ENST00000288602/)).toBeTruthy()
 })
 
+// a launch runs for 10+ minutes, so leaving with no way out means watching it
+test('a running launch offers a way out, and a failed one does not', () => {
+  const cancelLaunch = vi.fn()
+  panel({
+    blastParams: { proteinSequence: 'MKV' } as never,
+    progress: 'Re-checking BLAST status in... 7',
+    cancelLaunch,
+  })
+  screen.getByRole('button', { name: 'Cancel' }).click()
+  expect(cancelLaunch).toHaveBeenCalled()
+
+  cleanup()
+  panel({
+    blastParams: { proteinSequence: 'MKV' } as never,
+    progress: '',
+    error: new Error('No hits found'),
+    cancelLaunch,
+  })
+  expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull()
+})
+
 test('a running job links out to it', () => {
   panel({
     blastParams: { proteinSequence: 'MKV' } as never,

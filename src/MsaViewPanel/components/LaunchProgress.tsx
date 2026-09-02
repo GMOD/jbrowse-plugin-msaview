@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
-import { Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
@@ -12,6 +12,11 @@ import type { JBrowsePluginMsaViewModel } from '../model'
 const useStyles = makeStyles()({
   margin: {
     padding: 20,
+  },
+  progressRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
   },
 })
 
@@ -52,7 +57,20 @@ const LaunchProgress = observer(function LaunchProgress2({
         <>
           <LoadingEllipses message={message} variant="h5" />
           {rid ? <JobLink jobId={rid} /> : null}
-          <Typography>{progress || 'Initializing'}</Typography>
+          <div className={classes.progressRow}>
+            <Typography>{progress || 'Initializing'}</Typography>
+            {/* stops the polling and returns to the import form; the EBI job
+                itself runs on regardless, which is what its JobLink is for */}
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                model.cancelLaunch()
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
         </>
       )}
     </div>

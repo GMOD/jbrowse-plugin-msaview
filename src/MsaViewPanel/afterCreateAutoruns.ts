@@ -12,6 +12,7 @@ import {
   retrieveMsaData,
   storeMsaData,
 } from './msaDataStore'
+import { runLaunch } from './runLaunch'
 import { getProteinViews } from './structureConnection'
 import { getUniprotIdFromAlphaFoldUrl, hasQueryRow } from './util'
 
@@ -133,39 +134,27 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
  */
 export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
   if (self.orthologParams) {
-    void (async () => {
-      try {
-        self.setProgress('Resolving orthologs')
-        self.setError(undefined)
-        const data = await doLaunchOrthologs({ self })
-        self.setData(data)
+    runLaunch({
+      self,
+      message: 'Resolving orthologs',
+      launch: scope => doLaunchOrthologs({ self, scope }),
+      onLaunched: () => {
         self.setOrthologParams(undefined)
-      } catch (e) {
-        self.setError(e)
-        console.error(e)
-      } finally {
-        self.setProgress('')
-      }
-    })()
+      },
+    })
   }
 }
 
 export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
   if (self.blastParams) {
-    void (async () => {
-      try {
-        self.setProgress('Submitting query')
-        self.setError(undefined)
-        const data = await doLaunchBlast({ self })
-        self.setData(data)
+    runLaunch({
+      self,
+      message: 'Submitting query',
+      launch: scope => doLaunchBlast({ self, scope }),
+      onLaunched: () => {
         self.setBlastParams(undefined)
-      } catch (e) {
-        self.setError(e)
-        console.error(e)
-      } finally {
-        self.setProgress('')
-      }
-    })()
+      },
+    })
   }
 }
 

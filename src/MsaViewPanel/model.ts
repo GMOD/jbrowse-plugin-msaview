@@ -190,6 +190,7 @@ export default function stateModelFactory() {
         loadingStoredData: boolean
         isStoringData: boolean
         lastStoredData: MsaDataPayload | undefined
+        launchController: AbortController | undefined
         domainsRequested: boolean
       } => ({
         /**
@@ -219,6 +220,14 @@ export default function stateModelFactory() {
          * neighbor-joining tree, say) is recognized as needing a new one
          */
         lastStoredData: undefined,
+        /**
+         * #volatile
+         * aborts the launch currently in flight -- from the Cancel button, and
+         * from the disposer afterCreate registers, so a closed view stops
+         * polling EBI instead of running to completion and writing to a node
+         * that is gone
+         */
+        launchController: undefined,
         /**
          * #volatile
          * guards the one-shot auto-fetch of protein domains so it doesn't refire
@@ -388,6 +397,29 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setLaunchController(arg?: AbortController) {
+        self.launchController = arg
+      },
+      /**
+       * #action
+       * Abandon the launch in flight. The EBI job keeps running on their side —
+       * nothing here can recall it, and its JobLink stays valid — so this only
+       * stops the polling and the writes it would make. Dropping the params is
+       * what keeps the request from refiring; the view falls back to the import
+       * form, which is where react-msaview's own cancel leaves it too.
+       */
+      cancelLaunch() {
+        self.launchController?.abort()
+        self.launchController = undefined
+        self.blastParams = undefined
+        self.orthologParams = undefined
+        self.progress = ''
+        self.rid = undefined
+        self.error = undefined
+      },
+      /**
+       * #action
+       */
       setDomainsRequested(arg: boolean) {
         self.domainsRequested = arg
       },
@@ -449,6 +481,12 @@ export default function stateModelFactory() {
     .actions(self => ({
       afterCreate() {
         runCleanup()
+        // ties the launch to the view: closing one mid-BLAST used to leave the
+        // poller running for the job's lifetime and then call actions on a
+        // destroyed node, which surfaced as an unhandled rejection
+        addDisposer(self, () => {
+          self.launchController?.abort()
+        })
         for (const fn of [
           loadStoredData,
           storeDataToIndexedDB,
