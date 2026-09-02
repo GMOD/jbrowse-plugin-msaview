@@ -29,6 +29,7 @@
 //   node scripts/host-compat-probe.mjs --bundle dist/<name>.umd.production.min.js
 //   node scripts/host-compat-probe.mjs --bundle … --versions v4.0.0,main
 //
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
@@ -64,6 +65,34 @@ const bundle = fs.readFileSync(values.bundle, 'utf8')
 const bundleDir = path.dirname(values.bundle)
 const mainName = path.basename(values.bundle)
 
+// core@main resolves a config's `storePlugin` entries through the v2 store
+// manifest, which pins a versioned url AND a subresource-integrity hash — so a
+// substituted bundle fails SRI on that host however valid it is. The manifest
+// is rewritten so this plugin's integrity matches the candidate being served
+// (not stripped: the SRI machinery itself stays exercised), and every other
+// plugin's pin is left alone.
+const bundleIntegrity = `sha384-${crypto
+  .createHash('sha384')
+  .update(bundle)
+  .digest('base64')}`
+
+let manifestPromise
+function rewrittenStoreManifest(url) {
+  manifestPromise ??= (async () => {
+    const manifest = await (await fetch(url)).json()
+    for (const plugin of manifest.plugins ?? []) {
+      if (plugin.url?.includes(PACKAGE_PATH)) {
+        plugin.integrity = bundleIntegrity
+        for (const version of plugin.versions ?? []) {
+          version.integrity = bundleIntegrity
+        }
+      }
+    }
+    return JSON.stringify(manifest)
+  })()
+  return manifestPromise
+}
+
 // Serves the whole local dist for the plugin's store path, not just the one
 // file: a build that code-splits fetches sibling chunks by their own hashed
 // names, and answering those with the main bundle produces a failure that looks
@@ -73,6 +102,19 @@ async function serveCandidate(page) {
   page.on('request', req => {
     const url = req.url()
     const name = path.basename(new URL(url).pathname)
+    if (url.includes('/plugin-store/') && name === 'plugins.json') {
+      rewrittenStoreManifest(url)
+        .then(body =>
+          req.respond({
+            status: 200,
+            contentType: 'application/json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body,
+          }),
+        )
+        .catch(() => req.continue().catch(() => {}))
+      return
+    }
     const sibling = path.join(bundleDir, name)
     const isPluginAsset = url.includes(PACKAGE_PATH) && name.endsWith('.js')
     const body = !isPluginAsset
