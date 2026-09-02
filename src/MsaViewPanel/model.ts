@@ -249,7 +249,7 @@ export default function stateModelFactory() {
        * #method
        */
       getSequenceByRowName(rowName: string) {
-        return self.rows.find(r => r[0] === rowName)?.[1]
+        return this.getRowByName(rowName)?.[1]
       },
     }))
 
