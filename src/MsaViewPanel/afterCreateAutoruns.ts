@@ -1,4 +1,5 @@
 import { getSession } from '@jbrowse/core/util'
+import { transaction } from 'mobx'
 
 import { doLaunchBlast } from './doLaunchBlast'
 import { doLaunchOrthologs } from './doLaunchOrthologs'
@@ -15,6 +16,10 @@ import { getProteinViews } from './structureConnection'
 import { getUniprotIdFromAlphaFoldUrl, hasQueryRow } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
+import type { MsaDataPayload } from './msaDataStore'
+
+const EXPIRED_MESSAGE =
+  "This view's alignment is no longer in browser storage. Stored alignments are kept for 7 days after they were last used, and are lost when site data is cleared. Relaunch the alignment to rebuild it."
 
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   const { dataStoreId, rows } = self
@@ -24,15 +29,27 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
         self.setLoadingStoredData(true)
         const storedData = await retrieveMsaData(dataStoreId)
         if (storedData) {
-          if (storedData.msa) {
-            self.setMSA(storedData.msa)
-          }
-          if (storedData.tree) {
-            self.setTree(storedData.tree)
-          }
-          if (storedData.treeMetadata) {
-            self.setTreeMetadata(storedData.treeMetadata)
-          }
+          // one transaction, so storeDataToIndexedDB sees the restored data and
+          // the record of it together and does not write it straight back
+          transaction(() => {
+            if (storedData.msa) {
+              self.setMSA(storedData.msa)
+            }
+            if (storedData.tree) {
+              self.setTree(storedData.tree)
+            }
+            if (storedData.treeMetadata) {
+              self.setTreeMetadata(storedData.treeMetadata)
+            }
+            self.setLastStoredData(currentData(self))
+          })
+        } else {
+          // the id names nothing, so clearing it is what lets react-msaview's
+          // "Return to import form" actually return instead of landing back here
+          transaction(() => {
+            self.setDataStoreId(undefined)
+            self.setError(new Error(EXPIRED_MESSAGE))
+          })
         }
       } catch (e) {
         console.error('Failed to load MSA data from IndexedDB:', e)
@@ -43,40 +60,68 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   }
 }
 
+function currentData(self: JBrowsePluginMsaViewModel): MsaDataPayload {
+  const { msa, tree, treeMetadata } = self.data
+  return { msa, tree, treeMetadata }
+}
+
+function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
+  return (
+    !!a &&
+    a.msa === b.msa &&
+    a.tree === b.tree &&
+    a.treeMetadata === b.treeMetadata
+  )
+}
+
+/**
+ * Keep IndexedDB holding what the view holds. The first run writes a new row and
+ * records its id in the session snapshot; later runs update that row, because
+ * the alignment keeps changing after it arrives — react-msaview's
+ * "calculate neighbor-joining tree" replaces `data.tree` — and a session
+ * reopened against a stale row restores the wrong picture.
+ *
+ * `lastStoredData` is what makes that safe to run on every data change: it is
+ * the only thing separating "this is new" from "this is what we just wrote", and
+ * it is recorded whether or not the write succeeded, so a browser refusing
+ * IndexedDB (private mode) fails once rather than in a loop.
+ *
+ * A view whose data comes from a filehandle stores nothing at all: the file is
+ * the source of truth and react-msaview refetches it at startup.
+ */
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
-  const { rows, dataStoreId, isStoringData } = self
-  if (rows.length > 0 && !dataStoreId && !isStoringData) {
-    if (self.msaFilehandle || self.treeFilehandle) {
-      return
-    }
-
-    const msaData = self.data.msa
-    const treeData = self.data.tree
-
-    if (msaData || treeData) {
-      // mark as storing synchronously so re-runs of this autorun (e.g. when
-      // data observables change while the write is pending) don't kick off a
-      // duplicate write and leave an orphan IndexedDB entry
-      self.setIsStoringData(true)
-      void (async () => {
-        try {
-          const newId = generateDataStoreId()
-          const success = await storeMsaData(newId, {
-            msa: msaData,
-            tree: treeData,
-            treeMetadata: self.data.treeMetadata,
-          })
-          if (success) {
-            self.setDataStoreId(newId)
-          }
-        } catch (e) {
-          console.error('Failed to store MSA data to IndexedDB:', e)
-        } finally {
-          self.setIsStoringData(false)
-        }
-      })()
-    }
+  const { rows, dataStoreId, isStoringData, lastStoredData } = self
+  const data = currentData(self)
+  if (
+    rows.length === 0 ||
+    isStoringData ||
+    self.msaFilehandle ||
+    self.treeFilehandle ||
+    !(data.msa || data.tree) ||
+    sameData(lastStoredData, data)
+  ) {
+    return
   }
+
+  // mark as storing synchronously so re-runs of this autorun (e.g. when data
+  // observables change while the write is pending) don't kick off a duplicate
+  // write and leave an orphan IndexedDB entry
+  self.setIsStoringData(true)
+  void (async () => {
+    try {
+      const id = dataStoreId ?? generateDataStoreId()
+      if (await storeMsaData(id, data)) {
+        self.setDataStoreId(id)
+      }
+    } catch (e) {
+      console.error('Failed to store MSA data to IndexedDB:', e)
+    } finally {
+      transaction(() => {
+        self.setLastStoredData(data)
+        self.setIsStoringData(false)
+      })
+    }
+  })()
 }
 
 /**

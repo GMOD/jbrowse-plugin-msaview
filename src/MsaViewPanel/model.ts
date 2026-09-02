@@ -30,6 +30,7 @@ import type {
   MsaAlgorithm,
   PhmmerDatabase,
 } from '../LaunchMsaView/components/BlastQuery/consts'
+import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -188,6 +189,7 @@ export default function stateModelFactory() {
         error: unknown
         loadingStoredData: boolean
         isStoringData: boolean
+        lastStoredData: MsaDataPayload | undefined
         domainsRequested: boolean
       } => ({
         /**
@@ -210,6 +212,13 @@ export default function stateModelFactory() {
          * #volatile
          */
         isStoringData: false,
+        /**
+         * #volatile
+         * what IndexedDB was last known to hold for this view, so an edit made
+         * after the first write (react-msaview replacing data.tree with a
+         * neighbor-joining tree, say) is recognized as needing a new one
+         */
+        lastStoredData: undefined,
         /**
          * #volatile
          * guards the one-shot auto-fetch of protein domains so it doesn't refire
@@ -369,6 +378,12 @@ export default function stateModelFactory() {
        */
       setIsStoringData(arg: boolean) {
         self.isStoringData = arg
+      },
+      /**
+       * #action
+       */
+      setLastStoredData(arg?: MsaDataPayload) {
+        self.lastStoredData = arg
       },
       /**
        * #action

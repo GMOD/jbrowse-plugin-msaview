@@ -6,11 +6,15 @@ const DB_NAME = 'jbrowse-msaview-data'
 const DB_VERSION = 1
 const STORE_NAME = 'msa-data'
 
-interface StoredMsaData {
-  id: string
+/** the documents a view keeps in IndexedDB rather than in its session snapshot */
+export interface MsaDataPayload {
   msa?: string
   tree?: string
   treeMetadata?: string
+}
+
+interface StoredMsaData extends MsaDataPayload {
+  id: string
   timestamp: number
 }
 
@@ -33,10 +37,7 @@ export function generateDataStoreId() {
   return `msa-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
 }
 
-export async function storeMsaData(
-  id: string,
-  data: { msa?: string; tree?: string; treeMetadata?: string },
-) {
+export async function storeMsaData(id: string, data: MsaDataPayload) {
   try {
     const db = await getDB()
     const storedData: StoredMsaData = {
@@ -58,14 +59,22 @@ export async function retrieveMsaData(id: string) {
   try {
     const db = await getDB()
     const result = await db.get(STORE_NAME, id)
-    if (result) {
-      return {
-        msa: result.msa,
-        tree: result.tree,
-        treeMetadata: result.treeMetadata,
-      }
+    if (!result) {
+      return undefined
     }
-    return undefined
+    // reading counts as use, which is what makes cleanupOldData's policy
+    // "unused for 7 days" rather than "written 7 days ago" -- a session opened
+    // every day used to lose its alignment on the eighth
+    try {
+      await db.put(STORE_NAME, { ...result, timestamp: Date.now() })
+    } catch (e) {
+      console.warn('Failed to refresh MSA data timestamp:', e)
+    }
+    return {
+      msa: result.msa,
+      tree: result.tree,
+      treeMetadata: result.treeMetadata,
+    }
   } catch (e) {
     console.warn('Failed to retrieve MSA data:', e)
     return undefined
