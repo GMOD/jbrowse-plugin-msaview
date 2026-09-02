@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import {
+  cleanGeneCandidate,
   dedupeLabels,
   fetchOrthologGenes,
   fetchRepresentativeProteins,
@@ -30,6 +31,14 @@ describe('dedupeLabels', () => {
 
   test('falls back for a name with no usable characters', () => {
     expect(dedupeLabels(['...', '...'])).toEqual(['row', 'row_2'])
+  })
+})
+
+describe('cleanGeneCandidate', () => {
+  test('strips what a GFF feature carries that a gene lookup does not want', () => {
+    expect(cleanGeneCandidate(' gene:TP53 ')).toBe('TP53')
+    expect(cleanGeneCandidate('NM_000546.6')).toBe('NM_000546')
+    expect(cleanGeneCandidate('TP53')).toBe('TP53')
   })
 })
 

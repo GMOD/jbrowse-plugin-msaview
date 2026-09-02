@@ -71,6 +71,19 @@ function ncbiUrl(url: string) {
 }
 
 /**
+ * A candidate gene reference as the ortholog services know it: a GFF ID prefix
+ * (gene:TP53) and a version suffix (NM_000546.6) stripped off. Shared with
+ * pantherOrthologs, which asks PANTHER the same question with the same
+ * candidates.
+ */
+export function cleanGeneCandidate(raw: string) {
+  return raw
+    .trim()
+    .replace(/^\w+:/, '')
+    .replace(/\.\d+$/, '')
+}
+
+/**
  * A free-text gene reference -> NCBI gene id. A bare number is taken as the id
  * itself; anything else is searched as a gene name within the query taxon.
  * Several candidate identifiers are tried in order, because a JBrowse feature
@@ -89,8 +102,7 @@ export async function resolveGeneId(
     if (/^\d+$/.test(query)) {
       return { geneId: query, matched: query }
     }
-    // strip a version suffix (NM_000546.6) and any GFF ID prefix (gene:TP53)
-    const cleaned = query.replace(/^\w+:/, '').replace(/\.\d+$/, '')
+    const cleaned = cleanGeneCandidate(query)
     const term = `${cleaned}[Gene Name] AND ${taxId}[taxid]`
     const json = await jsonfetch<{
       esearchresult?: { idlist?: string[] }

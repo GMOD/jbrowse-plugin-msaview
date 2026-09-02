@@ -17,7 +17,11 @@
 // to a RefSeq accession.
 
 import { jsonfetch } from './fetch'
-import { dedupeLabels, defaultMaxSpecies } from './ncbiOrthologs'
+import {
+  cleanGeneCandidate,
+  dedupeLabels,
+  defaultMaxSpecies,
+} from './ncbiOrthologs'
 import { fetchTaxonomyInfo } from './taxonomyNames'
 
 import type { OrthologRow } from './ncbiOrthologs'
@@ -212,15 +216,6 @@ async function fetchSequences(accessions: string[]) {
   return map
 }
 
-// strip a version suffix (NM_000546.6) and any GFF ID prefix (gene:TP53), as
-// resolveGeneId does for NCBI
-function cleanCandidate(raw: string) {
-  return raw
-    .trim()
-    .replace(/^\w+:/, '')
-    .replace(/\.\d+$/, '')
-}
-
 /**
  * One `matchortho` per candidate until PANTHER maps one. A JBrowse feature
  * carries whatever its GFF/BigBed had — `id()`, `name`, `gene_name` — and only
@@ -234,7 +229,7 @@ async function matchOrthologs(
 ) {
   let matched: string | undefined
   for (const raw of candidates) {
-    const query = cleanCandidate(raw)
+    const query = cleanGeneCandidate(raw)
     if (!query) {
       continue
     }
