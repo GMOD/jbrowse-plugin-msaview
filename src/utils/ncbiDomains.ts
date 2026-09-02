@@ -97,7 +97,7 @@ function parseFeature(featureXml: string): DomainMatch | undefined {
  * domain and site annotations, keyed by both the versioned and primary
  * accession so callers can look up by whichever NCBI returned.
  */
-export function parseCddDomains(xml: string) {
+export function parseCddDomains(xml: string): Map<string, DomainMatch[]> {
   const byAccession = new Map<string, DomainMatch[]>()
   const seqRe = /<GBSeq>([\s\S]*?)<\/GBSeq>/g
   let seqMatch
@@ -132,7 +132,9 @@ export function parseCddDomains(xml: string) {
  * efetch returns them with no job submission or polling. Results are cached in
  * IndexedDB so reopening a view doesn't refetch.
  */
-export async function fetchProteinDomains(accessions: string[]) {
+export async function fetchProteinDomains(
+  accessions: string[],
+): Promise<Map<string, DomainMatch[]>> {
   const unique = [...new Set(accessions)].filter(Boolean)
   const byAccession = new Map<string, DomainMatch[]>()
 

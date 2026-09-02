@@ -4,6 +4,7 @@ import type { OrthologParams } from '../MsaViewPanel/model'
 import type { MsaViewPlacement } from '../utils/workspaces'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AbstractSessionModel } from '@jbrowse/core/util'
+import type { ColumnTrackSpec, Highlight } from 'react-msaview'
 
 interface LaunchMsaViewArgs {
   session: AbstractSessionModel
@@ -25,6 +26,15 @@ interface LaunchMsaViewArgs {
   showBranchLen?: boolean
   querySeqName?: string
   highlightColumns?: number[]
+  /**
+   * Labeled highlights in 1-based inclusive coordinates: `{row, start, end}`
+   * for residues of that row, `{start, end}` for alignment columns, `{rows}`
+   * for whole rows. Prefer this over `highlightColumns`: a residue range stays
+   * put when `allowedGappyness` changes the visible columns.
+   */
+  highlights?: Highlight[]
+  /** per-column tracks supplied as data, see react-msaview's docs/layers.md */
+  columnTracks?: ColumnTrackSpec[]
   /**
    * Build the alignment from NCBI orthologs at launch time instead of naming a
    * file: `{ taxId, geneCandidates }` is enough, and `taxa` and

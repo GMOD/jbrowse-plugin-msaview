@@ -94,8 +94,8 @@ importers:
         specifier: ^9.2.2
         version: 9.2.2(mobx@6.16.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       msa-parsers:
-        specifier: ^6.2.3
-        version: 6.2.3
+        specifier: ^6.3.0
+        version: 6.3.0
       oxfmt:
         specifier: ^0.65.0
         version: 0.65.0
@@ -124,8 +124,8 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
       react-msaview:
-        specifier: ^6.2.3
-        version: 6.2.3(0c3adce29a805627d5ace15b0268a431)
+        specifier: ^6.3.0
+        version: 6.3.0(0c3adce29a805627d5ace15b0268a431)
       rimraf:
         specifier: ^6.1.3
         version: 6.1.3
@@ -637,8 +637,8 @@ packages:
     resolution: {integrity: sha512-DPEtODWKt+QGmCg+EO36sSmKOmdjJOwtxeV/4PBnf+7jqC/P7R4YIz+/yohtqh9UZ38dbLtXIlmigPlkZy8SAA==}
     engines: {node: '>=18'}
 
-  '@jbrowse/svgcanvas@6.2.3':
-    resolution: {integrity: sha512-ugAIjun6Fifij8r4HbZjz1gOV87YFmfrA5xJYHwaRETjJ54T19/33qAF0kj9o0qmx9OW2xFnC01XrtxcJd4o6A==}
+  '@jbrowse/svgcanvas@6.3.0':
+    resolution: {integrity: sha512-iQ/xlOoZWcu8sBcnA5g6Z7aaRaNAF6B+uaZyV68DCBneOLFX8KVTsAkzdKROl9roORV5TfFh9xNbp4OBtPvaYQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2809,8 +2809,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msa-parsers@6.2.3:
-    resolution: {integrity: sha512-TBXacJxwfXxm1DZE78u9bT/5nsHxbGkLAQ04eXQ0NShLqjfYjZ/+XpO6t5HkiVH19SUSu2p+hiuT6XAVbirduA==}
+  msa-parsers@6.3.0:
+    resolution: {integrity: sha512-VtieLzXEZjZmUqRFtGx9SzFmU12rcWM0mQ2K+jNQEzw9bjf+Z8ARx+SL5LdaShjKDRCzX86k9egwYq10F9Lmpw==}
 
   nanoid@3.3.16:
     resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
@@ -3083,8 +3083,8 @@ packages:
   react-is@19.2.8:
     resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
 
-  react-msaview@6.2.3:
-    resolution: {integrity: sha512-FciPyz8z2tbB8pHi0aKDfH6oydILxZxqX7FFpRRMJQmU9HAik+6khfREDpRktqFXvfwrVqvpnOsLA43Z2K41Fw==}
+  react-msaview@6.3.0:
+    resolution: {integrity: sha512-xKqd9M7QDCGlCR4OiKfQFKRw5IYIvhRmaLh3GfYYOG7IynThzS5RN4oQXkConpiHJNO0h5c3YvXC7BrdC4Q46Q==}
     engines: {node: '>=10'}
     peerDependencies:
       '@jbrowse/core': '>=2.0.0'
@@ -4240,7 +4240,7 @@ snapshots:
 
   '@jbrowse/quick-lru@7.3.5': {}
 
-  '@jbrowse/svgcanvas@6.2.3': {}
+  '@jbrowse/svgcanvas@6.3.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -6320,7 +6320,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msa-parsers@6.2.3:
+  msa-parsers@6.3.0:
     dependencies:
       '@gmod/newick': 1.0.2
       clustal-js: 2.0.18
@@ -6623,19 +6623,19 @@ snapshots:
 
   react-is@19.2.8: {}
 
-  react-msaview@6.2.3(0c3adce29a805627d5ace15b0268a431):
+  react-msaview@6.3.0(0c3adce29a805627d5ace15b0268a431):
     dependencies:
       '@gmod/newick': 1.0.2
       '@jbrowse/core': 4.3.0(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
       '@jbrowse/mobx-state-tree': 5.13.0(mobx@6.16.1)
-      '@jbrowse/svgcanvas': 6.2.3
+      '@jbrowse/svgcanvas': 6.3.0
       '@mui/icons-material': 9.4.0(@mui/material@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react@19.2.18)(react@19.2.8)
       '@mui/material': 9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       colord: 2.10.0
       flatbush: 4.6.2
       mobx: 6.16.1
       mobx-react: 9.2.2(mobx@6.16.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      msa-parsers: 6.2.3
+      msa-parsers: 6.3.0
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 

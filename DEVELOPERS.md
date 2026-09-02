@@ -44,6 +44,8 @@ Everything else is optional.
 | `showBranchLen`    | Show branch lengths                                             |
 | `querySeqName`     | Name for query sequence                                         |
 | `highlightColumns` | Visible column indices to highlight on open                     |
+| `highlights`       | Labeled residue, column, or row highlights, see below           |
+| `columnTracks`     | Per-column tracks supplied as data (bar values or a text row)   |
 | `placement`        | Where the view lands: `stack` (default), `splitRight`, `newTab` |
 
 ### Building an alignment from a gene: `orthologParams`
@@ -112,6 +114,31 @@ session=spec-{"views":[{
   "allowedGappyness": 80
 }]}
 ```
+
+### Pointing at a residue: `highlights`
+
+A link that is about one residue should say so in that residue's own numbering.
+`highlights` takes 1-based inclusive ranges: `{row, start, end}` for residues of
+the named row, `{start, end}` for alignment columns, `{rows: [...]}` for whole
+rows, each with an optional `label` and `color`. The viewer projects a residue
+range through the alignment's gaps, so it lands on the same residues whatever
+`allowedGappyness` hides, where `highlightColumns` names visible column indices
+that shift with it.
+
+```
+session=spec-{"views":[{
+  "type": "MsaView",
+  "msaFileLocation": {"uri": "https://.../tp53-p53-orthologs.fa"},
+  "querySeqName": "human",
+  "highlights": [{"row": "human", "start": 339, "end": 350, "label": "NES"}]
+}]}
+```
+
+A connected protein3d view still lights the alignment through the volatile
+highlighted-columns channel, so its hover and click draw on top of these and
+never replace them. `columnTracks` follows the same contract for per-column
+numbers or a text row; both fields are documented in react-msaview's
+`docs/layers.md`.
 
 ### Where the view lands: `placement`
 
