@@ -14,6 +14,7 @@ import {
   getTranscriptDisplayName,
 } from '../../util'
 import MsaAlgorithmSelect from '../BlastQuery/MsaAlgorithmSelect'
+import { useStoredMsaAlgorithm } from '../BlastQuery/searchChoiceStorage'
 import LaunchPanelContent from '../LaunchPanelContent'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
@@ -25,7 +26,6 @@ import QuerySpeciesSelect from './QuerySpeciesSelect'
 import { orthologLaunchView } from './orthologLaunchView'
 
 import type { OrthologSource } from '../../../MsaViewPanel/model'
-import type { MsaAlgorithm } from '../BlastQuery/consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
@@ -51,7 +51,7 @@ const OrthologPanel = observer(function ({
     ORTHOLOG_SOURCE_STORAGE_KEY,
     'ncbi',
   )
-  const [msaAlgorithm, setMsaAlgorithm] = useState<MsaAlgorithm>('clustalo')
+  const [msaAlgorithm, setMsaAlgorithm] = useStoredMsaAlgorithm()
   const [maxSpecies, setMaxSpecies] = useState(String(defaultMaxSpecies))
 
   const geneCandidates = useMemo(() => getGeneIdentifiers(feature), [feature])
