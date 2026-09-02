@@ -24,15 +24,14 @@ import { useTranscriptSelection } from '../useTranscriptSelection'
 import CachedBlastResults from './CachedBlastResults'
 import MsaAlgorithmSelect from './MsaAlgorithmSelect'
 import { blastLaunchView } from './blastLaunchView'
+import { databaseOptionsFor, defaultSearchFor, searchPrograms } from './consts'
 import {
-  databaseOptionsFor,
-  defaultBlastDatabase,
-  defaultSearchFor,
-  searchPrograms,
-} from './consts'
+  useStoredMsaAlgorithm,
+  useStoredSearchChoice,
+} from './searchChoiceStorage'
 import { useCachedBlastResults } from './useCachedBlastResults'
 
-import type { MsaAlgorithm, SearchChoice, SearchProgram } from './consts'
+import type { SearchChoice, SearchProgram } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
@@ -70,12 +69,9 @@ const BlastAutomaticPanel = observer(function ({
   // one piece of state, not two: a program and a database that program does not
   // have is a 400 from EBI minutes after Submit, and holding them apart is what
   // would let them drift into that
-  const [search, setSearch] = useState<SearchChoice>({
-    program: 'blastp',
-    database: defaultBlastDatabase,
-  })
+  const [search, setSearch] = useStoredSearchChoice()
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
-    useState<MsaAlgorithm>('clustalo')
+    useStoredMsaAlgorithm()
   const isPhmmer = search.program === 'phmmer'
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
