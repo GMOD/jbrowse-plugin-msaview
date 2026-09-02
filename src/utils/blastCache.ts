@@ -6,11 +6,18 @@ import type {
   PhmmerDatabase,
   SearchProgram,
 } from '../LaunchMsaView/components/BlastQuery/consts'
-import type { DBSchema } from 'idb'
+import type { DBSchema, IDBPDatabase } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-blast-cache'
 const STORE_NAME = 'blast-results'
 const DB_VERSION = 2
+
+/**
+ * How many results the history keeps. Every row holds a whole alignment and its
+ * tree — megabytes each — so an unbounded store grows until the browser starts
+ * refusing writes to it, and the user never sees why.
+ */
+const MAX_CACHED_RESULTS = 50
 
 export interface CachedBlastResult {
   id: string
@@ -134,7 +141,33 @@ export async function saveBlastResult({
     geneName,
   }
   await db.put(STORE_NAME, entry)
+  await evictOldest(db)
   return entry
+}
+
+/**
+ * Drop the oldest rows until the store is back at MAX_CACHED_RESULTS.
+ *
+ * `count` first so the common save reads no values at all: without a timestamp
+ * index the oldest have to be found by loading every row, and each one is an
+ * entire alignment. Failing to evict must not fail the save — the result is
+ * already in hand and losing it to a housekeeping error would be the worse
+ * outcome.
+ */
+async function evictOldest(db: IDBPDatabase<BlastCacheDB>) {
+  try {
+    if ((await db.count(STORE_NAME)) <= MAX_CACHED_RESULTS) {
+      return
+    }
+    const all = await db.getAll(STORE_NAME)
+    const doomed = all
+      .toSorted((a, b) => a.timestamp - b.timestamp)
+      .slice(0, all.length - MAX_CACHED_RESULTS)
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    await Promise.all([...doomed.map(e => tx.store.delete(e.id)), tx.done])
+  } catch (e) {
+    console.warn('Failed to evict old BLAST cache entries:', e)
+  }
 }
 
 export async function getAllCachedResults() {
