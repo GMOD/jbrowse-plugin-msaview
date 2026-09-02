@@ -96,6 +96,16 @@ export default function LaunchMsaViewExtensionPointF(
       // directly, and so is orthologParams (the model's own autorun picks it up).
       // Only sources needing launch-time resolution go through `init`: msaUrl
       // (AlphaFold sniff) and the name-indexed bgzip block (no native loader).
+      //
+      // An init whose every field is undefined is still a truthy object, and
+      // MsaViewPanel reads any init as a launch in flight, so an inline-data
+      // launch flashed "Loading alignment" until processInit cleared it.
+      const init = {
+        msaUrl: msaFileLocation?.uri,
+        msaIndexedLocation,
+        msaName,
+        querySeqName,
+      }
       launchMsaView(session, {
         ...rest,
         data,
@@ -107,12 +117,7 @@ export default function LaunchMsaViewExtensionPointF(
               },
             }
           : {}),
-        init: {
-          msaUrl: msaFileLocation?.uri,
-          msaIndexedLocation,
-          msaName,
-          querySeqName,
-        },
+        ...(Object.values(init).some(v => v !== undefined) ? { init } : {}),
       })
 
       return args
