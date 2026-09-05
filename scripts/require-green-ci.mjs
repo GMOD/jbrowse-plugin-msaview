@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 //
 // Refuses to tag a release unless Integration is green on the exact commit being
-// tagged.
+// tagged -- pushing that commit and waiting for the run, rather than making you
+// do both by hand.
 //
 // 2.7.0 deleted the pre-4.3 contextMenuFeature branch as "unreachable dead
 // code". The v3.7.0 job in the test matrix caught it immediately and failed with
@@ -12,58 +13,122 @@
 // Every other preversion step checks the working tree. This is the only one that
 // checks whether anything has actually run the tests on it.
 //
+// The commit it pushes is the one `pnpm version` is about to tag anyway --
+// postversion pushes it either way, so waiting here only moves that push earlier
+// and buys the matrix result before the tag exists rather than after.
+//
+// CI_WAIT_MINUTES=0 restores the old behaviour: report the current state and
+// exit, never push, never wait.
+//
 // Escape hatch: ALLOW_RED_CI=1 pnpm version patch
 //
 /* global process, console */
 /* eslint-disable no-console */
 import { execFileSync } from 'node:child_process'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 const WORKFLOW = 'Integration'
+const POLL_MS = 15_000
+const WAIT_MS = Number(process.env.CI_WAIT_MINUTES ?? 45) * 60_000
+
+// A workflow that never starts is indistinguishable from one queued behind a
+// busy runner until you decide how long "never" is. The branch filter bug that
+// silently stopped Integration running on main looked exactly like this.
+const APPEAR_MS = 5 * 60_000
 
 function git(...args) {
   return execFileSync('git', args, { encoding: 'utf8' }).trim()
 }
 
-function findProblem() {
+function pushed(sha) {
+  return !!git('branch', '-r', '--contains', sha)
+}
+
+function latestRun(sha) {
+  const { workflow_runs } = JSON.parse(
+    execFileSync(
+      'gh',
+      ['api', `repos/:owner/:repo/actions/runs?head_sha=${sha}`],
+      {
+        encoding: 'utf8',
+      },
+    ),
+  )
+  return workflow_runs.find(r => r.name === WORKFLOW)
+}
+
+function fail(problem) {
+  console.error(
+    `Refusing to release: ${problem}\n\n` +
+      'The store serves latest/ with no-cache, so this tag is a live change to\n' +
+      'configs shipped months ago. If the failure is genuinely unrelated, rerun\n' +
+      'with ALLOW_RED_CI=1 and say why in the release notes.',
+  )
+  process.exit(1)
+}
+
+async function main() {
   const sha = git('rev-parse', 'HEAD')
   const short = sha.slice(0, 7)
 
-  // An unpushed commit has no run to look up, and its absence is
-  // indistinguishable from "the run has not been created yet". Say which it is.
-  const runs = !git('branch', '-r', '--contains', sha)
-    ? undefined
-    : JSON.parse(
-        execFileSync(
-          'gh',
-          ['api', `repos/:owner/:repo/actions/runs?head_sha=${sha}`],
-          { encoding: 'utf8' },
-        ),
-      ).workflow_runs.filter(r => r.name === WORKFLOW)
+  if (!WAIT_MS) {
+    const run = pushed(sha) ? latestRun(sha) : undefined
+    if (!pushed(sha)) {
+      fail(`HEAD (${short}) is not pushed, so ${WORKFLOW} has never seen it`)
+    } else if (!run) {
+      fail(`no ${WORKFLOW} run exists for ${short}`)
+    } else if (run.status !== 'completed') {
+      fail(`${WORKFLOW} is still ${run.status} -- wait for it: ${run.html_url}`)
+    } else if (run.conclusion !== 'success') {
+      fail(`${WORKFLOW} concluded ${run.conclusion}: ${run.html_url}`)
+    }
+    console.log(`${WORKFLOW} is green on ${short}: ${run.html_url}`)
+    return
+  }
 
-  const run = runs?.[0]
-  return !runs
-    ? `HEAD (${short}) is not pushed, so ${WORKFLOW} has never seen it. Push it, let the run finish, then bump.`
-    : !run
-      ? `no ${WORKFLOW} run exists for ${short}`
-      : run.status !== 'completed'
-        ? `${WORKFLOW} is still ${run.status} -- wait for it: ${run.html_url}`
-        : run.conclusion !== 'success'
-          ? `${WORKFLOW} concluded ${run.conclusion}: ${run.html_url}`
-          : { ok: `${WORKFLOW} is green on ${short}: ${run.html_url}` }
+  if (!pushed(sha)) {
+    console.log(`Pushing ${short} so ${WORKFLOW} can see it`)
+    execFileSync('git', ['push'], { stdio: 'inherit' })
+  }
+
+  const started = Date.now()
+  let announced
+
+  for (;;) {
+    const run = latestRun(sha)
+
+    if (run?.status === 'completed') {
+      if (run.conclusion !== 'success') {
+        fail(`${WORKFLOW} concluded ${run.conclusion}: ${run.html_url}`)
+      }
+      console.log(`${WORKFLOW} is green on ${short}: ${run.html_url}`)
+      return
+    }
+
+    if (run && announced !== run.id) {
+      console.log(`Waiting for ${WORKFLOW} on ${short}: ${run.html_url}`)
+      announced = run.id
+    }
+
+    const waited = Date.now() - started
+    if (!run && waited > APPEAR_MS) {
+      fail(
+        `no ${WORKFLOW} run appeared for ${short} in ${APPEAR_MS / 60_000} minutes -- ` +
+          'check the workflow still triggers on this branch',
+      )
+    }
+    if (waited > WAIT_MS) {
+      fail(
+        `${WORKFLOW} is still ${run.status} after ${WAIT_MS / 60_000} minutes: ${run.html_url}`,
+      )
+    }
+
+    await sleep(POLL_MS)
+  }
 }
 
 if (process.env.ALLOW_RED_CI) {
   console.warn('ALLOW_RED_CI set -- skipping the green-CI release gate')
 } else {
-  const result = findProblem()
-  if (typeof result === 'string') {
-    console.error(
-      `Refusing to release: ${result}\n\n` +
-        'The store serves latest/ with no-cache, so this tag is a live change to\n' +
-        'configs shipped months ago. If the failure is genuinely unrelated, rerun\n' +
-        'with ALLOW_RED_CI=1 and say why in the release notes.',
-    )
-    process.exit(1)
-  }
-  console.log(result.ok)
+  await main()
 }
