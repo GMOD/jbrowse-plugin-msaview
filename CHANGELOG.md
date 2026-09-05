@@ -1,3 +1,41 @@
+## [3.4.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.4.0...v3.4.1) (2026-09-05)
+
+### Bug Fixes
+
+- Keep dedupeLabels from reusing a suffix a raw name already holds ([6070cc5](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6070cc5e4985dbc03b561242bd8fafc56f92d317))
+- Omit init when the spec named nothing for it to resolve ([13e1e24](https://github.com/GMOD/jbrowse-plugin-msaview/commit/13e1e24677b513f2c93a8e08ca08469083c0b26b))
+- Cap the BLAST result cache at 50 entries ([bdb6182](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bdb6182ea22b553473df103c5001b846f292a83c))
+- Keep IndexedDB in step with the view, and say when a row is gone ([fbdc269](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fbdc26923c39bb802d1d133879624c3cc42a0046))
+- Release each sleep's abort listener when it resolves ([27712e4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/27712e4128a10c4652f733bac99d174158c4029b))
+- Satisfy core@main's store-manifest SRI in the host-compat probe ([9803d06](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9803d06d4b6150773a8e3d350b523cdb1d65aa33))
+
+### Chores
+
+- Run Integration on branches, not on the tag that repeats them ([27f0e96](https://github.com/GMOD/jbrowse-plugin-msaview/commit/27f0e96f297f62b45aa005c48e6295d00169d3fb))
+- Name the branches Integration runs on, since ignoring tags alone matched nothing ([ec4f181](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ec4f181ff031c26d43caf050db266d8fa314ae5d))
+
+### Documentation
+
+- Restore the v3.4.0 docs line that git-cliff truncated ([8c9a60f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/8c9a60f0dd261212ece6f9b9f4e98e9eba6ba144))
+
+### Features
+
+- Reopen the panel on the last search program, database and aligner ([932ae93](https://github.com/GMOD/jbrowse-plugin-msaview/commit/932ae93f03b97e81f99ccbbb86c94e585ba2603d))
+- Share the remembered aligner with the BLAST tab ([cf17337](https://github.com/GMOD/jbrowse-plugin-msaview/commit/cf1733754fd9ea11f4989dee5857f4199ee0aa96))
+- Thread an abort signal through the EBI job pipeline ([fc951b5](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fc951b5d7dfbb32069d9d0f456aaf5867028e15e))
+- Tie a launch to the view, and let the user cancel one ([fed56eb](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fed56ebeda1332e39c171b85b886c27b38f35deb))
+- Take react-msaview 6.3.0's highlights and columnTracks in a session spec ([eeec2ce](https://github.com/GMOD/jbrowse-plugin-msaview/commit/eeec2ce07f2f993e02f59688470f218c9dfea8c5))
+
+### Other Changes
+
+- Updates ([d5ae347](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d5ae347563fddbee46cab42b8b8dab41cd3bfad5))
+- Bump react-msaview ([0b5d028](https://github.com/GMOD/jbrowse-plugin-msaview/commit/0b5d02895e8bc47d188b9fff2ccff71beea769df))
+
+### Refactoring
+
+- One gene-candidate cleaner for both NCBI and PANTHER ([d1b8b2a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d1b8b2ae8e39b915186a8befcab3c6f76e57b886))
+- GetSequenceByRowName reuses getRowByName ([f274fb3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f274fb3eb9323adbfd9c44573803f132bc672660))
+
 ## [3.4.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.3.0...v3.4.0) (2026-08-26)
 
 ### Bug Fixes
