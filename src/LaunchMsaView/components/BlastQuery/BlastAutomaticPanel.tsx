@@ -24,7 +24,12 @@ import { useTranscriptSelection } from '../useTranscriptSelection'
 import CachedBlastResults from './CachedBlastResults'
 import MsaAlgorithmSelect from './MsaAlgorithmSelect'
 import { blastLaunchView } from './blastLaunchView'
-import { databaseOptionsFor, defaultSearchFor, searchPrograms } from './consts'
+import {
+  databaseOptionsFor,
+  defaultMaxHits,
+  defaultSearchFor,
+  searchPrograms,
+} from './consts'
 import {
   useStoredMsaAlgorithm,
   useStoredSearchChoice,
@@ -72,6 +77,9 @@ const BlastAutomaticPanel = observer(function ({
   const [search, setSearch] = useStoredSearchChoice()
   const [selectedMsaAlgorithm, setSelectedMsaAlgorithm] =
     useStoredMsaAlgorithm()
+  const [maxHits, setMaxHits] = useState(String(defaultMaxHits))
+  const hitCount = Number(maxHits)
+  const hitCountValid = Number.isInteger(hitCount) && hitCount >= 1
   const isPhmmer = search.program === 'phmmer'
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
@@ -133,6 +141,19 @@ const BlastAutomaticPanel = observer(function ({
           />
         )}
 
+        <TextField2
+          variant="outlined"
+          label="Hits"
+          className={classes.selectField}
+          type="number"
+          value={maxHits}
+          onChange={event => {
+            setMaxHits(event.target.value)
+          }}
+          error={!hitCountValid}
+          helperText="best-scoring sequences to keep"
+        />
+
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
         <Typography className={classes.infoText}>
@@ -140,16 +161,18 @@ const BlastAutomaticPanel = observer(function ({
             ? `phmmer searches UniProtKB with a profile HMM built from the query,
                so it aligns the hits as it finds them and that alignment is used
                directly — nothing is realigned afterwards. The tree is then built
-               from it by neighbour-joining. A hit matching the query in more
-               than one place appears once per matched region.`
+               from it in the browser. A hit matching the query in more than one
+               place appears once per matched region. rp15 spreads the hits
+               across all of life; swissprot keeps to the curated set.`
             : `This panel will automatically submit a blastp query to EBI, which
-               searches UniProtKB. Searches usually finish in under a minute, and
-               swissprot returns curated sequences that align more cleanly than
-               the many near-identical entries a TrEMBL search brings back. After
-               completion, all the hits will be run through a multiple sequence
-               alignment.`}{' '}
-          Searching NCBI's nr needs the manual approach: NCBI no longer lets a
-          browser read responses from Blast.cgi.
+               searches UniProtKB. swissprot returns curated sequences that align
+               more cleanly than the many near-identical entries a TrEMBL search
+               brings back. After completion, all the hits will be run through
+               the chosen aligner; "in browser" needs no second EBI job.`}{' '}
+          EBI's queue is the wait, and it varies from seconds to many minutes.
+          For a homolog panel with no job at all, the Orthologs tab's UniRef
+          source is a lookup. Searching NCBI's nr needs the manual approach:
+          NCBI no longer lets a browser read responses from Blast.cgi.
         </Typography>
 
         {cachedResults.length > 0 ? (
@@ -169,7 +192,7 @@ const BlastAutomaticPanel = observer(function ({
       </LaunchPanelContent>
       <SubmitCancelActions
         model={model}
-        submitDisabled={!proteinSequence}
+        submitDisabled={!proteinSequence || !hitCountValid}
         onSubmit={() => {
           try {
             if (selectedTranscript) {
@@ -183,6 +206,7 @@ const BlastAutomaticPanel = observer(function ({
                     ? {
                         searchProgram: 'phmmer',
                         blastDatabase: search.database,
+                        maxHits: hitCount,
                         selectedTranscript,
                         proteinSequence,
                       }
@@ -190,6 +214,7 @@ const BlastAutomaticPanel = observer(function ({
                         searchProgram: 'blastp',
                         blastDatabase: search.database,
                         msaAlgorithm: selectedMsaAlgorithm,
+                        maxHits: hitCount,
                         selectedTranscript,
                         proteinSequence,
                       },

@@ -3,6 +3,7 @@ import { StockholmMSA } from 'msa-parsers'
 import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
 import type { PhmmerDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
+import type { SearchBackend, SearchHit } from './homologSearch'
 
 const TOOL = 'hmmer3_phmmer'
 
@@ -70,15 +71,29 @@ function buildQueryRow({ rf, query }: { rf: string; query: string }) {
 
 /**
  * '[subseq from] Albumin OS=Homo sapiens OX=9606 GN=ALB PE=1 SV=2' is what a
- * UniProt target's #=GS DE looks like. Hits from the non-UniProt databases
- * phmmer also offers (PDB, AlphaFold, MEROPS...) carry no OS=/OX= at all, so
- * every field here is optional.
+ * UniProt target's #=GS DE looks like. The representative-proteome databases
+ * (rp15..rp75) write the same facts as caret-pipe fields instead --
+ * 'P53_HUMAN^|^DNHU53^|^Cellular tumor antigen p53^|^...^|^Homo sapiens^|^9606^|^Euk/mammal^|^40674'
+ * -- so both grammars are read. Hits from the non-UniProt databases phmmer
+ * also offers (PDB, AlphaFold, MEROPS...) carry neither, so every field here
+ * is optional.
  */
 function parseDescription(de: string | undefined) {
   const text = (de ?? '').replace('[subseq from] ', '')
+  if (text.includes('^|^')) {
+    const fields = text.split('^|^')
+    const ox = fields[6]
+    return {
+      id: fields[0] || undefined,
+      sciname: fields[5] || 'unknown',
+      taxid: ox && /^\d+$/.test(ox) ? Number.parseInt(ox, 10) : undefined,
+      title: fields[2] || undefined,
+    }
+  }
   const sciname = /OS=(.*?)\s+(?:OX|GN|PE|SV)=/.exec(text)?.[1]
   const ox = /OX=(\d+)/.exec(text)?.[1]
   return {
+    id: undefined,
     sciname: sciname ?? 'unknown',
     taxid: ox ? Number.parseInt(ox, 10) : undefined,
     title: text.split(' OS=')[0] || undefined,
@@ -121,26 +136,36 @@ export function parsePhmmerAlignment({
 
   return {
     queryRow: buildQueryRow({ rf, query }),
-    rows: seqname.map(name => ({
-      ...parseName(name),
-      ...parseDescription(gs.DE?.[name]?.[0]),
-      // insert columns come back lowercase with '.' for gaps; the MSA renderer
-      // looks colors up by the literal letter, so lowercase would draw
-      // uncolored. The insert columns stay visible as gaps in the query row.
-      aligned: (seqdata[name] ?? '').replaceAll('.', '-').toUpperCase(),
-    })),
+    rows: seqname.map(name => {
+      const { id, ...description } = parseDescription(gs.DE?.[name]?.[0])
+      const parsed = parseName(name)
+      return {
+        ...parsed,
+        // the rp databases name a row by bare accession and put the mnemonic
+        // id in the description instead
+        id: parsed.id === parsed.accession && id ? id : parsed.id,
+        ...description,
+        // insert columns come back lowercase with '.' for gaps; the MSA renderer
+        // looks colors up by the literal letter, so lowercase would draw
+        // uncolored. The insert columns stay visible as gaps in the query row.
+        aligned: (seqdata[name] ?? '').replaceAll('.', '-').toUpperCase(),
+      }
+    }),
   }
 }
 
 export async function queryPhmmer({
   query,
   database,
+  maxHits,
   onProgress,
   onRid,
   signal,
 }: {
   query: string
   database: PhmmerDatabase
+  /** EBI's `nhits`, 100 when omitted */
+  maxHits?: number
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
   signal?: AbortSignal
@@ -153,6 +178,7 @@ export async function queryPhmmer({
       sequence: query,
       // the alignment is the whole point of using phmmer here
       alignView: 'true',
+      ...(maxHits ? { nhits: String(maxHits) } : {}),
     },
     signal,
   })
@@ -175,4 +201,24 @@ export async function queryPhmmer({
     throw new Error('No hits found')
   }
   return { rid: jobId, ...alignment }
+}
+
+/** phmmer's rows as search hits: the aligned row is the hit's sequence. */
+export function toSearchHits(rows: PhmmerRow[]): SearchHit[] {
+  return rows.map(({ aligned, ...rest }) => ({ ...rest, sequence: aligned }))
+}
+
+/**
+ * phmmer as a search backend. It aligns every hit to a profile of the query as
+ * it searches, so the result carries `queryRow` and no aligner runs after it.
+ */
+export const searchEbiPhmmer: SearchBackend = async ({
+  database,
+  ...request
+}) => {
+  const { rows, queryRow, rid } = await queryPhmmer({
+    database: database as PhmmerDatabase,
+    ...request,
+  })
+  return { rid, queryRow, hits: toSearchHits(rows) }
 }

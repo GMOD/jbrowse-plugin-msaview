@@ -1,6 +1,6 @@
 import { makeId } from '../LaunchMsaView/components/util'
 
-import type { PhmmerRow } from './phmmer'
+import type { SearchHit } from './homologSearch'
 import type { TaxonomyInfo } from './taxonomyNames'
 import type { BlastHitDescription } from './types'
 
@@ -43,10 +43,10 @@ export function buildRowMetadata(
  * envelope disambiguates them.
  */
 export function makeRowNames(
-  rows: PhmmerRow[],
+  hits: SearchHit[],
   taxonomyInfo: Map<number, TaxonomyInfo>,
 ) {
-  const baseNames = rows.map(row => makeId(row, taxonomyInfo))
+  const baseNames = hits.map(hit => makeId(hit, taxonomyInfo))
   const counts = new Map<string, number>()
   for (const name of baseNames) {
     counts.set(name, (counts.get(name) ?? 0) + 1)
@@ -55,7 +55,7 @@ export function makeRowNames(
   const used = new Set<string>()
   return baseNames.map((base, i) => {
     let name =
-      counts.get(base)! > 1 ? `${base}_${rows[i]!.range ?? i + 1}` : base
+      counts.get(base)! > 1 ? `${base}_${hits[i]!.range ?? i + 1}` : base
     while (used.has(name)) {
       name = `${name}_${i + 1}`
     }
@@ -65,31 +65,35 @@ export function makeRowNames(
 }
 
 /**
- * The phmmer alignment as the view receives it: aligned FASTA whose first row
- * is the query, plus the per-row metadata keyed by the same names, which are
- * also what the tree's leaves are labelled with.
+ * A search result as the view receives it: FASTA whose first row is the query,
+ * plus the per-row metadata keyed by the same names, which are also what the
+ * tree's leaves are labelled with. With `queryRow` the hits are already in
+ * columns and this IS the alignment; without it the rows are bare and the
+ * FASTA is what an aligner is handed.
  */
-export function buildPhmmerMsa({
-  rows,
+export function buildSearchMsa({
+  hits,
+  query,
   queryRow,
   taxonomyInfo,
   querySeqName = 'QUERY',
 }: {
-  rows: PhmmerRow[]
-  queryRow: string
+  hits: SearchHit[]
+  query: string
+  queryRow?: string
   taxonomyInfo: Map<number, TaxonomyInfo>
   querySeqName?: string
 }) {
   const treeMetadata: Record<string, Record<string, string>> = {}
-  const rowNames = makeRowNames(rows, taxonomyInfo)
-  const sequences = rows.map((row, i) => {
+  const rowNames = makeRowNames(hits, taxonomyInfo)
+  const sequences = hits.map((hit, i) => {
     const rowName = rowNames[i]!
-    treeMetadata[rowName] = buildRowMetadata(row, taxonomyInfo)
-    return `>${rowName}\n${row.aligned}`
+    treeMetadata[rowName] = buildRowMetadata(hit, taxonomyInfo)
+    return `>${rowName}\n${hit.sequence}`
   })
 
   return {
-    msa: [`>${querySeqName}\n${queryRow}`, ...sequences].join('\n'),
+    msa: [`>${querySeqName}\n${queryRow ?? query}`, ...sequences].join('\n'),
     treeMetadata,
   }
 }

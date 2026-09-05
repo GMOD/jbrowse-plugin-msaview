@@ -133,7 +133,7 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
  * until a new request replaces them.
  */
 export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
-  if (self.orthologParams) {
+  if (self.orthologParams && !awaitingTranscript(self)) {
     runLaunch({
       self,
       message: 'Resolving orthologs',
@@ -145,8 +145,18 @@ export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
   }
 }
 
+/**
+ * A launch that names its transcript rather than its feature has to wait for
+ * the lookup: the query row is that transcript's translation, and the launch
+ * cannot start without a query. Both launchers read the same two fields, so
+ * the resolver setting `connectedFeature` is what refires them.
+ */
+function awaitingTranscript(self: JBrowsePluginMsaViewModel) {
+  return !!self.connectedTranscript && !self.connectedFeature
+}
+
 export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
-  if (self.blastParams) {
+  if (self.blastParams && !awaitingTranscript(self)) {
     runLaunch({
       self,
       message: 'Submitting query',

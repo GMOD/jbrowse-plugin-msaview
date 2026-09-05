@@ -1,9 +1,13 @@
+import { alignInBrowser, parseFastaRecords } from './browserAlign'
 import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
-import type { MsaAlgorithm } from '../LaunchMsaView/components/BlastQuery/consts'
+import type {
+  EbiMsaAlgorithm,
+  MsaAlgorithm,
+} from '../LaunchMsaView/components/BlastQuery/consts'
 
 const algorithms: Record<
-  MsaAlgorithm,
+  EbiMsaAlgorithm,
   {
     params: Record<string, string>
     msaResult: string
@@ -33,46 +37,10 @@ const algorithms: Record<
 }
 
 /**
- * Build a tree from an alignment that already exists, which is what the phmmer
- * path needs: phmmer produces the alignment itself, so there is no aligner run
- * to take a guide tree from — and a guide tree is a byproduct of deciding
- * progressive alignment order, not a phylogeny, so it is not what we would want
- * even if there were one. simple_phylogeny is clustalw2's neighbour-joining on
- * a real distance matrix, Kimura-corrected for protein distances.
+ * Align a FASTA whose first record is the query. `browser` never leaves the
+ * page and returns no tree, which the launch then builds itself (see
+ * runLaunch); the EBI aligners return their guide tree alongside the rows.
  */
-export async function launchTree({
-  alignment,
-  onProgress,
-  signal,
-}: {
-  alignment: string
-  onProgress: (arg: string) => void
-  signal?: AbortSignal
-}) {
-  const tool = 'simple_phylogeny'
-  onProgress('Building tree...')
-
-  const jobId = await submitEbiJob({
-    tool,
-    params: {
-      sequence: alignment,
-      tree: 'phylip',
-      clustering: 'Neighbour-joining',
-      kimura: 'true',
-    },
-    signal,
-  })
-  await waitForEbiJob({
-    tool,
-    jobId,
-    signal,
-    onCountdown: s => {
-      onProgress(`Re-checking tree status in... ${s}`)
-    },
-  })
-  return fetchEbiResult({ tool, jobId, type: 'tree', signal })
-}
-
 export async function launchMSA({
   algorithm,
   sequence,
@@ -84,6 +52,16 @@ export async function launchMSA({
   onProgress: (arg: string) => void
   signal?: AbortSignal
 }) {
+  if (algorithm === 'browser') {
+    const [query, ...targets] = parseFastaRecords(sequence)
+    if (!query) {
+      throw new Error('Nothing to align')
+    }
+    return {
+      msa: await alignInBrowser({ query, targets, onProgress, signal }),
+      tree: '',
+    }
+  }
   const config = algorithms[algorithm]
 
   onProgress(`Launching ${algorithm} MSA...`)

@@ -4,11 +4,12 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
 
-import { buildPhmmerMsa } from '../src/utils/msaRows'
+import { buildSearchMsa } from '../src/utils/msaRows'
 import {
   isPhmmerJobId,
   parsePhmmerAlignment,
   phmmerResultUrl,
+  toSearchHits,
 } from '../src/utils/phmmer'
 
 import type { TaxonomyInfo } from '../src/utils/taxonomyNames'
@@ -119,7 +120,12 @@ describe('buildPhmmerMsa', () => {
 
   function build() {
     const { rows, queryRow } = parsePhmmerAlignment({ stockholm, query })
-    return buildPhmmerMsa({ rows, queryRow, taxonomyInfo: noTaxonomy })
+    return buildSearchMsa({
+      hits: toSearchHits(rows),
+      query,
+      queryRow,
+      taxonomyInfo: noTaxonomy,
+    })
   }
 
   test('gives the query the first row, under the name the model looks for', () => {

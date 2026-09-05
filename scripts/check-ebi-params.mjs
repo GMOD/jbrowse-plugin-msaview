@@ -18,7 +18,7 @@
 // and that is worth a red build too.
 import {
   blastDatabaseOptions,
-  msaAlgorithms,
+  ebiMsaAlgorithms,
   phmmerDatabaseOptions,
 } from '../src/LaunchMsaView/components/BlastQuery/consts.ts'
 
@@ -32,10 +32,10 @@ const SEARCH_TOOLS = [
   { tool: 'hmmer3_phmmer', databases: phmmerDatabaseOptions },
 ]
 
-// Tools the plugin submits to that take no database: an aligner per msa
-// algorithm, plus the tree builder the phmmer path runs instead of taking a
-// guide tree from an aligner it never ran.
-const PLAIN_TOOLS = [...msaAlgorithms, 'simple_phylogeny']
+// Tools the plugin submits to that take no database: an aligner per EBI msa
+// algorithm. The in-browser aligner is no service, and trees are built in the
+// browser too.
+const PLAIN_TOOLS = [...ebiMsaAlgorithms]
 
 // EBI drops the occasional request, and one blip should not turn a push red
 // when the check is about the shape of their catalogue rather than its uptime.

@@ -24,12 +24,14 @@ import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
+import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript'
 
 import type {
   BlastDatabase,
   MsaAlgorithm,
   PhmmerDatabase,
 } from '../LaunchMsaView/components/BlastQuery/consts'
+import type { UnirefIdentity } from '../utils/unirefHomologs'
 import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { Feature } from '@jbrowse/core/util'
@@ -58,7 +60,17 @@ export interface IRegion {
  */
 export type BlastParams = {
   selectedTranscript?: Feature
-  proteinSequence: string
+  /**
+   * The query. The dialog always supplies it, translated from the transcript
+   * the user picked. A session spec may instead name a UniProt `accession`
+   * and have the sequence fetched at launch, or name a `connectedTranscript`
+   * on the view and have it translated from the genome (see
+   * resolveConnectedTranscript).
+   */
+  proteinSequence?: string
+  accession?: string
+  /** hits to keep: phmmer's `nhits`, blastp's `alignments`; 100 when omitted */
+  maxHits?: number
 } & (
   | {
       /** absent on params written before phmmer existed, which were all blastp */
@@ -76,11 +88,14 @@ export type BlastParams = {
 )
 
 /**
- * Where the ortholog set comes from. NCBI's sets cover vertebrates and
+ * Where the homolog set comes from. NCBI's ortholog sets cover vertebrates and
  * insects; PANTHER's span its 144 reference proteomes, human to yeast to
- * Arabidopsis, so a gene from outside NCBI's scope aligns only through it.
+ * Arabidopsis; a UniRef cluster is every UniProtKB entry within 50% (or 90%)
+ * identity of the query, one per species, from any organism at all -- and the
+ * one source of the three whose rows need no ortholog call, only UniProt's
+ * REST api (see utils/unirefHomologs.ts).
  */
-export const orthologSources = ['ncbi', 'panther'] as const
+export const orthologSources = ['ncbi', 'panther', 'uniref'] as const
 export type OrthologSource = (typeof orthologSources)[number]
 
 export interface OrthologParams {
@@ -88,6 +103,14 @@ export interface OrthologParams {
   taxId: number
   /** `ncbi` when omitted, so every launch written before this key keeps its meaning */
   source?: OrthologSource
+  /** UniRef only: the cluster identity level, 50 when omitted */
+  identity?: UnirefIdentity
+  /**
+   * UniRef only: keep members from reference proteomes, which is what makes a
+   * cluster one good entry per species rather than every strain and isolate
+   * UniProtKB holds. `true` when omitted.
+   */
+  referenceProteomesOnly?: boolean
   /**
    * taxon ids to include as rows. The query taxon has its own row already, so
    * it is excluded from this set whether or not it is named.
@@ -136,6 +159,14 @@ export default function stateModelFactory() {
          * #property
          */
         connectedFeature: types.frozen(),
+        /**
+         * #property
+         * the short form of `connectedFeature`: a transcript id (NM_000546.6)
+         * looked up in the connected genome view's tracks at launch, so a
+         * session spec can name the transcript instead of carrying its whole
+         * exon model. Resolved once into `connectedFeature` and left in place.
+         */
+        connectedTranscript: types.maybe(types.string),
         /**
          * #property
          */
@@ -343,6 +374,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setConnectedFeature(arg?: Record<string, unknown>) {
+        self.connectedFeature = arg
+      },
+      /**
+       * #action
+       */
       setOrthologParams(args?: OrthologParams) {
         self.orthologParams = args
       },
@@ -490,6 +527,7 @@ export default function stateModelFactory() {
         for (const fn of [
           loadStoredData,
           storeDataToIndexedDB,
+          resolveConnectedTranscriptIfNeeded,
           launchBlastIfNeeded,
           launchOrthologsIfNeeded,
           processInit,

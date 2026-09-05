@@ -39,9 +39,11 @@ const LaunchProgress = observer(function LaunchProgress2({
   const { blastParams, orthologParams, progress, rid, error } = model
   const { classes } = useStyles()
   const message = blastParams
-    ? 'Running EBI BLAST'
+    ? `Running EBI ${blastParams.searchProgram === 'phmmer' ? 'phmmer' : 'BLAST'}`
     : orthologParams
-      ? 'Building ortholog alignment'
+      ? orthologParams.source === 'uniref'
+        ? 'Building UniRef homolog alignment'
+        : 'Building ortholog alignment'
       : 'Loading alignment'
   return (
     <div className={classes.margin}>

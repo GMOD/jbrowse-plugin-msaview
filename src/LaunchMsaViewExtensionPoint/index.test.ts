@@ -40,6 +40,29 @@ test('a file location travels through init', () => {
   })
 })
 
+test('searchParams is a source, stored under the name the dialog uses', () => {
+  const snapshot = launch({
+    searchParams: {
+      searchProgram: 'phmmer',
+      blastDatabase: 'rp15',
+      accession: 'P04637',
+    },
+    connectedViewId: 'lgv1',
+    connectedTranscript: 'NM_000546.6',
+  })
+  expect(snapshot.blastParams).toEqual({
+    searchProgram: 'phmmer',
+    blastDatabase: 'rp15',
+    accession: 'P04637',
+  })
+  expect('searchParams' in snapshot).toBe(false)
+  expect(snapshot.connectedTranscript).toBe('NM_000546.6')
+})
+
+test('a launch naming no source at all is refused', () => {
+  expect(() => launch({ connectedViewId: 'lgv1' })).toThrow(/searchParams/)
+})
+
 test('one field set is enough to need init', () => {
   const snapshot = launch({ data: { msa: '>a\nMEEP' }, querySeqName: 'QUERY' })
   expect(snapshot.init).toEqual({

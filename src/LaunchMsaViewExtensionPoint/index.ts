@@ -1,6 +1,6 @@
 import { launchMsaView } from '../utils/launchMsaView'
 
-import type { OrthologParams } from '../MsaViewPanel/model'
+import type { BlastParams, OrthologParams } from '../MsaViewPanel/model'
 import type { MsaViewPlacement } from '../utils/workspaces'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AbstractSessionModel } from '@jbrowse/core/util'
@@ -15,6 +15,13 @@ interface LaunchMsaViewArgs {
   treeFileLocation?: { uri: string }
   connectedViewId?: string
   connectedFeature?: Record<string, unknown>
+  /**
+   * The short form of `connectedFeature`: a transcript id looked up in the
+   * connected genome view's open tracks at launch, and translated to become
+   * the query row of a `searchParams` or `orthologParams` launch that names
+   * no `proteinSequence` of its own.
+   */
+  connectedTranscript?: string
   displayName?: string
   colorSchemeName?: string
   colWidth?: number
@@ -43,6 +50,15 @@ interface LaunchMsaViewArgs {
    * "NLRP1 across species" and the view builds it.
    */
   orthologParams?: OrthologParams
+  /**
+   * Search for the alignment at launch: the dialog's BLAST tab reached
+   * declaratively. `{ searchProgram: 'phmmer', blastDatabase: 'rp15',
+   * accession: 'P04637' }` is a whole request. The query comes from
+   * `proteinSequence`, else fetched for `accession`, else translated from the
+   * view's `connectedTranscript`. Stored on the model as `blastParams`, the
+   * name the dialog has always used.
+   */
+  searchParams?: BlastParams
   /**
    * Hide any column gappier than this percentage, 100 being "hide nothing".
    * A native react-msaview property, named here because it is the one setting
@@ -85,20 +101,22 @@ export default function LaunchMsaViewExtensionPointF(
         msaName,
         treeFileLocation,
         querySeqName,
+        searchParams,
         ...rest
       } = args
 
-      // `orthologParams` is a fourth source, and unlike the other three it names
-      // no alignment at all — the view builds one from NCBI at launch, which is
-      // the dialog's Orthologs tab reached declaratively.
+      // `orthologParams` and `searchParams` name no alignment at all — the
+      // view builds one at launch, which is the dialog's Orthologs and BLAST
+      // tabs reached declaratively.
       if (
         !data &&
         !msaFileLocation &&
         !msaIndexedLocation &&
-        !rest.orthologParams
+        !rest.orthologParams &&
+        !searchParams
       ) {
         throw new Error(
-          'No MSA data, file location or orthologParams provided when launching MSA view',
+          'No MSA data, file location, orthologParams or searchParams provided when launching MSA view',
         )
       }
 
@@ -118,6 +136,7 @@ export default function LaunchMsaViewExtensionPointF(
       }
       launchMsaView(session, {
         ...rest,
+        ...(searchParams ? { blastParams: searchParams } : {}),
         data,
         ...(treeFileLocation
           ? {

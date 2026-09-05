@@ -11,14 +11,17 @@ export const ORTHOLOG_SOURCE_STORAGE_KEY = 'msaview-ortholog-source'
 export const orthologSourceLabels: Record<OrthologSource, string> = {
   ncbi: 'NCBI orthologs',
   panther: 'PANTHER',
+  uniref: 'UniRef cluster',
 }
 
 // Which species a source can answer for, in the words a reader picking one
 // needs: NCBI's ortholog sets stop at vertebrates and insects, PANTHER's run
-// from human to yeast and Arabidopsis.
+// from human to yeast and Arabidopsis, and a UniRef cluster is every UniProtKB
+// entry within 50% identity of the query, whatever it came from.
 const hints: Record<OrthologSource, string> = {
   ncbi: 'vertebrates and insects',
   panther: 'also yeast, worm, fly and plants',
+  uniref: 'all of UniProtKB within 50% identity',
 }
 
 export default function OrthologSourceSelect({

@@ -22,6 +22,7 @@ export interface LaunchScope {
 
 interface LaunchedData {
   msa: string
+  /** empty when the aligner built no tree, and one is then built in the browser */
   tree: string
   treeMetadata: string
 }
@@ -78,6 +79,12 @@ export function runLaunch({
       const data = await launch(scope)
       act(() => {
         self.setData(data)
+        // the in-browser aligner and a search hands back rows and no tree;
+        // react-msaview's neighbour joining over the finished alignment is
+        // what EBI's simple_phylogeny would have computed, without the job
+        if (!data.tree && self.rows.length >= 2) {
+          self.calculateNeighborJoiningTreeFromMSA()
+        }
         onLaunched()
       })
     } catch (e) {

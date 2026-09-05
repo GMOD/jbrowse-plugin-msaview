@@ -3,7 +3,7 @@ import React from 'react'
 import { MenuItem } from '@mui/material'
 
 import TextField2 from '../../../components/TextField2'
-import { msaAlgorithms } from './consts'
+import { msaAlgorithmLabels, msaAlgorithms } from './consts'
 
 import type { MsaAlgorithm } from './consts'
 
@@ -23,13 +23,18 @@ export default function MsaAlgorithmSelect({
       className={className}
       select
       value={value}
+      helperText={
+        value === 'browser'
+          ? 'no EBI job; rows aligned to the query'
+          : undefined
+      }
       onChange={event => {
         onChange(event.target.value as MsaAlgorithm)
       }}
     >
       {msaAlgorithms.map(val => (
         <MenuItem value={val} key={val}>
-          {val}
+          {msaAlgorithmLabels[val]}
         </MenuItem>
       ))}
     </TextField2>

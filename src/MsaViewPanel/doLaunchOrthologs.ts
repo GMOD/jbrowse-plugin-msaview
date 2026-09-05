@@ -8,9 +8,11 @@ import {
 } from '../utils/ncbiOrthologs'
 import { fetchPantherOrthologs } from '../utils/pantherOrthologs'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
+import { fetchUnirefHomologs } from '../utils/unirefHomologs'
 
 import type { OrthologRow } from '../utils/ncbiOrthologs'
-import type { JBrowsePluginMsaViewModel } from './model'
+import type { UnirefIdentity } from '../utils/unirefHomologs'
+import type { JBrowsePluginMsaViewModel, OrthologSource } from './model'
 import type { LaunchScope } from './runLaunch'
 
 interface Representative {
@@ -58,6 +60,8 @@ export async function doLaunchOrthologs({
     msaAlgorithm,
     proteinSequence,
     source = 'ncbi',
+    identity,
+    referenceProteomesOnly,
   } = self.orthologParams!
 
   const { onProgress, act, signal } = scope
@@ -74,7 +78,14 @@ export async function doLaunchOrthologs({
   const { geneId, representative, rows } =
     source === 'panther'
       ? await findPantherOrthologs(request)
-      : await findNcbiOrthologs(request)
+      : source === 'uniref'
+        ? await findUnirefHomologs({
+            ...request,
+            identity,
+            referenceProteomesOnly,
+            signal,
+          })
+        : await findNcbiOrthologs(request)
 
   // The query row. The dialog always supplies it — it is the user's OWN
   // selected transcript, which is what makes `connectedFeature` map genome
@@ -88,7 +99,7 @@ export async function doLaunchOrthologs({
     : representative?.sequence
   if (!cleanedSeq) {
     throw new Error(
-      `No query protein: none was supplied and ${source === 'panther' ? 'PANTHER' : 'NCBI'} returned no representative protein for gene ${geneId}.`,
+      `No query protein: none was supplied and ${sourceNames[source]} returned no representative protein for gene ${geneId}.`,
     )
   }
 
@@ -166,6 +177,45 @@ async function findNcbiOrthologs({
     ...rest,
   })
   return { geneId: resolved.geneId, representative, rows }
+}
+
+const sourceNames: Record<OrthologSource, string> = {
+  ncbi: 'NCBI',
+  panther: 'PANTHER',
+  uniref: 'UniProt',
+}
+
+/**
+ * The query's own UniProt entry stands in for a representative protein: the
+ * entry the cluster was looked up from, whose sequence a spec-launched row
+ * takes and whose accession earns the CDD overlay when the two match.
+ */
+async function findUnirefHomologs({
+  geneCandidates,
+  identity,
+  referenceProteomesOnly,
+  signal,
+  ...rest
+}: OrthologRequest & {
+  identity?: UnirefIdentity
+  referenceProteomesOnly?: boolean
+  signal?: AbortSignal
+}): Promise<FoundOrthologs> {
+  const found = await fetchUnirefHomologs({
+    candidates: geneCandidates,
+    identity,
+    referenceProteomesOnly,
+    signal,
+    ...rest,
+  })
+  return {
+    geneId: found.query.id,
+    representative: {
+      accession: found.query.accession,
+      sequence: found.query.sequence,
+    },
+    rows: found.rows,
+  }
 }
 
 /**

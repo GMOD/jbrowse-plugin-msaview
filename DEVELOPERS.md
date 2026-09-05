@@ -14,39 +14,41 @@ spec URL parameters (see https://jbrowse.org/jb2/docs/urlparams/#session-spec).
 
 ### Parameters
 
-Exactly one of the four **sources** is required. The first three name an
-alignment that already exists; `orthologParams` names no alignment at all and
-builds one at launch (see below).
+Exactly one of the five **sources** is required. The first three name an
+alignment that already exists; `orthologParams` and `searchParams` name no
+alignment at all and build one at launch (see below).
 
-| Source               | Description                                      |
-| -------------------- | ------------------------------------------------ |
-| `data`               | `{ msa: string, tree?: string }`                 |
-| `msaFileLocation`    | `{ uri: string }` for MSA file                   |
-| `msaIndexedLocation` | `{ uri: string }` for a name-indexed bgzip block |
-| `orthologParams`     | build the alignment from precomputed orthologs   |
+| Source               | Description                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| `data`               | `{ msa: string, tree?: string }`                              |
+| `msaFileLocation`    | `{ uri: string }` for MSA file                                |
+| `msaIndexedLocation` | `{ uri: string }` for a name-indexed bgzip block              |
+| `orthologParams`     | build the alignment from a precomputed ortholog or UniRef set |
+| `searchParams`       | build the alignment from a similarity search                  |
 
 Everything else is optional.
 
-| Parameter          | Description                                                     |
-| ------------------ | --------------------------------------------------------------- |
-| `treeFileLocation` | `{ uri: string }` for tree file                                 |
-| `connectedViewId`  | ID of connected LinearGenomeView                                |
-| `connectedFeature` | Feature for cross-linking                                       |
-| `displayName`      | Custom view display name                                        |
-| `colorSchemeName`  | Color scheme (e.g., 'percent_identity_dynamic')                 |
-| `colWidth`         | Column width in pixels                                          |
-| `rowHeight`        | Row height in pixels                                            |
-| `allowedGappyness` | Hide any column gappier than this percent, 100 to keep          |
-| `treeAreaWidth`    | Tree area width                                                 |
-| `treeWidth`        | Tree width                                                      |
-| `drawNodeBubbles`  | Show node bubbles on tree                                       |
-| `labelsAlignRight` | Align labels to the right                                       |
-| `showBranchLen`    | Show branch lengths                                             |
-| `querySeqName`     | Name for query sequence                                         |
-| `highlightColumns` | Visible column indices to highlight on open                     |
-| `highlights`       | Labeled residue, column, or row highlights, see below           |
-| `columnTracks`     | Per-column tracks supplied as data (bar values or a text row)   |
-| `placement`        | Where the view lands: `stack` (default), `splitRight`, `newTab` |
+| Parameter             | Description                                                     |
+| --------------------- | --------------------------------------------------------------- |
+| `treeFileLocation`    | `{ uri: string }` for tree file                                 |
+| `connectedViewId`     | ID of connected LinearGenomeView                                |
+| `connectedFeature`    | Feature for cross-linking                                       |
+| `connectedTranscript` | Transcript id to look up in the connected view instead, below   |
+| `displayName`         | Custom view display name                                        |
+| `colorSchemeName`     | Color scheme (e.g., 'percent_identity_dynamic')                 |
+| `colWidth`            | Column width in pixels                                          |
+| `rowHeight`           | Row height in pixels                                            |
+| `allowedGappyness`    | Hide any column gappier than this percent, 100 to keep          |
+| `treeAreaWidth`       | Tree area width                                                 |
+| `treeWidth`           | Tree width                                                      |
+| `drawNodeBubbles`     | Show node bubbles on tree                                       |
+| `labelsAlignRight`    | Align labels to the right                                       |
+| `showBranchLen`       | Show branch lengths                                             |
+| `querySeqName`        | Name for query sequence                                         |
+| `highlightColumns`    | Visible column indices to highlight on open                     |
+| `highlights`          | Labeled residue, column, or row highlights, see below           |
+| `columnTracks`        | Per-column tracks supplied as data (bar values or a text row)   |
+| `placement`           | Where the view lands: `stack` (default), `splitRight`, `newTab` |
 
 ### Building an alignment from a gene: `orthologParams`
 
@@ -54,15 +56,18 @@ This is the launch dialog's **Orthologs (fast)** tab reached declaratively, so a
 link can say "NLRP1 across species" and the view builds it. Two of its fields
 default so that a spec stays short.
 
-| Field                | Required | Description                                                      |
-| -------------------- | -------- | ---------------------------------------------------------------- |
-| `taxId`              | Yes      | NCBI taxon id of the assembly the query gene came from           |
-| `geneCandidates`     | Yes      | Gene identifiers, tried in order until one resolves              |
-| `msaAlgorithm`       | Yes      | `clustalo`, `muscle`, `kalign` or `mafft`                        |
-| `taxa`               | No       | Taxon ids to include. Omitted means every species the source has |
-| `proteinSequence`    | No       | The QUERY row. Omitted means the source's representative protein |
-| `selectedTranscript` | No       | The transcript the query row was translated from                 |
-| `source`             | No       | `ncbi` (the default) or `panther`, see below                     |
+| Field                    | Required | Description                                                      |
+| ------------------------ | -------- | ---------------------------------------------------------------- |
+| `taxId`                  | Yes      | NCBI taxon id of the assembly the query gene came from           |
+| `geneCandidates`         | Yes      | Gene identifiers, tried in order until one resolves              |
+| `msaAlgorithm`           | Yes      | `clustalo`, `muscle`, `kalign`, `mafft` or `browser`, see below  |
+| `taxa`                   | No       | Taxon ids to include. Omitted means every species the source has |
+| `maxSpecies`             | No       | Rows to align, 100 when omitted                                  |
+| `proteinSequence`        | No       | The QUERY row. Omitted means the source's representative protein |
+| `selectedTranscript`     | No       | The transcript the query row was translated from                 |
+| `source`                 | No       | `ncbi` (the default), `panther` or `uniref`, see below           |
+| `identity`               | No       | UniRef only: `50` (the default) or `90`                          |
+| `referenceProteomesOnly` | No       | UniRef only: keep reference-proteome members, `true` by default  |
 
 `proteinSequence` is what the launch dialog always supplies, translated from the
 transcript the user picked, because that is the row `connectedFeature` maps
@@ -91,16 +96,96 @@ all TrEMBL would 400 the whole batch and log "auto-load failed"; the alignment
 itself is unaffected. `source` omitted, or an old link without the key, runs the
 NCBI path unchanged.
 
-Two sources is the ceiling `source` is meant to reach. The plugin has two ways
-to put an alignment on screen for a gene, and only one of them costs per-source
-code: an interactive lookup against a live ortholog service, and
-`msaIndexedLocation` — a hosted bgzip alignment random-read by gene name, which
-costs none. New species coverage belongs in the second. A build script derives
-the alignment offline (react-msaview's `scripts/gene-explorer/build-data.mjs`
-does it for UCSC multiz) and the session names a URL, so the plugin renders it
-without knowing where the rows came from. A third live source would buy the same
-rows for another bespoke API client, another host on every launch's critical
-path, and another ~10s EBI alignment per visitor.
+`source: "uniref"` asks a different question: not "this gene's ortholog in each
+species" but "everything in UniProtKB within 50% identity of this protein",
+which UniProt has already clustered. The launch resolves the gene (or a UniProt
+accession given as a candidate, `geneCandidates: ["P04637"]`) to its entry,
+finds the entry's UniRef50 cluster, and lists the cluster's members, one per
+species, reviewed entries first. Three requests to rest.uniprot.org, which sends
+`Access-Control-Allow-Origin: *`, and no job anywhere. `identity: 90` takes the
+tighter UniRef90 cluster instead; `referenceProteomesOnly: false` admits every
+strain and isolate rather than the reference proteome's one entry per taxon.
+Human TP53 measured 2026-09-05: 191 UniProtKB members at 50%, 129 of them from
+reference proteomes, in about two seconds. A cluster stops at its identity
+threshold, so it reaches p53's mammals and not its fish; the remote homologs are
+what `searchParams` is for.
+
+Pair it with `msaAlgorithm: "browser"` and the whole launch never touches EBI:
+the rows are aligned to the query in the page (utils/browserAlign.ts, one column
+per query residue plus the insert columns each row needs) and the tree is
+react-msaview's own neighbour joining over the result. That aligner is also the
+one to name for any other source when a launch has to be quick or must not
+depend on EBI's queue, which has been measured at anything from ten seconds to
+fifteen minutes for the same job on different days.
+
+```
+session=spec-{"views":[{
+  "type": "MsaView",
+  "orthologParams": {"taxId":9606,"geneCandidates":["P04637","TP53"],"source":"uniref","msaAlgorithm":"browser"},
+  "allowedGappyness": 50
+}]}
+```
+
+Live ortholog services are the sources that cost per-source code: an interactive
+lookup against NCBI, PANTHER or UniProt each needed its own client.
+`msaIndexedLocation` — a hosted bgzip alignment random-read by gene name — costs
+none, and new species coverage belongs there. A build script derives the
+alignment offline (react-msaview's `scripts/gene-explorer/build-data.mjs` does
+it for UCSC multiz) and the session names a URL, so the plugin renders it
+without knowing where the rows came from.
+
+### Searching for the alignment: `searchParams`
+
+The dialog's BLAST tab reached declaratively: a similarity search of UniProtKB
+at EBI, then an alignment of what it found. The query comes from
+`proteinSequence`, else is fetched for a UniProt `accession`, else is translated
+from the view's `connectedTranscript`.
+
+| Field           | Required | Description                                                          |
+| --------------- | -------- | -------------------------------------------------------------------- |
+| `searchProgram` | No       | `phmmer` or `blastp` (the default)                                   |
+| `blastDatabase` | Yes      | a database of that program's, see `consts.ts`                        |
+| `accession`     | No       | UniProt accession to fetch the query from                            |
+| `maxHits`       | No       | hits to keep, 100 when omitted                                       |
+| `msaAlgorithm`  | blastp   | the aligner for blastp's hits, `browser` included; phmmer needs none |
+
+phmmer's `rp15` database is the widest net the search offers: UniProt's
+reference proteomes thinned to representatives no more than 15% similar, so
+every hit is a different corner of the tree of life. phmmer aligns as it
+searches, so its result is the alignment and no aligner runs after it; blastp's
+hits are pairwise and go to `msaAlgorithm`. The name `searchParams` is the
+spec's; the model stores it as `blastParams`, the name the dialog has always
+used.
+
+```
+session=spec-{"views":[{
+  "type": "MsaView",
+  "searchParams": {"searchProgram":"phmmer","blastDatabase":"rp15","accession":"P04637","maxHits":50}
+}]}
+```
+
+Search programs sit behind one interface, `SearchBackend` in
+`utils/homologSearch.ts`: a request in, hits out, aligned or not. A self-hosted
+DIAMOND or MMseqs2 endpoint would be a third entry in `searchBackends` returning
+bare hits, and nothing downstream of it would change.
+
+### Naming the transcript: `connectedTranscript`
+
+`connectedFeature` is the transcript's exon model, ~1.5 kB of coordinates a
+person cannot type. `connectedTranscript` is its short form: a transcript id
+(`NM_000546.6`, version optional) that the view looks up in the connected genome
+view's open tracks once that view has loaded, and translates to become the query
+row of a `searchParams` or `orthologParams` launch that names no
+`proteinSequence`. The genome view has to be on the gene's locus with a gene
+track open, which is what a spec pinning its `id` already does.
+
+```
+session=spec-{"views":[
+  {"type":"LinearGenomeView","id":"lgv1","assembly":"hg38","loc":"chr17:7,668,000-7,688,000","tracks":["hg38-ncbiRefSeqCurated"]},
+  {"type":"MsaView","connectedViewId":"lgv1","connectedTranscript":"NM_000546.6","placement":"splitRight",
+   "orthologParams":{"taxId":9606,"geneCandidates":["TP53"],"source":"uniref","msaAlgorithm":"browser"}}
+]}
+```
 
 `allowedGappyness` is worth setting alongside it. Proteins that differ in length
 put one row's private N-terminal extension at column 0 with every other row gap
@@ -367,8 +452,10 @@ menu on gene/mRNA/transcript features. The dialog that opens carries one tab per
 data source:
 
 1. **Orthologs (fast)**: look up a precomputed ortholog gene per species (NCBI,
-   or PANTHER for the species NCBI's sets leave out) and align what comes back.
-   No search job to queue, so this returns in seconds
+   or PANTHER for the species NCBI's sets leave out, or the query's UniRef
+   cluster for everything within 50% identity across UniProtKB) and align what
+   comes back. No search job to queue, so this returns in seconds; with the
+   in-browser aligner, no job at all
 2. **NCBI BLAST query**: submit the protein sequence to NCBI BLAST and align the
    hits. The route for a gene with no resolvable symbol
 3. **Pre-loaded MSA datasets**: use pre-calculated alignments from configuration
@@ -377,7 +464,8 @@ data source:
 Each launch method automatically sets up the genome view connection for
 coordinate mapping and highlighting.
 
-Only the first is reachable without the dialog, via `orthologParams` above.
+The first two are reachable without the dialog, via `orthologParams` and
+`searchParams` above.
 
 ## Data persistence
 

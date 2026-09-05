@@ -1,6 +1,9 @@
+import { snapBlastHitCount } from '../LaunchMsaView/components/BlastQuery/consts'
+import { strip } from '../LaunchMsaView/components/util'
 import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
 
 import type { BlastDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
+import type { SearchBackend } from './homologSearch'
 import type { BlastHit } from './types'
 
 const TOOL = 'ncbiblast'
@@ -94,17 +97,21 @@ export async function queryEbiBlastFromJobId({
 export async function queryEbiBlast({
   query,
   blastDatabase,
+  maxHits,
   onProgress,
   onRid,
   signal,
 }: {
   query: string
   blastDatabase: BlastDatabase
+  /** rounded up to a count EBI accepts; their default of 50 when omitted */
+  maxHits?: number
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
   signal?: AbortSignal
 }) {
   onProgress('Submitting to EBI BLAST...')
+  const hitCount = maxHits ? String(snapBlastHitCount(maxHits)) : undefined
   const jobId = await submitEbiJob({
     tool: TOOL,
     params: {
@@ -112,9 +119,36 @@ export async function queryEbiBlast({
       stype: 'protein',
       database: blastDatabase,
       sequence: query,
+      ...(hitCount ? { alignments: hitCount, scores: hitCount } : {}),
     },
     signal,
   })
   onRid(jobId)
   return queryEbiBlastFromJobId({ jobId, onProgress, signal })
+}
+
+/**
+ * BLAST as a search backend. Its alignments are pairwise and one hit at a
+ * time, so they are stripped back off and the hits go to an aligner as bare
+ * sequences: no `queryRow`.
+ */
+export const searchEbiBlast: SearchBackend = async ({
+  database,
+  ...request
+}) => {
+  const { hits, rid } = await queryEbiBlast({
+    blastDatabase: database as BlastDatabase,
+    ...request,
+  })
+  return {
+    rid,
+    hits: hits.map(hit => ({
+      ...(hit.description[0] ?? {
+        accession: 'unknown',
+        id: 'unknown',
+        sciname: 'unknown',
+      }),
+      sequence: strip(hit.hsps[0]?.hseq ?? ''),
+    })),
+  }
 }

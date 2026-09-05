@@ -1,22 +1,57 @@
-import { makeId, strip } from '../LaunchMsaView/components/util'
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { saveBlastResult } from '../utils/blastCache'
-import { queryEbiBlast } from '../utils/ebiBlast'
-import { launchMSA, launchTree } from '../utils/msa'
-import { buildPhmmerMsa, buildRowMetadata } from '../utils/msaRows'
-import { queryPhmmer } from '../utils/phmmer'
+import { searchBackends } from '../utils/homologSearch'
+import { launchMSA } from '../utils/msa'
+import { buildSearchMsa } from '../utils/msaRows'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
+import { resolveUniProtEntry } from '../utils/unirefHomologs'
 
-import type {
-  BlastDatabase,
-  MsaAlgorithm,
-  PhmmerDatabase,
-} from '../LaunchMsaView/components/BlastQuery/consts'
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { LaunchScope } from './runLaunch'
 
-type TreeMetadata = Record<string, Record<string, string>>
+/**
+ * The query sequence, and what its row is called. The dialog hands over the
+ * translated transcript and the row stays `QUERY`; a spec naming a UniProt
+ * accession has the sequence fetched and the row named after the entry
+ * (`P53_HUMAN_query`), since a search of swissprot returns the entry itself
+ * as a hit and two rows called the same thing collapse into one.
+ */
+async function resolveQuery(
+  self: JBrowsePluginMsaViewModel,
+  scope: LaunchScope,
+) {
+  const params = self.blastParams!
+  if (params.proteinSequence) {
+    return {
+      sequence: cleanProteinSequence(params.proteinSequence),
+      name: self.querySeqName,
+    }
+  }
+  if (params.accession) {
+    scope.onProgress(`Fetching ${params.accession} from UniProt...`)
+    const entry = await resolveUniProtEntry([params.accession], 0, scope.signal)
+    if (!entry) {
+      throw new Error(`UniProt has no entry ${params.accession}`)
+    }
+    const name = `${entry.id}_query`
+    scope.act(() => {
+      self.setQuerySeqName(name)
+    })
+    return { sequence: entry.sequence, name }
+  }
+  throw new Error(
+    'No query: a search needs a proteinSequence, a UniProt accession, or a connectedTranscript to translate',
+  )
+}
 
+/**
+ * A similarity search, then an alignment of what it found. The program is a
+ * backend behind one interface (utils/homologSearch.ts); what differs between
+ * them is settled by whether the result came back aligned. A program that
+ * aligns as it searches (phmmer) hands over the alignment and the tree is
+ * built from it in the browser; one that does not (blastp) hands over bare
+ * hits and the chosen aligner runs on them.
+ */
 export async function doLaunchBlast({
   self,
   scope,
@@ -24,42 +59,56 @@ export async function doLaunchBlast({
   self: JBrowsePluginMsaViewModel
   scope: LaunchScope
 }) {
-  // kept whole rather than destructured: the database's type depends on
-  // searchProgram, and pulling the two apart loses the link between them
   const params = self.blastParams!
-  const { selectedTranscript } = params
-  const cleanedSeq = cleanProteinSequence(params.proteinSequence)
+  const { selectedTranscript, maxHits, searchProgram = 'blastp' } = params
+  const { sequence: query, name: querySeqName } = await resolveQuery(
+    self,
+    scope,
+  )
   const { onProgress, onRid, signal } = scope
 
-  const { msa, tree, treeMetadata, rid } =
-    params.searchProgram === 'phmmer'
-      ? await runPhmmer({
-          query: cleanedSeq,
-          database: params.blastDatabase,
-          onProgress,
-          onRid,
-          signal,
-        })
-      : await runBlast({
-          query: cleanedSeq,
-          blastDatabase: params.blastDatabase,
-          msaAlgorithm: params.msaAlgorithm,
-          onProgress,
-          onRid,
-          signal,
-        })
+  const { hits, queryRow, rid } = await searchBackends[searchProgram]({
+    query,
+    database: params.blastDatabase,
+    maxHits,
+    onProgress,
+    onRid,
+    signal,
+  })
+  if (hits.length === 0) {
+    throw new Error('No hits found')
+  }
+
+  onProgress('Fetching species taxonomy info...')
+  const taxonomyInfo = await fetchTaxonomyInfo(
+    hits.map(h => h.taxid).filter((t): t is number => t !== undefined),
+  )
+  const { msa: fasta, treeMetadata } = buildSearchMsa({
+    hits,
+    query,
+    queryRow,
+    taxonomyInfo,
+    querySeqName,
+  })
+  const { msa, tree } = queryRow
+    ? { msa: fasta, tree: '' }
+    : await launchMSA({
+        algorithm: params.msaAlgorithm ?? 'browser',
+        sequence: fasta,
+        onProgress,
+        signal,
+      })
 
   const treeMetadataJson = JSON.stringify(treeMetadata)
-
   await saveBlastResult({
-    proteinSequence: cleanedSeq,
+    proteinSequence: query,
     blastDatabase: params.blastDatabase,
     msaAlgorithm: params.msaAlgorithm,
     searchProgram: params.searchProgram,
     msa,
     tree,
     treeMetadata: treeMetadataJson,
-    rid,
+    rid: rid ?? '',
     geneId: selectedTranscript?.get('parentId'),
     transcriptId: selectedTranscript?.id(),
     transcriptName:
@@ -70,106 +119,4 @@ export async function doLaunchBlast({
   })
 
   return { msa, tree, treeMetadata: treeMetadataJson }
-}
-
-/**
- * BLAST returns each hit already aligned to the query, but pairwise and one hit
- * at a time, so the alignments are stripped back off and every hit is realigned
- * together by a dedicated aligner.
- */
-async function runBlast({
-  query,
-  blastDatabase,
-  msaAlgorithm,
-  onProgress,
-  onRid,
-  signal,
-}: {
-  query: string
-  blastDatabase: BlastDatabase
-  msaAlgorithm: MsaAlgorithm
-  onProgress: (arg: string) => void
-  onRid: (arg: string) => void
-  signal?: AbortSignal
-}) {
-  const { hits, rid } = await queryEbiBlast({
-    query,
-    blastDatabase,
-    onProgress,
-    onRid,
-    signal,
-  })
-
-  onProgress('Fetching species taxonomy info...')
-  const taxonomyInfo = await fetchTaxonomyInfo(
-    hits
-      .map(h => h.description[0]?.taxid)
-      .filter((t): t is number => t !== undefined),
-  )
-
-  const treeMetadata: TreeMetadata = {}
-  const sequences = hits.map(h => {
-    const desc = h.description[0] ?? {
-      accession: 'unknown',
-      id: 'unknown',
-      sciname: 'unknown',
-    }
-    const rowName = makeId(desc, taxonomyInfo)
-    treeMetadata[rowName] = buildRowMetadata(desc, taxonomyInfo)
-    return `>${rowName}\n${strip(h.hsps[0]?.hseq ?? '')}`
-  })
-
-  const result = await launchMSA({
-    algorithm: msaAlgorithm,
-    sequence: [`>QUERY\n${query}`, ...sequences].join('\n'),
-    onProgress,
-    signal,
-  })
-  return { ...result, treeMetadata, rid }
-}
-
-/**
- * phmmer aligns every hit to a profile of the query as it searches, so its own
- * output is the MSA and there is no realignment step — the hits keep the
- * placement HMMER gave them, and the query row is derived from the alignment's
- * match columns rather than being aligned back in afterwards. That leaves no
- * aligner run to take a tree from, so the tree is built from this alignment.
- */
-async function runPhmmer({
-  query,
-  database,
-  onProgress,
-  onRid,
-  signal,
-}: {
-  query: string
-  database: PhmmerDatabase
-  onProgress: (arg: string) => void
-  onRid: (arg: string) => void
-  signal?: AbortSignal
-}) {
-  const { rows, queryRow, rid } = await queryPhmmer({
-    query,
-    database,
-    onProgress,
-    onRid,
-    signal,
-  })
-
-  onProgress('Fetching species taxonomy info...')
-  const taxonomyInfo = await fetchTaxonomyInfo(
-    rows.map(r => r.taxid).filter((t): t is number => t !== undefined),
-  )
-
-  const { msa, treeMetadata } = buildPhmmerMsa({
-    rows,
-    queryRow,
-    taxonomyInfo,
-  })
-  return {
-    msa,
-    tree: await launchTree({ alignment: msa, onProgress, signal }),
-    treeMetadata,
-    rid,
-  }
 }

@@ -29,6 +29,13 @@ https://jbrowse.org/code/jb2/main/index.html?config=https://unpkg.com/jbrowse-pl
 - Can share sessions with other users which will send relevant settings and
   links to files to automatically open your results
 - The tree or the MSA panel can be loaded separately from each other
+- Builds a cross-species alignment for any gene from the genome view's
+  right-click menu: precomputed orthologs (NCBI, PANTHER), the gene's UniRef
+  cluster across all of UniProtKB, or a phmmer/blastp search at EBI
+- Aligns and builds trees in the browser, so a UniRef launch needs no job at any
+  external service; EBI's aligners remain an option
+- Every launch is also a session-spec URL (`orthologParams`, `searchParams`,
+  `connectedTranscript`), see [DEVELOPERS.md](DEVELOPERS.md)
 
 ## File format supports
 

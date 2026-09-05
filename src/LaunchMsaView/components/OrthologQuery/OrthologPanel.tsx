@@ -34,6 +34,12 @@ const useStyles = makeStyles()({
   },
 })
 
+const rowsHint: Record<OrthologSource, string> = {
+  ncbi: 'the closest N species NCBI has',
+  panther: 'the closest N species PANTHER has',
+  uniref: 'one per species, reviewed entries first',
+}
+
 const OrthologPanel = observer(function ({
   handleClose,
   feature,
@@ -75,7 +81,8 @@ const OrthologPanel = observer(function ({
             second per row. */}
         <Typography variant="body2">
           Precomputed orthologs, one gene per species, looked up rather than
-          searched for. No BLAST job to queue.
+          searched for. No BLAST job to queue, and with the in-browser aligner
+          no job at all.
         </Typography>
 
         <div>
@@ -108,7 +115,7 @@ const OrthologPanel = observer(function ({
               setMaxSpecies(event.target.value)
             }}
             error={!rowCountValid}
-            helperText={`the closest N species ${source === 'panther' ? 'PANTHER' : 'NCBI'} has`}
+            helperText={rowsHint[source]}
           />
         </div>
 

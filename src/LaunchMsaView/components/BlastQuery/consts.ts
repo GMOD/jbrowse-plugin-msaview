@@ -6,8 +6,33 @@
  */
 export const BASE_BLAST_URL = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi'
 
-export const msaAlgorithms = ['clustalo', 'muscle', 'kalign', 'mafft'] as const
+/** The aligners EBI's Job Dispatcher runs, each a tool name at their REST api. */
+export const ebiMsaAlgorithms = [
+  'clustalo',
+  'muscle',
+  'kalign',
+  'mafft',
+] as const
+export type EbiMsaAlgorithm = (typeof ebiMsaAlgorithms)[number]
+
+/**
+ * `browser` is no job at all: each sequence is aligned to the query in the
+ * page and the rows merged on the query (utils/browserAlign.ts), with the tree
+ * built by react-msaview's neighbour joining. It is the aligner for a launch
+ * that must not depend on EBI, and for one that wants to be quick -- a
+ * hundred rows take a second or two against a Job Dispatcher queue that has
+ * been measured at anything from ten seconds to fifteen minutes.
+ */
+export const msaAlgorithms = [...ebiMsaAlgorithms, 'browser'] as const
 export type MsaAlgorithm = (typeof msaAlgorithms)[number]
+
+export const msaAlgorithmLabels: Record<MsaAlgorithm, string> = {
+  clustalo: 'clustalo (EBI)',
+  muscle: 'muscle (EBI)',
+  kalign: 'kalign (EBI)',
+  mafft: 'mafft (EBI)',
+  browser: 'in browser, query-anchored',
+}
 
 /**
  * EBI rejects a submission naming a database outside its own list with a 400,
@@ -33,18 +58,41 @@ export type SearchProgram = (typeof searchPrograms)[number]
 
 /**
  * phmmer offers PDB, AlphaFold, Ensembl Genomes, MEROPS and ChEMBL too, but
- * targets outside UniProt carry no OS=/OX= in their description, so those rows
+ * targets outside UniProt carry no species in their description, so those rows
  * would lose their species and common name. Only the databases that label their
  * hits are offered.
+ *
+ * rp15..rp75 are the Representative Proteomes: UniProt's reference proteomes
+ * thinned so that no two are more than 15% (35%, 55%, 75%) similar, which is
+ * the widest taxonomic spread per hit that any of these databases gives. rp15
+ * is the one to reach for when the question is "what is this like across all
+ * of life"; swissprot when it is "what is this like in the curated set".
  */
 export const phmmerDatabaseOptions = [
   'swissprot',
   'uniprotkb',
   'uniprotrefprot',
+  'rp75',
+  'rp55',
+  'rp35',
+  'rp15',
 ] as const
 export type PhmmerDatabase = (typeof phmmerDatabaseOptions)[number]
 
 export const defaultPhmmerDatabase: PhmmerDatabase = 'swissprot'
+
+/**
+ * The hit counts EBI's ncbiblast accepts for `alignments` and `scores`. A value
+ * off this list is a 400 at submit time, so a request is rounded up to the next
+ * one on it.
+ */
+const blastHitCounts = [5, 10, 20, 50, 100, 150, 200, 250, 500, 750, 1000]
+
+export const defaultMaxHits = 100
+
+export function snapBlastHitCount(maxHits: number) {
+  return blastHitCounts.find(n => n >= maxHits) ?? blastHitCounts.at(-1)!
+}
 
 /**
  * A program together with a database that program actually has.

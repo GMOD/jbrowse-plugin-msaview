@@ -4,6 +4,46 @@ The BLAST tab submits searches to **EBI**, and the reason is not preference.
 There is no option to query NCBI directly, because there is no longer a way to
 do it from a browser at all.
 
+## What the searches are, in one page
+
+A **similarity search** takes one protein and scans a database for sequences
+that score well against it. The score is a sum over aligned residue pairs from a
+substitution matrix (BLOSUM62: identical residues score high, chemically similar
+ones a little, dissimilar ones negative) minus gap penalties. The **E-value** on
+a hit is how many hits that good the search expected to find by chance in a
+database this size, so 1e-50 is unarguable and 0.5 is noise.
+
+- **blastp** finds short exact-ish seed matches, extends them into local
+  alignments and reports each hit paired with the query on its own. The hits do
+  not know about each other, so the plugin strips those pairings off and aligns
+  the hits together afterwards.
+- **phmmer** builds a profile from the query, one state per residue, and scores
+  every database sequence against the profile. Because every hit is placed
+  against the same profile, the hits come back already in shared columns: the
+  search's output is the alignment. It is more sensitive than blastp for remote
+  homologs and needs no aligner afterwards.
+- A **UniRef cluster** is not a search. UniProt has already grouped every
+  UniProtKB sequence by identity, so the query's cluster is looked up rather
+  than computed, in a second or two. It reaches everything within 50% (or 90%)
+  identity and nothing beyond that.
+
+Which database decides what the rows are. `swissprot` is the curated set, about
+one well-annotated entry per protein per species; `uniprotkb` is everything,
+mostly unreviewed near-duplicates; `uniprotrefprot` is one proteome per species;
+and phmmer's `rp15`..`rp75` are the reference proteomes thinned so no two are
+more than 15%..75% similar, which spreads a hit list across the tree of life
+instead of piling it on mammals.
+
+The cost is the queue, not the search. EBI's Job Dispatcher runs each submission
+as a cluster job, and the wait is whatever the cluster is doing. Measured on
+human p53 on 2026-09-05: blastp against swissprot finished in 36s, while three
+phmmer jobs (swissprot, rp15, uniprotrefprot) took 12 to 15 minutes each, and
+two of them reported a SLURM 502 for ten minutes of that before finishing.
+Nothing about the sequence or the database explains the difference; the queue
+does. That is why the plugin now aligns in the browser by default where it can
+(`msaAlgorithm: "browser"`), builds trees in the browser, and offers the UniRef
+lookup: a launch that needs no job cannot be queued.
+
 ## NCBI's Blast.cgi is no longer readable from a browser
 
 `https://blast.ncbi.nlm.nih.gov/Blast.cgi` returns no
@@ -94,20 +134,27 @@ The phmmer path differs from the BLAST path in more than the program:
   genome, which is worse than no result. The test checks the derivation against
   the query's own row in a swissprot search, where phmmer emits one to compare
   against.
-- **The tree is built from the alignment**, by `simple_phylogeny` (clustalw2
-  neighbour-joining, Kimura-corrected). What the BLAST path shows is clustalo's
-  _guide_ tree, which exists to order a progressive alignment and is not a
-  phylogeny.
+- **The tree is built from the alignment**, in the browser, by react-msaview's
+  neighbour joining over BLOSUM62 distances. It used to be a second EBI job
+  (`simple_phylogeny`, clustalw2's Kimura-corrected neighbour joining), which
+  doubled the queue wait for no better tree. What the BLAST path shows when an
+  EBI aligner runs is that aligner's _guide_ tree, which exists to order a
+  progressive alignment and is not a phylogeny; with the in-browser aligner it
+  is the same neighbour-joining tree.
 - **One row per matched region.** A target matching the query in several places
   gets a row each — four for lamprey albumin against human albumin — so row
   names carry the envelope to keep them distinct.
 - Insert columns come back lowercase with `.` for gaps and are uppercased,
   because the MSA renderer looks colors up by the literal letter.
 
-Databases are `swissprot`, `uniprotkb` and `uniprotrefprot`. phmmer also offers
-PDB, AlphaFold, Ensembl Genomes, MEROPS and ChEMBL, but targets outside UniProt
-carry no `OS=`/`OX=` in their description, so those rows would lose species and
-common name.
+Databases are `swissprot`, `uniprotkb`, `uniprotrefprot` and the representative
+proteomes `rp15`, `rp35`, `rp55` and `rp75`. The rp databases write their
+descriptions as caret-pipe fields
+(`P53_HUMAN^|^...^|^Homo sapiens^|^9606^|^...`) rather than `OS=`/`OX=`, and
+name rows by bare accession, so the parser reads both grammars. phmmer also
+offers PDB, AlphaFold, Ensembl Genomes, MEROPS and ChEMBL, but targets outside
+UniProt carry no species in their description at all, so those rows would lose
+species and common name.
 
 Cache keys for phmmer results are prefixed; blastp keys are byte-identical to
 what they always were, so results cached before phmmer existed still resolve.
@@ -170,8 +217,8 @@ query next to human albumin, its own swissprot entry.
   and which nothing in CI could see, since the string typechecks and the panel
   only fails at submit time.
 
-- `blastp` only — EBI exposes no `quick-blastp` equivalent. In practice this
-  costs nothing, since a swissprot search finishes in well under a minute.
+- `blastp` only — EBI exposes no `quick-blastp` equivalent. The search itself is
+  quick; what a user waits on is the queue (see the top of this page).
 - Taxon ids come from `hit_uni_ox` and are absent on hits from non-UniProt
   databases, so those rows fall back to `hit_os` for a species name and get no
   common name.
