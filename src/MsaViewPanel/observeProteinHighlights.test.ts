@@ -26,10 +26,14 @@ interface Range {
  * column equals the genome coordinate that produced it and the test reads as
  * "these genome coords lit these columns".
  */
-function makeModel({ highlightColumns }: { highlightColumns?: number[] } = {}) {
+function makeModel({
+  highlightColumns,
+  querySeqOffset = 0,
+}: { highlightColumns?: number[]; querySeqOffset?: number } = {}) {
   const calls: (number[] | undefined)[] = []
   const model = {
     querySeqName: 'query',
+    querySeqOffset,
     rows: [['query', 'MKVLTAEEK']],
     connectedViewId: CONNECTED,
     // g2p is indexed by genome coord; identity keeps the arithmetic out of the way
@@ -38,8 +42,8 @@ function makeModel({ highlightColumns }: { highlightColumns?: number[] } = {}) {
     },
     highlightColumns,
     highlightedColumns: undefined as number[] | undefined,
-    seqPosToGlobalCol: (_name: string, pos: number) => pos,
-    globalColToVisibleCol: (col: number) => col,
+    seqPosToVisibleCol: (_name: string, pos: number) => pos,
+    visibleColToSeqPos: (_name: string, col: number) => col,
     setHighlightedColumns: (cols?: number[]) => {
       calls.push(cols)
       model.highlightedColumns = cols
@@ -95,6 +99,26 @@ describe('the hover channel', () => {
     session({ hover: [{ start: 10, end: 13 }] })
     run()
     expect(calls).toEqual([[10, 11, 12]])
+  })
+
+  // a query row trimmed to what BLAST aligned starts partway into the protein,
+  // so the structure's residues sit that many columns to the left
+  test('a trimmed query row shifts the lit columns by its offset', () => {
+    const { model, calls } = makeModel({ querySeqOffset: 4 })
+    const run = observeProteinHighlights(model)
+
+    session({ hover: [{ start: 10, end: 13 }] })
+    run()
+    expect(calls).toEqual([[6, 7, 8]])
+  })
+
+  test('a residue before a trimmed row lights nothing', () => {
+    const { model, calls } = makeModel({ querySeqOffset: 20 })
+    const run = observeProteinHighlights(model)
+
+    session({ hover: [{ start: 10, end: 13 }] })
+    run()
+    expect(calls).toEqual([])
   })
 
   test('releasing the hover clears the highlight', () => {

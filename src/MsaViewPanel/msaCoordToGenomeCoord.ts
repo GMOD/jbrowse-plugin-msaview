@@ -17,6 +17,8 @@ interface CoordModel {
       }
     | undefined
   mafRegion?: MafRegion
+  /** transcript residues before the query row's first residue */
+  querySeqOffset?: number
   /**
    * react-msaview's converter, which is the only thing that knows which columns
    * are on screen. `rows` carries the whole gapped alignment, so counting
@@ -63,6 +65,9 @@ export function msaCoordToGenomeRegions({
 
   if (transcriptToMsaMap) {
     const { refName, p2gCodon } = transcriptToMsaMap
+    // the row is often only the aligned region of the transcript's protein, so
+    // its residues are the transcript's shifted by querySeqOffset
+    const proteinPos = ungappedPos + (model.querySeqOffset ?? 0)
     // p2gCodon holds every genomic base of the codon, so the range is exact on
     // either strand. Deriving it from consecutive p2g entries instead
     // (p2g[pos]..p2g[pos+1]) was off by one base on the reverse strand -- where
@@ -70,7 +75,7 @@ export function msaCoordToGenomeRegions({
     // whose successor has no p2g entry, and spanned the whole intron for a
     // codon split across an exon boundary.
     return (
-      getCodonRanges(p2gCodon, ungappedPos)?.map(([start, end]) => ({
+      getCodonRanges(p2gCodon, proteinPos)?.map(([start, end]) => ({
         refName,
         start,
         end,

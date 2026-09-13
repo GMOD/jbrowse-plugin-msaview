@@ -32,6 +32,13 @@ interface LaunchMsaViewArgs {
   labelsAlignRight?: boolean
   showBranchLen?: boolean
   querySeqName?: string
+  /**
+   * Transcript residues before the query row's first residue, for a row that
+   * carries only part of the protein -- what BLAST reports when it trims the
+   * query to the aligned region. Genome navigation is off by this much without
+   * it.
+   */
+  querySeqOffset?: number
   highlightColumns?: number[]
   /**
    * Labeled highlights in 1-based inclusive coordinates: `{row, start, end}`

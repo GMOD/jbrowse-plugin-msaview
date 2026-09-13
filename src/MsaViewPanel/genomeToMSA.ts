@@ -1,6 +1,10 @@
 import { getSession } from '@jbrowse/core/util'
 
-import { hasHoverPosition, hasQueryRow } from './util'
+import {
+  hasHoverPosition,
+  hasQueryRow,
+  transcriptPosToVisibleCol,
+} from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 
@@ -39,9 +43,9 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   // without it the same numeric coordinate on an unrelated chromosome matches a
   // g2p key and lights up a column for a different locus
   if (refName === transcriptToMsaMap?.refName) {
-    const seqPos = transcriptToMsaMap.g2p[genomePos]
-    if (seqPos !== undefined) {
-      return model.seqPosToVisibleCol(querySeqName, seqPos)
+    const proteinPos = transcriptToMsaMap.g2p[genomePos]
+    if (proteinPos !== undefined) {
+      return transcriptPosToVisibleCol(model, proteinPos)
     }
   }
 

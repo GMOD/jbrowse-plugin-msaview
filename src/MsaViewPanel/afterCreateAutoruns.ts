@@ -14,7 +14,11 @@ import {
 } from './msaDataStore'
 import { runLaunch } from './runLaunch'
 import { getProteinViews } from './structureConnection'
-import { getUniprotIdFromAlphaFoldUrl, hasQueryRow } from './util'
+import {
+  getUniprotIdFromAlphaFoldUrl,
+  hasQueryRow,
+  transcriptPosToVisibleCol,
+} from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { MsaDataPayload } from './msaDataStore'
@@ -270,13 +274,13 @@ export function syncGenomeHoverToMsaColumn(self: JBrowsePluginMsaViewModel) {
  * Translate genome regions published by a 3D protein view into this MSA's
  * visible columns. The genome is the only coordinate space the two plugins
  * share, so the hops are genome coord -> protein position (the transcript's g2p
- * map) -> global alignment column -> visible column.
+ * map) -> visible column.
  */
 function genomeHighlightsToVisibleColumns(
   self: JBrowsePluginMsaViewModel,
   field: 'hoverGenomeHighlights' | 'clickGenomeHighlights',
 ) {
-  const { connectedViewId, transcriptToMsaMap, querySeqName } = self
+  const { connectedViewId, transcriptToMsaMap } = self
   if (!transcriptToMsaMap || !hasQueryRow(self)) {
     return []
   }
@@ -291,8 +295,12 @@ function genomeHighlightsToVisibleColumns(
       for (const highlight of structure[field] ?? []) {
         for (let coord = highlight.start; coord < highlight.end; coord++) {
           const proteinPos = g2p[coord]
-          if (proteinPos !== undefined) {
-            columns.add(self.seqPosToGlobalCol(querySeqName, proteinPos))
+          const col =
+            proteinPos === undefined
+              ? undefined
+              : transcriptPosToVisibleCol(self, proteinPos)
+          if (col !== undefined) {
+            columns.add(col)
           }
         }
       }
@@ -300,8 +308,6 @@ function genomeHighlightsToVisibleColumns(
   }
 
   return [...columns]
-    .map(col => self.globalColToVisibleCol(col))
-    .filter((col): col is number => col !== undefined)
 }
 
 function sameColumns(a: number[] | undefined, b: number[] | undefined) {

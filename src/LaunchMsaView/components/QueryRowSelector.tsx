@@ -17,6 +17,26 @@ const useStyles = makeStyles()({
 })
 
 /**
+ * Where a trimmed row sits in the protein. The offset is what the view maps
+ * through, so the alert says it rather than leaving the user to wonder why the
+ * row is shorter than their transcript.
+ */
+function partialCoverage({
+  identity,
+  offset,
+}: {
+  identity: number
+  offset: number
+}) {
+  const covering = `, covering ${Math.round(identity * 100)}% of it`
+  return offset > 0
+    ? `${covering} from residue ${offset + 1}`
+    : offset < 0
+      ? `${covering} and running ${-offset} residues past its start`
+      : covering
+}
+
+/**
  * Which MSA row corresponds to the selected transcript. Clicking and hovering in
  * the alignment reach the genome only through this name, and a wrong one fails
  * silently -- the view opens, renders, and never navigates -- so the field fills
@@ -74,13 +94,21 @@ export default function QueryRowSelector({
       )}
 
       {isAutoDetected && detected ? (
-        <Alert severity="success" className={classes.alert}>
-          Matched <strong>{detected.name}</strong> to your protein sequence
-          {detected.quality === 'exact'
-            ? ''
-            : `, covering ${Math.round(detected.identity * 100)}% of it`}
-          . Clicking the alignment will navigate the genome view.
-        </Alert>
+        detected.quality === 'similar' ? (
+          <Alert severity="warning" className={classes.alert}>
+            <strong>{detected.name}</strong> is{' '}
+            {Math.round(detected.identity * 100)}% identical to your protein but
+            is not the same sequence. Clicking the alignment navigates the
+            genome view, approximately: wherever the two differ by an insertion
+            or a deletion, every residue after it lands one codon off.
+          </Alert>
+        ) : (
+          <Alert severity="success" className={classes.alert}>
+            Matched <strong>{detected.name}</strong> to your protein sequence
+            {detected.quality === 'exact' ? '' : partialCoverage(detected)}.
+            Clicking the alignment will navigate the genome view.
+          </Alert>
+        )
       ) : names.length > 0 && !querySeqName ? (
         <Alert severity="warning" className={classes.alert}>
           No row matched your protein sequence — pick the one for your gene

@@ -22,6 +22,17 @@ export interface QueryRowMatch {
   quality: MatchQuality
   /** identity over the compared region, 0-1 */
   identity: number
+  /**
+   * Transcript residues before the row's first residue, so transcript position
+   * = row position + offset. BLAST reports the aligned region, so a row is
+   * often the query with its termini trimmed, and mapping its first residue to
+   * the transcript's first residue would put every navigation off by the
+   * trimmed amount. Negative when the row is the longer of the two.
+   *
+   * Zero for a `similar` match, which is the one arm this cannot measure: the
+   * row is not the query, so where it starts is a guess.
+   */
+  offset: number
 }
 
 /**
@@ -115,21 +126,28 @@ function bestMatch(
     }
     if (row === query) {
       // nothing beats an exact match, and a second one would be a duplicate row
-      return { name, quality: 'exact', identity: 1 }
+      return { name, quality: 'exact', identity: 1, offset: 0 }
     }
     // BLAST reports the aligned region, so the row is often the query trimmed
     // at one or both ends rather than the whole protein
-    if (query.includes(row) || row.includes(query)) {
+    const contained = query.indexOf(row)
+    const containing = row.indexOf(query)
+    if (contained !== -1 || containing !== -1) {
       const coverage =
         Math.min(row.length, query.length) / Math.max(row.length, query.length)
       if (coverage >= PARTIAL_COVERAGE_FLOOR) {
-        candidates.push({ name, quality: 'partial', identity: coverage })
+        candidates.push({
+          name,
+          quality: 'partial',
+          identity: coverage,
+          offset: contained === -1 ? -containing : contained,
+        })
       }
       continue
     }
     const identity = identityOverOverlap(row, query)
     if (identity >= SIMILARITY_FLOOR) {
-      candidates.push({ name, quality: 'similar', identity })
+      candidates.push({ name, quality: 'similar', identity, offset: 0 })
     }
   }
 

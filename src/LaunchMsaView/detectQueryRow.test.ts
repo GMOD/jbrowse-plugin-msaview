@@ -42,6 +42,40 @@ describe('findQueryRow', () => {
     })
   })
 
+  // the offset is what the view maps genome coordinates through: without it an
+  // N-terminally trimmed row puts every click five codons off, silently
+  test('says how far into the protein a trimmed row starts', () => {
+    const trimmed = `>aligned_query\n${protein.slice(5, 40)}\n>hit_one\nWRONGWRONGWRONGWRONG\n`
+    expect(findQueryRow(trimmed, protein).match).toMatchObject({
+      name: 'aligned_query',
+      quality: 'partial',
+      offset: 5,
+    })
+  })
+
+  test('an exact match starts where the protein does', () => {
+    expect(findQueryRow(clustal, protein).match?.offset).toBe(0)
+  })
+
+  test('a row running past the protein gets a negative offset', () => {
+    const extended = `>longer_row\nMMM${protein}\n`
+    expect(findQueryRow(extended, protein).match).toMatchObject({
+      name: 'longer_row',
+      quality: 'partial',
+      offset: -3,
+    })
+  })
+
+  // the one arm with nothing to measure: a 90%-identical row is not the query,
+  // so QueryRowSelector warns rather than claiming a match
+  test('a merely similar row claims no offset', () => {
+    const similar = protein.slice(0, 30) + 'W' + protein.slice(31)
+    expect(findQueryRow(`>near\n${similar}\n`, protein).match).toMatchObject({
+      quality: 'similar',
+      offset: 0,
+    })
+  })
+
   // the failure that matters: silently wiring the view to a homolog would look
   // like it worked, and every navigation afterwards would land in the wrong place
   test('returns nothing when only diverged homologs are present', () => {

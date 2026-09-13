@@ -188,6 +188,18 @@ export default function stateModelFactory() {
 
         /**
          * #property
+         * transcript residues before the query row's first residue, so a
+         * transcript position is a row position plus this. A pasted alignment
+         * often carries only the aligned region of the query -- BLAST reports
+         * what it aligned -- and mapping that row's first residue to the
+         * transcript's first residue put every click off by the trimmed
+         * amount. Negative when the row runs past the transcript's start.
+         */
+        // see querySeqName above re: types.stripDefault
+        querySeqOffset: 0,
+
+        /**
+         * #property
          */
         uniprotId: types.maybe(types.string),
 
@@ -368,6 +380,12 @@ export default function stateModelFactory() {
        */
       setQuerySeqName(arg: string) {
         self.querySeqName = arg
+      },
+      /**
+       * #action
+       */
+      setQuerySeqOffset(arg: number) {
+        self.querySeqOffset = arg
       },
       /**
        * #action

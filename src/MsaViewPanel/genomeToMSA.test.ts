@@ -232,6 +232,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'QUERY',
+        querySeqOffset: 0,
         rows: [['QUERY', 'MKVLTAEEK']],
         transcriptToMsaMap: {
           refName: 'chr1',
@@ -241,6 +242,7 @@ describe('genomeToMSA', () => {
         mafRegion: undefined,
         connectedView: { initialized: true },
         seqPosToVisibleCol: mockSeqPosToVisibleCol,
+        visibleColToSeqPos: (_name: string, col: number) => col,
       } as any
 
       const result = genomeToMSA({ model })
@@ -274,6 +276,80 @@ describe('genomeToMSA', () => {
 
       expect(genomeToMSA({ model })).toBeUndefined()
       expect(mockSeqPosToVisibleCol).not.toHaveBeenCalled()
+    })
+
+    // a pasted alignment often carries only the region BLAST aligned, and
+    // querySeqOffset says how much of the protein comes before it
+    test('shifts a trimmed query row by querySeqOffset', () => {
+      mockGetSession.mockReturnValue({
+        hovered: {
+          hoverFeature: {},
+          hoverPosition: { coord: 1005, refName: 'chr1' },
+        },
+      } as any)
+
+      const seqPosToVisibleCol = vi.fn((_name: string, pos: number) => pos)
+      const model = {
+        querySeqName: 'QUERY',
+        querySeqOffset: 4,
+        rows: [['QUERY', 'MKVLTAEEK']],
+        transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
+        mafRegion: undefined,
+        connectedView: { initialized: true },
+        seqPosToVisibleCol,
+        visibleColToSeqPos: (_name: string, col: number) => col,
+      } as any
+
+      expect(genomeToMSA({ model })).toBe(6)
+      expect(seqPosToVisibleCol).toHaveBeenCalledWith('QUERY', 6)
+    })
+
+    test('maps nothing for a residue before the trimmed row starts', () => {
+      mockGetSession.mockReturnValue({
+        hovered: {
+          hoverFeature: {},
+          hoverPosition: { coord: 1005, refName: 'chr1' },
+        },
+      } as any)
+
+      const seqPosToVisibleCol = vi.fn((_name: string, pos: number) => pos)
+      const model = {
+        querySeqName: 'QUERY',
+        querySeqOffset: 20,
+        rows: [['QUERY', 'MKVLTAEEK']],
+        transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
+        mafRegion: undefined,
+        connectedView: { initialized: true },
+        seqPosToVisibleCol,
+        visibleColToSeqPos: (_name: string, col: number) => col,
+      } as any
+
+      expect(genomeToMSA({ model })).toBeUndefined()
+      expect(seqPosToVisibleCol).not.toHaveBeenCalled()
+    })
+
+    // react-msaview answers one column past the end for a residue the row does
+    // not have, which would light the last column for everything beyond it
+    test('maps nothing for a residue the row stops short of', () => {
+      mockGetSession.mockReturnValue({
+        hovered: {
+          hoverFeature: {},
+          hoverPosition: { coord: 1005, refName: 'chr1' },
+        },
+      } as any)
+
+      const model = {
+        querySeqName: 'QUERY',
+        querySeqOffset: 0,
+        rows: [['QUERY', 'MKV']],
+        transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
+        mafRegion: undefined,
+        connectedView: { initialized: true },
+        seqPosToVisibleCol: () => 3,
+        visibleColToSeqPos: () => undefined,
+      } as any
+
+      expect(genomeToMSA({ model })).toBeUndefined()
     })
 
     test('returns undefined when g2p has no mapping for coord', () => {

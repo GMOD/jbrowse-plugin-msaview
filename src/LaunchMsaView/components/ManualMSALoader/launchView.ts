@@ -13,6 +13,7 @@ export function launchView({
   msaFilehandle,
   treeFilehandle,
   querySeqName,
+  querySeqOffset,
   data,
 }: {
   newViewTitle: string
@@ -21,6 +22,8 @@ export function launchView({
   msaFilehandle?: FileLocation
   treeFilehandle?: FileLocation
   querySeqName?: string
+  /** transcript residues before the query row's first residue */
+  querySeqOffset?: number
   data?: {
     msa: string
     tree?: string
@@ -34,6 +37,7 @@ export function launchView({
     msaFilehandle,
     treeFilehandle,
     querySeqName,
+    querySeqOffset,
     data,
   })
 }

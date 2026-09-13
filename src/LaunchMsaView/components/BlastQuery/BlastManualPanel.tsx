@@ -166,6 +166,7 @@ const BlastManualPanel = observer(function ({
                 view,
                 feature: selectedTranscript,
                 querySeqName: queryRow.querySeqName,
+                querySeqOffset: queryRow.querySeqOffset,
                 data: { msa: msaText, tree: treeText },
               })
               handleClose()

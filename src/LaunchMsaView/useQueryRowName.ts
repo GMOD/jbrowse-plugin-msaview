@@ -20,10 +20,14 @@ export function useQueryRowName(msaText: string, proteinSequence: string) {
     [msaText, proteinSequence],
   )
 
+  const querySeqName = override ?? match?.name ?? ''
   return {
     detected: match,
     names,
-    querySeqName: override ?? match?.name ?? '',
+    querySeqName,
+    // only the detected row's offset is known; a row the user picked instead is
+    // taken at face value, residue 1 to residue 1
+    querySeqOffset: querySeqName === match?.name ? match.offset : 0,
     setQuerySeqName: setOverride,
     isAutoDetected: override === undefined && !!match,
   }

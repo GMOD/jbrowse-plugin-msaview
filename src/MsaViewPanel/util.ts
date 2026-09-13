@@ -16,6 +16,44 @@ export function hasQueryRow(model: { rows: string[][]; querySeqName: string }) {
   return model.rows.some(r => r[0] === model.querySeqName)
 }
 
+export interface QueryRowModel {
+  querySeqName: string
+  querySeqOffset: number
+  seqPosToVisibleCol: (rowName: string, seqPos: number) => number | undefined
+  visibleColToSeqPos: (
+    rowName: string,
+    visibleCol: number,
+  ) => number | undefined
+}
+
+/**
+ * The visible column showing residue `proteinPos` (0-based) of the transcript,
+ * or undefined when the query row does not carry that residue or react-msaview
+ * is hiding its column.
+ *
+ * Two things separate the transcript from the row. `querySeqOffset` is the
+ * trimming — a pasted BLAST alignment carries the aligned region, not the whole
+ * protein. And the row can simply stop short: react-msaview answers one column
+ * past the end for a position it does not have, which would light the last
+ * column for every residue beyond the row, so the round trip back through
+ * visibleColToSeqPos is what rejects those.
+ */
+export function transcriptPosToVisibleCol(
+  model: QueryRowModel,
+  proteinPos: number,
+) {
+  const { querySeqName, querySeqOffset } = model
+  const seqPos = proteinPos - querySeqOffset
+  if (seqPos < 0) {
+    return undefined
+  }
+  const col = model.seqPosToVisibleCol(querySeqName, seqPos)
+  return col !== undefined &&
+    model.visibleColToSeqPos(querySeqName, col) === seqPos
+    ? col
+    : undefined
+}
+
 export function hasHoverPosition(
   hovered: unknown,
 ): hovered is { hoverPosition: { coord: number; refName: string } } {

@@ -152,6 +152,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                 view,
                 feature: selectedTranscript,
                 querySeqName: queryRow.querySeqName,
+                querySeqOffset: queryRow.querySeqOffset,
                 ...(inputMethod === 'file'
                   ? {
                       msaFilehandle: msaFileLocation,
