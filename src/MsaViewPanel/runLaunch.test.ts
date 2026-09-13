@@ -23,8 +23,12 @@ function makeModel() {
       writes.push(`setError:${e instanceof Error ? e.message : String(e)}`),
     setRid: (arg: string) => writes.push(`setRid:${arg}`),
     setData: () => writes.push('setData'),
+    rows: [] as string[][],
+    calculateNeighborJoiningTreeFromMSA: () => writes.push('neighborJoining'),
   } as unknown as JBrowsePluginMsaViewModel & {
     launchController: AbortController | undefined
+    rows: string[][]
+    calculateNeighborJoiningTreeFromMSA: () => void
   }
   return { model, writes }
 }
@@ -150,5 +154,55 @@ describe('a launch that fails', () => {
 
     expect(writes).toContain('setError:Only 1 ortholog(s) found')
     expect(writes.at(-2)).toBe('setProgress:')
+  })
+})
+
+// react-msaview caps neighbor joining by row count and throws above it, and a
+// search can ask for 1000 hits. Thrown from inside the success path, that
+// discarded a finished alignment behind "Running EBI BLAST failed".
+describe('a launch whose alignment is too big to build a tree from', () => {
+  test('keeps the alignment and reports the refusal', async () => {
+    const { model, writes } = makeModel()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    model.rows = [
+      ['a', 'MK'],
+      ['b', 'MK'],
+    ]
+    model.calculateNeighborJoiningTreeFromMSA = () => {
+      throw new Error('Neighbor joining here is capped at 500 sequences')
+    }
+    const onLaunched = vi.fn()
+
+    runLaunch({
+      self: model,
+      message: 'Submitting query',
+      onLaunched,
+      launch: async () => ({ ...DATA, tree: '' }),
+    })
+    await settle()
+
+    expect(writes).toContain('setData')
+    expect(onLaunched).toHaveBeenCalled()
+    expect(writes.filter(w => w.startsWith('setError:'))).toEqual([
+      'setError:undefined',
+    ])
+  })
+
+  test('builds the tree when the alignment came back without one', async () => {
+    const { model, writes } = makeModel()
+    model.rows = [
+      ['a', 'MK'],
+      ['b', 'MK'],
+    ]
+
+    runLaunch({
+      self: model,
+      message: 'Submitting query',
+      onLaunched: vi.fn(),
+      launch: async () => ({ ...DATA, tree: '' }),
+    })
+    await settle()
+
+    expect(writes).toContain('neighborJoining')
   })
 })

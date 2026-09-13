@@ -1,6 +1,39 @@
+import { getSession } from '@jbrowse/core/util'
+
 import { isAbortError } from '../utils/fetch'
 
 import type { JBrowsePluginMsaViewModel } from './model'
+
+/**
+ * The in-browser aligner and a search hand back rows and no tree;
+ * react-msaview's neighbour joining over the finished alignment is what EBI's
+ * simple_phylogeny would have computed, without the job.
+ *
+ * It runs after the alignment is applied, and its refusals are reported rather
+ * than thrown: the library caps neighbour joining by row count and throws above
+ * it, and inside the success path that throw discarded an alignment that had
+ * just cost fifteen minutes of EBI queue behind "Running EBI BLAST failed".
+ * A search asking for 1000 hits clears that cap on its own.
+ */
+function buildTree(self: JBrowsePluginMsaViewModel) {
+  if (self.rows.length < 2) {
+    return
+  }
+  try {
+    self.calculateNeighborJoiningTreeFromMSA()
+  } catch (e) {
+    console.error(e)
+    // a notice, not the view's error: the alignment is fine and on screen
+    try {
+      getSession(self).notify(
+        `The alignment loaded, but no tree was built. ${e instanceof Error ? e.message : String(e)}`,
+        'warning',
+      )
+    } catch (e2) {
+      console.error(e2)
+    }
+  }
+}
 
 /**
  * What a launch is allowed to do to the model and to the network while it runs.
@@ -79,14 +112,13 @@ export function runLaunch({
       const data = await launch(scope)
       act(() => {
         self.setData(data)
-        // the in-browser aligner and a search hands back rows and no tree;
-        // react-msaview's neighbour joining over the finished alignment is
-        // what EBI's simple_phylogeny would have computed, without the job
-        if (!data.tree && self.rows.length >= 2) {
-          self.calculateNeighborJoiningTreeFromMSA()
-        }
         onLaunched()
       })
+      if (!data.tree) {
+        act(() => {
+          buildTree(self)
+        })
+      }
     } catch (e) {
       // a cancel is not a failure: drawing the error panel for one would tell
       // the user their launch broke when they are the one who stopped it
