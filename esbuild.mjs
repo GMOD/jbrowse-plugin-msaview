@@ -6,6 +6,8 @@ import JBrowseReExports from '@jbrowse/core/ReExports/list'
 import * as esbuild from 'esbuild'
 import prettyBytes from 'pretty-bytes'
 
+import floor from './scripts/host-reexports-floor.json' with { type: 'json' }
+
 const isWatch = process.argv.includes('--watch')
 const PORT = process.env.PORT ? +process.env.PORT : 9000
 
@@ -62,7 +64,30 @@ const rebuildLogPlugin = {
 // Bundling it pulls in some MUI internals -- roughly 433KB -> 503KB -- and works
 // on both MUI generations. Worth 70KB to not error-page every host.
 const SHAPE_VARIES_BY_HOST = new Set(['@mui/material/SvgIcon'])
-const globals = JBrowseReExports.filter(x => !SHAPE_VARIES_BY_HOST.has(x))
+
+// Absence is the other half of the same hazard, and it runs the opposite way
+// from SvgIcon's: a path the INSTALLED core re-exports but an older host does
+// not is `undefined` there, and rendering undefined as a component throws React
+// error #130 on the first hover. `@jbrowse/core/ui/BaseTooltip` is the live
+// example -- on core main's list, not in v4.3.0's, and react-msaview imports it
+// by default -- so bumping the core devDep would have externalized it and broken
+// every v4.0-v4.3 host, invisibly to tsc, the linter and the host-compat probe,
+// which never hovers.
+//
+// So the externals are the intersection: what this build's core re-exports AND
+// what the oldest supported host re-exports (host-reexports-floor.json, the
+// first version the probe boots). A path only the newer core lists is bundled,
+// which is what a deep path not in ReExports does anyway.
+const hostFloor = new Set(floor.paths)
+const globals = JBrowseReExports.filter(
+  x => hostFloor.has(x) && !SHAPE_VARIES_BY_HOST.has(x),
+)
+const bundledForOldHosts = JBrowseReExports.filter(x => !hostFloor.has(x))
+if (bundledForOldHosts.length > 0) {
+  console.log(
+    `Bundling ${bundledForOldHosts.length} re-export(s) absent from @jbrowse/core@${floor.version}: ${bundledForOldHosts.join(', ')}`,
+  )
+}
 const config = {
   entryPoints: ['src/index.ts'],
   bundle: true,

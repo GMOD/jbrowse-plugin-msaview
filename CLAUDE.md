@@ -36,6 +36,22 @@ on nightly with `(0 , PR.useLocalStorage) is not a function`. Before assuming a
 `@jbrowse/core/util` import works everywhere, check it against **both** v4.3.0
 and `main`.
 
+**The externals are the intersection, not the installed list.** A path the
+installed core re-exports but an older host does not is `undefined` there —
+absence in the other direction from the `@jbrowse/core/util` barrel's. So
+`esbuild.mjs` externalizes only what BOTH this build's `ReExports/list` and
+`scripts/host-reexports-floor.json` carry; everything else is bundled, which is
+what a deep path off the list gets anyway. The floor is the oldest version the
+host-compat probe boots, regenerated with
+`node scripts/update-host-reexports-floor.mjs` (it packs that `@jbrowse/core`
+from npm — don't hand-edit the json), and `pnpm check-host-externals` greps the
+built bundle for `JBrowseExports[…]` so the artifact is checked, not the intent.
+`@jbrowse/core/ui/BaseTooltip` is the case this was written for: on core
+`main`'s list, absent from v4.3.0's, and react-msaview imports it by default —
+so bumping the core devDep would have externalized it and thrown React #130 on
+the first hover on every v4.0–v4.3 host, invisibly to tsc, the linter, and a
+probe that never hovers.
+
 ## `@mui/material` is a hand-listed set, not all of MUI
 
 The host's `JBrowseExports["@mui/material"]` is ~112 named components in
