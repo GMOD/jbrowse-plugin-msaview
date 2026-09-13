@@ -60,6 +60,17 @@ test('a failed ortholog launch shows why', () => {
   expect(screen.getByText(/Only 1 ortholog\(s\) found/)).toBeTruthy()
 })
 
+// an indexed view keeps its init -- it is how the block is refetched on the
+// next session -- so the panel cannot read init alone as "still launching"
+test('an indexed view with its alignment draws it, init and all', () => {
+  panel({
+    init: { msaIndexedLocation: { uri: 'msa.fa.gz' }, msaName: 'ENST1' },
+    dataInitialized: true,
+    progress: '',
+  })
+  expect(screen.getByText('the alignment')).toBeTruthy()
+})
+
 test('a failed init shows why', () => {
   panel({
     init: { msaName: 'ENST00000288602' },

@@ -91,17 +91,21 @@ function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
  * it is recorded whether or not the write succeeded, so a browser refusing
  * IndexedDB (private mode) fails once rather than in a loop.
  *
- * A view whose data comes from a filehandle stores nothing at all: the file is
- * the source of truth and react-msaview refetches it at startup.
+ * A view whose data comes from a filehandle -- or from the indexed block its
+ * kept `init` names -- stores nothing at all: the file is the source of truth
+ * and it is refetched at startup.
  */
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
-  const { rows, dataStoreId, isStoringData, lastStoredData } = self
+  const { rows, dataStoreId, isStoringData, lastStoredData, init } = self
   const data = currentData(self)
   if (
     rows.length === 0 ||
     isStoringData ||
     self.msaFilehandle ||
     self.treeFilehandle ||
+    // an indexed view keeps its init and refetches the block, so a row here
+    // would be one nothing ever reads
+    !!init?.msaIndexedLocation ||
     !(data.msa || data.tree) ||
     sameData(lastStoredData, data)
   ) {
@@ -200,15 +204,28 @@ export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
   }
 }
 
-// Resolve the declarative `init` launch contract once, then clear it. msaUrl is
-// handed to react-msaview's native filehandle loader (openLocation + progress +
-// abort + CORS-proxy) and sniffed for an AlphaFold uniprotId; the bgzip
-// name-indexed block is the one source with no native loader, so it's fetched
-// here. Inline data and tree URLs arrive as native snapshot props, not via init.
+// Resolve the declarative `init` launch contract. msaUrl is handed to
+// react-msaview's native filehandle loader (openLocation + progress + abort +
+// CORS-proxy) and sniffed for an AlphaFold uniprotId; the bgzip name-indexed
+// block is the one source with no native loader, so it's fetched here. Inline
+// data and tree URLs arrive as native snapshot props, not via init.
+//
+// An init that named the indexed block is KEPT rather than cleared, as
+// jbrowse-plugin-tview keeps its own: what it resolves to is one alignment
+// string, react-msaview drops a document over 50kb from the snapshot, and there
+// is no filehandle to reload it from -- so a shared session came back saying the
+// alignment had expired. The init is both smaller than what it fetches and the
+// only durable statement of what the view is.
 export function processInit(self: JBrowsePluginMsaViewModel) {
   const { init } = self
   if (init) {
     const { msaUrl, msaIndexedLocation, msaName, querySeqName } = init
+    const indexed = !!(msaIndexedLocation && msaName)
+    // a kept init re-runs this on every session restore; the alignment already
+    // in hand is the one it would fetch
+    if (indexed && self.data.msa) {
+      return
+    }
     void (async () => {
       try {
         self.setError(undefined)
@@ -240,7 +257,9 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
           }
         }
 
-        self.setInit(undefined)
+        if (!indexed) {
+          self.setInit(undefined)
+        }
       } catch (e) {
         self.setError(e)
         console.error(e)

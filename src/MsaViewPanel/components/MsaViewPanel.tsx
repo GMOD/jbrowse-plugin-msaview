@@ -24,8 +24,14 @@ const MsaViewPanel = observer(function MsaViewPanel2({
   const { classes } = useStyles()
   const { blastParams, orthologParams, init, loadingStoredData } = model
   // an unresolved launch request means there is no alignment to draw yet, so all
-  // three gate the same panel -- see LaunchProgress
-  const launching = !!(blastParams ?? orthologParams ?? init)
+  // three gate the same panel -- see LaunchProgress. An indexed view keeps its
+  // init for the life of the view (it is how the block is refetched), so that
+  // one is only "launching" until the alignment arrives.
+  const launching = !!(
+    blastParams ??
+    orthologParams ??
+    (init && !model.dataInitialized)
+  )
   return (
     <ErrorBoundary>
       <div>
