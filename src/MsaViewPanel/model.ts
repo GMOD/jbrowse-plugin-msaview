@@ -24,6 +24,7 @@ import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
+import { deleteMsaData } from './msaDataStore'
 import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript'
 
 import type {
@@ -510,6 +511,39 @@ export default function stateModelFactory() {
           superSetMouseClickPos(col, row)
           if (col !== undefined) {
             self.handleMsaClick(col)
+          }
+        },
+      }
+    })
+
+    .actions(self => {
+      const superReset = self.reset.bind(self)
+      return {
+        /**
+         * #action
+         * overrides base
+         *
+         * react-msaview's reset applies a snapshot filtered to its own
+         * `preservedOnReset` list, and a downstream property is never on it:
+         * returning to the import form dropped the view's name, un-minimized
+         * it, and forgot the zoom-on-click preference. The volatiles fail the
+         * other way -- applySnapshot cannot reach them, so the last file's
+         * state carried into the next one and the domain auto-load, which fires
+         * once per view, never fired again.
+         */
+        reset() {
+          const { displayName, minimized, zoomToBaseLevel, dataStoreId } = self
+          superReset()
+          if (displayName !== undefined) {
+            self.setDisplayName(displayName)
+          }
+          self.setMinimized(minimized)
+          self.setZoomToBaseLevel(zoomToBaseLevel)
+          self.setDomainsRequested(false)
+          self.setLastStoredData(undefined)
+          if (dataStoreId) {
+            // nothing points at that row now
+            void deleteMsaData(dataStoreId)
           }
         },
       }

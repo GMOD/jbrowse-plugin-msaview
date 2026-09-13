@@ -2,12 +2,20 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { doLaunchBlast } from './doLaunchBlast'
 import stateModelFactory from './model'
+import { deleteMsaData } from './msaDataStore'
 
 // the launch autoruns are live on a real model, and a blastParams write is what
-// wakes them -- so the search is mocked rather than sent to EBI
+// wakes them -- so the search is mocked rather than sent to EBI. The session is
+// mocked for the same reason: the hover and highlight autoruns reach for one on
+// every change, and there is no session around a bare model.
+vi.mock('@jbrowse/core/util', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getSession: () => ({ views: [], hovered: undefined }),
+}))
 vi.mock('./doLaunchBlast', () => ({ doLaunchBlast: vi.fn() }))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(async () => {}),
+  deleteMsaData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
   retrieveMsaData: vi.fn(),
   storeMsaData: vi.fn(),
@@ -75,5 +83,39 @@ describe('a failed launch', () => {
     model.cancelLaunch()
     expect(model.blastParams).toBeUndefined()
     expect(model.error).toBeUndefined()
+  })
+})
+
+// react-msaview's reset keeps only what is on its own preservedOnReset list,
+// and a downstream property is never on it; its volatiles survive instead,
+// which is the direction that carries the last file's state into the next one
+describe('returning to the import form', () => {
+  test('keeps what is about the view, not about the file', () => {
+    const model = view()
+    model.setDisplayName('BLAST - TP53')
+    model.setMinimized(true)
+    model.setZoomToBaseLevel(true)
+    model.setMSA('>a\nMK')
+
+    model.reset()
+
+    expect(model.displayName).toBe('BLAST - TP53')
+    expect(model.minimized).toBe(true)
+    expect(model.zoomToBaseLevel).toBe(true)
+    expect(model.dataInitialized).toBe(false)
+  })
+
+  test('clears the volatiles applySnapshot cannot reach, and the stored row', () => {
+    const model = view()
+    model.setDomainsRequested(true)
+    model.setLastStoredData({ msa: '>a\nMK' })
+    model.setDataStoreId('msa-1')
+
+    model.reset()
+
+    expect(model.domainsRequested).toBe(false)
+    expect(model.lastStoredData).toBeUndefined()
+    expect(model.dataStoreId).toBeUndefined()
+    expect(deleteMsaData).toHaveBeenCalledWith('msa-1')
   })
 })
