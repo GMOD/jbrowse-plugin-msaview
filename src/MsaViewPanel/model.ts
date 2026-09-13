@@ -34,6 +34,7 @@ import type {
 import type { UnirefIdentity } from '../utils/unirefHomologs'
 import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
+import type { MenuItem } from '@jbrowse/core/ui'
 import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -217,7 +218,6 @@ export default function stateModelFactory() {
       (): {
         rid: string | undefined
         progress: string
-        error: unknown
         loadingStoredData: boolean
         isStoringData: boolean
         lastStoredData: MsaDataPayload | undefined
@@ -232,10 +232,6 @@ export default function stateModelFactory() {
          * #volatile
          */
         progress: '',
-        /**
-         * #volatile
-         */
-        error: undefined,
         /**
          * #volatile
          */
@@ -267,22 +263,6 @@ export default function stateModelFactory() {
         domainsRequested: false,
       }),
     )
-
-    .views(self => ({
-      /**
-       * #method
-       */
-      getRowByName(rowName: string) {
-        return self.rows.find(r => r[0] === rowName)
-      },
-
-      /**
-       * #method
-       */
-      getSequenceByRowName(rowName: string) {
-        return this.getRowByName(rowName)?.[1]
-      },
-    }))
 
     .views(self => ({
       /**
@@ -346,12 +326,6 @@ export default function stateModelFactory() {
        */
       setZoomToBaseLevel(arg: boolean) {
         self.zoomToBaseLevel = arg
-      },
-      /**
-       * #action
-       */
-      setError(e: unknown) {
-        self.error = e
       },
       /**
        * #action
@@ -497,23 +471,31 @@ export default function stateModelFactory() {
       }
     })
 
-    .views(self => ({
-      /**
-       * #method
-       */
-      extraViewMenuItems() {
-        return [
-          {
-            label: 'Zoom to base level on click?',
-            checked: self.zoomToBaseLevel,
-            type: 'checkbox',
-            onClick: () => {
-              self.setZoomToBaseLevel(!self.zoomToBaseLevel)
+    .views(self => {
+      // react-msaview's extraViewMenuItems() has had no caller since v5.6.0, in
+      // that package or in JBrowse; the view hamburger renders menuItems(), so
+      // extend that
+      const superMenuItems = self.menuItems.bind(self)
+      return {
+        /**
+         * #method
+         * overrides base
+         */
+        menuItems(): MenuItem[] {
+          return [
+            ...superMenuItems(),
+            {
+              label: 'Zoom to base level on click?',
+              type: 'checkbox',
+              checked: self.zoomToBaseLevel,
+              onClick: () => {
+                self.setZoomToBaseLevel(!self.zoomToBaseLevel)
+              },
             },
-          },
-        ]
-      },
-    }))
+          ]
+        },
+      }
+    })
 
     .actions(self => ({
       afterCreate() {
