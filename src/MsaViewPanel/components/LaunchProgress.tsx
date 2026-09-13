@@ -54,6 +54,28 @@ const LaunchProgress = observer(function LaunchProgress2({
               the failure -- EBI's own page says more about a job than we can */}
           {rid ? <JobLink jobId={rid} /> : null}
           <ErrorMessage error={error} />
+          {/* the request stays on the model after a failure, so without these
+              the view is a dead end that resubmits the job on every reload */}
+          <div className={classes.progressRow}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                model.retryLaunch()
+              }}
+            >
+              Retry
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                model.cancelLaunch()
+              }}
+            >
+              Dismiss
+            </Button>
+          </div>
         </>
       ) : (
         <>

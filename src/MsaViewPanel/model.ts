@@ -433,20 +433,44 @@ export default function stateModelFactory() {
       },
       /**
        * #action
-       * Abandon the launch in flight. The EBI job keeps running on their side —
-       * nothing here can recall it, and its JobLink stays valid — so this only
-       * stops the polling and the writes it would make. Dropping the params is
-       * what keeps the request from refiring; the view falls back to the import
-       * form, which is where react-msaview's own cancel leaves it too.
+       * Abandon the launch, in flight or failed. The EBI job keeps running on
+       * their side — nothing here can recall it, and its JobLink stays valid —
+       * so this only stops the polling and the writes it would make. Dropping
+       * the request (the params, or the init) is what keeps it from refiring on
+       * the next reload; the view falls back to the import form, which is where
+       * react-msaview's own cancel leaves it too.
        */
       cancelLaunch() {
         self.launchController?.abort()
         self.launchController = undefined
         self.blastParams = undefined
         self.orthologParams = undefined
+        self.init = undefined
         self.progress = ''
         self.rid = undefined
         self.error = undefined
+      },
+      /**
+       * #action
+       * Run the failed request again. The request IS the params, so re-stating
+       * them is the whole retry: each is a frozen property, and a fresh object
+       * is a change the launch autoruns wake on.
+       */
+      retryLaunch() {
+        self.launchController?.abort()
+        self.launchController = undefined
+        self.progress = ''
+        self.rid = undefined
+        self.error = undefined
+        if (self.blastParams) {
+          self.blastParams = { ...self.blastParams }
+        }
+        if (self.orthologParams) {
+          self.orthologParams = { ...self.orthologParams }
+        }
+        if (self.init) {
+          self.init = { ...self.init }
+        }
       },
       /**
        * #action

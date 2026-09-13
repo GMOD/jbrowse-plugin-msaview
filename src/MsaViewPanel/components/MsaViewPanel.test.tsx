@@ -82,7 +82,7 @@ test('a failed init shows why', () => {
 })
 
 // a launch runs for 10+ minutes, so leaving with no way out means watching it
-test('a running launch offers a way out, and a failed one does not', () => {
+test('a running launch offers a way out', () => {
   const cancelLaunch = vi.fn()
   panel({
     blastParams: { proteinSequence: 'MKV' } as never,
@@ -91,15 +91,26 @@ test('a running launch offers a way out, and a failed one does not', () => {
   })
   screen.getByRole('button', { name: 'Cancel' }).click()
   expect(cancelLaunch).toHaveBeenCalled()
+})
 
-  cleanup()
+// the request outlives the failure -- it is what a reload resubmits -- so a
+// failed launch that only drew the error was a dead end that re-ran the EBI job
+// on every reload
+test('a failed launch can be retried or dismissed', () => {
+  const cancelLaunch = vi.fn()
+  const retryLaunch = vi.fn()
   panel({
     blastParams: { proteinSequence: 'MKV' } as never,
     progress: '',
     error: new Error('No hits found'),
     cancelLaunch,
+    retryLaunch,
   })
   expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull()
+  screen.getByRole('button', { name: 'Retry' }).click()
+  expect(retryLaunch).toHaveBeenCalled()
+  screen.getByRole('button', { name: 'Dismiss' }).click()
+  expect(cancelLaunch).toHaveBeenCalled()
 })
 
 test('a running job links out to it', () => {
