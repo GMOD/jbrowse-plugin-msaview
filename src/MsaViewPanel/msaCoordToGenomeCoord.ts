@@ -1,7 +1,5 @@
 import { getCodonRanges } from 'g2p_mapper'
 
-import { gappedToUngappedPosition } from './structureConnection'
-
 import type { MafRegion } from './types'
 
 interface GenomeRegion {
@@ -19,12 +17,24 @@ interface CoordModel {
       }
     | undefined
   mafRegion?: MafRegion
-  rows: string[][]
+  /**
+   * react-msaview's converter, which is the only thing that knows which columns
+   * are on screen. `rows` carries the whole gapped alignment, so counting
+   * residues along one of them answers for a column index the user cannot
+   * produce once `hideGaps` drops columns -- and it drops them as soon as a
+   * clade collapses or allowedGappyness falls below 100.
+   */
+  visibleColToSeqPos: (
+    rowName: string,
+    visibleCol: number,
+  ) => number | undefined
 }
 
 /**
  * The genome regions covered by MSA column `coord` of the query row, in 0-based
  * half-open coordinates (what bpToPx and navTo take).
+ *
+ * `coord` is a VISIBLE column -- what mouseCol and mouseClickCol carry.
  *
  * Usually one region -- one codon, or one base in a MAF alignment -- but a
  * codon split across an exon boundary yields one region per contiguous piece,
@@ -37,14 +47,9 @@ export function msaCoordToGenomeRegions({
   model: CoordModel
   coord: number
 }): GenomeRegion[] {
-  const { querySeqName, transcriptToMsaMap, mafRegion, rows } = model
+  const { querySeqName, transcriptToMsaMap, mafRegion } = model
 
-  const querySeq = rows.find(f => f[0] === querySeqName)?.[1]
-  if (!querySeq) {
-    return []
-  }
-
-  const ungappedPos = gappedToUngappedPosition(querySeq, mouseCol)
+  const ungappedPos = model.visibleColToSeqPos(querySeqName, mouseCol)
   if (ungappedPos === undefined) {
     return []
   }

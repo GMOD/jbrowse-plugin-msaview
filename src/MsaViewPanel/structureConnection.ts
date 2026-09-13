@@ -31,29 +31,3 @@ export function isProteinView(view: unknown): view is ProteinView {
 export function getProteinViews(views: { type: string }[]): ProteinView[] {
   return (views as unknown[]).filter(isProteinView)
 }
-
-/**
- * Helper to convert gapped MSA column to ungapped position for a specific row
- */
-export function gappedToUngappedPosition(
-  sequence: string,
-  gappedPosition: number,
-): number | undefined {
-  if (gappedPosition < 0 || gappedPosition >= sequence.length) {
-    return undefined
-  }
-
-  let ungapped = 0
-  for (let i = 0; i < gappedPosition; i++) {
-    if (sequence[i] !== '-') {
-      ungapped++
-    }
-  }
-
-  // If the position itself is a gap, return undefined
-  if (sequence[gappedPosition] === '-') {
-    return undefined
-  }
-
-  return ungapped
-}

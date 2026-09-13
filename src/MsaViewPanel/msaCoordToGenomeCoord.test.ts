@@ -1,10 +1,60 @@
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
+import { MSAModelF } from 'react-msaview'
 import { describe, expect, test } from 'vitest'
 
 import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
+
+import type { MafRegion } from './types'
+
+interface Fixture {
+  querySeqName: string
+  transcriptToMsaMap?: {
+    refName: string
+    p2gCodon: Record<number, number[]>
+  }
+  mafRegion?: MafRegion
+  rows: string[][]
+  /** global columns react-msaview is hiding, as its `blanks` getter reports them */
+  blanks?: number[]
+}
+
+/**
+ * A stand-in for the view model, converting exactly as react-msaview does: a
+ * visible column is shifted right past every hidden column before it, and the
+ * residue is then counted along the row.
+ */
+function coordModel({ rows, blanks = [], ...rest }: Fixture) {
+  return {
+    ...rest,
+    transcriptToMsaMap: rest.transcriptToMsaMap,
+    visibleColToSeqPos(rowName: string, visibleCol: number) {
+      const seq = rows.find(r => r[0] === rowName)?.[1]
+      if (seq === undefined) {
+        return undefined
+      }
+      let globalCol = visibleCol
+      for (const blank of blanks) {
+        if (blank <= globalCol) {
+          globalCol++
+        }
+      }
+      const isBlank = (c?: string) => c === '-' || c === '.'
+      if (globalCol >= seq.length || isBlank(seq[globalCol])) {
+        return undefined
+      }
+      let seqPos = 0
+      for (let i = 0; i < globalCol; i++) {
+        if (!isBlank(seq[i])) {
+          seqPos++
+        }
+      }
+      return seqPos
+    },
+  }
+}
 
 // codon at protein position i covers three consecutive genome bases starting at
 // 100 + i * 3, i.e. a single-exon forward-strand transcript
@@ -19,52 +69,52 @@ function forwardCodons(n: number) {
 
 describe('msaCoordToGenomeCoord', () => {
   test('returns undefined when neither transcriptToMsaMap nor mafRegion is defined', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: undefined,
       mafRegion: undefined,
       rows: [['QUERY', 'MKAA']],
-    }
+    })
     const result = msaCoordToGenomeCoord({ model, coord: 0 })
     expect(result).toBeUndefined()
   })
 
   test('returns undefined when query row is not found', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
         p2gCodon: forwardCodons(2),
       },
       rows: [['OTHER', 'MKAA']],
-    }
+    })
     const result = msaCoordToGenomeCoord({ model, coord: 0 })
     expect(result).toBeUndefined()
   })
 
   test('returns undefined when coord is a gap', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
         p2gCodon: forwardCodons(2),
       },
       rows: [['QUERY', 'M-KA']],
-    }
+    })
     // Position 1 is a gap
     const result = msaCoordToGenomeCoord({ model, coord: 1 })
     expect(result).toBeUndefined()
   })
 
   test('returns genome region for valid non-gap position', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
         p2gCodon: forwardCodons(4),
       },
       rows: [['QUERY', 'MKAA']],
-    }
+    })
     // Position 0 (M) should map to ungapped 0, genome 100-103
     const result = msaCoordToGenomeCoord({ model, coord: 0 })
     expect(result).toEqual({
@@ -75,7 +125,7 @@ describe('msaCoordToGenomeCoord', () => {
   })
 
   test('handles gapped sequence correctly', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
@@ -84,7 +134,7 @@ describe('msaCoordToGenomeCoord', () => {
       rows: [['QUERY', 'M-K-AA']],
       //                 012345 gapped positions
       //                 0  1 23 ungapped positions
-    }
+    })
     // Gapped position 2 (K) = ungapped 1
     const result = msaCoordToGenomeCoord({ model, coord: 2 })
     expect(result).toEqual({
@@ -103,28 +153,28 @@ describe('msaCoordToGenomeCoord', () => {
   })
 
   test('returns undefined when the position has no codon mapping', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
         p2gCodon: forwardCodons(1),
       },
       rows: [['QUERY', 'MKAA']],
-    }
+    })
     // ungapped position 1 has no entry in p2gCodon
     const result = msaCoordToGenomeCoord({ model, coord: 1 })
     expect(result).toBeUndefined()
   })
 
   test('maps the final residue, whose codon has no successor', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
         p2gCodon: forwardCodons(4),
       },
       rows: [['QUERY', 'MKAA']],
-    }
+    })
     const result = msaCoordToGenomeCoord({ model, coord: 3 })
     expect(result).toEqual({
       refName: 'chr1',
@@ -134,21 +184,21 @@ describe('msaCoordToGenomeCoord', () => {
   })
 
   test('returns undefined for out of bounds coord', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'QUERY',
       transcriptToMsaMap: {
         refName: 'chr1',
         p2gCodon: forwardCodons(2),
       },
       rows: [['QUERY', 'MK']],
-    }
+    })
     // Position 10 is out of bounds
     const result = msaCoordToGenomeCoord({ model, coord: 10 })
     expect(result).toBeUndefined()
   })
 
   test('works with multiple rows, uses querySeqName', () => {
-    const model = {
+    const model = coordModel({
       querySeqName: 'SEQ2',
       transcriptToMsaMap: {
         refName: 'chr1',
@@ -159,7 +209,7 @@ describe('msaCoordToGenomeCoord', () => {
         ['SEQ2', 'MKAA'],
         ['SEQ3', 'LLLL'],
       ],
-    }
+    })
     const result = msaCoordToGenomeCoord({ model, coord: 0 })
     expect(result).toEqual({
       refName: 'chr1',
@@ -180,11 +230,11 @@ describe('msaCoordToGenomeCoord', () => {
         strand: 1,
         subfeatures: [{ refName: 'chr1', type: 'CDS', start: 100, end: 112 }],
       })
-      const model = {
+      const model = coordModel({
         querySeqName: 'QUERY',
         transcriptToMsaMap: { refName, p2gCodon },
         rows: [['QUERY', 'MKAA']],
-      }
+      })
       expect(msaCoordToGenomeCoord({ model, coord: 0 })).toEqual({
         refName: 'chr1',
         start: 100,
@@ -205,11 +255,11 @@ describe('msaCoordToGenomeCoord', () => {
         strand: -1,
         subfeatures: [{ refName: 'chr1', type: 'CDS', start: 100, end: 112 }],
       })
-      const model = {
+      const model = coordModel({
         querySeqName: 'QUERY',
         transcriptToMsaMap: { refName, p2gCodon },
         rows: [['QUERY', 'MKAA']],
-      }
+      })
       // the first residue is translated from the 3' end of the genome region
       expect(msaCoordToGenomeCoord({ model, coord: 0 })).toEqual({
         refName: 'chr1',
@@ -235,11 +285,11 @@ describe('msaCoordToGenomeCoord', () => {
           { refName: 'chr1', type: 'CDS', start: 200, end: 202 },
         ],
       })
-      const model = {
+      const model = coordModel({
         querySeqName: 'QUERY',
         transcriptToMsaMap: { refName, p2gCodon },
         rows: [['QUERY', 'MK']],
-      }
+      })
       expect(msaCoordToGenomeRegions({ model, coord: 1 })).toEqual([
         { refName: 'chr1', start: 103, end: 104 },
         { refName: 'chr1', start: 200, end: 202 },
@@ -256,7 +306,7 @@ describe('msaCoordToGenomeCoord', () => {
   // MAF region tests
   describe('mafRegion', () => {
     test('returns genome position for mafRegion mapping', () => {
-      const model = {
+      const model = coordModel({
         querySeqName: 'hg38.chr1',
         transcriptToMsaMap: undefined,
         mafRegion: {
@@ -266,7 +316,7 @@ describe('msaCoordToGenomeCoord', () => {
           assemblyName: 'hg38',
         },
         rows: [['hg38.chr1', 'ACGTACGTAC']],
-      }
+      })
       // Position 0 should map to genome 1000
       const result = msaCoordToGenomeCoord({ model, coord: 0 })
       expect(result).toEqual({
@@ -285,7 +335,7 @@ describe('msaCoordToGenomeCoord', () => {
     })
 
     test('handles gaps in mafRegion sequence', () => {
-      const model = {
+      const model = coordModel({
         querySeqName: 'hg38.chr1',
         transcriptToMsaMap: undefined,
         mafRegion: {
@@ -297,7 +347,7 @@ describe('msaCoordToGenomeCoord', () => {
         rows: [['hg38.chr1', 'AC--GTAC']],
         // Gapped positions: 0  1  2  3  4  5  6  7
         // Ungapped:         0  1        2  3  4  5
-      }
+      })
       // Position 2 is a gap, should return undefined
       const result = msaCoordToGenomeCoord({ model, coord: 2 })
       expect(result).toBeUndefined()
@@ -312,7 +362,7 @@ describe('msaCoordToGenomeCoord', () => {
     })
 
     test('returns undefined when position exceeds mafRegion end', () => {
-      const model = {
+      const model = coordModel({
         querySeqName: 'hg38.chr1',
         transcriptToMsaMap: undefined,
         mafRegion: {
@@ -322,14 +372,14 @@ describe('msaCoordToGenomeCoord', () => {
           assemblyName: 'hg38',
         },
         rows: [['hg38.chr1', 'ACGTACGTAC']], // 10 chars but region is only 5bp
-      }
+      })
       // Position 8 would be ungapped 8 = genome 1008, but region ends at 1005
       const result = msaCoordToGenomeCoord({ model, coord: 8 })
       expect(result).toBeUndefined()
     })
 
     test('mafRegion takes precedence over transcriptToMsaMap', () => {
-      const model = {
+      const model = coordModel({
         querySeqName: 'hg38.chr1',
         transcriptToMsaMap: {
           refName: 'chr2',
@@ -342,7 +392,7 @@ describe('msaCoordToGenomeCoord', () => {
           assemblyName: 'hg38',
         },
         rows: [['hg38.chr1', 'ACGTACGTAC']],
-      }
+      })
       // Should use mafRegion, not transcriptToMsaMap
       const result = msaCoordToGenomeCoord({ model, coord: 0 })
       expect(result).toEqual({
@@ -350,6 +400,76 @@ describe('msaCoordToGenomeCoord', () => {
         start: 1000,
         end: 1001,
       })
+    })
+  })
+})
+
+// mouseCol and mouseClickCol are VISIBLE columns, and react-msaview hides
+// columns as soon as a clade collapses or allowedGappyness drops below 100 --
+// which `hideGaps` leaves on by default. Counting residues along the raw gapped
+// row instead landed every hover and click some codons off.
+describe('columns react-msaview is hiding', () => {
+  test('a visible column past a hidden one maps to the residue on screen', () => {
+    const model = coordModel({
+      querySeqName: 'QUERY',
+      transcriptToMsaMap: {
+        refName: 'chr1',
+        p2gCodon: forwardCodons(4),
+      },
+      rows: [['QUERY', 'M-KA']],
+      blanks: [1],
+    })
+    expect(msaCoordToGenomeCoord({ model, coord: 1 })).toEqual({
+      refName: 'chr1',
+      start: 103,
+      end: 106,
+    })
+    expect(msaCoordToGenomeCoord({ model, coord: 2 })).toEqual({
+      refName: 'chr1',
+      start: 106,
+      end: 109,
+    })
+  })
+
+  test('a MAF row shifts by the hidden columns too', () => {
+    const model = coordModel({
+      querySeqName: 'hg38.chr1',
+      mafRegion: {
+        refName: 'chr1',
+        start: 1000,
+        end: 1008,
+        assemblyName: 'hg38',
+      },
+      rows: [['hg38.chr1', 'AC--GTAC']],
+      blanks: [2, 3],
+    })
+    expect(msaCoordToGenomeCoord({ model, coord: 2 })).toEqual({
+      refName: 'chr1',
+      start: 1002,
+      end: 1003,
+    })
+  })
+
+  // the fixture above says what blanks mean; this says react-msaview agrees,
+  // so a change to how it hides columns fails here rather than in the browser
+  test('against the real react-msaview model', () => {
+    const model = MSAModelF().create({
+      type: 'MsaView',
+      data: { msa: '>QUERY\nM-KA\n>B\nMWKA\n>C\nM-KA\n' },
+      allowedGappyness: 50,
+    })
+    expect(model.blanks).toEqual([1])
+    expect(model.numColumns).toBe(3)
+    const fromView = {
+      querySeqName: 'QUERY',
+      transcriptToMsaMap: { refName: 'chr1', p2gCodon: forwardCodons(4) },
+      visibleColToSeqPos: (rowName: string, visibleCol: number) =>
+        model.visibleColToSeqPos(rowName, visibleCol),
+    }
+    expect(msaCoordToGenomeCoord({ model: fromView, coord: 1 })).toEqual({
+      refName: 'chr1',
+      start: 103,
+      end: 106,
     })
   })
 })
