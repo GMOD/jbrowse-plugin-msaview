@@ -143,3 +143,65 @@ test('a request with no query at all is refused before any search runs', async (
   ).rejects.toThrow(/connectedTranscript/)
   expect(phmmer).not.toHaveBeenCalled()
 })
+
+// blastParams is a frozen snapshot property, so the Feature the dialog put in
+// it comes back from a session reload as the plain JSON it serialized to. The
+// launch used to call .get() on that, minutes after the EBI job the reload
+// resubmitted had come back, and threw where nothing was catching.
+test('a transcript restored from a session snapshot still labels the cache row', async () => {
+  blastp.mockResolvedValue({ rid: 'job', hits: [{ ...HIT, sequence: 'MKWV' }] })
+  mockLaunchMSA.mockResolvedValue({ msa: 'aligned', tree: 'tree' })
+
+  await launch(
+    makeModel({
+      searchProgram: 'blastp',
+      blastDatabase: 'uniprotkb_swissprot',
+      msaAlgorithm: 'clustalo',
+      proteinSequence: 'MKWV',
+      selectedTranscript: {
+        uniqueId: 'NM_000546.6',
+        name: 'TP53-201',
+        parentId: 'TP53',
+        gene_name: 'TP53',
+      },
+    }),
+  )
+
+  expect(saveBlastResult).toHaveBeenCalledWith(
+    expect.objectContaining({
+      geneId: 'TP53',
+      transcriptId: 'NM_000546.6',
+      transcriptName: 'TP53-201',
+      geneName: 'TP53',
+    }),
+  )
+})
+
+test('a live Feature handed over in the same session labels it the same way', async () => {
+  blastp.mockResolvedValue({ rid: 'job', hits: [{ ...HIT, sequence: 'MKWV' }] })
+  mockLaunchMSA.mockResolvedValue({ msa: 'aligned', tree: 'tree' })
+
+  const json = {
+    uniqueId: 'NM_000546.6',
+    name: 'TP53-201',
+    parentId: 'TP53',
+  }
+  await launch(
+    makeModel({
+      searchProgram: 'blastp',
+      blastDatabase: 'uniprotkb_swissprot',
+      msaAlgorithm: 'clustalo',
+      proteinSequence: 'MKWV',
+      selectedTranscript: { toJSON: () => json },
+    }),
+  )
+
+  expect(saveBlastResult).toHaveBeenCalledWith(
+    expect.objectContaining({
+      geneId: 'TP53',
+      transcriptId: 'NM_000546.6',
+      transcriptName: 'TP53-201',
+      geneName: 'TP53',
+    }),
+  )
+})

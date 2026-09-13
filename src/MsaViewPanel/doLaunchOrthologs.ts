@@ -9,6 +9,7 @@ import {
 import { fetchPantherOrthologs } from '../utils/pantherOrthologs'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 import { fetchUnirefHomologs } from '../utils/unirefHomologs'
+import { transcriptName } from './util'
 
 import type { OrthologRow } from '../utils/ncbiOrthologs'
 import type { UnirefIdentity } from '../utils/unirefHomologs'
@@ -286,9 +287,8 @@ function buildQueryMetadata(
   proteinSequence: string,
   representative: Representative | undefined,
 ): Record<string, string> {
-  const transcript = self.orthologParams?.selectedTranscript
   const metadata: Record<string, string> = { 'Gene ID': geneId }
-  const name = transcript?.get('name') ?? transcript?.get('id')
+  const name = transcriptName(self.orthologParams?.selectedTranscript)
   if (name) {
     metadata.Transcript = name
   }

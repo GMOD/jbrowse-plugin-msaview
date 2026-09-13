@@ -207,7 +207,7 @@ const BlastAutomaticPanel = observer(function ({
                         searchProgram: 'phmmer',
                         blastDatabase: search.database,
                         maxHits: hitCount,
-                        selectedTranscript,
+                        selectedTranscript: selectedTranscript.toJSON(),
                         proteinSequence,
                       }
                     : {
@@ -215,7 +215,7 @@ const BlastAutomaticPanel = observer(function ({
                         blastDatabase: search.database,
                         msaAlgorithm: selectedMsaAlgorithm,
                         maxHits: hitCount,
-                        selectedTranscript,
+                        selectedTranscript: selectedTranscript.toJSON(),
                         proteinSequence,
                       },
               })

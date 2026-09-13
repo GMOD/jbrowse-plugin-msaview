@@ -122,23 +122,26 @@ export function resolveConnectedTranscriptIfNeeded(
           `Transcript "${connectedTranscript}" has no CDS to translate`,
         )
       }
+      // toJSON, not the Feature: the params are frozen snapshot properties, so
+      // an instance in one is gone the moment the session reloads
+      const transcriptJson = transcript.toJSON()
       const { blastParams, orthologParams } = self
       if (blastParams && !blastParams.proteinSequence) {
         self.setBlastParams({
           ...blastParams,
-          selectedTranscript: transcript,
+          selectedTranscript: transcriptJson,
           proteinSequence,
         })
       }
       if (orthologParams && !orthologParams.proteinSequence) {
         self.setOrthologParams({
           ...orthologParams,
-          selectedTranscript: transcript,
+          selectedTranscript: transcriptJson,
           proteinSequence,
         })
       }
       // last, because the launchers wake on it
-      self.setConnectedFeature(transcript.toJSON())
+      self.setConnectedFeature(transcriptJson)
     } catch (e) {
       console.error(e)
       self.setError(e)

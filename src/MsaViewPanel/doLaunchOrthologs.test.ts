@@ -249,6 +249,19 @@ describe('the Accession that drives the domain overlay', () => {
     })
   })
 
+  // orthologParams is frozen, so a session reload hands the transcript back as
+  // the plain JSON it serialized to; .get() on that threw
+  test('names the transcript from a snapshot-restored transcript', async () => {
+    const result = await launch({
+      self: makeModel(
+        params({
+          selectedTranscript: { uniqueId: 'NM_1', name: 'TP53-201' },
+        }),
+      ),
+    })
+    expect(queryMetadata(result).Transcript).toBe('TP53-201')
+  })
+
   test('is withheld from a non-representative isoform', async () => {
     const result = await launch({
       self: makeModel(params({ proteinSequence: 'MDIFFERENTISOFORM' })),

@@ -138,7 +138,7 @@ const OrthologPanel = observer(function ({
                   maxSpecies: rowCount,
                   geneCandidates,
                   msaAlgorithm,
-                  selectedTranscript,
+                  selectedTranscript: selectedTranscript.toJSON(),
                   proteinSequence,
                 },
               })

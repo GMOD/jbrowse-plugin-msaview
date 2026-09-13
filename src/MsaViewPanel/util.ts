@@ -16,6 +16,43 @@ export function hasQueryRow(model: { rows: string[][]; querySeqName: string }) {
   return model.rows.some(r => r[0] === model.querySeqName)
 }
 
+/**
+ * The transcript a launch was started from, as it is stored: plain JSON.
+ *
+ * blastParams and orthologParams are frozen snapshot properties, so a Feature
+ * instance put in one lives only as long as the tab. A reloaded session hands
+ * back the JSON the instance serialized to, and `.get()` on that threw --
+ * minutes after the EBI job the reload resubmitted had finally come back.
+ */
+export type TranscriptRef = Record<string, unknown> | LiveFeature
+
+interface LiveFeature {
+  toJSON: () => Record<string, unknown>
+}
+
+/**
+ * Read the transcript's fields whichever shape it arrived in: a caller inside
+ * the session may still hand over a live Feature.
+ */
+export function transcriptFields(transcript?: TranscriptRef) {
+  if (!transcript) {
+    return {}
+  }
+  return typeof (transcript as LiveFeature).toJSON === 'function'
+    ? (transcript as LiveFeature).toJSON()
+    : (transcript as Record<string, unknown>)
+}
+
+function str(val: unknown) {
+  return typeof val === 'string' ? val : undefined
+}
+
+/** what a transcript is called, preferring its name over its id */
+export function transcriptName(transcript?: TranscriptRef) {
+  const fields = transcriptFields(transcript)
+  return str(fields.name) ?? str(fields.id)
+}
+
 export interface QueryRowModel {
   querySeqName: string
   querySeqOffset: number

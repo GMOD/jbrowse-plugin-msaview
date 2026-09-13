@@ -34,8 +34,8 @@ import type {
 import type { UnirefIdentity } from '../utils/unirefHomologs'
 import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
+import type { TranscriptRef } from './util'
 import type { MenuItem } from '@jbrowse/core/ui'
-import type { Feature } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
@@ -60,7 +60,8 @@ export interface IRegion {
  * orphan every row already written.
  */
 export type BlastParams = {
-  selectedTranscript?: Feature
+  /** plain JSON, not a Feature: see TranscriptRef */
+  selectedTranscript?: TranscriptRef
   /**
    * The query. The dialog always supplies it, translated from the transcript
    * the user picked. A session spec may instead name a UniProt `accession`
@@ -129,7 +130,8 @@ export interface OrthologParams {
   /** candidate gene identifiers off the feature, tried in order */
   geneCandidates: string[]
   msaAlgorithm: MsaAlgorithm
-  selectedTranscript?: Feature
+  /** plain JSON, not a Feature: see TranscriptRef */
+  selectedTranscript?: TranscriptRef
   /**
    * The query row, named `<species>_query`. The launch dialog always supplies
    * it, translated from the

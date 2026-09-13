@@ -5,9 +5,14 @@ import { launchMSA } from '../utils/msa'
 import { buildSearchMsa } from '../utils/msaRows'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 import { resolveUniProtEntry } from '../utils/unirefHomologs'
+import { transcriptFields, transcriptName } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { LaunchScope } from './runLaunch'
+
+function asString(val: unknown) {
+  return typeof val === 'string' ? val : undefined
+}
 
 /**
  * The query sequence, and what its row is called. The dialog hands over the
@@ -99,6 +104,7 @@ export async function doLaunchBlast({
         signal,
       })
 
+  const transcript = transcriptFields(selectedTranscript)
   const treeMetadataJson = JSON.stringify(treeMetadata)
   await saveBlastResult({
     proteinSequence: query,
@@ -109,13 +115,10 @@ export async function doLaunchBlast({
     tree,
     treeMetadata: treeMetadataJson,
     rid: rid ?? '',
-    geneId: selectedTranscript?.get('parentId'),
-    transcriptId: selectedTranscript?.id(),
-    transcriptName:
-      selectedTranscript?.get('name') ?? selectedTranscript?.get('id'),
-    geneName:
-      selectedTranscript?.get('gene_name') ??
-      selectedTranscript?.get('parentId'),
+    geneId: asString(transcript.parentId),
+    transcriptId: asString(transcript.uniqueId),
+    transcriptName: transcriptName(selectedTranscript),
+    geneName: asString(transcript.gene_name) ?? asString(transcript.parentId),
   })
 
   return { msa, tree, treeMetadata: treeMetadataJson }
