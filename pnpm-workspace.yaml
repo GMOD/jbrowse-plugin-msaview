@@ -7,3 +7,4 @@ minimumReleaseAgeExclude:
   - 'react-msaview'
   - '@jbrowse/svgcanvas'
   - msa-parsers
+  - '@gmod/newick@1.0.3'

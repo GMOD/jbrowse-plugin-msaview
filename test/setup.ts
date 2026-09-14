@@ -30,11 +30,11 @@ export function getJBrowseVersion() {
 export function setupJBrowse() {
   if (!fs.existsSync(TEST_JBROWSE_DIR)) {
     throw new Error(
-      `JBrowse directory not found at ${TEST_JBROWSE_DIR}. Run "yarn test:setup" or "yarn test:setup:version ${JBROWSE_VERSION}" first.`,
+      `JBrowse directory not found at ${TEST_JBROWSE_DIR}. Run "pnpm test:setup" or "pnpm test:setup:version ${JBROWSE_VERSION}" first.`,
     )
   }
 
-  execSync('yarn build', {
+  execSync('pnpm build', {
     cwd: process.cwd(),
     stdio: 'inherit',
     timeout: 60_000,
