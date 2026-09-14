@@ -1,13 +1,13 @@
 import { fetchProteinDomains } from '../utils/ncbiDomains'
 
-import type { InterProScanResults } from 'react-msaview'
+import type { Annotation } from 'react-msaview'
 
 // structural subset of the MSA model: the full model type can't be used here
 // because it references this very action, creating a self-referential cycle
 interface DomainModel {
   data: { treeMetadata?: string }
   setProgress: (arg: string) => void
-  setDomains: (data: Record<string, InterProScanResults>) => void
+  setAnnotations: (annotations: Annotation[]) => void
 }
 
 /**
@@ -15,6 +15,12 @@ interface DomainModel {
  * annotations. The BLAST workflow stores each hit's accession in treeMetadata,
  * so we look those up via efetch and key the results by MSA row name (which is
  * what react-msaview matches domains against).
+ *
+ * The overlay is handed over as `Annotation[]`, the shape every source flattens
+ * to. It used to be dressed up as an InterProScan response — an `xref` invented
+ * to carry the row name — so that `setDomains` could unwrap it again; that entry
+ * point exists for plugins holding the actual EBI wire format, which this is
+ * not.
  */
 export async function loadProteinDomains(self: DomainModel) {
   const metadataJson = self.data.treeMetadata
@@ -41,17 +47,24 @@ export async function loadProteinDomains(self: DomainModel) {
     rowAccessions.map(r => r.accession),
   )
 
-  const annotations: Record<string, InterProScanResults> = {}
-  for (const { rowName, accession } of rowAccessions) {
-    const matches = byAccession.get(accession)
-    if (matches && matches.length > 0) {
-      annotations[rowName] = { matches, xref: [{ id: rowName }] }
-    }
-  }
+  const annotations = rowAccessions.flatMap(({ rowName, accession }) =>
+    (byAccession.get(accession) ?? []).flatMap(({ signature, locations }) =>
+      signature.entry
+        ? locations.map(({ start, end }) => ({
+            id: rowName,
+            accession: signature.entry!.accession,
+            name: signature.entry!.name,
+            description: signature.entry!.description,
+            start,
+            end,
+          }))
+        : [],
+    ),
+  )
 
-  if (Object.keys(annotations).length === 0) {
+  if (annotations.length === 0) {
     throw new Error('No CDD domain annotations found for these proteins')
   }
 
-  self.setDomains(annotations)
+  self.setAnnotations(annotations)
 }
