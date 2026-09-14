@@ -25,9 +25,10 @@ if (!fs.existsSync(MUI_REEXPORTS)) {
 }
 
 const source = fs.readFileSync(MUI_REEXPORTS, 'utf8')
-// entries look like `    Stepper: lazy(() => import('@mui/material/Stepper')),`
+// entries look like `    Stepper: lazy(() => import('@mui/material/Stepper')),`,
+// or `    Typography,` for the eager ones core 5 serves unwrapped
 const hostExports = new Set(
-  [...source.matchAll(/^\s{4}(\w+):/gm)].map(m => m[1]),
+  [...source.matchAll(/^\s{4}(\w+)(?::|,$)/gm)].map(m => m[1]),
 )
 // modules.js adds these three on top of the lazy map
 for (const extra of ['alpha', 'useTheme', 'createTheme']) {
