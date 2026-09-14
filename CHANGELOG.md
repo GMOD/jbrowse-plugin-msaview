@@ -1,3 +1,35 @@
+## [3.5.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.4.1...v3.5.0) (2026-09-14)
+
+### Bug Fixes
+
+- Map the column the user clicked, not the one under it ([7c98cb7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7c98cb7004f73b2be05b8400c45ad1a32cb70b18))
+- Put the zoom-to-base-level toggle where the hamburger looks ([59dd164](https://github.com/GMOD/jbrowse-plugin-msaview/commit/59dd164dc8dccb48fada42ed36f9d98bbb554c63))
+- Map a trimmed query row through its offset ([7ffaf2c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7ffaf2c482bdb0be8c5a4fe53691b67cb86a93d6))
+- Store the launch transcript as JSON, not as a Feature ([4d84d39](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4d84d39560eb968514366a71edd7019859174781))
+- Keep the init an indexed alignment is the only record of ([91e3b9c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/91e3b9c942bdd3895c6820f7d91043c6e7c2a468))
+- Make reset keep the view and drop the file ([f4c79ee](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f4c79eee7dab25a1580dd5c961a1fb930095d8ad))
+- Don't lose a finished alignment to the tree step ([a7af43c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a7af43c13863aa35d899604566312cfa24602fbb))
+
+### Chores
+
+- Push HEAD and wait for Integration rather than refusing it ([4b4dff0](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4b4dff018c09a71b4e5d455d70e1471673e79e08))
+- Externalize only what the oldest supported host also re-exports ([ffc2a4e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ffc2a4e3f894dac0a1588aba591543a805834507))
+- Sort the floor list through a comparator ([3e02cca](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3e02cca7e3d8978a5d94a82e396e619489caffa0))
+- Take react-msaview 7.0.0, and run the test build with pnpm ([beb0873](https://github.com/GMOD/jbrowse-plugin-msaview/commit/beb0873ba2d45cdeb1366696d79c0ea2c6d1bc30))
+
+### Features
+
+- Homologs without a job, and searches from a URL ([a2dce0d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a2dce0d8b8a0d751f1690938ac8299c0a068a504))
+- Retry or dismiss a failed launch ([bf69a5e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bf69a5ee1306f36bc7a29f9e24e99d7c5d7a8717))
+
+### Other Changes
+
+- Update deps ([258a167](https://github.com/GMOD/jbrowse-plugin-msaview/commit/258a16737b9c22b36906a2c481dd1cc9f8979ba7))
+
+### Refactoring
+
+- Hand CDD annotations over as annotations ([32c66d0](https://github.com/GMOD/jbrowse-plugin-msaview/commit/32c66d0a3cc4ab3a6647ba1575a32b92cbca53c5))
+
 ## [3.4.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.4.0...v3.4.1) (2026-09-05)
 
 ### Bug Fixes
