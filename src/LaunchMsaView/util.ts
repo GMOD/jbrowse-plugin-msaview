@@ -7,12 +7,16 @@ export function getLinearGenomeView(model: AbstractTrackModel) {
   return getContainingView(model) as LinearGenomeViewModel
 }
 
-function uniqueDefined(vals: (string | undefined)[]): string[] {
-  return [...new Set(vals.filter((v): v is string => !!v))]
+function isNonEmptyString(v: unknown): v is string {
+  return typeof v === 'string' && v !== ''
 }
 
-function joinDefined(sep: string, parts: (string | undefined)[]): string {
-  return parts.filter((p): p is string => !!p).join(sep)
+function uniqueDefined(vals: unknown[]): string[] {
+  return [...new Set(vals.filter(isNonEmptyString))]
+}
+
+function joinDefined(sep: string, parts: unknown[]): string {
+  return parts.filter(isNonEmptyString).join(sep)
 }
 
 export function getTranscriptFeatures(feature: Feature) {

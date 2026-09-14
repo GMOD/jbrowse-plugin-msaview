@@ -12,8 +12,8 @@ export default function AddHighlightComponentsModelF(
   pluginManager: PluginManager,
 ) {
   pluginManager.addToExtensionPoint(
+    // @ts-expect-error v4 hosts have no contributeToExtensionPoint
     'LinearGenomeView-TracksContainerComponent',
-    // @ts-expect-error
     (rest: React.ReactNode[], { model }: { model: LinearGenomeViewModel }) => {
       // Quick check: don't add any components if no MSA view exists
       const { views } = getSession(model)

@@ -89,6 +89,14 @@ problem. A 2026-08 update to mst 6 / mobx 7 forked the package in two, because
 reach a browser -- but the fix is the pin, not a dedupe override, because an
 override would silence the symptom and keep the rubber stamp.
 
+On 2026-09-13 we took the other exit and moved the core devDep to
+`5.0.0-beta.8`, which declares mobx 7 / mst 6 itself. That leaves tsc checking
+against v5 while almost every host in the wild runs v4, so where v5's types
+reject a call v4 needs, the code keeps the v4 call and adapts the typing:
+`addToExtensionPoint` over `contributeToExtensionPoint`, and `sessionId` inside
+`CoreGetFeatures` args, which v4.3.0 reads there to find the adapter cache. A
+clean tsc says nothing about v4 hosts; `pnpm host-compat` is what does.
+
 **typescript stays on 6.x** for an unrelated reason with the same shape.
 TypeScript 7's package entry is a stub -- `require('typescript')` yields
 `{version, versionMajorMinor}` and nothing else -- so anything reading the

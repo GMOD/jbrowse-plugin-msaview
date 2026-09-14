@@ -13,7 +13,7 @@ export default function configSchemaF(pluginManager: PluginManager) {
       },
     },
     {
-      baseConfiguration: base?.configSchema,
+      baseConfiguration: base.configSchema,
     },
   )
 }

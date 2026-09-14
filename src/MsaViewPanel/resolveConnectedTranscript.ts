@@ -51,11 +51,17 @@ async function findTranscript(
     end: r.end,
   }))
   for (const track of view.tracks) {
-    const feats = (await session.rpcManager.call(sessionId, 'CoreGetFeatures', {
+    // a named object keeps sessionId, which v4 hosts read from the args
+    const args = {
       adapterConfig: getConf(track, 'adapter'),
       sessionId,
       regions,
-    })) as Feature[]
+    }
+    const feats = await session.rpcManager.call(
+      sessionId,
+      'CoreGetFeatures',
+      args,
+    )
     for (const feat of feats) {
       const hit = getTranscriptFeatures(feat).find(t =>
         transcriptMatches(t, transcriptId),
