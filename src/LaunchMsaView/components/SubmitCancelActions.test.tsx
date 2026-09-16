@@ -65,7 +65,7 @@ test('a panel that launches nothing passes no model, and gets no box', () => {
   expect(toggle()).toBeNull()
 })
 
-test('clicking it writes the placement the next launch will read', () => {
+test('submitting writes the placement the launch will read', () => {
   render(
     <SubmitCancelActions
       model={trackModel(tiling)}
@@ -74,12 +74,39 @@ test('clicking it writes the placement the next launch will read', () => {
     />,
   )
   toggle()!.click()
-  expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBe('stack')
   expect((toggle() as HTMLInputElement).checked).toBe(false)
+  screen.getByText('Submit').click()
+  expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBe('stack')
+})
 
+// the box is a property of this launch until it is launched; a dialog the user
+// backed out of should not have moved where every future one lands
+test('cancelling leaves the stored placement alone', () => {
+  render(
+    <SubmitCancelActions
+      model={trackModel(tiling)}
+      onSubmit={() => {}}
+      onCancel={() => {}}
+    />,
+  )
   toggle()!.click()
+  screen.getByText('Cancel').click()
+  expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBeNull()
+})
+
+// a host with no tiling never shows the box, so submitting there must not
+// overwrite the choice the user made on a host that does
+test('a host that cannot tile writes nothing on submit', () => {
+  localStorage.setItem(LAUNCH_PLACEMENT_KEY, 'splitRight')
+  render(
+    <SubmitCancelActions
+      model={trackModel({})}
+      onSubmit={() => {}}
+      onCancel={() => {}}
+    />,
+  )
+  screen.getByText('Submit').click()
   expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBe('splitRight')
-  expect((toggle() as HTMLInputElement).checked).toBe(true)
 })
 
 test('a stored choice is what the box opens on', () => {

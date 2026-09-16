@@ -27,26 +27,26 @@ import type { AbstractTrackModel } from '@jbrowse/core/util'
  * release that places views its own way — because the box would do nothing
  * there and every launch would quietly ignore it.
  */
-function PlacementToggle({ model }: { model: AbstractTrackModel }) {
-  const session = getSession(model)
-  const [sideBySide, setSideBySide] = useState(
-    () => readLaunchPlacement() === 'splitRight',
-  )
-  return sessionSupportsPlacement(session) ? (
+function PlacementToggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean
+  onChange: (checked: boolean) => void
+}) {
+  return (
     <FormControlLabel
       label="Open beside the genome view"
       control={
         <Checkbox
-          checked={sideBySide}
+          checked={checked}
           onChange={event => {
-            const { checked } = event.target
-            setSideBySide(checked)
-            writeLaunchPlacement(checked ? 'splitRight' : 'stack')
+            onChange(event.target.checked)
           }}
         />
       }
     />
-  ) : null
+  )
 }
 
 export default function SubmitCancelActions({
@@ -65,12 +65,22 @@ export default function SubmitCancelActions({
   /** omitted by a panel that submits something other than a view launch */
   model?: AbstractTrackModel
 }) {
+  const [sideBySide, setSideBySide] = useState(
+    () => readLaunchPlacement() === 'splitRight',
+  )
+  // The stored value is what the next launch reads, so it is written on submit
+  // rather than on the click: ticking the box and then pressing Cancel used to
+  // change where every future launch landed, from a dialog the user backed out
+  // of.
+  const offerPlacement = !!model && sessionSupportsPlacement(getSession(model))
   return (
     // The buttons are one child rather than two, so a dialog too narrow for
     // the whole row wraps them together underneath the option instead of
     // breaking Cancel away from Submit or shrinking both out of shape.
     <DialogActions sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-      {model ? <PlacementToggle model={model} /> : null}
+      {offerPlacement ? (
+        <PlacementToggle checked={sideBySide} onChange={setSideBySide} />
+      ) : null}
       <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
         <Button
           sx={{ flexShrink: 0 }}
@@ -78,6 +88,9 @@ export default function SubmitCancelActions({
           variant="contained"
           disabled={submitDisabled}
           onClick={() => {
+            if (offerPlacement) {
+              writeLaunchPlacement(sideBySide ? 'splitRight' : 'stack')
+            }
             onSubmit()
           }}
         >
