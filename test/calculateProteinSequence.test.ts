@@ -1,18 +1,19 @@
 import { SimpleFeature } from '@jbrowse/core/util'
+import {
+  getGeneticCode,
+  parseTranslTable,
+} from '@jbrowse/core/util/geneticCodes'
 import { describe, expect, it } from 'vitest'
 
 import {
   calculateProteinSequence,
   getProteinSequenceFromFeature,
 } from '../src/LaunchMsaView/components/calculateProteinSequence'
-import {
-  getGeneticCode,
-  parseTranslTable,
-} from '../src/LaunchMsaView/components/geneticCodes'
 
 // The table @jbrowse/core/util exported as `defaultCodonTable` up to 4.3.0,
-// pinned here so the vendored NCBI strings can't drift from what every released
-// host translates with.
+// pinned here so core's NCBI strings can't drift from what every released host
+// translates with. The module is a deep path and therefore bundled, so the
+// version this build pins is the one every host runs.
 const RELEASED_DEFAULT_CODON_TABLE: Record<string, string> = {
   TCA: 'S',
   TCC: 'S',
@@ -80,7 +81,7 @@ const RELEASED_DEFAULT_CODON_TABLE: Record<string, string> = {
   GGT: 'G',
 }
 
-describe('vendored genetic codes', () => {
+describe('genetic codes', () => {
   it('table 1 matches the codon table released hosts ship', () => {
     const { codonTable } = getGeneticCode(1)
     for (const [codon, aa] of Object.entries(RELEASED_DEFAULT_CODON_TABLE)) {
@@ -96,11 +97,25 @@ describe('vendored genetic codes', () => {
     expect(codonTable.ATG).toBe('M')
   })
 
-  it('vertebrate mitochondrial (2) reassigns TGA and AGA', () => {
-    const { codonTable } = getGeneticCode(2)
+  it('vertebrate mitochondrial (2) reassigns TGA, ATA and AGA', () => {
+    const { codonTable, starts } = getGeneticCode(2)
     expect(codonTable.TGA).toBe('W')
+    expect(codonTable.ATA).toBe('M')
     expect(codonTable.AGA).toBe('*')
+    expect(codonTable.AGG).toBe('*')
+    expect(starts).toEqual(['ATT', 'ATC', 'ATA', 'ATG', 'GTG'])
     expect(getGeneticCode(1).codonTable.TGA).toBe('*')
+    expect(getGeneticCode(1).codonTable.ATA).toBe('I')
+  })
+
+  // Table 11 translates identically to the standard code; its alternative
+  // initiators are the only thing that distinguishes it, so `starts` is where a
+  // table difference would show.
+  it('bacterial (11) shares table 1 codons but adds start codons', () => {
+    const { codonTable, starts } = getGeneticCode(11)
+    expect(codonTable).toEqual(getGeneticCode(1).codonTable)
+    expect(starts).toEqual(['TTG', 'CTG', 'ATT', 'ATC', 'ATA', 'ATG', 'GTG'])
+    expect(getGeneticCode(1).starts).toEqual(['TTG', 'CTG', 'ATG'])
   })
 
   it('falls back to the standard code for an unknown table', () => {
@@ -145,6 +160,15 @@ describe('calculateProteinSequence', () => {
       'MAW*',
     )
     expect(calculateProteinSequence({ cds, sequence })).toBe('MA**')
+  })
+
+  it('reads ATA as M under table 2 and I under table 1', () => {
+    const cds = [{ start: 0, end: 9, type: 'CDS' }]
+    const ata = 'ATGATATGA'
+    expect(
+      calculateProteinSequence({ cds, sequence: ata, geneticCodeId: 2 }),
+    ).toBe('MMW')
+    expect(calculateProteinSequence({ cds, sequence: ata })).toBe('MI*')
   })
 
   it('offsets by the phase of the first CDS', () => {

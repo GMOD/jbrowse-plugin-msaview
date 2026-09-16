@@ -1,13 +1,16 @@
 import { revcom } from '@jbrowse/core/util'
 import { convertCodingSequenceToPeptides } from '@jbrowse/core/util/convertCodingSequenceToPeptides'
-
-import { getGeneticCode, parseTranslTable } from './geneticCodes'
+import {
+  getGeneticCode,
+  parseTranslTable,
+} from '@jbrowse/core/util/geneticCodes'
 
 import type { Feat } from './types'
 import type { Feature } from '@jbrowse/core/util'
 
-// `@jbrowse/core/util/convertCodingSequenceToPeptides` is a deep path, so unlike
-// the `@jbrowse/core/util` barrel it is absent from ReExports and gets bundled
+// `@jbrowse/core/util/convertCodingSequenceToPeptides` and
+// `@jbrowse/core/util/geneticCodes` are deep paths, so unlike the
+// `@jbrowse/core/util` barrel they are absent from ReExports and get bundled
 // rather than resolved out of the host's JBrowseExports. That is what makes
 // reusing core's translation safe across every host a config names: this module
 // previously built its codon table at module scope from the barrel's
@@ -36,11 +39,7 @@ export function calculateProteinSequence({
   })
 }
 
-// Vendored rather than taken off the `@jbrowse/core/util` barrel, which is in
-// ReExports: a name the host's build has dropped is `undefined` inside a bundle
-// that is already published, which is how `defaultCodonTable` leaving that
-// barrel error-paged every config naming this plugin. The list is sorted by
-// start, so adjacent comparison is the whole job.
+// The CDS list is sorted by start, so adjacent comparison is the whole job.
 function cdsId(feat: Feat) {
   return `${feat.start}-${feat.end}`
 }
