@@ -368,7 +368,10 @@ export default function stateModelFactory() {
        */
       get hostRestoresData() {
         const { msaIndexedLocation, msaName } = self.init ?? {}
-        return !!(msaIndexedLocation && msaName)
+        // `hostCarriesData` first: it is the base answer, the volatile a simple
+        // host flips, and overriding the getter without it threw that switch
+        // away for every view this one does not speak for
+        return self.hostCarriesData || !!(msaIndexedLocation && msaName)
       },
     }))
 

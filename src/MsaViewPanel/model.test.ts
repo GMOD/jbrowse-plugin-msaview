@@ -127,6 +127,17 @@ describe('what the snapshot cannot carry', () => {
     expect(model.unshareableData).toEqual([])
   })
 
+  // the base getter reads a volatile a host flips to say it brings the data
+  // back by its own means; overriding without it threw that switch away
+  test('a host that says it carries the data is still believed', () => {
+    const model = view()
+    model.setMSA(big)
+    expect(model.unshareableData).not.toEqual([])
+    model.setHostCarriesData(true)
+    expect(model.hostRestoresData).toBe(true)
+    expect(model.unshareableData).toEqual([])
+  })
+
   test('a pasted alignment is reported, because a link really does lose it', () => {
     const model = view()
     model.setMSA(big)
