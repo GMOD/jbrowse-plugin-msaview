@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
 import { getEnv, getSession } from '@jbrowse/core/util'
@@ -8,8 +8,14 @@ import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
 import { useFetch } from '../../../utils/useFetch'
-import { getGeneDisplayName, getLinearGenomeView } from '../../util'
+import { useQueryRowName } from '../../useQueryRowName'
+import {
+  getGeneDisplayName,
+  getLinearGenomeView,
+  getTranscriptDisplayName,
+} from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import QueryRowSelector from '../QueryRowSelector'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
@@ -39,7 +45,6 @@ const PreLoadedMSA = observer(function ({
   const view = getLinearGenomeView(model)
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
-  const { assemblyNames } = view
   const [viewError, setViewError] = useState<unknown>()
 
   const datasets = readMsaDatasets(session.jbrowse)
@@ -61,7 +66,8 @@ const PreLoadedMSA = observer(function ({
     view,
     validIds: msaList,
   })
-  const { selectedId, selectedTranscript, sequenceStatus } = transcriptSelection
+  const { selectedId, selectedTranscript, proteinSequence, sequenceStatus } =
+    transcriptSelection
 
   const {
     data: msaData,
@@ -78,6 +84,20 @@ const PreLoadedMSA = observer(function ({
         pluginManager,
       }),
   )
+
+  const msaText = useMemo(
+    () =>
+      msaData?.map(r => `>${r.get('refName')}\n${r.get('seq')}`).join('\n') ??
+      '',
+    [msaData],
+  )
+
+  // The dataset's row for this transcript used to be assumed -- the launch
+  // named `<transcriptId>_<assembly>` and hoped the file agreed. Nothing
+  // checked, and a name the alignment does not carry fails silently: the view
+  // opens, renders, and never navigates. The row is found by sequence instead,
+  // the same way the Manual tab finds it.
+  const queryRow = useQueryRowName(msaText, proteinSequence)
 
   const e =
     msaListFetchError ??
@@ -107,7 +127,7 @@ const PreLoadedMSA = observer(function ({
             {!msaListLoading && msaDataLoading ? (
               <LoadingEllipses
                 variant="h6"
-                message={`Loading MSA for (${selectedId})`}
+                message={`Loading MSA for ${getTranscriptDisplayName(selectedTranscript) || selectedId}`}
               />
             ) : null}
             {msaListLoading ? (
@@ -124,6 +144,7 @@ const PreLoadedMSA = observer(function ({
                   feature={feature}
                   {...transcriptSelection}
                 />
+                {msaText ? <QueryRowSelector {...queryRow} /> : null}
               </div>
             ) : null}
           </div>
@@ -142,18 +163,14 @@ const PreLoadedMSA = observer(function ({
         submitDisabled={!selectedTranscript || !msaData?.length}
         onSubmit={() => {
           try {
-            if (selectedTranscript && msaData) {
-              const querySeqName = `${selectedId}_${assemblyNames[0]}`
+            if (selectedTranscript && msaText) {
               preCalculatedLaunchView({
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
-                querySeqName,
+                querySeqName: queryRow.querySeqName,
+                querySeqOffset: queryRow.querySeqOffset,
                 feature: selectedTranscript,
-                data: {
-                  msa: msaData
-                    .map(r => `>${r.get('refName')}\n${r.get('seq')}`)
-                    .join('\n'),
-                },
+                data: { msa: msaText },
               })
               handleClose()
             }

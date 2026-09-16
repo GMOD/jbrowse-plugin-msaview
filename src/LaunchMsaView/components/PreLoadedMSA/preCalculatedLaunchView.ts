@@ -12,18 +12,22 @@ export function preCalculatedLaunchView({
   feature,
   data,
   querySeqName,
+  querySeqOffset,
 }: {
   data: { msa: string }
   newViewTitle: string
   view: LinearGenomeViewModel
   feature: Feature
   querySeqName: string
+  /** transcript residues before the query row's first residue */
+  querySeqOffset?: number
 }) {
   launchMsaView(getSession(view), {
     placement: readLaunchPlacement(),
     displayName: newViewTitle,
     treeAreaWidth: 200,
     querySeqName,
+    querySeqOffset,
     treeWidth: 100,
     drawNodeBubbles: false,
     labelsAlignRight: true,
