@@ -27,10 +27,10 @@ export const msaAlgorithms = [...ebiMsaAlgorithms, 'browser'] as const
 export type MsaAlgorithm = (typeof msaAlgorithms)[number]
 
 export const msaAlgorithmLabels: Record<MsaAlgorithm, string> = {
-  clustalo: 'clustalo (EBI)',
-  muscle: 'muscle (EBI)',
-  kalign: 'kalign (EBI)',
-  mafft: 'mafft (EBI)',
+  clustalo: 'Clustal Omega (EBI)',
+  muscle: 'MUSCLE (EBI)',
+  kalign: 'Kalign (EBI)',
+  mafft: 'MAFFT (EBI)',
   browser: 'in browser, query-anchored',
 }
 
@@ -55,6 +55,11 @@ export const defaultBlastDatabase: BlastDatabase = 'uniprotkb_swissprot'
 
 export const searchPrograms = ['blastp', 'phmmer'] as const
 export type SearchProgram = (typeof searchPrograms)[number]
+
+export const searchProgramLabels: Record<SearchProgram, string> = {
+  blastp: 'blastp (sequence search)',
+  phmmer: 'phmmer (profile HMM search)',
+}
 
 /**
  * phmmer offers PDB, AlphaFold, Ensembl Genomes, MEROPS and ChEMBL too, but
@@ -114,4 +119,26 @@ export function defaultSearchFor(program: SearchProgram): SearchChoice {
 
 export function databaseOptionsFor(program: SearchProgram) {
   return program === 'phmmer' ? phmmerDatabaseOptions : blastDatabaseOptions
+}
+
+/**
+ * What each database is called in the menu. The keys are what EBI is sent and
+ * are not negotiable; `uniprotkb_swissprot` and `swissprot` are the same
+ * collection under each service's own name, so they read the same here.
+ */
+const databaseLabels: Record<BlastDatabase | PhmmerDatabase, string> = {
+  uniprotkb_swissprot: 'UniProtKB/Swiss-Prot (curated)',
+  swissprot: 'UniProtKB/Swiss-Prot (curated)',
+  uniprotkb: 'UniProtKB (all entries)',
+  uniprotkb_trembl: 'UniProtKB/TrEMBL (unreviewed)',
+  pan_proteomes: 'Pan-proteomes',
+  uniprotrefprot: 'UniProt reference proteomes',
+  rp75: 'Representative proteomes, 75%',
+  rp55: 'Representative proteomes, 55%',
+  rp35: 'Representative proteomes, 35%',
+  rp15: 'Representative proteomes, 15% (widest spread)',
+}
+
+export function databaseLabel(database: BlastDatabase | PhmmerDatabase) {
+  return databaseLabels[database]
 }

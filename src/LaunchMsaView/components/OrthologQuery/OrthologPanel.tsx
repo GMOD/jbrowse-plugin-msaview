@@ -35,10 +35,12 @@ const useStyles = makeStyles()({
   },
 })
 
-const rowsHint: Record<OrthologSource, string> = {
-  ncbi: 'the closest N species NCBI has',
-  panther: 'the closest N species PANTHER has',
-  uniref: 'one per species, reviewed entries first',
+// the N was literal: the helper text said "the closest N species" whatever the
+// box held
+const rowsHint: Record<OrthologSource, (rows: number) => string> = {
+  ncbi: rows => `the ${rows} closest species NCBI has`,
+  panther: rows => `the ${rows} closest species PANTHER has`,
+  uniref: rows => `${rows} rows, one per species, reviewed entries first`,
 }
 
 const OrthologPanel = observer(function ({
@@ -117,7 +119,11 @@ const OrthologPanel = observer(function ({
               setMaxSpecies(event.target.value)
             }}
             error={!rowCountValid}
-            helperText={rowsHint[source]}
+            helperText={
+              rowCountValid
+                ? rowsHint[source](rowCount)
+                : 'a whole number, 2 or more'
+            }
           />
         </div>
 

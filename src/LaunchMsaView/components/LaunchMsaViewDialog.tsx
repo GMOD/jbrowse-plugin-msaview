@@ -5,6 +5,7 @@ import { getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 
 import BlastPanel from './BlastQuery/BlastPanel'
+import HelpButton from './HelpButton'
 import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
 import OrthologPanel from './OrthologQuery/OrthologPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
@@ -34,21 +35,24 @@ export default function LaunchMsaViewDialog({
 
   return (
     <Dialog maxWidth="xl" title="Launch MSA view" open onClose={handleClose}>
-      <Tabs
-        value={value}
-        onChange={(_event, newValue) => {
-          setValue(newValue)
-        }}
-      >
-        <Tab label="Orthologs (fast)" value="orthologs" />
-        {/* the tab value stays 'ncbi_blast' — it is only local state, and
-            renaming it buys nothing */}
-        <Tab label="BLAST query" value="ncbi_blast" />
-        {hasPreloadedDatasets ? (
-          <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
-        ) : null}
-        <Tab label="Manual upload" value="manual_msa" />
-      </Tabs>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Tabs
+          value={value}
+          onChange={(_event, newValue) => {
+            setValue(newValue)
+          }}
+        >
+          <Tab label="Orthologs" value="orthologs" />
+          {/* the tab value stays 'ncbi_blast' — it is only local state, and
+              renaming it buys nothing */}
+          <Tab label="BLAST query" value="ncbi_blast" />
+          {hasPreloadedDatasets ? (
+            <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
+          ) : null}
+          <Tab label="Manual upload" value="manual_msa" />
+        </Tabs>
+        <HelpButton />
+      </div>
       <TabPanel value={value} index="orthologs">
         <OrthologPanel
           handleClose={handleClose}

@@ -26,9 +26,11 @@ import CachedBlastResults from './CachedBlastResults'
 import MsaAlgorithmSelect from './MsaAlgorithmSelect'
 import { blastLaunchView } from './blastLaunchView'
 import {
+  databaseLabel,
   databaseOptionsFor,
   defaultMaxHits,
   defaultSearchFor,
+  searchProgramLabels,
   searchPrograms,
 } from './consts'
 import {
@@ -44,11 +46,10 @@ const useStyles = makeStyles()({
   selectField: {
     width: 150,
   },
-  // wider than the rest because the values are what the user came to read, and
-  // `uniprotkb_swissprot` is 19 characters — at 150 the field showed
-  // `uniprotkb_swis…`, which does not distinguish it from `uniprotkb_trembl`
+  // wider than the rest because the collection names are what the user came to
+  // read, and truncating them does not distinguish Swiss-Prot from TrEMBL
   databaseField: {
-    width: 230,
+    width: 260,
   },
   cachedResultsAccordion: {
     marginTop: 20,
@@ -110,7 +111,7 @@ const BlastAutomaticPanel = observer(function ({
         >
           {searchPrograms.map(val => (
             <MenuItem value={val} key={val}>
-              {val}
+              {searchProgramLabels[val]}
             </MenuItem>
           ))}
         </TextField2>
@@ -130,7 +131,7 @@ const BlastAutomaticPanel = observer(function ({
         >
           {databaseOptionsFor(search.program).map(val => (
             <MenuItem value={val} key={val}>
-              {val}
+              {databaseLabel(val)}
             </MenuItem>
           ))}
         </TextField2>
@@ -158,23 +159,13 @@ const BlastAutomaticPanel = observer(function ({
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
-        <Typography className={classes.infoText}>
+        {/* one line rather than eight; the rest is behind the Help button,
+            where a reader who wants it can go and find it */}
+        <Typography variant="body2" className={classes.infoText}>
           {isPhmmer
-            ? `phmmer searches UniProtKB with a profile HMM built from the query,
-               so it aligns the hits as it finds them and that alignment is used
-               directly — nothing is realigned afterwards. The tree is then built
-               from it in the browser. A hit matching the query in more than one
-               place appears once per matched region. rp15 spreads the hits
-               across all of life; swissprot keeps to the curated set.`
-            : `This panel will automatically submit a blastp query to EBI, which
-               searches UniProtKB. swissprot returns curated sequences that align
-               more cleanly than the many near-identical entries a TrEMBL search
-               brings back. After completion, all the hits will be run through
-               the chosen aligner; "in browser" needs no second EBI job.`}{' '}
-          EBI's queue is the wait, and it varies from seconds to many minutes.
-          For a homolog panel with no job at all, the Orthologs tab's UniRef
-          source is a lookup. Searching NCBI's nr needs the manual approach:
-          NCBI no longer lets a browser read responses from Blast.cgi.
+            ? 'phmmer aligns the hits as it finds them, so nothing is realigned afterwards.'
+            : 'The hits come back from EBI and are then run through the chosen aligner.'}{' '}
+          The EBI queue is the wait, and it runs from seconds to many minutes.
         </Typography>
 
         {cachedResults.length > 0 ? (

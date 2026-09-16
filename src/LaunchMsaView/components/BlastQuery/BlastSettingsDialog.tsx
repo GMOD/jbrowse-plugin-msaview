@@ -43,12 +43,12 @@ export default function BlastSettingsDialog({
         handleClose()
       }}
     >
-      <DialogTitle>BLAST Settings</DialogTitle>
+      <DialogTitle>EBI settings</DialogTitle>
       <DialogContent>
         <Typography variant="subtitle2" className={classes.help}>
-          Searches run at EBI, which asks for a contact address on every job so
-          they can reach whoever is generating the load. If your site sends real
-          volume, use your own.
+          Every search this tab runs is submitted to EBI with this address,
+          which is how they reach whoever is generating the load. If your site
+          sends real volume, use your own.
         </Typography>
         <TextField2
           autoFocus

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 import SettingsIcon from '@mui/icons-material/Settings'
-import { IconButton } from '@mui/material'
+import { IconButton, Tooltip } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 
 import {
@@ -51,15 +51,20 @@ export default function BlastPanel({
 
   return (
     <>
-      <IconButton
-        className={classes.settingsButton}
-        size="small"
-        onClick={() => {
-          setSettingsOpen(true)
-        }}
-      >
-        <SettingsIcon />
-      </IconButton>
+      {/* a bare gear said nothing about what it opened, and the address the
+          job carries was invisible until you opened it */}
+      <Tooltip title={`EBI settings — jobs are submitted with ${ebiEmail}`}>
+        <IconButton
+          className={classes.settingsButton}
+          aria-label="EBI settings"
+          size="small"
+          onClick={() => {
+            setSettingsOpen(true)
+          }}
+        >
+          <SettingsIcon />
+        </IconButton>
+      </Tooltip>
 
       <Panel model={model} feature={feature} handleClose={handleClose}>
         <BlastMethodSelector
