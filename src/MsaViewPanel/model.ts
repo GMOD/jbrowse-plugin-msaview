@@ -145,6 +145,20 @@ export interface OrthologParams {
 }
 
 /**
+ * The request that produced an alignment, kept after the launch clears it.
+ *
+ * The live params ARE the pending request -- the autoruns fire on them and the
+ * launcher drops them on success -- so there is nothing left to rebuild from
+ * once the alignment is in hand. That is only a problem when the alignment goes
+ * away: browser storage expires it after 7 days, or the user clears site data,
+ * and the view could then only tell them to start over from the gene.
+ */
+export interface LaunchRequest {
+  blastParams?: BlastParams
+  orthologParams?: OrthologParams
+}
+
+/**
  * #stateModel MsaViewPlugin
  * extends
  * - MSAModel from https://github.com/GMOD/react-msaview
@@ -221,6 +235,11 @@ export default function stateModelFactory() {
          * #property
          */
         dataStoreId: types.maybe(types.string),
+
+        /**
+         * #property
+         */
+        lastLaunch: types.frozen<LaunchRequest | undefined>(),
 
         /**
          * #property
@@ -405,6 +424,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setLastLaunch(arg?: LaunchRequest) {
+        self.lastLaunch = arg
+      },
+      /**
+       * #action
+       */
       setMafRegion(arg?: MafRegion) {
         self.mafRegion = arg
       },
@@ -453,9 +478,13 @@ export default function stateModelFactory() {
       },
       /**
        * #action
-       * Run the failed request again. The request IS the params, so re-stating
-       * them is the whole retry: each is a frozen property, and a fresh object
-       * is a change the launch autoruns wake on.
+       * Run the request again. The request IS the params, so re-stating them is
+       * the whole retry: each is a frozen property, and a fresh object is a
+       * change the launch autoruns wake on.
+       *
+       * A launch that already succeeded has no live params -- they are cleared
+       * to mark it done -- so `lastLaunch` is what a view whose stored
+       * alignment expired retries from.
        */
       retryLaunch() {
         self.launchController?.abort()
@@ -463,6 +492,15 @@ export default function stateModelFactory() {
         self.progress = ''
         self.rid = undefined
         self.error = undefined
+        const pending = self.blastParams ?? self.orthologParams ?? self.init
+        if (!pending) {
+          const { blastParams, orthologParams } = self.lastLaunch ?? {}
+          self.blastParams = blastParams ? { ...blastParams } : undefined
+          self.orthologParams = orthologParams
+            ? { ...orthologParams }
+            : undefined
+          return
+        }
         if (self.blastParams) {
           self.blastParams = { ...self.blastParams }
         }

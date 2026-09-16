@@ -36,8 +36,14 @@ const LaunchProgress = observer(function LaunchProgress2({
 }: {
   model: JBrowsePluginMsaViewModel
 }) {
-  const { blastParams, orthologParams, progress, rid, error } = model
+  const { progress, rid, error } = model
   const { classes } = useStyles()
+  // the finished request describes the view just as well as the pending one, so
+  // an expired alignment's panel is named after the search that built it
+  const pending = !!(model.blastParams ?? model.orthologParams ?? model.init)
+  const blastParams = model.blastParams ?? model.lastLaunch?.blastParams
+  const orthologParams =
+    model.orthologParams ?? model.lastLaunch?.orthologParams
   const message = blastParams
     ? `Running EBI ${blastParams.searchProgram === 'phmmer' ? 'phmmer' : 'BLAST'}`
     : orthologParams
@@ -49,7 +55,9 @@ const LaunchProgress = observer(function LaunchProgress2({
     <div className={classes.margin}>
       {error ? (
         <>
-          <Typography variant="h5">{message} failed</Typography>
+          <Typography variant="h5">
+            {pending ? `${message} failed` : 'Alignment no longer available'}
+          </Typography>
           {/* the job outlives the browser, so its link is worth keeping next to
               the failure -- EBI's own page says more about a job than we can */}
           {rid ? <JobLink jobId={rid} /> : null}

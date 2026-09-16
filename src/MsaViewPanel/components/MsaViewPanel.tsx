@@ -27,11 +27,16 @@ const MsaViewPanel = observer(function MsaViewPanel2({
   // three gate the same panel -- see LaunchProgress. An indexed view keeps its
   // init for the life of the view (it is how the block is refetched), so that
   // one is only "launching" until the alignment arrives.
-  const launching = !!(
+  const pending = !!(
     blastParams ??
     orthologParams ??
     (init && !model.dataInitialized)
   )
+  // a view whose stored alignment expired has no pending request and no data,
+  // and its error is the only thing left to draw. LaunchProgress draws it with
+  // the Retry that runs `lastLaunch` again.
+  const expired = !!model.error && !!model.lastLaunch && !model.dataInitialized
+  const launching = pending || expired
   return (
     <ErrorBoundary>
       <div>

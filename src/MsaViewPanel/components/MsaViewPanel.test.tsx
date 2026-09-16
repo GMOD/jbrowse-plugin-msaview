@@ -113,6 +113,31 @@ test('a failed launch can be retried or dismissed', () => {
   expect(cancelLaunch).toHaveBeenCalled()
 })
 
+// a stored alignment expires after 7 days, and the view used to say so and
+// stop there -- the request that built it had been dropped on success, so the
+// only way back was to find the gene again
+test('an expired alignment offers to run its original search again', () => {
+  const retryLaunch = vi.fn()
+  panel({
+    progress: '',
+    dataInitialized: false,
+    error: new Error("This view's alignment is no longer in browser storage."),
+    lastLaunch: { blastParams: { blastDatabase: 'uniprotkb_swissprot' } },
+    retryLaunch,
+  } as never)
+  expect(screen.queryByText('the alignment')).toBeNull()
+  expect(screen.getByText('Alignment no longer available')).toBeTruthy()
+  screen.getByRole('button', { name: 'Retry' }).click()
+  expect(retryLaunch).toHaveBeenCalled()
+})
+
+// with nothing to retry from -- a pasted alignment, say -- the panel stays out
+// of the way and react-msaview's own import form is what the user gets
+test('an expired alignment with no request behind it draws the view', () => {
+  panel({ progress: '', dataInitialized: false, error: new Error('gone') })
+  expect(screen.getByText('the alignment')).toBeTruthy()
+})
+
 test('a running job links out to it', () => {
   panel({
     blastParams: { proteinSequence: 'MKV' } as never,

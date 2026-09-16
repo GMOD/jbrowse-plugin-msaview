@@ -24,7 +24,11 @@ import type { JBrowsePluginMsaViewModel } from './model'
 import type { MsaDataPayload } from './msaDataStore'
 
 const EXPIRED_MESSAGE =
-  "This view's alignment is no longer in browser storage. Stored alignments are kept for 7 days after they were last used, and are lost when site data is cleared. Relaunch the alignment to rebuild it."
+  "This view's alignment is no longer in browser storage. Stored alignments are kept for 7 days after they were last used, and are lost when site data is cleared."
+
+const RELAUNCHABLE = ' Retry runs the original search again and rebuilds it.'
+
+const START_OVER = ' Relaunch it from the gene to rebuild it.'
 
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   const { dataStoreId, rows } = self
@@ -50,10 +54,17 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
           })
         } else {
           // the id names nothing, so clearing it is what lets react-msaview's
-          // "Return to import form" actually return instead of landing back here
+          // "Return to import form" actually return instead of landing back
+          // here. The request that built the alignment is kept, though: it is
+          // the whole of a retry, and dropping it left the user reading an
+          // apology with nothing to press.
           transaction(() => {
             self.setDataStoreId(undefined)
-            self.setError(new Error(EXPIRED_MESSAGE))
+            self.setError(
+              new Error(
+                EXPIRED_MESSAGE + (self.lastLaunch ? RELAUNCHABLE : START_OVER),
+              ),
+            )
           })
         }
       } catch (e) {
@@ -147,6 +158,10 @@ export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
       message: 'Resolving orthologs',
       launch: scope => doLaunchOrthologs({ self, scope }),
       onLaunched: () => {
+        // moved rather than dropped: clearing the params is what marks the
+        // request done, and keeping a copy is what lets a view whose stored
+        // alignment expired run it again
+        self.setLastLaunch({ orthologParams: self.orthologParams })
         self.setOrthologParams(undefined)
       },
     })
@@ -170,6 +185,7 @@ export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
       message: 'Submitting query',
       launch: scope => doLaunchBlast({ self, scope }),
       onLaunched: () => {
+        self.setLastLaunch({ blastParams: self.blastParams })
         self.setBlastParams(undefined)
       },
     })

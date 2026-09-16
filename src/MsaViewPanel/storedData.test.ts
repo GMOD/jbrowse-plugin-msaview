@@ -115,6 +115,32 @@ describe('restoring a view from IndexedDB', () => {
     // to import form" lands straight back on this error
     expect(model.dataStoreId).toBeUndefined()
   })
+
+  // the request that built the alignment is kept past the launch, so the view
+  // can offer to run it again instead of sending the user back to the gene
+  test('a row that is gone points at Retry when the search is still known', async () => {
+    mockRetrieve.mockResolvedValue(undefined)
+    const model = makeModel({
+      dataStoreId: 'msa-1',
+      lastLaunch: { blastParams: { blastDatabase: 'uniprotkb_swissprot' } },
+    })
+
+    loadStoredData(model)
+    await settle()
+
+    expect((model.error as Error).message).toMatch(/Retry/)
+    expect(model.lastLaunch).toBeDefined()
+  })
+
+  test('a row that is gone with no search behind it says to relaunch', async () => {
+    mockRetrieve.mockResolvedValue(undefined)
+    const model = makeModel({ dataStoreId: 'msa-1' })
+
+    loadStoredData(model)
+    await settle()
+
+    expect((model.error as Error).message).toMatch(/Relaunch it from the gene/)
+  })
 })
 
 describe('keeping IndexedDB up to date', () => {
