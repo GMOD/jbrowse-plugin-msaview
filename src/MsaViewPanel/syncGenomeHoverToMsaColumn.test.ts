@@ -40,16 +40,25 @@ function makeModel() {
   return { model, calls }
 }
 
-function hoverGenome(coord: number) {
+// this config spells the refName the same way on both sides, so the assembly
+// hands every name straight back
+const assemblyManager = {
+  get: () => ({ getCanonicalRefName: (refName: string) => refName }),
+}
+
+function mockSession(hovered: unknown) {
   mockGetSession.mockReturnValue({
-    hovered: { hoverFeature: {}, hoverPosition: { coord, refName: 'chr1' } },
+    assemblyManager,
+    hovered,
   } as unknown as ReturnType<typeof getSession>)
 }
 
+function hoverGenome(coord: number) {
+  mockSession({ hoverFeature: {}, hoverPosition: { coord, refName: 'chr1' } })
+}
+
 function clearGenomeHover() {
-  mockGetSession.mockReturnValue({
-    hovered: null,
-  } as unknown as ReturnType<typeof getSession>)
+  mockSession(null)
 }
 
 describe('syncGenomeHoverToMsaColumn (real genomeToMSA mapping)', () => {
