@@ -354,6 +354,24 @@ export default function stateModelFactory() {
       },
     }))
 
+    .views(self => ({
+      /**
+       * #getter
+       * overrides base
+       *
+       * react-msaview drops any snapshot document over 50kb and warns that a
+       * link to the view opens without it. True for an alignment this browser
+       * is holding in IndexedDB; wrong for an indexed view, whose kept `init`
+       * names a bgzip block over HTTP that processInit refetches wherever the
+       * session is opened -- so that one showed "Not in the link" about an
+       * alignment the link does carry.
+       */
+      get hostRestoresData() {
+        const { msaIndexedLocation, msaName } = self.init ?? {}
+        return !!(msaIndexedLocation && msaName)
+      },
+    }))
+
     .actions(self => ({
       /**
        * #action

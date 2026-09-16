@@ -109,6 +109,32 @@ describe('a failed launch', () => {
   })
 })
 
+// react-msaview drops a snapshot document past 50kb and reports it through
+// `unshareableData`, which the header renders as "Not in the link". An indexed
+// view's alignment IS in the link -- its init names the block and processInit
+// refetches it -- so that view answers the question itself.
+describe('what the snapshot cannot carry', () => {
+  const big = `>a\n${'M'.repeat(60_000)}`
+
+  test('an indexed view says the host brings its alignment back', () => {
+    const model = view()
+    model.setInit({
+      msaIndexedLocation: { uri: 'msa.fa.gz' },
+      msaName: 'ENST1',
+    })
+    model.setMSA(big)
+    expect(model.hostRestoresData).toBe(true)
+    expect(model.unshareableData).toEqual([])
+  })
+
+  test('a pasted alignment is reported, because a link really does lose it', () => {
+    const model = view()
+    model.setMSA(big)
+    expect(model.hostRestoresData).toBe(false)
+    expect(model.unshareableData.map(d => d.what)).toEqual(['alignment'])
+  })
+})
+
 // react-msaview's reset keeps only what is on its own preservedOnReset list,
 // and a downstream property is never on it; its volatiles survive instead,
 // which is the direction that carries the last file's state into the next one
