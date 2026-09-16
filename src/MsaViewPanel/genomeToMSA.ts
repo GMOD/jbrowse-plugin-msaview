@@ -9,7 +9,7 @@ import {
 import type { JBrowsePluginMsaViewModel } from './model'
 
 export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
-  const { hovered } = getSession(model)
+  const { assemblyManager, hovered } = getSession(model)
   const { querySeqName, transcriptToMsaMap, connectedView, mafRegion } = model
 
   if (
@@ -26,9 +26,22 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   // +1), while g2p and mafRegion are keyed by 0-based genome position
   const genomePos = coord - 1
 
+  // The two sides name the chromosome differently. A hover carries the
+  // assembly's canonical name -- `1` on jbrowse.org's hg38 -- while mafRegion
+  // and the transcript's g2p map carry the feature's, straight out of the
+  // annotation file, which is `chr1` in GENCODE. Compared raw they agree only
+  // where a config happens to pair files that agree, and everywhere else
+  // hovering a codon lit nothing at all, with no throw and no console line.
+  const assembly = assemblyManager.get(
+    mafRegion?.assemblyName ?? connectedView.assemblyNames[0] ?? '',
+  )
+  const canonical = (name: string) =>
+    assembly?.getCanonicalRefName(name) ?? name
+  const hoveredRefName = canonical(refName)
+
   if (mafRegion) {
     if (
-      refName !== mafRegion.refName ||
+      hoveredRefName !== canonical(mafRegion.refName) ||
       !connectedView.assemblyNames.includes(mafRegion.assemblyName) ||
       genomePos < mafRegion.start ||
       genomePos >= mafRegion.end
@@ -42,7 +55,10 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   // was last over, on any assembly -- so the refName gate is load bearing:
   // without it the same numeric coordinate on an unrelated chromosome matches a
   // g2p key and lights up a column for a different locus
-  if (refName === transcriptToMsaMap?.refName) {
+  if (
+    transcriptToMsaMap &&
+    hoveredRefName === canonical(transcriptToMsaMap.refName)
+  ) {
     const proteinPos = transcriptToMsaMap.g2p[genomePos]
     if (proteinPos !== undefined) {
       return transcriptPosToVisibleCol(model, proteinPos)
