@@ -1,3 +1,5 @@
+import { geneLikeRoot, isCodingFeature, isGeneLikeType } from './codingFeature'
+
 import type { MenuItem } from '@jbrowse/core/ui'
 import type { Feature } from '@jbrowse/core/util'
 
@@ -20,6 +22,16 @@ export interface DisplayModel {
   contextMenuFeature?: Feature
 }
 
+/**
+ * What the menu item launches on. A legacy host hands over the whole feature,
+ * so whether it codes for anything is known while the menu is built; a canvas
+ * host's hit test carries a type and an id, so that question can only be
+ * answered after the fetch, and the caller answers it there.
+ */
+export type MenuTarget =
+  | { feature: Feature }
+  | { fetchFeature: () => Promise<Feature | undefined> }
+
 // Read off the clicked item rather than off the display.
 //
 // LinearBasicDisplay used to publish an `isGeneLike` getter and this gated on
@@ -34,20 +46,21 @@ export interface DisplayModel {
 // costs one comparison. Deliberately the same loose case-insensitive test the
 // host applies (`isGeneLikeType` in collapseIntronsMenu.ts): real GFFs carry
 // 'mRNA', 'lnc_RNA', 'protein_coding_gene', 'transcript'.
-export function isGeneLikeType(type: unknown) {
-  const t = String(type ?? '').toLowerCase()
-  return t.includes('gene') || t.includes('rna') || t.includes('transcript')
-}
+export { isGeneLikeType }
 
 /**
- * How to get the right-clicked feature, or nothing when there is no gene to
- * launch on. Both host shapes reduce to a thunk, so the menu item is built and
- * the dialog is opened by one code path — and the same gene test decides both.
- * The strict three-name set the legacy branch used to carry disagreed with the
- * loose one above, so a `lnc_RNA` offered the menu item on a 4.3 host and not
- * on a 3.7 one.
+ * How to get the right-clicked feature, or nothing when there is nothing to
+ * launch on. Both host shapes reduce to one target, so the menu item is built
+ * and the dialog is opened by one code path — and the same gene test decides
+ * both. The strict three-name set the legacy branch used to carry disagreed
+ * with the loose one above, so a `lnc_RNA` offered the menu item on a 4.3 host
+ * and not on a 3.7 one.
+ *
+ * Gene-like is not enough on its own: an lncRNA has no protein to align, and
+ * accepting it opened a dialog whose Submit never left grey, with nothing
+ * saying why. Where the whole feature is in hand the CDS decides here.
  */
-export function launchTarget(self: DisplayModel) {
+export function launchTarget(self: DisplayModel): MenuTarget | undefined {
   const info = self.contextMenuInfo
   const fetchFullFeature = self.fetchFullFeature
   // exclusive, not a fallthrough: a display publishing contextMenuInfo has
@@ -55,11 +68,18 @@ export function launchTarget(self: DisplayModel) {
   // rejects the click can only answer with some other feature
   if (info && fetchFullFeature) {
     return isGeneLikeType(info.item.type)
-      ? () => fetchFullFeature(info.item.featureId, info.displayedRegionIndex)
+      ? {
+          fetchFeature: () =>
+            fetchFullFeature(info.item.featureId, info.displayedRegionIndex),
+        }
       : undefined
   }
   const legacy = self.contextMenuFeature
-  return legacy && isGeneLikeType(legacy.get('type'))
-    ? () => Promise.resolve(legacy)
+  if (!legacy) {
+    return undefined
+  }
+  const root = geneLikeRoot(legacy)
+  return isGeneLikeType(root.get('type')) && isCodingFeature(root)
+    ? { feature: root }
     : undefined
 }

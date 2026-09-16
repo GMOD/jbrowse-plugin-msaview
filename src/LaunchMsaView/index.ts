@@ -1,10 +1,11 @@
 import { getContainingTrack, getSession } from '@jbrowse/core/util'
 import AddIcon from '@mui/icons-material/Add'
 
+import { isCodingFeature } from './codingFeature'
 import LaunchMsaViewDialog from './components/LaunchMsaViewDialog'
 import { launchTarget } from './launchTarget'
 
-import type { DisplayModel } from './launchTarget'
+import type { DisplayModel, MenuTarget } from './launchTarget'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
 import type DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
@@ -19,21 +20,38 @@ function isDisplay(elt: { name: string }): elt is DisplayType {
 // built: contextMenuItems runs on every right-click and, on a host whose base
 // method reads `this`, is the one place a plugin can take the whole menu down.
 // Keeping it to a pure read of the display is also what lets a test call it.
-function openDialog(
-  self: DisplayModel,
-  feature: () => Promise<Feature | undefined>,
-) {
+function featureName(feature: Feature) {
+  return feature.get('name') ?? feature.get('id') ?? 'This feature'
+}
+
+function openDialog(self: DisplayModel, target: MenuTarget) {
   const track = getContainingTrack(self)
   const session = getSession(track)
-  feature()
-    .then(f => {
-      if (f) {
-        session.queueDialog(handleClose => [
-          LaunchMsaViewDialog,
-          { model: track, handleClose, feature: f },
-        ])
-      } else {
+  const open = (feature: Feature) => {
+    session.queueDialog(handleClose => [
+      LaunchMsaViewDialog,
+      { model: track, handleClose, feature },
+    ])
+  }
+  if ('feature' in target) {
+    open(target.feature)
+    return
+  }
+  target
+    .fetchFeature()
+    .then(feature => {
+      if (!feature) {
         session.notify('Could not load feature for MSA view', 'warning')
+      } else if (!isCodingFeature(feature)) {
+        // the canvas hit test carries a type and nothing else, so this is the
+        // first point at which the CDS can be looked for. Saying so beats
+        // opening a dialog whose Submit never leaves grey.
+        session.notify(
+          `${featureName(feature)} has no coding sequence, so there is no protein to align`,
+          'info',
+        )
+      } else {
+        open(feature)
       }
     })
     .catch((e: unknown) => {
