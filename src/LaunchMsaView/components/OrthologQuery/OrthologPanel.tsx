@@ -47,10 +47,13 @@ const OrthologPanel = observer(function ({
   handleClose,
   feature,
   model,
+  preferredTranscriptId,
 }: {
   model: AbstractTrackModel
   feature: Feature
   handleClose: () => void
+  /** the isoform the user right-clicked, preselected in the picker */
+  preferredTranscriptId?: string
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
@@ -64,7 +67,11 @@ const OrthologPanel = observer(function ({
   const [maxSpecies, setMaxSpecies] = useState(String(defaultMaxSpecies))
 
   const geneCandidates = useMemo(() => getGeneIdentifiers(feature), [feature])
-  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const transcriptSelection = useTranscriptSelection({
+    feature,
+    view,
+    preferredTranscriptId,
+  })
   const { selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
   const e = transcriptSelection.error ?? launchViewError

@@ -131,6 +131,10 @@ describe('launchTarget', () => {
     const mrna = gene.get('subfeatures')![0]!
     const target = launchTarget(legacyHost(mrna))
     expect(target && 'feature' in target && target.feature).toBe(gene)
+    // the gene is what the dialog opens on, but the picker still opens on the
+    // isoform the click landed on -- on a v4 host that click is the only place
+    // the choice is ever stated
+    expect(target?.preferredTranscriptId).toBe(mrna.id())
   })
 
   // a host that has both shapes must not fall through to the legacy branch and

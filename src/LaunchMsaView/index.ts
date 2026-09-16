@@ -27,10 +27,11 @@ function featureName(feature: Feature) {
 function openDialog(self: DisplayModel, target: MenuTarget) {
   const track = getContainingTrack(self)
   const session = getSession(track)
+  const { preferredTranscriptId } = target
   const open = (feature: Feature) => {
     session.queueDialog(handleClose => [
       LaunchMsaViewDialog,
-      { model: track, handleClose, feature },
+      { model: track, handleClose, feature, preferredTranscriptId },
     ])
   }
   if ('feature' in target) {

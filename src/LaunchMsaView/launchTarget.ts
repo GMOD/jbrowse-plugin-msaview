@@ -28,9 +28,22 @@ export interface DisplayModel {
  * host's hit test carries a type and an id, so that question can only be
  * answered after the fetch, and the caller answers it there.
  */
+interface ClickedTranscript {
+  /**
+   * The isoform the click actually landed on, when the dialog opens on its
+   * gene. Climbing to the gene is what puts every isoform in the picker, and it
+   * threw away which one the user pointed at: the picker then opened on the
+   * longest transcript, and on a v4 host that is the only place the choice was
+   * ever stated.
+   */
+  preferredTranscriptId?: string
+}
+
 export type MenuTarget =
-  | { feature: Feature }
-  | { fetchFeature: () => Promise<Feature | undefined> }
+  | (ClickedTranscript & { feature: Feature })
+  | (ClickedTranscript & {
+      fetchFeature: () => Promise<Feature | undefined>
+    })
 
 // Read off the clicked item rather than off the display.
 //
@@ -82,6 +95,6 @@ export function launchTarget(self: DisplayModel): MenuTarget | undefined {
   }
   const root = geneLikeRoot(legacy)
   return isGeneLikeType(root.get('type')) && !isKnownNonCoding(root)
-    ? { feature: root }
+    ? { feature: root, preferredTranscriptId: legacy.id() }
     : undefined
 }

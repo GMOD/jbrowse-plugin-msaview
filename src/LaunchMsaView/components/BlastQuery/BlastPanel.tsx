@@ -33,10 +33,13 @@ export default function BlastPanel({
   handleClose,
   model,
   feature,
+  preferredTranscriptId,
 }: {
   handleClose: () => void
   model: AbstractTrackModel
   feature: Feature
+  /** the isoform the user right-clicked, preselected in the picker */
+  preferredTranscriptId?: string
 }) {
   const [lookupMethod, setLookupMethod] =
     useState<BlastLookupMethod>('automatic')
@@ -66,7 +69,12 @@ export default function BlastPanel({
         </IconButton>
       </Tooltip>
 
-      <Panel model={model} feature={feature} handleClose={handleClose}>
+      <Panel
+        model={model}
+        feature={feature}
+        handleClose={handleClose}
+        preferredTranscriptId={preferredTranscriptId}
+      >
         <BlastMethodSelector
           lookupMethod={lookupMethod}
           setLookupMethod={setLookupMethod}

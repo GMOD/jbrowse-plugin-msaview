@@ -58,11 +58,14 @@ const BlastManualPanel = observer(function ({
   feature,
   model,
   children,
+  preferredTranscriptId,
 }: {
   children: React.ReactNode
   model: AbstractTrackModel
   feature: Feature
   handleClose: () => void
+  /** the isoform the user right-clicked, preselected in the picker */
+  preferredTranscriptId?: string
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
@@ -70,7 +73,11 @@ const BlastManualPanel = observer(function ({
   const [msaText, setMsaText] = useState('')
   const [treeText, setTreeText] = useState('')
 
-  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const transcriptSelection = useTranscriptSelection({
+    feature,
+    view,
+    preferredTranscriptId,
+  })
   const { proteinSequence, selectedTranscript, error } = transcriptSelection
   const queryRow = useQueryRowName(msaText, proteinSequence)
 

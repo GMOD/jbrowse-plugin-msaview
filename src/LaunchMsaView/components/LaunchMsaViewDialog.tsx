@@ -19,10 +19,13 @@ export default function LaunchMsaViewDialog({
   handleClose,
   feature,
   model,
+  preferredTranscriptId,
 }: {
   handleClose: () => void
   feature: Feature
   model: AbstractTrackModel
+  /** the isoform the right-click landed on, when this opened on its gene */
+  preferredTranscriptId?: string
 }) {
   const session = getSession(model)
   const datasets = readMsaDatasets(session.jbrowse)
@@ -62,6 +65,7 @@ export default function LaunchMsaViewDialog({
             handleClose={handleClose}
             feature={feature}
             model={model}
+            preferredTranscriptId={preferredTranscriptId}
           />
         </TabPanel>
         <TabPanel value={value} index="ncbi_blast">
@@ -69,6 +73,7 @@ export default function LaunchMsaViewDialog({
             handleClose={handleClose}
             feature={feature}
             model={model}
+            preferredTranscriptId={preferredTranscriptId}
           />
         </TabPanel>
         {hasPreloadedDatasets ? (
@@ -77,6 +82,7 @@ export default function LaunchMsaViewDialog({
               model={model}
               feature={feature}
               handleClose={handleClose}
+              preferredTranscriptId={preferredTranscriptId}
             />
           </TabPanel>
         ) : null}
@@ -85,6 +91,7 @@ export default function LaunchMsaViewDialog({
             model={model}
             feature={feature}
             handleClose={handleClose}
+            preferredTranscriptId={preferredTranscriptId}
           />
         </TabPanel>
       </LaunchPlacementProvider>

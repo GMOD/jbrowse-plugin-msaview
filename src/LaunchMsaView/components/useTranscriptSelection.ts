@@ -55,13 +55,25 @@ export function useTranscriptSelection({
   feature,
   view,
   validIds,
+  preferredTranscriptId,
 }: {
   feature: Feature
   view: { assemblyNames?: string[] } | undefined
   validIds?: string[]
+  /**
+   * the isoform the user right-clicked, when the dialog opened on its gene.
+   * Ignored when this gene does not carry it, so a stale id falls back to the
+   * longest transcript rather than selecting nothing.
+   */
+  preferredTranscriptId?: string
 }) {
   const options = useMemo(() => getSortedTranscriptFeatures(feature), [feature])
-  const [selectedId, setSelectedId] = useState(() => getId(options[0]))
+  const [selectedId, setSelectedId] = useState(() =>
+    getId(
+      options.find(opt => featureMatchesId(opt, preferredTranscriptId ?? '')) ??
+        options[0],
+    ),
+  )
   const validatedSelectedId = pickSelectedId(selectedId, options, validIds)
   const selectedTranscript = options.find(
     val => getId(val) === validatedSelectedId,

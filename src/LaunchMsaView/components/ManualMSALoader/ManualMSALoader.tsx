@@ -41,10 +41,13 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   model,
   feature,
   handleClose,
+  preferredTranscriptId,
 }: {
   model: AbstractTrackModel
   feature: Feature
   handleClose: () => void
+  /** the isoform the user right-clicked, preselected in the picker */
+  preferredTranscriptId?: string
 }) {
   const view = getLinearGenomeView(model)
   const { classes } = useStyles()
@@ -54,7 +57,11 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [treeText, setTreeText] = useState('')
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
-  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const transcriptSelection = useTranscriptSelection({
+    feature,
+    view,
+    preferredTranscriptId,
+  })
   const { selectedTranscript, proteinSequence, error, sequenceStatus } =
     transcriptSelection
   const queryRow = useQueryRowName(msaText, proteinSequence)

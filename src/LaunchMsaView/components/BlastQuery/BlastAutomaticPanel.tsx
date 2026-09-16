@@ -64,11 +64,14 @@ const BlastAutomaticPanel = observer(function ({
   feature,
   model,
   children,
+  preferredTranscriptId,
 }: {
   model: AbstractTrackModel
   feature: Feature
   handleClose: () => void
   children: React.ReactNode
+  /** the isoform the user right-clicked, preselected in the picker */
+  preferredTranscriptId?: string
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
@@ -88,7 +91,11 @@ const BlastAutomaticPanel = observer(function ({
   const { results: cachedResults, error: cachedResultsError } =
     useCachedBlastResults(geneIds)
 
-  const transcriptSelection = useTranscriptSelection({ feature, view })
+  const transcriptSelection = useTranscriptSelection({
+    feature,
+    view,
+    preferredTranscriptId,
+  })
   const { selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
   const e = transcriptSelection.error ?? launchViewError ?? cachedResultsError

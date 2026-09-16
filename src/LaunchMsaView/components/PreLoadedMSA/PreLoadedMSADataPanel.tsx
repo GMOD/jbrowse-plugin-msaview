@@ -36,10 +36,13 @@ const PreLoadedMSA = observer(function ({
   model,
   feature,
   handleClose,
+  preferredTranscriptId,
 }: {
   model: AbstractTrackModel
   feature: Feature
   handleClose: () => void
+  /** the isoform the user right-clicked, preselected in the picker */
+  preferredTranscriptId?: string
 }) {
   const session = getSession(model)
   const view = getLinearGenomeView(model)
@@ -66,6 +69,7 @@ const PreLoadedMSA = observer(function ({
     feature,
     view,
     validIds: msaList,
+    preferredTranscriptId,
   })
   const { selectedId, selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
