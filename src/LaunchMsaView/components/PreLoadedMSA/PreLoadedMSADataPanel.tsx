@@ -2,13 +2,13 @@ import React, { useMemo, useState } from 'react'
 
 import { LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
 import { getEnv, getSession } from '@jbrowse/core/util'
-import { MenuItem } from '@mui/material'
+import { MenuItem, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
 import { useFetch } from '../../../utils/useFetch'
-import { useQueryRowName } from '../../useQueryRowName'
+import { resolveQueryRowName, useQueryRowName } from '../../useQueryRowName'
 import {
   getGeneDisplayName,
   getLinearGenomeView,
@@ -45,6 +45,7 @@ const PreLoadedMSA = observer(function ({
   const view = getLinearGenomeView(model)
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
+  const { assemblyNames } = view
   const [viewError, setViewError] = useState<unknown>()
 
   const datasets = readMsaDatasets(session.jbrowse)
@@ -99,6 +100,15 @@ const PreLoadedMSA = observer(function ({
   // the same way the Manual tab finds it.
   const queryRow = useQueryRowName(msaText, proteinSequence)
 
+  // The name this panel used to launch with unconditionally. A dataset built to
+  // that convention does carry the row, so it is worth falling back to when the
+  // residues do not match closely enough to find it -- but only when the
+  // alignment really has it, which is the check the old code never made.
+  const querySeqName = resolveQueryRowName(
+    queryRow,
+    `${selectedId}_${assemblyNames[0] ?? ''}`,
+  )
+
   const e =
     msaListFetchError ??
     msaDataFetchError ??
@@ -144,7 +154,9 @@ const PreLoadedMSA = observer(function ({
                   feature={feature}
                   {...transcriptSelection}
                 />
-                {msaText ? <QueryRowSelector {...queryRow} /> : null}
+                {msaText ? (
+                  <QueryRowSelector {...queryRow} querySeqName={querySeqName} />
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -156,18 +168,27 @@ const PreLoadedMSA = observer(function ({
         hint={
           msaDataLoading ? (
             <LoadingEllipses message="Loading alignment" />
+          ) : !!msaData?.length && !querySeqName ? (
+            <Typography color="textSecondary" variant="body2">
+              no row matches this transcript
+            </Typography>
           ) : (
             <SequenceStatusMessage status={sequenceStatus} />
           )
         }
-        submitDisabled={!selectedTranscript || !msaData?.length}
+        // launching without a query row opens a view that renders and then
+        // never navigates, which reads as a broken feature rather than a
+        // dataset that does not cover this gene
+        submitDisabled={
+          !selectedTranscript || !msaData?.length || !querySeqName
+        }
         onSubmit={() => {
           try {
             if (selectedTranscript && msaText) {
               preCalculatedLaunchView({
                 newViewTitle: getGeneDisplayName(selectedTranscript),
                 view,
-                querySeqName: queryRow.querySeqName,
+                querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 feature: selectedTranscript,
                 data: { msa: msaText },
