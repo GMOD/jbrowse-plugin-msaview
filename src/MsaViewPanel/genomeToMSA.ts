@@ -32,11 +32,19 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   // annotation file, which is `chr1` in GENCODE. Compared raw they agree only
   // where a config happens to pair files that agree, and everywhere else
   // hovering a codon lit nothing at all, with no throw and no console line.
+  //
+  // `initialized` is the gate rather than a try/catch: getCanonicalRefName
+  // throws until the assembly's aliases load, and this runs from a hover
+  // autorun over an assembly nothing here waited for -- mafRegion names its own
+  // on a frozen spec, which need not be one the connected view loaded. Until
+  // the aliases arrive the raw name is the whole answer, and the hover lights
+  // nothing for those frames rather than throwing out of the autorun.
   const assembly = assemblyManager.get(
     mafRegion?.assemblyName ?? connectedView.assemblyNames[0] ?? '',
   )
   const canonical = (name: string) =>
-    assembly?.getCanonicalRefName(name) ?? name
+    (assembly?.initialized ? assembly.getCanonicalRefName(name) : undefined) ??
+    name
   const hoveredRefName = canonical(refName)
 
   if (mafRegion) {

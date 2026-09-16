@@ -15,11 +15,24 @@ const mockGetSession = vi.mocked(getSession)
 // happened to work.
 let aliases: Record<string, string> = {}
 
+// core's assembly throws from getCanonicalRefName until its aliases load, and
+// answers `initialized` false until then -- so the stand-in throws too, or the
+// guard is asserted against a method that never had the failure mode
+let assemblyInitialized = true
+
 function mockSession(session: { hovered: unknown }) {
   mockGetSession.mockReturnValue({
     assemblyManager: {
       get: () => ({
-        getCanonicalRefName: (refName: string) => aliases[refName] ?? refName,
+        get initialized() {
+          return assemblyInitialized
+        },
+        getCanonicalRefName: (refName: string) => {
+          if (!assemblyInitialized) {
+            throw new Error('aliases not loaded')
+          }
+          return aliases[refName] ?? refName
+        },
       }),
     },
     ...session,
@@ -30,6 +43,7 @@ describe('genomeToMSA', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     aliases = {}
+    assemblyInitialized = true
   })
 
   test('returns undefined when connectedView is not initialized', () => {
@@ -495,6 +509,35 @@ describe('genomeToMSA', () => {
 
       expect(genomeToMSA({ model })).toBeUndefined()
       expect(seqPosToVisibleCol).not.toHaveBeenCalled()
+    })
+
+    // this runs from a hover autorun, and mafRegion names an assembly off a
+    // frozen spec that nothing here waited for -- so the aliases may not be
+    // loaded, and asking for them throws
+    test('falls back to the raw name while the aliases are still loading', () => {
+      assemblyInitialized = false
+      mockSession({
+        hovered: {
+          hoverFeature: {},
+          hoverPosition: { coord: 1005, refName: 'chr1' },
+        },
+      })
+
+      const seqPosToVisibleCol = vi.fn().mockReturnValue(10)
+      const model = {
+        querySeqName: 'QUERY',
+        querySeqOffset: 0,
+        rows: [['QUERY', 'MKVLTAEEK']],
+        transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
+        mafRegion: undefined,
+        connectedView: { initialized: true, assemblyNames: ['hg38'] },
+        seqPosToVisibleCol,
+        visibleColToSeqPos: (_name: string, col: number) => col,
+      } as any
+
+      expect(() => genomeToMSA({ model })).not.toThrow()
+      // both sides spell it 'chr1' here, so the raw comparison still answers
+      expect(genomeToMSA({ model })).toBe(10)
     })
 
     test('maps a hover named 1 into a mafRegion named chr1', () => {
