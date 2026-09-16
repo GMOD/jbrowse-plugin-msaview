@@ -1,3 +1,49 @@
+## [3.6.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.5.0...v3.6.0) (2026-09-16)
+
+### Bug Fixes
+
+- Keep a visited launch tab mounted so it does not lose its state ([fa28d0e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fa28d0e9628c0d2cb6aa1c7a12223c1302329903))
+- Canonicalize the refName on both sides of a genome hover ([1af58b5](https://github.com/GMOD/jbrowse-plugin-msaview/commit/1af58b504e90a84ac92ee9df41fa64a94762b26f))
+- Translate with the assembly's genetic code, and stop taking dedupe off the barrel ([d75a0b4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d75a0b4229fee3dd4638766311bf3efeb4b23a03))
+- Write the placement choice on submit, not on the click ([aa9d078](https://github.com/GMOD/jbrowse-plugin-msaview/commit/aa9d07846bf5f9401645a7eedb479d6e346d5ce3))
+- Offer the MSA launch only for features that code for a protein ([c2ed15b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c2ed15b5bfc675acd095c684ab9eaa1bac29d300))
+- Let an expired alignment run its own search again ([0ad884b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/0ad884bdc4d2ab193cbfd87d5645da5672a12212))
+- Find the pre-loaded dataset's query row by sequence ([166926e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/166926e35d9ecf82798fb5c88b17eece1b532c00))
+- An indexed view's alignment is in the link, so stop warning that it is not ([b388690](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b3886905269d276d60de247c808895eba34ec9ec))
+- Do not ask an assembly for aliases it has not loaded ([f8248b1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f8248b1861fa2c9ee7795998dd41bc649c39bf22))
+- Refuse a pre-loaded launch with no query row, and keep the old name as a fallback ([f9f96cb](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f9f96cbf2479141360c2844702eaf8594b0660b8))
+- One placement answer per dialog, not per tab ([8b6d022](https://github.com/GMOD/jbrowse-plugin-msaview/commit/8b6d022554d9367768de2e147c6e1af20ddf92bb))
+- An absent subfeature list is not an answer about coding ([65e36c8](https://github.com/GMOD/jbrowse-plugin-msaview/commit/65e36c8231d26bd2a44959fefed273563543a563))
+- Keep the clicked isoform selected when the dialog opens on its gene ([9b980b2](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9b980b28792f6158337513ca7fea5a9d62d5d6ba))
+- The hostRestoresData override dropped the base answer ([7311d91](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7311d9122f8df824d2b146a41db60b5be5c0500e))
+
+### Chores
+
+- Read core 5's unwrapped MUI re-exports in check-mui-imports ([b0af125](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b0af125aa8b05dda597d6c93ebaa34ea3b1c5644))
+- Build against @jbrowse/core 5.0.0-beta.8, keeping the calls v4 hosts need ([c5976da](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c5976da95525c1ff4c2de8bfb77402591bb5f09d))
+- React-msaview 8, msa-parsers 8, and the routine dep bumps ([734babc](https://github.com/GMOD/jbrowse-plugin-msaview/commit/734babc8baea8eb3352e01c833fa42945a93f586))
+
+### Features
+
+- Say why Submit is grey while the query sequence loads ([c72661d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c72661d73fbb14bb2e4ab434a9a7100752dadd4f))
+- Name things the way a reader would, and put the prose behind Help ([f353de2](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f353de282a521acee18ac94d54b0369c87d4c03b))
+
+### Refactoring
+
+- Mark a launch done rather than copying its request ([d315be9](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d315be95eb1bf75d6a9c994919886192d6e5428c))
+- Translate with core's geneticCodes rather than a vendored copy ([0642391](https://github.com/GMOD/jbrowse-plugin-msaview/commit/0642391fc08e76da689117f8d16571595a67d843))
+
+### Styling
+
+- Satisfy oxlint on the tab panel and the hover-sync stubs ([7a49f12](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7a49f12a298d4ee9778dee23ebc3af69e230024c))
+
+### Tests
+
+- Give the hover-sync stub an assemblyManager ([d088eb2](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d088eb27a3ff26afa7fe2ba47f80299ee52632e9))
+- Find Submit inside the visible tab panel ([859f38b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/859f38b185b01e2f4e6a585d920999f97e60ad75))
+- Refresh the context-menu capture, which had no plugin row in it ([74d1af5](https://github.com/GMOD/jbrowse-plugin-msaview/commit/74d1af59f9b39d72b97cec30be4fb55f1d8d6968))
+- Refresh the v4.3.0 reference for react-msaview 8's cosmetics ([063b15c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/063b15c35fc91a560584a9d202f70bfc123a4c53))
+
 ## [3.5.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.4.1...v3.5.0) (2026-09-14)
 
 ### Bug Fixes
