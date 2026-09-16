@@ -295,8 +295,13 @@ describe('TranscriptSelector E2E', () => {
     await new Promise(r => setTimeout(r, 500))
     await saveScreenshot(p, getScreenshotPath('10b-manual-upload-tab'))
 
+    // scoped to the visible panel: a tab the user has been on stays mounted
+    // and hidden, so the document holds a Submit button per visited tab
     const submitHandle = await p.evaluateHandle(() => {
-      const buttons = Array.from(document.querySelectorAll('button'))
+      const panel = [...document.querySelectorAll('[role="tabpanel"]')].find(
+        el => !el.hasAttribute('hidden'),
+      )
+      const buttons = [...(panel ?? document).querySelectorAll('button')]
       return buttons.find(b => b.textContent?.trim() === 'Submit') ?? null
     })
     const submitEl = submitHandle.asElement()
