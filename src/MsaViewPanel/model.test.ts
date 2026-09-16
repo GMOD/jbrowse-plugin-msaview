@@ -76,9 +76,10 @@ describe('a failed launch', () => {
     expect(doLaunchBlast).toHaveBeenCalledTimes(2)
   })
 
-  // the params are cleared on success to mark the request done, so a view whose
-  // stored alignment later expired had nothing left to run again
-  test('a successful launch keeps its request for a later retry', async () => {
+  // the params used to be cleared on success to mark the request done, which
+  // threw away the only durable statement of what the view is: a stored
+  // alignment expires after 7 days and there was nothing left to run again
+  test('a successful launch keeps its request and is not run twice', async () => {
     vi.mocked(doLaunchBlast).mockResolvedValue({
       msa: '>a\nMK\n>b\nMK',
       tree: '(a,b);',
@@ -88,15 +89,29 @@ describe('a failed launch', () => {
     model.setBlastParams({ ...BLAST_PARAMS })
     await new Promise(res => setTimeout(res, 0))
 
-    expect(model.blastParams).toBeUndefined()
-    expect(model.lastLaunch).toEqual({ blastParams: BLAST_PARAMS })
+    expect(model.blastParams).toEqual(BLAST_PARAMS)
+    expect(model.launchCompleted).toBe(true)
+    expect(doLaunchBlast).toHaveBeenCalledTimes(1)
 
     vi.mocked(doLaunchBlast).mockReturnValue(new Promise(() => {}))
     model.setError(new Error('alignment is no longer in browser storage'))
     model.retryLaunch()
 
     expect(model.error).toBeUndefined()
-    expect(model.blastParams).toEqual(BLAST_PARAMS)
+    expect(model.launchCompleted).toBe(false)
+    expect(doLaunchBlast).toHaveBeenCalledTimes(2)
+  })
+
+  // a session reopens with the request still on it, so the mark is what stops
+  // the whole search running again unasked
+  test('a restored session does not rerun a request it already ran', () => {
+    stateModelFactory().create({
+      type: 'MsaView',
+      id: 'msaview2',
+      blastParams: { ...BLAST_PARAMS },
+      launchCompleted: true,
+    })
+    expect(doLaunchBlast).not.toHaveBeenCalled()
   })
 
   test('dismisses by dropping it', () => {

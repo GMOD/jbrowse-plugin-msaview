@@ -122,7 +122,8 @@ test('an expired alignment offers to run its original search again', () => {
     progress: '',
     dataInitialized: false,
     error: new Error("This view's alignment is no longer in browser storage."),
-    lastLaunch: { blastParams: { blastDatabase: 'uniprotkb_swissprot' } },
+    blastParams: { blastDatabase: 'uniprotkb_swissprot' },
+    launchCompleted: true,
     retryLaunch,
   } as never)
   expect(screen.queryByText('the alignment')).toBeNull()

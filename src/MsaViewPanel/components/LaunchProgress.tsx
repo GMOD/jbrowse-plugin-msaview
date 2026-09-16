@@ -24,9 +24,10 @@ const useStyles = makeStyles()({
  * What a view shows while it is still building its alignment, and what it shows
  * when that fails.
  *
- * Every launch that resolves something leaves its request on the model until it
- * succeeds -- `blastParams`, `orthologParams`, `init` -- so one still being
- * there IS "no alignment yet", and the error a failed launch records is only
+ * Every launch that resolves something states its request on the model --
+ * `blastParams`, `orthologParams`, `init` -- and one not yet marked
+ * `launchCompleted` IS "no alignment yet", as is a completed one whose stored
+ * alignment has since expired. The error a failed launch records is only
  * readable here. This used to key on `blastParams` alone, which left an ortholog
  * launch rendering an empty MSAView for the minutes its alignment takes and, on
  * failure, forever: the error was set and nothing drew it.
@@ -38,12 +39,10 @@ const LaunchProgress = observer(function LaunchProgress2({
 }) {
   const { progress, rid, error } = model
   const { classes } = useStyles()
-  // the finished request describes the view just as well as the pending one, so
-  // an expired alignment's panel is named after the search that built it
-  const pending = !!(model.blastParams ?? model.orthologParams ?? model.init)
-  const blastParams = model.blastParams ?? model.lastLaunch?.blastParams
-  const orthologParams =
-    model.orthologParams ?? model.lastLaunch?.orthologParams
+  // the request stays on the model after it succeeds, so an expired
+  // alignment's panel is still named after the search that built it
+  const pending = !model.launchCompleted
+  const { blastParams, orthologParams } = model
   const message = blastParams
     ? `Running EBI ${blastParams.searchProgram === 'phmmer' ? 'phmmer' : 'BLAST'}`
     : orthologParams

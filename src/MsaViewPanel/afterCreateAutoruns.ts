@@ -62,7 +62,10 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
             self.setDataStoreId(undefined)
             self.setError(
               new Error(
-                EXPIRED_MESSAGE + (self.lastLaunch ? RELAUNCHABLE : START_OVER),
+                EXPIRED_MESSAGE +
+                  ((self.blastParams ?? self.orthologParams)
+                    ? RELAUNCHABLE
+                    : START_OVER),
               ),
             )
           })
@@ -146,23 +149,28 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
 
 /**
  * Same shape as launchBlastIfNeeded, for the ortholog path: the params ARE the
- * request, and clearing them on success is what marks it done. They are left in
- * place on failure so the error stays attributable to a specific request; the
- * autorun's only tracked read is orthologParams itself, so nothing refires
- * until a new request replaces them.
+ * request, and `launchCompleted` is what marks it done. They are left in place
+ * either way -- on failure so the error stays attributable to a specific
+ * request, and on success because they are the only durable statement of what
+ * the view is, which is what a stored alignment that expired is rebuilt from.
+ * The autorun tracks those two reads alone, so nothing refires until a new
+ * request replaces them or a retry clears the mark.
  */
 export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
-  if (self.orthologParams && !awaitingTranscript(self)) {
+  if (
+    self.orthologParams &&
+    !self.launchCompleted &&
+    !awaitingTranscript(self)
+  ) {
     runLaunch({
       self,
       message: 'Resolving orthologs',
       launch: scope => doLaunchOrthologs({ self, scope }),
+      // marked rather than dropped: the request is the only durable statement
+      // of what this view is, and a view whose stored alignment expired runs it
+      // again
       onLaunched: () => {
-        // moved rather than dropped: clearing the params is what marks the
-        // request done, and keeping a copy is what lets a view whose stored
-        // alignment expired run it again
-        self.setLastLaunch({ orthologParams: self.orthologParams })
-        self.setOrthologParams(undefined)
+        self.setLaunchCompleted(true)
       },
     })
   }
@@ -179,14 +187,13 @@ function awaitingTranscript(self: JBrowsePluginMsaViewModel) {
 }
 
 export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
-  if (self.blastParams && !awaitingTranscript(self)) {
+  if (self.blastParams && !self.launchCompleted && !awaitingTranscript(self)) {
     runLaunch({
       self,
       message: 'Submitting query',
       launch: scope => doLaunchBlast({ self, scope }),
       onLaunched: () => {
-        self.setLastLaunch({ blastParams: self.blastParams })
-        self.setBlastParams(undefined)
+        self.setLaunchCompleted(true)
       },
     })
   }

@@ -122,14 +122,14 @@ describe('restoring a view from IndexedDB', () => {
     mockRetrieve.mockResolvedValue(undefined)
     const model = makeModel({
       dataStoreId: 'msa-1',
-      lastLaunch: { blastParams: { blastDatabase: 'uniprotkb_swissprot' } },
+      blastParams: { blastDatabase: 'uniprotkb_swissprot' },
     })
 
     loadStoredData(model)
     await settle()
 
     expect((model.error as Error).message).toMatch(/Retry/)
-    expect(model.lastLaunch).toBeDefined()
+    expect(model.blastParams).toBeDefined()
   })
 
   test('a row that is gone with no search behind it says to relaunch', async () => {
