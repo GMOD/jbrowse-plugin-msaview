@@ -1,4 +1,4 @@
-import { geneLikeRoot, isCodingFeature, isGeneLikeType } from './codingFeature'
+import { geneLikeRoot, isGeneLikeType, isKnownNonCoding } from './codingFeature'
 
 import type { MenuItem } from '@jbrowse/core/ui'
 import type { Feature } from '@jbrowse/core/util'
@@ -58,7 +58,9 @@ export { isGeneLikeType }
  *
  * Gene-like is not enough on its own: an lncRNA has no protein to align, and
  * accepting it opened a dialog whose Submit never left grey, with nothing
- * saying why. Where the whole feature is in hand the CDS decides here.
+ * saying why. Where the whole feature is in hand the CDS decides here -- but
+ * only where there are subfeatures to read it off, since a feature that came
+ * with none has not answered the question.
  */
 export function launchTarget(self: DisplayModel): MenuTarget | undefined {
   const info = self.contextMenuInfo
@@ -79,7 +81,7 @@ export function launchTarget(self: DisplayModel): MenuTarget | undefined {
     return undefined
   }
   const root = geneLikeRoot(legacy)
-  return isGeneLikeType(root.get('type')) && isCodingFeature(root)
+  return isGeneLikeType(root.get('type')) && !isKnownNonCoding(root)
     ? { feature: root }
     : undefined
 }

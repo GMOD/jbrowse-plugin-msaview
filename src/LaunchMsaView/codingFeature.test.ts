@@ -1,7 +1,12 @@
 import { SimpleFeature } from '@jbrowse/core/util'
 import { describe, expect, it } from 'vitest'
 
-import { geneLikeRoot, isCodingFeature, isGeneLikeType } from './codingFeature'
+import {
+  geneLikeRoot,
+  isCodingFeature,
+  isGeneLikeType,
+  isKnownNonCoding,
+} from './codingFeature'
 
 function feature(type: string, subfeatures: SimpleFeature[] = []) {
   return new SimpleFeature({
@@ -54,6 +59,26 @@ describe('isCodingFeature', () => {
 
   it('counts the feature itself', () => {
     expect(isCodingFeature(feature('CDS'))).toBe(true)
+  })
+})
+
+describe('isKnownNonCoding', () => {
+  it('is true for a transcript whose subfeatures are all exons', () => {
+    expect(
+      isKnownNonCoding(feature('lnc_RNA', [feature('exon'), feature('exon')])),
+    ).toBe(true)
+  })
+
+  // a host is free to hand over a bare record, and reading that as "no protein
+  // here" takes the menu item off an ordinary gene without a word
+  it('is false for a feature that arrived with no subfeatures at all', () => {
+    expect(isKnownNonCoding(feature('gene'))).toBe(false)
+  })
+
+  it('is false when a CDS is somewhere below', () => {
+    expect(
+      isKnownNonCoding(feature('gene', [feature('mRNA', [feature('CDS')])])),
+    ).toBe(false)
   })
 })
 

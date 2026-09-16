@@ -21,6 +21,19 @@ export function isCodingFeature(feature: Feature): boolean {
   return isCDS(feature) || !!feature.get('subfeatures')?.some(isCodingFeature)
 }
 
+/**
+ * Whether the feature is known not to code for anything.
+ *
+ * Not simply `!isCodingFeature`: a feature that arrived with no subfeatures at
+ * all says nothing either way, and a host is free to hand one over that way.
+ * Reading that as "no protein here" takes the menu item off a perfectly
+ * ordinary gene, silently, which is worse than opening a dialog that then has
+ * nothing to translate.
+ */
+export function isKnownNonCoding(feature: Feature) {
+  return !!feature.get('subfeatures')?.length && !isCodingFeature(feature)
+}
+
 // The outermost gene-like ancestor, so a click on an isoform opens the dialog
 // on the gene with every transcript to choose from, as the canvas host does.
 export function geneLikeRoot(feature: Feature) {

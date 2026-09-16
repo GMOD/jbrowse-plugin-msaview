@@ -94,6 +94,12 @@ describe('launchTarget', () => {
     ).toBeUndefined()
   })
 
+  // a legacy host can hand over a bare record whose children are a separate
+  // query, and declining it takes the item off an ordinary gene with no word
+  test('offers the item for a gene that arrived with no subfeatures', () => {
+    expect(launchTarget(legacyHost(feature('gene', [])))).toBeDefined()
+  })
+
   // a click on an isoform should open the dialog on the gene, so every
   // transcript is there to pick from
   test('climbs to the gene from a clicked isoform', () => {
