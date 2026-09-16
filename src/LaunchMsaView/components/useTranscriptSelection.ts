@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { featureMatchesId, getId, getSortedTranscriptFeatures } from '../util'
 import { useFeatureSequence } from './useFeatureSequence'
 
+import type { SequenceStatus } from './SequenceStatus'
 import type { Feature } from '@jbrowse/core/util'
 
 // Keep the current selection if it's valid for the given validIds, otherwise
@@ -26,6 +27,30 @@ function pickSelectedId(
   return firstValid ? getId(firstValid) : currentId
 }
 
+/**
+ * Submit is disabled until the query sequence is in hand, and a grey button
+ * reads the same whether the translation is on its way or was never going to
+ * arrive. `missing` is the second case: the feature has no CDS to translate,
+ * which the dialog never said.
+ */
+function sequenceStatus({
+  error,
+  isLoading,
+  proteinSequence,
+}: {
+  error: unknown
+  isLoading: boolean
+  proteinSequence: string
+}): SequenceStatus {
+  if (error) {
+    return 'error'
+  }
+  if (isLoading) {
+    return 'loading'
+  }
+  return proteinSequence ? 'ready' : 'missing'
+}
+
 export function useTranscriptSelection({
   feature,
   view,
@@ -41,7 +66,7 @@ export function useTranscriptSelection({
   const selectedTranscript = options.find(
     val => getId(val) === validatedSelectedId,
   )
-  const { proteinSequence, error } = useFeatureSequence({
+  const { proteinSequence, error, isLoading } = useFeatureSequence({
     view,
     feature: selectedTranscript,
   })
@@ -53,6 +78,8 @@ export function useTranscriptSelection({
     selectedTranscript,
     proteinSequence,
     error,
+    isLoading,
+    sequenceStatus: sequenceStatus({ error, isLoading, proteinSequence }),
     validIds,
   }
 }

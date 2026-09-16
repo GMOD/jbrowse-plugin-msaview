@@ -10,6 +10,7 @@ import { useQueryRowName } from '../../useQueryRowName'
 import { getGeneDisplayName, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
 import QueryRowSelector from '../QueryRowSelector'
+import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -54,7 +55,8 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   const [msaFileLocation, setMsaFileLocation] = useState<FileLocation>()
   const [treeFileLocation, setTreeFileLocation] = useState<FileLocation>()
   const transcriptSelection = useTranscriptSelection({ feature, view })
-  const { selectedTranscript, proteinSequence, error } = transcriptSelection
+  const { selectedTranscript, proteinSequence, error, sequenceStatus } =
+    transcriptSelection
   const queryRow = useQueryRowName(msaText, proteinSequence)
 
   const e = launchViewError ?? error
@@ -138,6 +140,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
 
       <SubmitCancelActions
         model={model}
+        hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={
           !selectedTranscript ||
           (inputMethod === 'file' && !msaFileLocation) ||

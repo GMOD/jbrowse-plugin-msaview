@@ -18,7 +18,11 @@ export function useFeatureSequence({
   feature?: Feature
 }) {
   const assemblyName = view?.assemblyNames?.[0]
-  const { data: sequence, error } = useFetch(
+  const {
+    data: sequence,
+    error,
+    isLoading,
+  } = useFetch(
     feature && assemblyName
       ? [feature.id(), assemblyName, 'feature-sequence']
       : null,
@@ -49,5 +53,6 @@ export function useFeatureSequence({
         : '',
     sequence,
     error,
+    isLoading,
   }
 }

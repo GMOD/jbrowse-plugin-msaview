@@ -10,6 +10,7 @@ import TextField2 from '../../../components/TextField2'
 import { useFetch } from '../../../utils/useFetch'
 import { getGeneDisplayName, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -60,7 +61,7 @@ const PreLoadedMSA = observer(function ({
     view,
     validIds: msaList,
   })
-  const { selectedId, selectedTranscript } = transcriptSelection
+  const { selectedId, selectedTranscript, sequenceStatus } = transcriptSelection
 
   const {
     data: msaData,
@@ -131,6 +132,13 @@ const PreLoadedMSA = observer(function ({
 
       <SubmitCancelActions
         model={model}
+        hint={
+          msaDataLoading ? (
+            <LoadingEllipses message="Loading alignment" />
+          ) : (
+            <SequenceStatusMessage status={sequenceStatus} />
+          )
+        }
         submitDisabled={!selectedTranscript || !msaData?.length}
         onSubmit={() => {
           try {

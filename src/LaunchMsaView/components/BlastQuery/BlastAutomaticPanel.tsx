@@ -18,6 +18,7 @@ import {
   getLinearGenomeView,
 } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -87,7 +88,8 @@ const BlastAutomaticPanel = observer(function ({
     useCachedBlastResults(geneIds)
 
   const transcriptSelection = useTranscriptSelection({ feature, view })
-  const { selectedTranscript, proteinSequence } = transcriptSelection
+  const { selectedTranscript, proteinSequence, sequenceStatus } =
+    transcriptSelection
   const e = transcriptSelection.error ?? launchViewError ?? cachedResultsError
   return (
     <>
@@ -192,6 +194,7 @@ const BlastAutomaticPanel = observer(function ({
       </LaunchPanelContent>
       <SubmitCancelActions
         model={model}
+        hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={!proteinSequence || !hitCountValid}
         onSubmit={() => {
           try {

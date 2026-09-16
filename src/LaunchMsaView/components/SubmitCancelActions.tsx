@@ -53,6 +53,7 @@ export default function SubmitCancelActions({
   onSubmit,
   onCancel,
   submitDisabled,
+  hint,
   submitLabel = 'Submit',
   cancelLabel = 'Cancel',
   model,
@@ -60,6 +61,8 @@ export default function SubmitCancelActions({
   onSubmit: () => void
   onCancel: () => void
   submitDisabled?: boolean
+  /** why Submit is grey, shown beside it */
+  hint?: React.ReactNode
   submitLabel?: string
   cancelLabel?: string
   /** omitted by a panel that submits something other than a view launch */
@@ -81,7 +84,15 @@ export default function SubmitCancelActions({
       {offerPlacement ? (
         <PlacementToggle checked={sideBySide} onChange={setSideBySide} />
       ) : null}
-      <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginLeft: 'auto',
+        }}
+      >
+        {hint}
         <Button
           sx={{ flexShrink: 0 }}
           color="primary"

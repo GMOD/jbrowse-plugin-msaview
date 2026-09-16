@@ -16,6 +16,7 @@ import {
 import MsaAlgorithmSelect from '../BlastQuery/MsaAlgorithmSelect'
 import { useStoredMsaAlgorithm } from '../BlastQuery/searchChoiceStorage'
 import LaunchPanelContent from '../LaunchPanelContent'
+import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
@@ -62,7 +63,8 @@ const OrthologPanel = observer(function ({
 
   const geneCandidates = useMemo(() => getGeneIdentifiers(feature), [feature])
   const transcriptSelection = useTranscriptSelection({ feature, view })
-  const { selectedTranscript, proteinSequence } = transcriptSelection
+  const { selectedTranscript, proteinSequence, sequenceStatus } =
+    transcriptSelection
   const e = transcriptSelection.error ?? launchViewError
 
   const rowCount = Number(maxSpecies)
@@ -123,6 +125,7 @@ const OrthologPanel = observer(function ({
       </LaunchPanelContent>
       <SubmitCancelActions
         model={model}
+        hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={!proteinSequence || !rowCountValid}
         onSubmit={() => {
           try {

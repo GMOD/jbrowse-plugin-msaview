@@ -12,6 +12,7 @@ import {
   getTranscriptLength,
 } from '../util'
 
+import type { SequenceStatus } from './SequenceStatus'
 import type { Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
@@ -34,6 +35,7 @@ export default function TranscriptSelector({
   selectedTranscript,
   setSelectedId,
   proteinSequence,
+  sequenceStatus = 'ready',
   validIds,
 }: {
   feature: Feature
@@ -42,6 +44,7 @@ export default function TranscriptSelector({
   selectedTranscript: Feature | undefined
   setSelectedId: (transcriptId: string) => void
   proteinSequence: string | undefined
+  sequenceStatus?: SequenceStatus
   validIds?: string[]
 }) {
   const { classes } = useStyles()
@@ -98,7 +101,9 @@ export default function TranscriptSelector({
           value={
             proteinSequence
               ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
-              : 'Loading...'
+              : sequenceStatus === 'missing'
+                ? 'This transcript has no coding sequence, so there is nothing to translate.'
+                : 'Loading...'
           }
         />
       ) : null}
