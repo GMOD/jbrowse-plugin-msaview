@@ -11,6 +11,7 @@ import OrthologPanel from './OrthologQuery/OrthologPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import { readMsaDatasets } from './PreLoadedMSA/types'
 import TabPanel from './TabPanel'
+import { LaunchPlacementProvider } from './launchPlacement'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
@@ -35,50 +36,58 @@ export default function LaunchMsaViewDialog({
 
   return (
     <Dialog maxWidth="xl" title="Launch MSA view" open onClose={handleClose}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Tabs
-          value={value}
-          onChange={(_event, newValue) => {
-            setValue(newValue)
-          }}
-        >
-          <Tab label="Orthologs" value="orthologs" />
-          {/* the tab value stays 'ncbi_blast' — it is only local state, and
+      {/* one placement answer for every tab: they all stay mounted once
+          visited, so a per-panel one is a per-tab one */}
+      <LaunchPlacementProvider>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Tabs
+            value={value}
+            onChange={(_event, newValue) => {
+              setValue(newValue)
+            }}
+          >
+            <Tab label="Orthologs" value="orthologs" />
+            {/* the tab value stays 'ncbi_blast' — it is only local state, and
               renaming it buys nothing */}
-          <Tab label="BLAST query" value="ncbi_blast" />
-          {hasPreloadedDatasets ? (
-            <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
-          ) : null}
-          <Tab label="Manual upload" value="manual_msa" />
-        </Tabs>
-        <HelpButton />
-      </div>
-      <TabPanel value={value} index="orthologs">
-        <OrthologPanel
-          handleClose={handleClose}
-          feature={feature}
-          model={model}
-        />
-      </TabPanel>
-      <TabPanel value={value} index="ncbi_blast">
-        <BlastPanel handleClose={handleClose} feature={feature} model={model} />
-      </TabPanel>
-      {hasPreloadedDatasets ? (
-        <TabPanel value={value} index="preloaded_msa">
-          <PreLoadedMSA
+            <Tab label="BLAST query" value="ncbi_blast" />
+            {hasPreloadedDatasets ? (
+              <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
+            ) : null}
+            <Tab label="Manual upload" value="manual_msa" />
+          </Tabs>
+          <HelpButton />
+        </div>
+        <TabPanel value={value} index="orthologs">
+          <OrthologPanel
+            handleClose={handleClose}
+            feature={feature}
+            model={model}
+          />
+        </TabPanel>
+        <TabPanel value={value} index="ncbi_blast">
+          <BlastPanel
+            handleClose={handleClose}
+            feature={feature}
+            model={model}
+          />
+        </TabPanel>
+        {hasPreloadedDatasets ? (
+          <TabPanel value={value} index="preloaded_msa">
+            <PreLoadedMSA
+              model={model}
+              feature={feature}
+              handleClose={handleClose}
+            />
+          </TabPanel>
+        ) : null}
+        <TabPanel value={value} index="manual_msa">
+          <ManualMSALoader
             model={model}
             feature={feature}
             handleClose={handleClose}
           />
         </TabPanel>
-      ) : null}
-      <TabPanel value={value} index="manual_msa">
-        <ManualMSALoader
-          model={model}
-          feature={feature}
-          handleClose={handleClose}
-        />
-      </TabPanel>
+      </LaunchPlacementProvider>
     </Dialog>
   )
 }

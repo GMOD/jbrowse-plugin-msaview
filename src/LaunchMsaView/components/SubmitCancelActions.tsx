@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 import {
@@ -9,10 +9,10 @@ import {
 } from '@mui/material'
 
 import {
-  readLaunchPlacement,
   sessionSupportsPlacement,
   writeLaunchPlacement,
 } from '../../utils/workspaces'
+import { useLaunchPlacement } from './launchPlacement'
 
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 
@@ -68,9 +68,7 @@ export default function SubmitCancelActions({
   /** omitted by a panel that submits something other than a view launch */
   model?: AbstractTrackModel
 }) {
-  const [sideBySide, setSideBySide] = useState(
-    () => readLaunchPlacement() === 'splitRight',
-  )
+  const [sideBySide, setSideBySide] = useLaunchPlacement()
   // The stored value is what the next launch reads, so it is written on submit
   // rather than on the click: ticking the box and then pressing Cancel used to
   // change where every future launch landed, from a dialog the user backed out

@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
 import { LAUNCH_PLACEMENT_KEY } from '../../utils/workspaces'
 import SubmitCancelActions from './SubmitCancelActions'
+import { LaunchPlacementProvider } from './launchPlacement'
 
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 
@@ -107,6 +108,37 @@ test('a host that cannot tile writes nothing on submit', () => {
   )
   screen.getByText('Submit').click()
   expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBe('splitRight')
+})
+
+// every visited tab stays mounted, so each has an actions row of its own; with
+// the answer held per row, ticking the box on one tab and submitting from
+// another wrote the other tab's stale one
+test('every tab in one dialog shares the answer', () => {
+  render(
+    <LaunchPlacementProvider>
+      <div data-testid="tab-a">
+        <SubmitCancelActions
+          model={trackModel(tiling)}
+          onSubmit={() => {}}
+          onCancel={() => {}}
+        />
+      </div>
+      <div data-testid="tab-b">
+        <SubmitCancelActions
+          model={trackModel(tiling)}
+          onSubmit={() => {}}
+          onCancel={() => {}}
+          submitLabel="Launch"
+        />
+      </div>
+    </LaunchPlacementProvider>,
+  )
+  const boxes = screen.getAllByRole('checkbox')
+  boxes[0]!.click()
+  expect((boxes[1] as HTMLInputElement).checked).toBe(false)
+
+  screen.getByText('Launch').click()
+  expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBe('stack')
 })
 
 test('a stored choice is what the box opens on', () => {
