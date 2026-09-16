@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useState } from 'react'
 
 // Once visited, a panel stays mounted and is hidden with the `hidden` attribute.
 // Unmounting it discarded whatever the user had typed and re-ran every fetch the
@@ -19,11 +19,13 @@ export default function TabPanel({
   value: number | string
 }) {
   const active = value === index
-  const visited = useRef(active)
-  visited.current ||= active
+  const [visited, setVisited] = useState(active)
+  if (active && !visited) {
+    setVisited(true)
+  }
   return (
     <div role="tabpanel" hidden={!active} {...other}>
-      {visited.current ? children : null}
+      {visited || active ? children : null}
     </div>
   )
 }

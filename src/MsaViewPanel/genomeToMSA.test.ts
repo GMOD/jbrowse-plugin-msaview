@@ -38,7 +38,7 @@ describe('genomeToMSA', () => {
         hoverFeature: {},
         hoverPosition: { coord: 1005, refName: 'chr1' },
       },
-    } as any)
+    })
 
     const model = {
       querySeqName: 'hg38.chr1',
@@ -61,7 +61,7 @@ describe('genomeToMSA', () => {
   test('returns undefined when hovered is not valid', () => {
     mockSession({
       hovered: null,
-    } as any)
+    })
 
     const model = {
       querySeqName: 'hg38.chr1',
@@ -88,7 +88,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const mockSeqPosToVisibleCol = vi.fn().mockReturnValue(5)
 
@@ -123,7 +123,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr2' },
         },
-      } as any)
+      })
 
       const model = {
         querySeqName: 'hg38.chr1',
@@ -153,7 +153,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1000, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const model = {
         querySeqName: 'hg38.chr1',
@@ -183,7 +183,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1011, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const model = {
         querySeqName: 'hg38.chr1',
@@ -212,7 +212,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const model = {
         querySeqName: 'hg38.chr1',
@@ -243,7 +243,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const mockSeqPosToVisibleCol = vi.fn().mockReturnValue(10)
 
@@ -276,7 +276,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr2' },
         },
-      } as any)
+      })
 
       const mockSeqPosToVisibleCol = vi.fn()
       const model = {
@@ -303,7 +303,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const seqPosToVisibleCol = vi.fn((_name: string, pos: number) => pos)
       const model = {
@@ -327,7 +327,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const seqPosToVisibleCol = vi.fn((_name: string, pos: number) => pos)
       const model = {
@@ -353,7 +353,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const model = {
         querySeqName: 'QUERY',
@@ -375,7 +375,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: 'chr1' },
         },
-      } as any)
+      })
 
       const model = {
         querySeqName: 'QUERY',
@@ -400,7 +400,7 @@ describe('genomeToMSA', () => {
         hoverFeature: {},
         hoverPosition: { coord: 1005, refName: 'chr1' },
       },
-    } as any)
+    })
 
     const model = {
       querySeqName: 'QUERY',
@@ -425,7 +425,7 @@ describe('genomeToMSA', () => {
         hoverFeature: {},
         hoverPosition: { coord: 1005, refName: 'chr1' },
       },
-    } as any)
+    })
 
     const seqPosToVisibleCol = vi.fn(() => 0)
     const model = {
@@ -455,7 +455,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: '1' },
         },
-      } as any)
+      })
 
       const seqPosToVisibleCol = vi.fn().mockReturnValue(10)
       const model = {
@@ -481,7 +481,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: '2' },
         },
-      } as any)
+      })
 
       const seqPosToVisibleCol = vi.fn()
       const model = {
@@ -503,7 +503,7 @@ describe('genomeToMSA', () => {
           hoverFeature: {},
           hoverPosition: { coord: 1005, refName: '1' },
         },
-      } as any)
+      })
 
       const seqPosToVisibleCol = vi.fn().mockReturnValue(5)
       const model = {
