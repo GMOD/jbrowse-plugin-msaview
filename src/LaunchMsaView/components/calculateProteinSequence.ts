@@ -1,4 +1,4 @@
-import { dedupe, revcom } from '@jbrowse/core/util'
+import { revcom } from '@jbrowse/core/util'
 import { convertCodingSequenceToPeptides } from '@jbrowse/core/util/convertCodingSequenceToPeptides'
 
 import { getGeneticCode, parseTranslTable } from './geneticCodes'
@@ -36,6 +36,21 @@ export function calculateProteinSequence({
   })
 }
 
+// Vendored rather than taken off the `@jbrowse/core/util` barrel, which is in
+// ReExports: a name the host's build has dropped is `undefined` inside a bundle
+// that is already published, which is how `defaultCodonTable` leaving that
+// barrel error-paged every config naming this plugin. The list is sorted by
+// start, so adjacent comparison is the whole job.
+function cdsId(feat: Feat) {
+  return `${feat.start}-${feat.end}`
+}
+
+function dedupe(list: Feat[]) {
+  return list.filter(
+    (item, pos, ary) => !pos || cdsId(item) !== cdsId(ary[pos - 1]!),
+  )
+}
+
 export function revlist(list: Feat[], seqlen: number) {
   return list
     .map(sub => ({
@@ -49,9 +64,13 @@ export function revlist(list: Feat[], seqlen: number) {
 export function getProteinSequenceFromFeature({
   feature,
   seq,
+  assemblyGeneticCodeId,
 }: {
   seq: string
   feature: Feature
+  /** the assembly's code for the feature's contig, `{ chrM: 2 }` in hub
+   * configs; a transl_table on the feature wins */
+  assemblyGeneticCodeId?: number
 }) {
   const { subfeatures, start, strand } = feature.toJSON()
   const cds = dedupe(
@@ -63,18 +82,19 @@ export function getProteinSequenceFromFeature({
         end: sub.end - start,
       }))
       .filter(subfeature => subfeature.type === 'CDS') ?? [],
-    feat => `${feat.start}-${feat.end}`,
   )
 
-  // a mitochondrial gene declares e.g. transl_table=2, so it translates with
-  // NCBI table 2 rather than the standard code. GFF3 usually carries the
-  // attribute on the CDS rather than the transcript, so check both.
+  // RefSeq declares transl_table=2 on a mitochondrial CDS, usually on the CDS
+  // rather than the transcript. GENCODE and UCSC declare nothing, so without
+  // the assembly's code all 13 human mitochondrial proteins read TGA as a stop
+  // and ATA as I.
   const cdsSubfeature = feature
     .get('subfeatures')
     ?.find((f: Feature) => f.get('type')?.toLowerCase() === 'cds')
   const geneticCodeId =
     parseTranslTable(feature.get('transl_table')) ??
-    parseTranslTable(cdsSubfeature?.get('transl_table'))
+    parseTranslTable(cdsSubfeature?.get('transl_table')) ??
+    assemblyGeneticCodeId
 
   return calculateProteinSequence({
     cds: strand === -1 ? revlist(cds, seq.length) : cds,

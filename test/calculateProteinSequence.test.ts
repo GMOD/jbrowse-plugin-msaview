@@ -1,6 +1,10 @@
+import { SimpleFeature } from '@jbrowse/core/util'
 import { describe, expect, it } from 'vitest'
 
-import { calculateProteinSequence } from '../src/LaunchMsaView/components/calculateProteinSequence'
+import {
+  calculateProteinSequence,
+  getProteinSequenceFromFeature,
+} from '../src/LaunchMsaView/components/calculateProteinSequence'
 import {
   getGeneticCode,
   parseTranslTable,
@@ -160,5 +164,70 @@ describe('calculateProteinSequence', () => {
         sequence,
       }),
     ).toBe('M&')
+  })
+})
+
+describe('getProteinSequenceFromFeature', () => {
+  const sequence = 'ATGGCTTGATAA'
+
+  function transcript(attrs: Record<string, unknown> = {}) {
+    return new SimpleFeature({
+      uniqueId: 'mt-co1',
+      refName: 'chrM',
+      start: 0,
+      end: 12,
+      type: 'mRNA',
+      strand: 1,
+      subfeatures: [
+        { uniqueId: 'cds1', refName: 'chrM', start: 0, end: 12, type: 'CDS' },
+      ],
+      ...attrs,
+    })
+  }
+
+  // GENCODE and UCSC declare no transl_table at all, so a chrM gene read with
+  // the standard code stops at the first TGA
+  it('falls back to the assembly code for a contig that declares none', () => {
+    expect(
+      getProteinSequenceFromFeature({
+        seq: sequence,
+        feature: transcript(),
+        assemblyGeneticCodeId: 2,
+      }),
+    ).toBe('MAW*')
+    expect(
+      getProteinSequenceFromFeature({ seq: sequence, feature: transcript() }),
+    ).toBe('MA**')
+  })
+
+  it("prefers the feature's own transl_table over the assembly's", () => {
+    expect(
+      getProteinSequenceFromFeature({
+        seq: sequence,
+        feature: transcript({ transl_table: '1' }),
+        assemblyGeneticCodeId: 2,
+      }),
+    ).toBe('MA**')
+  })
+
+  // the CDS records of a transcript can repeat, and a duplicate stitched in
+  // twice shifts the frame for everything after it
+  it('drops a repeated CDS record', () => {
+    const feature = new SimpleFeature({
+      uniqueId: 'dup',
+      refName: 'chr1',
+      start: 0,
+      end: 12,
+      type: 'mRNA',
+      strand: 1,
+      subfeatures: [
+        { uniqueId: 'a', refName: 'chr1', start: 0, end: 6, type: 'CDS' },
+        { uniqueId: 'b', refName: 'chr1', start: 0, end: 6, type: 'CDS' },
+        { uniqueId: 'c', refName: 'chr1', start: 6, end: 12, type: 'CDS' },
+      ],
+    })
+    expect(getProteinSequenceFromFeature({ seq: sequence, feature })).toBe(
+      'MA**',
+    )
   })
 })

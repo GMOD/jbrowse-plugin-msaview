@@ -28,22 +28,24 @@ export function useFeatureSequence({
         end: number
         refName: string
       }
-      return {
-        seq: await fetchSeq({
-          start,
-          end,
-          refName,
-          assemblyName: assemblyName!,
-          session: getSession(view),
-        }),
-      }
+      return fetchSeq({
+        start,
+        end,
+        refName,
+        assemblyName: assemblyName!,
+        session: getSession(view),
+      })
     },
   )
 
   return {
     proteinSequence:
       sequence && feature
-        ? getProteinSequenceFromFeature({ seq: sequence.seq, feature })
+        ? getProteinSequenceFromFeature({
+            seq: sequence.seq,
+            feature,
+            assemblyGeneticCodeId: sequence.assemblyGeneticCodeId,
+          })
         : '',
     sequence,
     error,

@@ -81,14 +81,18 @@ async function translate(self: JBrowsePluginMsaViewModel, transcript: Feature) {
     refName: string
   }
   const assemblyName = self.connectedView!.assemblyNames[0]!
-  const seq = await fetchSeq({
+  const { seq, assemblyGeneticCodeId } = await fetchSeq({
     start,
     end,
     refName,
     assemblyName,
     session: getSession(self),
   })
-  return getProteinSequenceFromFeature({ seq, feature: transcript })
+  return getProteinSequenceFromFeature({
+    seq,
+    feature: transcript,
+    assemblyGeneticCodeId,
+  })
 }
 
 /**
