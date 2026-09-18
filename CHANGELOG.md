@@ -1,3 +1,19 @@
+## [3.7.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.7.0...v3.7.1) (2026-09-18)
+
+### Chores
+
+- React-msaview and msa-parsers 8.2.0, which carry expandSpec ([4af193b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4af193b64aded201c7dca22c6c6b514d436c62c8))
+
+### Documentation
+
+- Capture the README figure from the demo link at every release ([22cc49f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/22cc49f404d17456b380d0cb801ced7ea2d1026d))
+- Drop the ClinVar track from the demo's genome view ([6bda0cf](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6bda0cf3c5c18ab40116574fad4f242fcb2ae1c6))
+- README as a portal; split DEVELOPERS.md into launching, parameters, alignments from a gene and linked views; add a guide for your own alignments ([4325447](https://github.com/GMOD/jbrowse-plugin-msaview/commit/432544703737bd4bbd900780b3fab4e9c03e351d))
+
+### Features
+
+- Session specs take react-msaview's short forms, and the demo link uses them ([65754d9](https://github.com/GMOD/jbrowse-plugin-msaview/commit/65754d975d04feb28a1f534cbfcd283e84b829e3))
+
 ## [3.7.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.6.0...v3.7.0) (2026-09-18)
 
 ### Bug Fixes
