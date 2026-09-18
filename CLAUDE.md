@@ -124,10 +124,9 @@ oxfmt, which handles md/json/yaml here as well as ts/tsx, so prettier is gone.
 `pnpm lint:eslint` keeps the old eslint config as a fallback -- it is what pins
 typescript, per the section above.
 
-**oxlint lints `test/`, `scripts/` and `ucsc/`; eslint only ever linted
-`src/`.** Turning it on found a dead import and an unused mock that had sat in
-`test/` for as long as those files existed. Expect the same the next time
-coverage widens.
+**oxlint lints `test/` and `scripts/`; eslint only ever linted `src/`.** Turning
+it on found a dead import and an unused mock that had sat in `test/` for as long
+as those files existed. Expect the same the next time coverage widens.
 
 **`tsconfig.json` has `"include": ["src"]`, so type-aware rules read `test/`
 under default compiler options unless `test/tsconfig.json` extends the root
