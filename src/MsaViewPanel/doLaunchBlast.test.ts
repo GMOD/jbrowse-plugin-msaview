@@ -52,7 +52,7 @@ function launch(self: JBrowsePluginMsaViewModel) {
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(fetchTaxonomyInfo).mockResolvedValue(new Map())
-  vi.mocked(saveBlastResult).mockResolvedValue(undefined as never)
+  vi.mocked(saveBlastResult).mockResolvedValue(undefined)
 })
 
 test('bare hits go to the chosen aligner, with the query first', async () => {

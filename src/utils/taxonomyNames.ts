@@ -1,6 +1,6 @@
 import { efetchUrl } from './eutils'
 import { textfetch } from './fetch'
-import { createDbOpener } from './idb'
+import { bestEffort, createDbOpener } from './idb'
 
 import type { DBSchema } from 'idb'
 
@@ -28,21 +28,35 @@ const getDB = createDbOpener<TaxonomyCacheDB>(DB_NAME, DB_VERSION, db => {
   db.createObjectStore(STORE_NAME, { keyPath: 'taxid' })
 })
 
-async function getCachedTaxonomies(taxids: number[]) {
-  const db = await getDB()
-  const tx = db.transaction(STORE_NAME, 'readonly')
-  const results = await Promise.all(taxids.map(taxid => tx.store.get(taxid)))
-  await tx.done
-  return results
+function getCachedTaxonomies(taxids: number[]) {
+  return bestEffort(
+    'taxonomy cache read',
+    async () => {
+      const db = await getDB()
+      const tx = db.transaction(STORE_NAME, 'readonly')
+      const results = await Promise.all(
+        taxids.map(taxid => tx.store.get(taxid)),
+      )
+      await tx.done
+      return results
+    },
+    [],
+  )
 }
 
-async function saveTaxonomyCache(entries: CachedTaxonomy[]) {
-  const db = await getDB()
-  const tx = db.transaction(STORE_NAME, 'readwrite')
-  for (const entry of entries) {
-    await tx.store.put(entry)
-  }
-  await tx.done
+function saveTaxonomyCache(entries: CachedTaxonomy[]) {
+  return bestEffort(
+    'taxonomy cache write',
+    async () => {
+      const db = await getDB()
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      for (const entry of entries) {
+        await tx.store.put(entry)
+      }
+      await tx.done
+    },
+    undefined,
+  )
 }
 
 export interface TaxonomyInfo {

@@ -1,4 +1,4 @@
-import { createDbOpener } from './idb'
+import { bestEffort, createDbOpener } from './idb'
 
 import type {
   BlastDatabase,
@@ -89,7 +89,12 @@ function createCacheKey({
   return `${blastDatabase}:${msaAlgorithm}${idPart}:${proteinSequence}`
 }
 
-export async function saveBlastResult({
+/**
+ * Record a finished search in the history. Best effort: the alignment is
+ * already in hand, and a browser refusing the write must not turn it into a
+ * failed launch.
+ */
+export function saveBlastResult({
   proteinSequence,
   blastDatabase,
   msaAlgorithm,
@@ -116,33 +121,38 @@ export async function saveBlastResult({
   transcriptName?: string
   geneName?: string
 }) {
-  const db = await getDB()
-  const id = createCacheKey({
-    proteinSequence,
-    blastDatabase,
-    msaAlgorithm,
-    searchProgram,
-    transcriptId,
-  })
-  const entry: CachedBlastResult = {
-    id,
-    proteinSequence,
-    blastDatabase,
-    msaAlgorithm,
-    searchProgram,
-    msa,
-    tree,
-    treeMetadata,
-    rid,
-    timestamp: Date.now(),
-    geneId,
-    transcriptId,
-    transcriptName,
-    geneName,
-  }
-  await db.put(STORE_NAME, entry)
-  await evictOldest(db)
-  return entry
+  return bestEffort(
+    'BLAST history write',
+    async () => {
+      const db = await getDB()
+      const entry: CachedBlastResult = {
+        id: createCacheKey({
+          proteinSequence,
+          blastDatabase,
+          msaAlgorithm,
+          searchProgram,
+          transcriptId,
+        }),
+        proteinSequence,
+        blastDatabase,
+        msaAlgorithm,
+        searchProgram,
+        msa,
+        tree,
+        treeMetadata,
+        rid,
+        timestamp: Date.now(),
+        geneId,
+        transcriptId,
+        transcriptName,
+        geneName,
+      }
+      await db.put(STORE_NAME, entry)
+      await evictOldest(db)
+      return entry
+    },
+    undefined,
+  )
 }
 
 /**

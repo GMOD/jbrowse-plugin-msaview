@@ -7,29 +7,33 @@ import type { CachedBlastResult } from './blastCache'
 // An in-memory stand-in for the one object store this module opens. Only the
 // idb calls blastCache makes are implemented; anything else would be untested
 // scaffolding.
-const { rows } = vi.hoisted(() => ({
+const { rows, store } = vi.hoisted(() => ({
   rows: new Map<string, { id: string; timestamp: number }>(),
+  store: { refuses: false },
 }))
 
-vi.mock('./idb', () => ({
+vi.mock('./idb', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
   createDbOpener: () => () =>
-    Promise.resolve({
-      put: (_store: string, value: { id: string }) => {
-        rows.set(value.id, value as { id: string; timestamp: number })
-        return Promise.resolve(value.id)
-      },
-      count: () => Promise.resolve(rows.size),
-      getAll: () => Promise.resolve([...rows.values()]),
-      transaction: () => ({
-        store: {
-          delete: (id: string) => {
-            rows.delete(id)
-            return Promise.resolve()
+    store.refuses
+      ? Promise.reject(new DOMException('site data blocked', 'SecurityError'))
+      : Promise.resolve({
+          put: (_store: string, value: { id: string }) => {
+            rows.set(value.id, value as { id: string; timestamp: number })
+            return Promise.resolve(value.id)
           },
-        },
-        done: Promise.resolve(),
-      }),
-    }),
+          count: () => Promise.resolve(rows.size),
+          getAll: () => Promise.resolve([...rows.values()]),
+          transaction: () => ({
+            store: {
+              delete: (id: string) => {
+                rows.delete(id)
+                return Promise.resolve()
+              },
+            },
+            done: Promise.resolve(),
+          }),
+        }),
 }))
 
 function save(n: number) {
@@ -46,6 +50,7 @@ function save(n: number) {
 
 beforeEach(() => {
   rows.clear()
+  store.refuses = false
   // strictly increasing, so "oldest" is unambiguous -- 55 saves in one
   // millisecond would otherwise all carry the same timestamp
   let clock = 1
@@ -83,4 +88,12 @@ test('re-saving the same query overwrites its row rather than growing the store'
   }
   await save(0)
   expect(rows.size).toBe(50)
+})
+
+// the alignment is already in hand by the time it is saved, so a browser that
+// refuses the write must not turn a finished search into a failed launch
+test('a store that refuses the write does not fail the save', async () => {
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  store.refuses = true
+  await expect(save(1)).resolves.toBeUndefined()
 })

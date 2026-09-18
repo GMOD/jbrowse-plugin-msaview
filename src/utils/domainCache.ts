@@ -1,4 +1,4 @@
-import { createDbOpener } from './idb'
+import { bestEffort, createDbOpener } from './idb'
 
 import type { DomainMatch } from './ncbiDomains'
 import type { DBSchema } from 'idb'
@@ -25,21 +25,33 @@ const getDB = createDbOpener<DomainCacheDB>(DB_NAME, DB_VERSION, db => {
   }
 })
 
-export async function getCachedDomains(accessions: string[]) {
-  const db = await getDB()
-  const tx = db.transaction(STORE_NAME, 'readonly')
-  const results = await Promise.all(
-    accessions.map(accession => tx.store.get(accession)),
+export function getCachedDomains(accessions: string[]) {
+  return bestEffort(
+    'domain cache read',
+    async () => {
+      const db = await getDB()
+      const tx = db.transaction(STORE_NAME, 'readonly')
+      const results = await Promise.all(
+        accessions.map(accession => tx.store.get(accession)),
+      )
+      await tx.done
+      return results
+    },
+    [],
   )
-  await tx.done
-  return results
 }
 
-export async function saveDomains(entries: CachedDomain[]) {
-  const db = await getDB()
-  const tx = db.transaction(STORE_NAME, 'readwrite')
-  for (const entry of entries) {
-    await tx.store.put(entry)
-  }
-  await tx.done
+export function saveDomains(entries: CachedDomain[]) {
+  return bestEffort(
+    'domain cache write',
+    async () => {
+      const db = await getDB()
+      const tx = db.transaction(STORE_NAME, 'readwrite')
+      for (const entry of entries) {
+        await tx.store.put(entry)
+      }
+      await tx.done
+    },
+    undefined,
+  )
 }
