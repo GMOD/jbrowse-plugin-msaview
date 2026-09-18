@@ -1,3 +1,5 @@
+import { expandSpec } from 'react-msaview'
+
 import { launchMsaView } from '../utils/launchMsaView'
 
 import type { BlastParams, OrthologParams } from '../MsaViewPanel/model'
@@ -6,16 +8,25 @@ import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AbstractSessionModel } from '@jbrowse/core/util'
 import type {
   Clade,
-  ColumnTrackSpec,
+  ColumnTrackShorthand,
   Encoding,
-  Highlight,
-  Region,
+  HighlightShorthand,
+  RegionShorthand,
   ResidueMapping,
   RowPanelSpec,
 } from 'react-msaview'
 
 interface LaunchMsaViewArgs {
   session: AbstractSessionModel
+  /**
+   * Shorthand, see react-msaview's docs/layers.md: `msa` and `tree` take a
+   * url or the text itself, and `query` names the row the spec is about, the
+   * `querySeqName` and the `row` of every highlight, region and column track
+   * that names none
+   */
+  msa?: string
+  tree?: string
+  query?: string
   data?: { msa: string; tree?: string }
   msaFileLocation?: { uri: string }
   msaIndexedLocation?: { uri: string }
@@ -54,15 +65,15 @@ interface LaunchMsaViewArgs {
    * for whole rows. Prefer this over `highlightColumns`: a residue range stays
    * put when `allowedGappyness` changes the visible columns.
    */
-  highlights?: Highlight[]
+  highlights?: HighlightShorthand[]
   /** per-column tracks supplied as data, see react-msaview's docs/layers.md */
-  columnTracks?: ColumnTrackSpec[]
+  columnTracks?: ColumnTrackShorthand[]
   /**
    * Where the view opens, in `highlights` coordinates: `{row, start, end}`
    * zooms onto residues of that row, `{start, end}` onto alignment columns.
    * Applied once the alignment has loaded, then dropped from the session.
    */
-  region?: Region
+  region?: RegionShorthand
   /**
    * Passed through untouched as react-msaview snapshot properties; see its
    * docs/layers.md. A bare `{ uri }` is enough for the two filehandles.
@@ -121,6 +132,30 @@ interface LaunchMsaViewArgs {
   placement?: MsaViewPlacement
 }
 
+/**
+ * `msa` and `tree` onto the plugin's own sources, so a url still goes through
+ * `init.msaUrl` and its format sniffing, and `query` onto `querySeqName`
+ */
+function withLongSources({ msa, tree, ...args }: LaunchMsaViewArgs) {
+  const inlineMsa = msa?.includes('\n') ? msa : undefined
+  const inlineTree = tree?.trimStart().startsWith('(') ? tree : undefined
+  const data =
+    inlineMsa || inlineTree
+      ? {
+          ...args.data,
+          ...(inlineMsa ? { msa: inlineMsa } : {}),
+          ...(inlineTree ? { tree: inlineTree } : {}),
+        }
+      : args.data
+  return {
+    ...args,
+    data: data as LaunchMsaViewArgs['data'],
+    ...(msa && !inlineMsa ? { msaFileLocation: { uri: msa } } : {}),
+    ...(tree && !inlineTree ? { treeFileLocation: { uri: tree } } : {}),
+    querySeqName: args.querySeqName ?? args.query,
+  }
+}
+
 export default function LaunchMsaViewExtensionPointF(
   pluginManager: PluginManager,
 ) {
@@ -129,6 +164,7 @@ export default function LaunchMsaViewExtensionPointF(
     (args: LaunchMsaViewArgs) => {
       const {
         session,
+        query,
         data,
         msaFileLocation,
         msaIndexedLocation,
@@ -137,7 +173,7 @@ export default function LaunchMsaViewExtensionPointF(
         querySeqName,
         searchParams,
         ...rest
-      } = args
+      } = withLongSources(args)
 
       // `orthologParams` and `searchParams` name no alignment at all — the
       // view builds one at launch, which is the dialog's Orthologs and BLAST
@@ -169,7 +205,7 @@ export default function LaunchMsaViewExtensionPointF(
         querySeqName,
       }
       launchMsaView(session, {
-        ...rest,
+        ...expandSpec({ ...rest, query }),
         ...(searchParams ? { blastParams: searchParams } : {}),
         data,
         ...(treeFileLocation

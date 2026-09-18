@@ -88,3 +88,51 @@ test('one field set is enough to need init', () => {
     querySeqName: 'QUERY',
   })
 })
+
+test('msa and tree urls reach the plugin sources, query the query row', () => {
+  const snapshot = launch({
+    msa: 'https://example.com/p53.afa',
+    tree: 'https://example.com/p53.nh',
+    query: 'Human',
+  })
+  expect(snapshot.init).toMatchObject({
+    msaUrl: 'https://example.com/p53.afa',
+    querySeqName: 'Human',
+  })
+  expect(snapshot.treeFilehandle).toEqual({
+    uri: 'https://example.com/p53.nh',
+    locationType: 'UriLocation',
+  })
+  expect(snapshot.relativeTo).toBe('Human')
+  expect('msa' in snapshot || 'query' in snapshot).toBe(false)
+})
+
+test('inline msa and newick text become inline data', () => {
+  const snapshot = launch({ msa: '>a\nMEEP\n>b\nMEEP', tree: '(a,b);' })
+  expect(snapshot.data).toEqual({ msa: '>a\nMEEP\n>b\nMEEP', tree: '(a,b);' })
+  expect('init' in snapshot).toBe(false)
+})
+
+test('highlights, region and column tracks expand onto the query row', () => {
+  const snapshot = launch({
+    msa: 'https://example.com/p53.afa',
+    query: 'Human',
+    highlights: ['102-292 DNA-binding', 175],
+    region: '170-290',
+    columnTracks: [{ name: 'ClinVar', start: 3, values: [2, 1] }],
+  })
+  expect(snapshot.highlights).toEqual([
+    { row: 'Human', start: 102, end: 292, label: 'DNA-binding' },
+    { row: 'Human', start: 175, end: 175, label: '{residue}{position}' },
+  ])
+  expect(snapshot.region).toEqual({ row: 'Human', start: 170, end: 290 })
+  expect(snapshot.columnTracks).toEqual([
+    {
+      id: 'clinvar',
+      name: 'ClinVar',
+      kind: 'bar',
+      row: 'Human',
+      values: [0, 0, 2, 1],
+    },
+  ])
+})

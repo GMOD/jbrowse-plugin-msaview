@@ -12,6 +12,7 @@ one at launch ([alignments from a gene](alignments-from-a-gene.md)).
 
 | Source               | Description                                                              |
 | -------------------- | ------------------------------------------------------------------------ |
+| `msa`                | a url, or the alignment text itself when it spans more than one line     |
 | `data`               | `{ msa: string, tree?: string }`                                         |
 | `msaFileLocation`    | `{ uri: string }` for an MSA file                                        |
 | `msaIndexedLocation` | `{ uri: string }` for a name-indexed bgzip alignment; needs `msaName`    |
@@ -23,7 +24,9 @@ one at launch ([alignments from a gene](alignments-from-a-gene.md)).
 | Parameter             | Description                                                            |
 | --------------------- | ---------------------------------------------------------------------- |
 | `msaName`             | The entry of an `msaIndexedLocation` to read, usually a transcript id  |
+| `tree`                | a Newick url, or the Newick text itself when it starts with `(`        |
 | `treeFileLocation`    | `{ uri: string }` for a Newick tree file                               |
+| `query`               | The row the spec is about, see [short forms](#short-forms)             |
 | `connectedViewId`     | ID of the connected LinearGenomeView                                   |
 | `connectedFeature`    | The transcript feature columns map to the genome through               |
 | `connectedTranscript` | A transcript id looked up in the connected view instead                |
@@ -92,6 +95,25 @@ used.
 Both take 1-based inclusive ranges: `{row, start, end}` for residues of the
 named row, `{start, end}` for alignment columns. `highlights` also takes
 `{rows: [...]}` for whole rows, and each entry an optional `label` and `color`.
+
+## Short forms
+
+The extension point runs every entry through react-msaview's `expandSpec`, so a
+spec can use the short forms its
+[`docs/layers.md`](https://github.com/GMOD/react-msaview/blob/main/docs/layers.md#shorthand)
+lists, and the long forms above keep working.
+
+| Short form                 | Means                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| `msa`, `tree`              | a url, or the text itself; a url still goes through `msaFileLocation`                     |
+| `query: "Human"`           | `querySeqName` and `relativeTo`, and the default `row` of highlights, `region` and tracks |
+| a highlight `175`          | residue 175 of the query row, labeled from the sequence: "R175"                           |
+| a highlight `"102-292 DB"` | residues 102-292 of the query row, labeled "DB"                                           |
+| `region: "170-290"`        | residues 170-290 of the query row                                                         |
+| a column track             | `id` from `name`, `kind` from `values`/`data`/`arcs`, `start` for an offset               |
+
+`"row": null` on an object entry puts it back on alignment columns. A host whose
+store serves an older plugin release ignores the short forms.
 
 ## `placement`
 

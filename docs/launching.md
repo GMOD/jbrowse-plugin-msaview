@@ -10,12 +10,15 @@ the view where it belongs, with no clicking.
 ## An alignment on its own
 
 ```
-https://jbrowse.org/code/jb2/main/?config=config.json&session=spec-{"views":[{"type":"MsaView","msaFileLocation":{"uri":"https://example.com/alignment.fa"}}]}
+https://jbrowse.org/code/jb2/main/?config=config.json&session=spec-{"views":[{"type":"MsaView","msa":"https://example.com/alignment.fa"}]}
 ```
 
-`msaFileLocation` takes FASTA, Stockholm or Clustal, and `treeFileLocation` a
-Newick tree. [Your own alignments](your-own-alignments.md) covers the other ways
-to hand the view an alignment you made.
+`msa` takes the url of a FASTA, Stockholm or Clustal file, and `tree` a Newick
+tree's. Either also takes the text itself. `msaFileLocation` and
+`treeFileLocation` are the long forms, and
+[launch parameters](launch-parameters.md#short-forms) lists the other short
+ones. [Your own alignments](your-own-alignments.md) covers the other ways to
+hand the view an alignment you made.
 
 ## Connected to the genome: `connectedTranscript`
 
@@ -37,8 +40,9 @@ session=spec-{"views":[
 ```
 
 For an alignment file, also name the row that is the transcript's protein with
-`querySeqName`. For an `orthologParams` or `searchParams` launch that names no
-`proteinSequence`, the translated transcript becomes the query row.
+`query` (long form `querySeqName`). For an `orthologParams` or `searchParams`
+launch that names no `proteinSequence`, the translated transcript becomes the
+query row.
 
 `allowedGappyness` is worth setting alongside it. Proteins that differ in length
 put one row's private N-terminal extension at column 0 with every other row gap
@@ -59,19 +63,21 @@ protein3d structure.
 ## Pointing at a residue: `highlights`
 
 A link that is about one residue should say so in that residue's own numbering.
-`highlights` takes 1-based inclusive ranges: `{row, start, end}` for residues of
-the named row, `{start, end}` for alignment columns, `{rows: [...]}` for whole
-rows, each with an optional `label` and `color`. The viewer projects a residue
-range through the alignment's gaps, so it lands on the same residues whatever
+With a `query` row, `175` highlights that row's residue 175 and labels it from
+the sequence ("R175"), and `"339-350 NES"` highlights a labeled range. The long
+form takes 1-based inclusive ranges: `{row, start, end}` for residues of the
+named row, `{start, end}` for alignment columns, `{rows: [...]}` for whole rows,
+each with an optional `label` and `color`. The viewer projects a residue range
+through the alignment's gaps, so it lands on the same residues whatever
 `allowedGappyness` hides, where `highlightColumns` names visible column indices
 that shift with it.
 
 ```
 session=spec-{"views":[{
   "type": "MsaView",
-  "msaFileLocation": {"uri": "https://.../tp53-p53-orthologs.fa"},
-  "querySeqName": "human",
-  "highlights": [{"row": "human", "start": 339, "end": 350, "label": "NES"}]
+  "msa": "https://.../tp53-p53-orthologs.fa",
+  "query": "human",
+  "highlights": ["339-350 NES"]
 }]}
 ```
 
@@ -90,10 +96,10 @@ older than the one that shipped `region` ignores the key and opens at column 0.
 ```
 session=spec-{"views":[{
   "type": "MsaView",
-  "msaFileLocation": {"uri": "https://.../tp53-p53-orthologs.fa"},
-  "querySeqName": "human",
-  "highlights": [{"row": "human", "start": 248, "end": 248, "label": "R248"}],
-  "region": {"row": "human", "start": 230, "end": 290}
+  "msa": "https://.../tp53-p53-orthologs.fa",
+  "query": "human",
+  "highlights": [248],
+  "region": "230-290"
 }]}
 ```
 
@@ -150,17 +156,21 @@ already loads this plugin and jbrowse-plugin-protein3d:
   carry them
 - an MSA view of the vertebrate p53 alignment hosted at
   `gmod.org/JBrowseMSA/demo/data/p53/`, connected to `lgv1` through
-  `connectedTranscript`, with the ClinVar, AlphaMissense and MaveDB tracks from
-  that folder's `p53-layers.json` inlined as `columnTracks`, the DNA-binding
-  domain and six hotspots as `highlights`, and a `region` on the hotspots
+  `connectedTranscript`, with `query: "Human"`, the DNA-binding domain and six
+  hotspots as `highlights` (`175` draws as "R175"), a `region` on the hotspots,
+  and ClinVar, AlphaMissense and MaveDB per-residue scores as `columnTracks`.
+  Each track's `start` skips its leading zeros. react-msaview's
+  [p53 tutorial](https://github.com/GMOD/react-msaview/blob/main/docs/tutorials/p53_variant_effects.md)
+  builds those numbers from ClinVar, AlphaFold and MaveDB, and is the recipe for
+  tracks of your own
 - a ProteinView of AlphaFold's P04637 model, connected to the same genome view
   by `transcriptId`
 
 The alignment's Human row is P04637's canonical sequence, which is what
 NM_000546.6 translates to, so the three views share one coordinate map. The spec
-escapes `#`, `&`, `%` and `+` and nothing else: a track color's `#` would
-otherwise end the query string, and escaping everything takes the URL past the 8
-kB request line the host accepts.
+is `encodeURIComponent` with `,:[]{}/` put back, which keeps it readable, and
+with `(` and `)` escaped, which would otherwise end the Markdown link. Escaping
+everything takes the URL past the 8 kB request line the host accepts.
 
 ## From code
 
