@@ -47,14 +47,15 @@ Everything else is optional.
 | `querySeqName`        | Name for query sequence                                         |
 | `highlightColumns`    | Visible column indices to highlight on open                     |
 | `highlights`          | Labeled residue, column, or row highlights, see below           |
+| `region`              | Residues or columns to open zoomed onto, see below              |
 | `columnTracks`        | Per-column tracks supplied as data (bar values or a text row)   |
 | `placement`           | Where the view lands: `stack` (default), `splitRight`, `newTab` |
 
 ### Building an alignment from a gene: `orthologParams`
 
-This is the launch dialog's **Orthologs (fast)** tab reached declaratively, so a
-link can say "NLRP1 across species" and the view builds it. Two of its fields
-default so that a spec stays short.
+This is the launch dialog's **Orthologs** tab reached declaratively, so a link
+can say "NLRP1 across species" and the view builds it. Two of its fields default
+so that a spec stays short.
 
 | Field                    | Required | Description                                                      |
 | ------------------------ | -------- | ---------------------------------------------------------------- |
@@ -225,6 +226,25 @@ never replace them. `columnTracks` follows the same contract for per-column
 numbers or a text row; both fields are documented in react-msaview's
 `docs/layers.md`.
 
+### Opening on a residue: `region`
+
+`region` takes the same 1-based inclusive coordinates as `highlights`:
+`{row, start, end}` for residues of that row, `{start, end}` for alignment
+columns. The view zooms onto it once the alignment and any tree file have
+loaded, then drops the key, so a reloaded session opens wherever the reader left
+it. A plugin release older than the one that shipped `region` ignores the key
+and opens at column 0.
+
+```
+session=spec-{"views":[{
+  "type": "MsaView",
+  "msaFileLocation": {"uri": "https://.../tp53-p53-orthologs.fa"},
+  "querySeqName": "human",
+  "highlights": [{"row": "human", "start": 248, "end": 248, "label": "R248"}],
+  "region": {"row": "human", "start": 230, "end": 290}
+}]}
+```
+
 ### Where the view lands: `placement`
 
 A launch states its arrangement instead of leaving the reader to drag the view
@@ -277,6 +297,29 @@ session=spec-{
 
 `layout` wins over `placement`, being the later and more specific statement, so
 a spec carrying both gets the tree it drew.
+
+### Demo: p53 variant evidence
+
+[This link](https://jbrowse.org/code/jb2/main/?config=https://jbrowse.org/ucsc/hg38/config.json&session=spec-{%22views%22:[{%22type%22:%22LinearGenomeView%22,%22id%22:%22lgv1%22,%22assembly%22:%22hg38%22,%22loc%22:%22chr17:7,661,779-7,687,538%22,%22tracks%22:[%22hg38-ncbiRefSeqSelect%22,%22hg38-clinvarMain%22]},{%22type%22:%22MsaView%22,%22displayName%22:%22p53%20across%20vertebrates%22,%22msaFileLocation%22:{%22uri%22:%22https://gmod.org/JBrowseMSA/demo/data/p53/p53-vertebrates.afa%22},%22treeFileLocation%22:{%22uri%22:%22https://gmod.org/JBrowseMSA/demo/data/p53/p53-vertebrates.nh%22},%22querySeqName%22:%22Human%22,%22relativeTo%22:%22Human%22,%22connectedViewId%22:%22lgv1%22,%22connectedTranscript%22:%22NM_000546.6%22,%22placement%22:%22splitRight%22,%22colorSchemeName%22:%22clustalx_protein_dynamic%22,%22highlights%22:[{%22row%22:%22Human%22,%22start%22:102,%22end%22:292,%22label%22:%22DNA-binding%22,%22color%22:%22rgba%28255,140,0,0.15%29%22},{%22row%22:%22Human%22,%22start%22:175,%22end%22:175,%22label%22:%22R175%22},{%22row%22:%22Human%22,%22start%22:245,%22end%22:245,%22label%22:%22G245%22},{%22row%22:%22Human%22,%22start%22:248,%22end%22:248,%22label%22:%22R248%22},{%22row%22:%22Human%22,%22start%22:249,%22end%22:249,%22label%22:%22R249%22},{%22row%22:%22Human%22,%22start%22:273,%22end%22:273,%22label%22:%22R273%22},{%22row%22:%22Human%22,%22start%22:282,%22end%22:282,%22label%22:%22R282%22}],%22columnTracks%22:[{%22id%22:%22clinvar%22,%22name%22:%22ClinVar%20pathogenic%20missense%22,%22kind%22:%22bar%22,%22row%22:%22Human%22,%22color%22:%22%23c0392b%22,%22height%22:60,%22max%22:8,%22values%22:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,2,4,3,0,6,0,0,0,0,0,0,0,0,0,0,1,2,1,5,0,0,2,2,3,1,1,4,0,0,2,0,0,2,0,3,0,0,0,1,0,0,0,6,2,0,0,1,1,3,6,2,0,1,0,2,1,1,0,0,2,0,0,2,1,3,0,3,3,1,3,5,1,3,0,0,0,0,0,0,0,0,1,0,0,4,3,1,1,1,0,1,0,0,0,0,0,3,0,0,0,0,0,0,0,3,2,1,1,0,1,0,3,0,0,0,0,0,0,0,0,0,0,0,3,0,4,0,2,4,6,2,3,5,2,0,4,5,4,1,6,2,1,2,0,1,3,0,0,0,2,1,0,0,0,0,0,2,3,3,0,1,4,1,3,6,0,2,1,1,3,0,3,8,3,1,0,2,2,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,5,0,0,0,1,1,0,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{%22id%22:%22alphamissense%22,%22name%22:%22AlphaMissense%20mean%20%28x100%29%22,%22kind%22:%22bar%22,%22row%22:%22Human%22,%22color%22:%22%231565c0%22,%22height%22:60,%22max%22:100,%22values%22:[49,27,19,11,12,14,18,10,12,14,28,17,40,57,73,65,65,68,95,29,30,72,95,21,24,60,39,21,18,17,18,16,17,12,11,13,14,13,14,21,22,20,17,20,16,16,15,14,17,17,15,13,37,29,11,19,16,11,11,12,14,20,14,12,11,20,13,19,15,14,12,13,15,17,14,17,15,19,20,17,15,15,22,22,19,22,20,24,17,23,67,41,46,66,63,37,90,98,63,35,36,20,76,15,99,13,58,48,98,26,81,57,97,43,17,64,87,68,90,98,96,92,73,81,98,91,95,23,13,81,56,97,84,97,98,87,86,81,91,84,94,93,89,66,81,57,77,26,20,13,90,69,17,52,70,49,91,98,87,88,94,87,95,89,48,54,52,76,76,68,92,87,98,78,99,100,98,97,100,96,85,50,38,52,32,74,52,32,83,87,71,47,99,95,89,95,91,96,95,81,20,25,69,48,98,24,64,93,17,23,84,56,99,92,91,93,70,89,76,91,77,27,92,87,57,92,58,35,54,68,75,87,85,87,74,93,96,100,95,98,99,100,94,100,100,98,97,100,99,93,93,59,91,91,87,92,93,99,87,22,21,94,24,76,83,99,98,36,61,97,93,93,99,95,100,97,100,100,99,100,100,97,84,60,98,96,47,62,13,18,56,34,17,17,11,9,9,16,11,15,13,18,20,17,81,75,26,26,23,13,12,14,16,18,18,14,15,15,47,54,46,19,13,34,24,50,56,88,36,87,48,93,63,98,73,40,89,90,45,60,88,51,36,81,77,55,79,75,87,31,54,67,23,18,17,16,25,22,13,15,15,16,20,18,15,20,25,13,15,56,21,47,45,21,16,16,15,21,16,20,66,47,13,26,19,66,13,28,18,16,47,54,66]},{%22id%22:%22mavedb%22,%22name%22:%22MaveDB%20nutlin-3,%20p53WT%22,%22kind%22:%22bar%22,%22row%22:%22Human%22,%22color%22:%22%232e7d32%22,%22height%22:60,%22max%22:2,%22values%22:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.6,0,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0,0,0.2,0.4,0,0,0,0,0.1,0,0.8,0,0.7,0.3,1.6,0.1,1.4,0.1,1.3,0,0,0,0.1,0,0.1,0.5,0.2,0.4,0.4,0.8,0.8,1.4,1.5,0.1,0.1,1.2,1,1.7,1.1,1.4,1.3,0.8,0.5,0.5,0.8,0.4,1.2,0.4,1.4,0.7,1.2,0.6,1.1,0.5,0.4,0.6,1.5,1.3,0,0.7,1.3,0.3,1.4,1,1.4,0.8,1.4,0.8,1.8,0.8,0.3,0,0.2,0.8,0.4,0,0.6,0.7,1.7,1,1.2,2,1.1,0.6,2,0.8,0.7,0.3,0.1,0.4,0.2,0.3,0.1,0.1,0.5,0.8,0.1,0.1,1.4,1.6,1.4,0.7,1.3,0.1,0.1,0,0,0,0.9,0.3,1.8,0,0,1,0,0.1,0.9,0.7,1.2,1.1,1.5,1.4,0.6,1.3,0.5,1.5,0.4,0.3,0.6,0.3,0.1,0.4,0.3,0.2,0.7,0.5,0.6,1.4,0.5,1.4,0.6,1.7,1.1,1.9,0.8,1.3,1.3,1.7,0.9,1.7,2.2,2,0.9,1.5,2.1,1,1.4,0.3,1.3,1.2,1.4,0.8,1.4,1.4,0.9,0.5,0.5,0.7,0.5,0.5,0.8,1.6,1,0.9,0.8,1.5,1.3,1.5,1.5,1.7,1.8,0.5,0.4,2,0,0.9,0.6,1,0,0,1,1.8,0,0.1,0.2,0.1,0.2,0,0.1,0.4,0.4,0.3,0.4,0.6,0.4,0.6,0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],%22region%22:{%22row%22:%22Human%22,%22start%22:170,%22end%22:290}},{%22type%22:%22ProteinView%22,%22uniprotId%22:%22P04637%22,%22transcriptId%22:%22NM_000546.6%22,%22connectedViewId%22:%22lgv1%22,%22connectedView%22:{%22assembly%22:%22hg38%22,%22loc%22:%22chr17:7,661,779-7,687,538%22,%22tracks%22:[%22hg38-ncbiRefSeqSelect%22]}}]})
+opens three views on jbrowse.org's hg38 hub config, which already loads this
+plugin and jbrowse-plugin-protein3d:
+
+- a genome view pinned as `lgv1` on TP53, with RefSeq Select listed before
+  ClinVar so the transcript lookup finds `NM_000546.6` in the first track it
+  reads
+- an MSA view of the vertebrate p53 alignment hosted at
+  `gmod.org/JBrowseMSA/demo/data/p53/`, connected to `lgv1` through
+  `connectedTranscript`, with the ClinVar, AlphaMissense and MaveDB tracks from
+  that folder's `p53-layers.json` inlined as `columnTracks`, the DNA-binding
+  domain and six hotspots as `highlights`, and a `region` on the hotspots
+- a ProteinView of AlphaFold's P04637 model, connected to the same genome view
+  by `transcriptId`
+
+The alignment's Human row is P04637's canonical sequence, which is what
+NM_000546.6 translates to, so the three views share one coordinate map. The spec
+escapes `#`, `&`, `%` and `+` and nothing else: a track color's `#` would
+otherwise end the query string, and escaping everything takes the URL past the 8
+kB request line the host accepts.
 
 ### URL example
 
@@ -336,114 +379,47 @@ Key files:
 
 #### Click navigation
 
-Clicking on an MSA column navigates the connected Linear Genome View to the
-corresponding genome position. The `handleMsaClick()` action in
-`src/MsaViewPanel/model.ts:364-382` handles this.
+Clicking an MSA column navigates the connected genome view to the codon under
+it, or zooms to it when the view menu's "Zoom to base level on click?" is on
+(`handleMsaClick` in `src/MsaViewPanel/model.ts`).
 
 #### Bidirectional highlighting
 
-- **MSA → Genome**: When hovering over MSA columns, the corresponding genome
-  region is highlighted in the Linear Genome View via the
-  `LinearGenomeView-TracksContainerComponent` extension point
-  (`src/AddHighlightModel/MsaToGenomeHighlight.tsx`)
-
-- **Genome → MSA**: When hovering over the genome view, the corresponding MSA
-  column is highlighted (`src/AddHighlightModel/GenomeMouseoverHighlight.tsx`)
+- **MSA to genome**: the codon under the hovered or clicked column is drawn over
+  the genome view through the `LinearGenomeView-TracksContainerComponent`
+  extension point (`src/AddHighlightModel/MsaToGenomeHighlight.tsx`)
+- **Genome to MSA**: the genome view's hover position lights the matching column
+  (`syncGenomeHoverToMsaColumn` in `src/MsaViewPanel/afterCreateAutoruns.ts`),
+  and `GenomeMouseoverHighlight.tsx` marks the hovered base itself
 
 ### Communication with jbrowse-plugin-protein3d
 
-The MSA view can connect to protein structures displayed in
-jbrowse-plugin-protein3d for synchronized highlighting between sequence
-alignment and 3D structure.
+The two plugins share no coordinate space except the genome, so they talk
+through the genome view both are connected to, matched by `connectedViewId`.
+Neither maps a structure to an alignment row directly.
 
-#### Auto-connection
+- **Structure to MSA**: `observeProteinHighlights`
+  (`src/MsaViewPanel/afterCreateAutoruns.ts`) reads each connected structure's
+  `hoverGenomeHighlights` (the residue under the pointer) and
+  `clickGenomeHighlights` (the selected domain, also what protein3d's
+  `initialSelection` lights), maps them through the transcript to the query row,
+  and lights those columns. A hover outranks a click selection, which outranks
+  the view's own `highlightColumns`.
+- **MSA to structure**: protein3d reads this view's `connectedHoverHighlights`,
+  the genome regions of the hovered column's codon, and lights the residue they
+  translate to. That getter is a cross-plugin contract, as is
+  `connectedHighlights`, which jbrowse-plugin-mafviewer reads.
 
-The plugin automatically discovers and connects to compatible ProteinViews based
-on:
-
-1. Matching `connectedViewId` (both views connected to the same genome view)
-2. Matching `uniprotId` between MSA row and protein structure
-
-This logic is in `src/MsaViewPanel/model.ts:625-685`.
-
-#### Manual connection
-
-Users can manually connect to protein structures via the menu: **Menu → "Connect
-to protein structure..."**
-
-The `ConnectStructureDialog`
-(`src/MsaViewPanel/components/ConnectStructureDialog.tsx`) allows selecting:
-
-- Which ProteinView to connect to
-- Which structure (if multiple)
-- Which MSA row to align with the structure sequence
-
-#### Pairwise alignment
-
-When connecting to a structure, the plugin performs a Needleman-Wunsch pairwise
-alignment between the MSA row sequence and the structure's sequence to create
-coordinate mappings. This handles cases where sequences may differ slightly.
-
-Key file: `src/MsaViewPanel/pairwiseAlignment.ts`
-
-#### Connection data structure
-
-Each structure connection stores:
-
-```typescript
-interface StructureConnection {
-  proteinViewId: string
-  structureIdx: number
-  msaRowName: string
-  msaToStructure: Record<number, number> // MSA ungapped → structure position
-  structureToMsa: Record<number, number> // structure position → MSA ungapped
-}
-```
-
-#### Bidirectional highlighting
-
-- **MSA → Structure**: When hovering over MSA columns, the corresponding residue
-  is highlighted in the 3D structure via `structure.highlightFromExternal()`
-
-- **Structure → MSA**: When hovering over residues in the 3D structure, the
-  corresponding MSA column is highlighted. This works via two mechanisms:
-  1. Direct mapping via `structureHoverCol` getter (requires explicit
-     connection)
-  2. Indirect via genome coordinates: the MSA view observes protein3d's
-     `hoverGenomeHighlights` and maps back to MSA columns using `g2p` mapping.
-     This works automatically when both views share the same `connectedViewId`.
-
-### Three-way synchronization
-
-When all three views are connected (Linear Genome View, MSA View, and Protein
-View), hovering over any one view will highlight the corresponding positions in
-the other two views, creating a fully synchronized visualization experience.
+Connecting all three views to one genome view gives three-way hover sync:
 
 ```
-┌─────────────────────┐
-│  Linear Genome View │◄────────────────────────────┐
-│    (genome coords)  │                             │
-└─────────┬───────────┘                             │
-          │                                         │
-          │ connectedViewId + connectedFeature      │ hoverGenomeHighlights
-          │ (uses p2g/g2p mapping)                  │ (genome coords)
-          ▼                                         │
-┌─────────────────────┐                   ┌─────────┴───────────┐
-│      MSA View       │◄──────────────────│    Protein View     │
-│   (aligned seqs)    │  observes genome  │   (3D structure)    │
-└─────────┬───────────┘  highlights       └───────────────────────┘
-          │                                         ▲
-          │ pairwise alignment mapping              │
-          │ (msaToStructure/structureToMsa)         │
-          └─────────────────────────────────────────┘
+      Linear Genome View
+       ▲              ▲
+       │ codon        │ hover/click genome highlights
+       ▼              ▼
+    MSA View ◄──────► Protein View
+         (through the genome view)
 ```
-
-The MSA view can receive highlights from protein3d via two paths:
-
-1. **Direct**: MSA observes `structure.hoverPosition` (requires explicit
-   connection with matching `uniprotId`)
-2. **Indirect**: MSA observes `structure.hoverGenomeHighlights` and maps genome
-   coords back to MSA columns (works when both share `connectedViewId`)
 
 ### Launch mechanisms
 
@@ -451,13 +427,15 @@ The MSA view can be launched from the Linear Genome View via right-click context
 menu on gene/mRNA/transcript features. The dialog that opens carries one tab per
 data source:
 
-1. **Orthologs (fast)**: look up a precomputed ortholog gene per species (NCBI,
-   or PANTHER for the species NCBI's sets leave out, or the query's UniRef
-   cluster for everything within 50% identity across UniProtKB) and align what
-   comes back. No search job to queue, so this returns in seconds; with the
-   in-browser aligner, no job at all
-2. **NCBI BLAST query**: submit the protein sequence to NCBI BLAST and align the
-   hits. The route for a gene with no resolvable symbol
+1. **Orthologs**: look up a precomputed ortholog gene per species (NCBI, or
+   PANTHER for the species NCBI's sets leave out, or the query's UniRef cluster
+   for everything within 50% identity across UniProtKB) and align what comes
+   back. No search job to queue, so this returns in seconds; with the in-browser
+   aligner, no job at all
+2. **BLAST query**: search EBI with blastp or phmmer and align the hits. The
+   route for a gene with no resolvable symbol. Its Manual option links out to
+   NCBI's own BLAST page for `nr`, which no browser can query directly (see
+   docs/blast.md)
 3. **Pre-loaded MSA datasets**: use pre-calculated alignments from configuration
 4. **Manual upload**: load MSA/tree files directly
 
