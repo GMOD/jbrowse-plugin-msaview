@@ -19,7 +19,7 @@
 // pantherOrthologs.ts produce, so the launch, the labels and the aligner do not
 // know which source ran. `protein` is the UniProt accession, which is what the
 // CDD overlay reads through efetch (Swiss-Prot rows only; see the PANTHER note
-// in DEVELOPERS.md).
+// in docs/alignments-from-a-gene.md).
 
 import { handleFetch, jsonfetch } from './fetch'
 import {

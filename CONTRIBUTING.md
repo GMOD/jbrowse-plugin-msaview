@@ -1,10 +1,7 @@
 # Contributing
 
-## Development
-
-Run jbrowse-web on port 3000, then run `pnpm start` in this repo and navigate to
-
-http://localhost:3000/?config=http://localhost:9000/config.json
+[DEVELOPERS.md](DEVELOPERS.md) covers running the plugin locally, the checks and
+publishing.
 
 ## Notes
 
