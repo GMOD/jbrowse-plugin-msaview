@@ -10,7 +10,9 @@ https://github.com/GMOD/react-msaview/blob/main/docs/user_guide.md
 
 ![](img/1.png)
 
-MSAView plugin running in JBrowse 2
+The [demo](#demo) below: TP53 in the genome view beside a vertebrate p53
+alignment carrying per-residue variant tracks. Each release recaptures it with
+`pnpm readme-figure`.
 
 ## Demo
 

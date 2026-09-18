@@ -475,3 +475,17 @@ otherwise the existing file is left byte-for-byte intact, so unrelated runs
 don't churn git. Tune the threshold with `SCREENSHOT_DIFF_RATIO` (e.g. `0` to
 always rewrite, `0.05` to tolerate larger wobble). `pngquant` is optional: where
 it's absent the raw PNG is used as a fallback.
+
+### The README figure
+
+`img/1.png` is a capture of the README's demo link, not a hand-made screenshot.
+`pnpm readme-figure` loads that link on the hosted `main` build with the local
+`dist/` answering for this plugin, drops the ProteinView (protein3d's, and
+molstar gets no WebGL in headless Chrome), and writes the figure through the
+same tolerance as the test references. The `version` lifecycle runs it, so each
+release commits a figure of its own UI. When the capture fails there, the script
+prints a warning and keeps the old figure, so a slow gmod.org or UCSC cannot
+hold up a release.
+
+Change the demo link and the figure follows at the next release. Run
+`pnpm build && pnpm readme-figure` to see it sooner.

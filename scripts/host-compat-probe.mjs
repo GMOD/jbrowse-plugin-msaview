@@ -29,12 +29,12 @@
 //   node scripts/host-compat-probe.mjs --bundle dist/<name>.umd.production.min.js
 //   node scripts/host-compat-probe.mjs --bundle … --versions v4.0.0,main
 //
-import crypto from 'node:crypto'
 import fs from 'node:fs'
-import path from 'node:path'
 import { parseArgs } from 'node:util'
 
 import puppeteer from 'puppeteer'
+
+import { candidateServer } from './serveCandidate.mjs'
 
 // The oldest entry is the support floor: every host at or above it must load the
 // bundle. `main` is included because it is where a core change lands first, so
@@ -46,7 +46,6 @@ const DEFAULT_VERSIONS = ['v4.0.0', 'v4.3.0', 'latest', 'main']
 const CONFIG = 'https://jbrowse.org/ucsc/hg38/config.json'
 const PLUGIN_NAME = 'MsaView'
 const PLUGIN_GLOBAL = 'JBrowsePluginMsaView'
-const PACKAGE_PATH = '/jbrowse-plugin-msaview/'
 
 const { values } = parseArgs({
   options: {
@@ -61,81 +60,7 @@ if (!values.bundle) {
 }
 const versions = values.versions?.split(',') ?? DEFAULT_VERSIONS
 const timeout = Number(values.timeout)
-const bundle = fs.readFileSync(values.bundle, 'utf8')
-const bundleDir = path.dirname(values.bundle)
-const mainName = path.basename(values.bundle)
-
-// core@main resolves a config's `storePlugin` entries through the v2 store
-// manifest, which pins a versioned url AND a subresource-integrity hash — so a
-// substituted bundle fails SRI on that host however valid it is. The manifest
-// is rewritten so this plugin's integrity matches the candidate being served
-// (not stripped: the SRI machinery itself stays exercised), and every other
-// plugin's pin is left alone.
-const bundleIntegrity = `sha384-${crypto
-  .createHash('sha384')
-  .update(bundle)
-  .digest('base64')}`
-
-let manifestPromise
-function rewrittenStoreManifest(url) {
-  manifestPromise ??= (async () => {
-    const manifest = await (await fetch(url)).json()
-    for (const plugin of manifest.plugins ?? []) {
-      if (plugin.url?.includes(PACKAGE_PATH)) {
-        plugin.integrity = bundleIntegrity
-        for (const version of plugin.versions ?? []) {
-          version.integrity = bundleIntegrity
-        }
-      }
-    }
-    return JSON.stringify(manifest)
-  })()
-  return manifestPromise
-}
-
-// Serves the whole local dist for the plugin's store path, not just the one
-// file: a build that code-splits fetches sibling chunks by their own hashed
-// names, and answering those with the main bundle produces a failure that looks
-// like a host incompatibility but is a probe bug.
-async function serveCandidate(page) {
-  await page.setRequestInterception(true)
-  page.on('request', req => {
-    const url = req.url()
-    const name = path.basename(new URL(url).pathname)
-    if (url.includes('/plugin-store/') && name === 'plugins.json') {
-      rewrittenStoreManifest(url)
-        .then(body =>
-          req.respond({
-            status: 200,
-            contentType: 'application/json',
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            body,
-          }),
-        )
-        .catch(() => req.continue().catch(() => {}))
-      return
-    }
-    const sibling = path.join(bundleDir, name)
-    const isPluginAsset = url.includes(PACKAGE_PATH) && name.endsWith('.js')
-    const body = !isPluginAsset
-      ? undefined
-      : name !== mainName && fs.existsSync(sibling)
-        ? fs.readFileSync(sibling, 'utf8')
-        : bundle
-    if (body === undefined) {
-      req.continue().catch(() => {})
-    } else {
-      req
-        .respond({
-          status: 200,
-          contentType: 'application/javascript',
-          headers: { 'Access-Control-Allow-Origin': '*' },
-          body,
-        })
-        .catch(() => {})
-    }
-  })
-}
+const serveCandidate = candidateServer(values.bundle)
 
 async function probeOne(browser, version) {
   const page = await browser.newPage()
