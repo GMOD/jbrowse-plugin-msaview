@@ -1,3 +1,43 @@
+## [3.7.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.6.0...v3.7.0) (2026-09-18)
+
+### Bug Fixes
+
+- Translate with the genetic code's initiators and transl_except, as core's feature panel does ([62808f9](https://github.com/GMOD/jbrowse-plugin-msaview/commit/62808f960035d8f61d152152c55aa3c1efcdc346))
+- Keep one query residue per codon, so a partial first codon no longer shifts the genome link ([6f99a3d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6f99a3d3bd90a2da7d6156a762e18dbe2275c1bd))
+- Validate the remembered ortholog source before the Orthologs tab indexes by it ([b4d7330](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b4d73303ca78733ff97acccf86bc357d15817455))
+- A launch replaces the one holding the controller instead of orphaning it ([b17defd](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b17defdbb109d5c87e775e1d519f767bc22cbb48))
+- The connectedTranscript lookup retries, searches feature tracks on screen first, and lets only the latest lookup write ([171b1aa](https://github.com/GMOD/jbrowse-plugin-msaview/commit/171b1aa32b7a2f4a84fde95a01ba16c7e8ffde0f))
+- A collapsed query row still maps, and a MAF hover past the row's end lights nothing ([62dbfa6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/62dbfa6a3451d3c0a56484fd29d93192847d4fc6))
+- Keep a view's GFF in IndexedDB alongside its alignment ([9fc19cd](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9fc19cd9560493eda09521117b02de1088fe339a))
+- An IndexedDB open blocked by another tab rejects instead of hanging the launch ([ad650fd](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ad650fd53dee9b85ad15b2588ee68cdb39c84d8e))
+- A cache the browser refuses no longer fails a finished search ([28ec22f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/28ec22f1f42a21566bf60a9e3a12ab6f0a8d601c))
+- A UniProt isoform accession launches that isoform, not the canonical sequence ([20e3232](https://github.com/GMOD/jbrowse-plugin-msaview/commit/20e3232a66efb3d92024c3ec42f334f1f6145c29))
+- The EBI poll rides out a long outage instead of quitting after 50 seconds ([c6bc2d3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c6bc2d3929545f61f2c6adcd3ad010b6f869c9cb))
+- BLAST history keeps runs with different hit counts apart and names the aligner that ran ([97d93dc](https://github.com/GMOD/jbrowse-plugin-msaview/commit/97d93dc9dc8215e958f7e664b9dbc08aa59cfe12))
+- Eutils requests go out spaced under NCBI's rate limit, and their XML escapes are decoded ([5194493](https://github.com/GMOD/jbrowse-plugin-msaview/commit/51944939d5717ebaee0a57350523296c89fc4ae1))
+- A failing Add-menu contribution no longer takes the app down ([9e20c66](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9e20c66b405bcce2aa4c293d2b2d41f23e2ac183))
+
+### Chores
+
+- Delete the unused ucsc/ species table and its lint and ignore entries ([a6dce58](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a6dce58b38ea371b35493b00bb47d2f03378c517))
+
+### Documentation
+
+- A p53 demo linking genome, alignment and structure, and drop the removed structure-connection docs ([96d86d0](https://github.com/GMOD/jbrowse-plugin-msaview/commit/96d86d0ce9548baa6ce76035ea350977fd2612f0))
+
+### Features
+
+- A `region` spec key opens the view zoomed onto a residue range ([4f17a6e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4f17a6e2d9176d36266b10f6fc4c1beecedaf513))
+
+### Other Changes
+
+- Update deps ([fe33e4c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fe33e4cf949bfc362c11bdfc5640a21d0125e3ec))
+- Some todos ([cc0bd90](https://github.com/GMOD/jbrowse-plugin-msaview/commit/cc0bd9003ac0c3a6d0e4c7246da88da26676df01))
+
+### Refactoring
+
+- One launch helper for the dialog, handed its placement rather than reading it back from storage ([3f33c8a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3f33c8ad00b49f25eb6f2f58230c8fa0146128c7))
+
 ## [3.6.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.5.0...v3.6.0) (2026-09-16)
 
 ### Bug Fixes
