@@ -137,6 +137,25 @@ describe('a launch that is abandoned', () => {
   })
 })
 
+describe('a launch started while another holds the controller', () => {
+  test('aborts the first, so nothing is left polling that Cancel cannot reach', async () => {
+    const { model } = makeModel()
+    const signals: AbortSignal[] = []
+    const launch = (scope: LaunchScope) => {
+      signals.push(scope.signal)
+      return new Promise<typeof DATA>(() => {})
+    }
+
+    runLaunch({ self: model, message: 'a', onLaunched: () => {}, launch })
+    runLaunch({ self: model, message: 'b', onLaunched: () => {}, launch })
+    await settle()
+
+    expect(signals.map(s => s.aborted)).toEqual([true, false])
+    model.launchController!.abort()
+    expect(signals[1]!.aborted).toBe(true)
+  })
+})
+
 describe('a launch that fails', () => {
   test('records the error and stops the spinner', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})

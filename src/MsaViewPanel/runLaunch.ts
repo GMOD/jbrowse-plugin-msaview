@@ -1,4 +1,5 @@
 import { getSession } from '@jbrowse/core/util'
+import { untracked } from 'mobx'
 
 import { isAbortError } from '../utils/fetch'
 
@@ -64,11 +65,26 @@ interface LaunchedData {
  * Run one launch attempt, owning the AbortController that ties it to the view.
  *
  * The controller lives on the model because two things end a launch and neither
- * is here: the Cancel button, and the disposer `afterCreate` registers. Before
- * it existed, closing a view mid-BLAST left the poller checking EBI for the
- * job's lifetime and then writing to a node that was gone.
+ * is here: the Cancel button, and the disposer `afterCreate` registers. A launch
+ * already holding it is aborted first, so a re-fired autorun replaces the
+ * attempt rather than orphaning one that nothing can cancel.
+ *
+ * Runs untracked: it is called from the launch autoruns, and whatever the
+ * launch body reads before its first await would otherwise become a reason to
+ * launch again.
  */
-export function runLaunch({
+export function runLaunch(args: {
+  self: JBrowsePluginMsaViewModel
+  message: string
+  launch: (scope: LaunchScope) => Promise<LaunchedData>
+  onLaunched: () => void
+}) {
+  untracked(() => {
+    startLaunch(args)
+  })
+}
+
+function startLaunch({
   self,
   message,
   launch,
@@ -79,6 +95,7 @@ export function runLaunch({
   launch: (scope: LaunchScope) => Promise<LaunchedData>
   onLaunched: () => void
 }) {
+  self.launchController?.abort()
   const controller = new AbortController()
   const { signal } = controller
   self.setLaunchController(controller)
