@@ -1,11 +1,14 @@
 import { beforeEach, expect, test, vi } from 'vitest'
 
-import { retrieveMsaData } from './msaDataStore'
+import { retrieveMsaData, storeMsaData } from './msaDataStore'
 
 // An in-memory stand-in for the one object store this module opens, with a
 // switch for the write half so a browser that refuses writes can be played back.
 const { rows, state } = vi.hoisted(() => ({
-  rows: new Map<string, { id: string; msa?: string; timestamp: number }>(),
+  rows: new Map<
+    string,
+    { id: string; msa?: string; gff?: string; timestamp: number }
+  >(),
   state: { putFails: false },
 }))
 
@@ -51,4 +54,13 @@ test('a refresh that fails still hands back the data it read', async () => {
   state.putFails = true
 
   expect((await retrieveMsaData('msa-1'))?.msa).toBe('>a\nMK')
+})
+
+test('every document a view keeps comes back, and nothing else', async () => {
+  await storeMsaData('msa-1', { msa: '>a\nMK', gff: 'a\t.\tdomain\t1\t2' })
+
+  expect(await retrieveMsaData('msa-1')).toEqual({
+    msa: '>a\nMK',
+    gff: 'a\t.\tdomain\t1\t2',
+  })
 })

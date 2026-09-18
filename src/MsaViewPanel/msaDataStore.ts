@@ -11,6 +11,7 @@ export interface MsaDataPayload {
   msa?: string
   tree?: string
   treeMetadata?: string
+  gff?: string
 }
 
 interface StoredMsaData extends MsaDataPayload {
@@ -40,13 +41,7 @@ export function generateDataStoreId() {
 export async function storeMsaData(id: string, data: MsaDataPayload) {
   try {
     const db = await getDB()
-    const storedData: StoredMsaData = {
-      id,
-      msa: data.msa,
-      tree: data.tree,
-      treeMetadata: data.treeMetadata,
-      timestamp: Date.now(),
-    }
+    const storedData: StoredMsaData = { ...data, id, timestamp: Date.now() }
     await db.put(STORE_NAME, storedData)
     return true
   } catch (e) {
@@ -70,11 +65,8 @@ export async function retrieveMsaData(id: string) {
     } catch (e) {
       console.warn('Failed to refresh MSA data timestamp:', e)
     }
-    return {
-      msa: result.msa,
-      tree: result.tree,
-      treeMetadata: result.treeMetadata,
-    }
+    const { id: _id, timestamp: _timestamp, ...payload } = result
+    return payload
   } catch (e) {
     console.warn('Failed to retrieve MSA data:', e)
     return undefined

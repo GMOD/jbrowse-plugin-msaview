@@ -61,6 +61,9 @@ function makeModel(over: Record<string, unknown> = {}) {
     setTreeMetadata(arg: string) {
       model.data.treeMetadata = arg
     },
+    setGFF(arg: string) {
+      model.data.gff = arg
+    },
     ...over,
   }
   return model as typeof model & JBrowsePluginMsaViewModel
@@ -98,6 +101,17 @@ describe('restoring a view from IndexedDB', () => {
     model.rows = [['a', 'MK']]
     storeDataToIndexedDB(model)
     expect(mockStore).not.toHaveBeenCalled()
+  })
+
+  // react-msaview drops a GFF over 50kB from the snapshot too
+  test('a stored GFF comes back with the alignment', async () => {
+    mockRetrieve.mockResolvedValue({ msa: MSA, gff: 'a\t.\tdomain\t1\t2' })
+    const model = makeModel({ dataStoreId: 'msa-1' })
+
+    loadStoredData(model)
+    await settle()
+
+    expect(model.data.gff).toBe('a\t.\tdomain\t1\t2')
   })
 
   // the row expires or the user clears site data, and the view used to reopen as
@@ -179,6 +193,24 @@ describe('keeping IndexedDB up to date', () => {
       treeMetadata: undefined,
     })
     expect(model.dataStoreId).toBe('msa-1')
+  })
+
+  test('a GFF loaded after the first write updates the row', async () => {
+    const model = makeModel({
+      dataStoreId: 'msa-1',
+      rows: [['a', 'MK']],
+      data: { msa: MSA },
+      lastStoredData: { msa: MSA },
+    })
+
+    model.data.gff = 'a\t.\tdomain\t1\t2'
+    storeDataToIndexedDB(model)
+    await settle()
+
+    expect(mockStore).toHaveBeenCalledWith(
+      'msa-1',
+      expect.objectContaining({ gff: 'a\t.\tdomain\t1\t2' }),
+    )
   })
 
   // a browser that refuses IndexedDB (private mode) answers every write the same

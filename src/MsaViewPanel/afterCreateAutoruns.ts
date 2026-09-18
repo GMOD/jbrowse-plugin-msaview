@@ -50,6 +50,9 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
             if (storedData.treeMetadata) {
               self.setTreeMetadata(storedData.treeMetadata)
             }
+            if (storedData.gff) {
+              self.setGFF(storedData.gff)
+            }
             self.setLastStoredData(currentData(self))
           })
         } else {
@@ -79,9 +82,14 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   }
 }
 
+/**
+ * Everything react-msaview drops from the snapshot once it passes 50kB. The
+ * GFF is among them: a local one's filehandle is cleared once it loads, so
+ * this row is the only copy.
+ */
 function currentData(self: JBrowsePluginMsaViewModel): MsaDataPayload {
-  const { msa, tree, treeMetadata } = self.data
-  return { msa, tree, treeMetadata }
+  const { msa, tree, treeMetadata, gff } = self.data
+  return { msa, tree, treeMetadata, gff }
 }
 
 function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
@@ -89,7 +97,8 @@ function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
     !!a &&
     a.msa === b.msa &&
     a.tree === b.tree &&
-    a.treeMetadata === b.treeMetadata
+    a.treeMetadata === b.treeMetadata &&
+    a.gff === b.gff
   )
 }
 
