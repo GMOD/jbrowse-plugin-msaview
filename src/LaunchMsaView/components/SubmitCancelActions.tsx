@@ -9,11 +9,13 @@ import {
 } from '@mui/material'
 
 import {
+  readLaunchPlacement,
   sessionSupportsPlacement,
   writeLaunchPlacement,
 } from '../../utils/workspaces'
 import { useLaunchPlacement } from './launchPlacement'
 
+import type { MsaViewPlacement } from '../../utils/workspaces'
 import type { AbstractTrackModel } from '@jbrowse/core/util'
 
 /**
@@ -58,7 +60,8 @@ export default function SubmitCancelActions({
   cancelLabel = 'Cancel',
   model,
 }: {
-  onSubmit: () => void
+  /** handed the placement the box states, so no launch re-reads storage */
+  onSubmit: (placement: MsaViewPlacement) => void
   onCancel: () => void
   submitDisabled?: boolean
   /** why Submit is grey, shown beside it */
@@ -69,10 +72,9 @@ export default function SubmitCancelActions({
   model?: AbstractTrackModel
 }) {
   const [sideBySide, setSideBySide] = useLaunchPlacement()
-  // The stored value is what the next launch reads, so it is written on submit
-  // rather than on the click: ticking the box and then pressing Cancel used to
-  // change where every future launch landed, from a dialog the user backed out
-  // of.
+  // The stored value is what the next dialog opens on, so it is written on
+  // submit rather than on the click: a dialog the user backed out of must not
+  // move where every future launch lands.
   const offerPlacement = !!model && sessionSupportsPlacement(getSession(model))
   return (
     // The buttons are one child rather than two, so a dialog too narrow for
@@ -98,9 +100,12 @@ export default function SubmitCancelActions({
           disabled={submitDisabled}
           onClick={() => {
             if (offerPlacement) {
-              writeLaunchPlacement(sideBySide ? 'splitRight' : 'stack')
+              const placement = sideBySide ? 'splitRight' : 'stack'
+              writeLaunchPlacement(placement)
+              onSubmit(placement)
+            } else {
+              onSubmit(readLaunchPlacement())
             }
-            onSubmit()
           }}
         >
           {submitLabel}

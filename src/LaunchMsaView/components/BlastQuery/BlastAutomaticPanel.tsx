@@ -21,10 +21,14 @@ import LaunchPanelContent from '../LaunchPanelContent'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
+import {
+  builtAlignmentLook,
+  launchConnectedView,
+  useLaunchSubmit,
+} from '../launchConnectedView'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 import CachedBlastResults from './CachedBlastResults'
 import MsaAlgorithmSelect from './MsaAlgorithmSelect'
-import { blastLaunchView } from './blastLaunchView'
 import {
   databaseLabel,
   databaseOptionsFor,
@@ -39,6 +43,7 @@ import {
 } from './searchChoiceStorage'
 import { useCachedBlastResults } from './useCachedBlastResults'
 
+import type { BlastParams } from '../../../MsaViewPanel/model'
 import type { SearchChoice, SearchProgram } from './consts'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
@@ -75,7 +80,7 @@ const BlastAutomaticPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
-  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const { launchError, submit } = useLaunchSubmit(handleClose)
   // one piece of state, not two: a program and a database that program does not
   // have is a 400 from EBI minutes after Submit, and holding them apart is what
   // would let them drift into that
@@ -98,7 +103,7 @@ const BlastAutomaticPanel = observer(function ({
   })
   const { selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
-  const e = transcriptSelection.error ?? launchViewError ?? cachedResultsError
+  const e = transcriptSelection.error ?? launchError ?? cachedResultsError
   return (
     <>
       <LaunchPanelContent error={e}>
@@ -194,37 +199,35 @@ const BlastAutomaticPanel = observer(function ({
         model={model}
         hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={!proteinSequence || !hitCountValid}
-        onSubmit={() => {
-          try {
-            if (selectedTranscript) {
-              setLaunchViewError(undefined)
-              blastLaunchView({
-                feature: selectedTranscript,
+        onSubmit={placement => {
+          if (selectedTranscript) {
+            const blastParams: BlastParams =
+              search.program === 'phmmer'
+                ? {
+                    searchProgram: 'phmmer',
+                    blastDatabase: search.database,
+                    maxHits: hitCount,
+                    selectedTranscript: selectedTranscript.toJSON(),
+                    proteinSequence,
+                  }
+                : {
+                    searchProgram: 'blastp',
+                    blastDatabase: search.database,
+                    msaAlgorithm: selectedMsaAlgorithm,
+                    maxHits: hitCount,
+                    selectedTranscript: selectedTranscript.toJSON(),
+                    proteinSequence,
+                  }
+            submit(() => {
+              launchConnectedView({
                 view,
-                newViewTitle: getBlastViewTitle(feature, selectedTranscript),
-                blastParams:
-                  search.program === 'phmmer'
-                    ? {
-                        searchProgram: 'phmmer',
-                        blastDatabase: search.database,
-                        maxHits: hitCount,
-                        selectedTranscript: selectedTranscript.toJSON(),
-                        proteinSequence,
-                      }
-                    : {
-                        searchProgram: 'blastp',
-                        blastDatabase: search.database,
-                        msaAlgorithm: selectedMsaAlgorithm,
-                        maxHits: hitCount,
-                        selectedTranscript: selectedTranscript.toJSON(),
-                        proteinSequence,
-                      },
+                feature: selectedTranscript,
+                placement,
+                displayName: getBlastViewTitle(feature, selectedTranscript),
+                ...builtAlignmentLook,
+                blastParams,
               })
-              handleClose()
-            }
-          } catch (e) {
-            console.error(e)
-            setLaunchViewError(e)
+            })
           }
         }}
         onCancel={handleClose}

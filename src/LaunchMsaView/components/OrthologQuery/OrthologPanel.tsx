@@ -18,12 +18,16 @@ import LaunchPanelContent from '../LaunchPanelContent'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
+import {
+  builtAlignmentLook,
+  launchConnectedView,
+  useLaunchSubmit,
+} from '../launchConnectedView'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 import OrthologSourceSelect, {
   useStoredOrthologSource,
 } from './OrthologSourceSelect'
 import QuerySpeciesSelect from './QuerySpeciesSelect'
-import { orthologLaunchView } from './orthologLaunchView'
 
 import type { OrthologSource } from '../../../MsaViewPanel/model'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
@@ -56,7 +60,7 @@ const OrthologPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
-  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const { launchError, submit } = useLaunchSubmit(handleClose)
   const [taxId, setTaxId] = useState(9606)
   const [source, setSource] = useStoredOrthologSource()
   const [msaAlgorithm, setMsaAlgorithm] = useStoredMsaAlgorithm()
@@ -70,7 +74,7 @@ const OrthologPanel = observer(function ({
   })
   const { selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
-  const e = transcriptSelection.error ?? launchViewError
+  const e = transcriptSelection.error ?? launchError
 
   const rowCount = Number(maxSpecies)
   const rowCountValid = Number.isInteger(rowCount) && rowCount >= 2
@@ -136,14 +140,15 @@ const OrthologPanel = observer(function ({
         model={model}
         hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={!proteinSequence || !rowCountValid}
-        onSubmit={() => {
-          try {
-            if (selectedTranscript) {
-              setLaunchViewError(undefined)
-              orthologLaunchView({
-                feature: selectedTranscript,
+        onSubmit={placement => {
+          if (selectedTranscript) {
+            submit(() => {
+              launchConnectedView({
                 view,
-                newViewTitle: `Orthologs - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                feature: selectedTranscript,
+                placement,
+                displayName: `Orthologs - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(selectedTranscript)}`,
+                ...builtAlignmentLook,
                 orthologParams: {
                   taxId,
                   source,
@@ -154,11 +159,7 @@ const OrthologPanel = observer(function ({
                   proteinSequence,
                 },
               })
-              handleClose()
-            }
-          } catch (e) {
-            console.error(e)
-            setLaunchViewError(e)
+            })
           }
         }}
         onCancel={handleClose}

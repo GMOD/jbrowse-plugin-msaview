@@ -66,18 +66,43 @@ test('a panel that launches nothing passes no model, and gets no box', () => {
   expect(toggle()).toBeNull()
 })
 
-test('submitting writes the placement the launch will read', () => {
+test('submitting hands the launch the placement and remembers it', () => {
+  const onSubmit = vi.fn()
   render(
     <SubmitCancelActions
       model={trackModel(tiling)}
-      onSubmit={() => {}}
+      onSubmit={onSubmit}
       onCancel={() => {}}
     />,
   )
   toggle()!.click()
   expect((toggle() as HTMLInputElement).checked).toBe(false)
   screen.getByText('Submit').click()
+  expect(onSubmit).toHaveBeenCalledWith('stack')
   expect(localStorage.getItem(LAUNCH_PLACEMENT_KEY)).toBe('stack')
+})
+
+// an unticked box used to reach the launch only through storage, so a browser
+// refusing localStorage launched side by side anyway
+test('the box decides the launch even where storage throws', () => {
+  const onSubmit = vi.fn()
+  const setItem = vi
+    .spyOn(Storage.prototype, 'setItem')
+    .mockImplementation(() => {
+      throw new Error('SecurityError')
+    })
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  render(
+    <SubmitCancelActions
+      model={trackModel(tiling)}
+      onSubmit={onSubmit}
+      onCancel={() => {}}
+    />,
+  )
+  toggle()!.click()
+  screen.getByText('Submit').click()
+  expect(onSubmit).toHaveBeenCalledWith('stack')
+  setItem.mockRestore()
 })
 
 // the box is a property of this launch until it is launched; a dialog the user

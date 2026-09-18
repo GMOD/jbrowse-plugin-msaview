@@ -19,9 +19,9 @@ import QueryRowSelector from '../QueryRowSelector'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
+import { launchConnectedView, useLaunchSubmit } from '../launchConnectedView'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 import { fetchMSA, fetchMSAList } from './fetchMSAData'
-import { preCalculatedLaunchView } from './preCalculatedLaunchView'
 import { readMsaDatasets } from './types'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
@@ -49,7 +49,7 @@ const PreLoadedMSA = observer(function ({
   const { classes } = useStyles()
   const { pluginManager } = getEnv(model)
   const { assemblyNames } = view
-  const [viewError, setViewError] = useState<unknown>()
+  const { launchError, submit } = useLaunchSubmit(handleClose)
 
   const datasets = readMsaDatasets(session.jbrowse)
   const [selectedDatasetId, setSelectedDatasetId] = useState(
@@ -117,7 +117,7 @@ const PreLoadedMSA = observer(function ({
     msaListFetchError ??
     msaDataFetchError ??
     transcriptSelection.error ??
-    viewError
+    launchError
   return (
     <>
       <LaunchPanelContent error={e}>
@@ -186,21 +186,27 @@ const PreLoadedMSA = observer(function ({
         submitDisabled={
           !selectedTranscript || !msaData?.length || !querySeqName
         }
-        onSubmit={() => {
-          try {
-            if (selectedTranscript && msaText) {
-              preCalculatedLaunchView({
-                newViewTitle: getGeneDisplayName(selectedTranscript),
+        onSubmit={placement => {
+          if (selectedTranscript && msaText) {
+            submit(() => {
+              launchConnectedView({
                 view,
+                feature: selectedTranscript,
+                placement,
+                displayName: getGeneDisplayName(selectedTranscript),
+                treeAreaWidth: 200,
+                treeWidth: 100,
+                drawNodeBubbles: false,
+                labelsAlignRight: true,
+                showBranchLen: false,
+                colWidth: 10,
+                rowHeight: 12,
+                colorSchemeName: 'percent_identity_dynamic',
                 querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
-                feature: selectedTranscript,
                 data: { msa: msaText },
               })
-              handleClose()
-            }
-          } catch (e) {
-            setViewError(e)
+            })
           }
         }}
         onCancel={handleClose}

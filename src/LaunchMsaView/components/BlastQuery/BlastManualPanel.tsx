@@ -14,10 +14,10 @@ import {
   getLinearGenomeView,
 } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
-import { launchView } from '../ManualMSALoader/launchView'
 import QueryRowSelector from '../QueryRowSelector'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
+import { launchConnectedView, useLaunchSubmit } from '../launchConnectedView'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 import { BASE_BLAST_URL } from './consts'
 
@@ -69,7 +69,7 @@ const BlastManualPanel = observer(function ({
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
-  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const { launchError, submit } = useLaunchSubmit(handleClose)
   const [msaText, setMsaText] = useState('')
   const [treeText, setTreeText] = useState('')
 
@@ -89,7 +89,7 @@ const BlastManualPanel = observer(function ({
 
   return (
     <>
-      <LaunchPanelContent error={launchViewError ?? error}>
+      <LaunchPanelContent error={launchError ?? error}>
         {children}
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
@@ -164,23 +164,19 @@ const BlastManualPanel = observer(function ({
       <SubmitCancelActions
         model={model}
         submitDisabled={!selectedTranscript || !msaText.trim()}
-        onSubmit={() => {
-          try {
-            if (selectedTranscript) {
-              setLaunchViewError(undefined)
-              launchView({
-                newViewTitle: getGeneDisplayName(selectedTranscript),
+        onSubmit={placement => {
+          if (selectedTranscript) {
+            submit(() => {
+              launchConnectedView({
                 view,
                 feature: selectedTranscript,
+                placement,
+                displayName: getGeneDisplayName(selectedTranscript),
                 querySeqName: queryRow.querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 data: { msa: msaText, tree: treeText },
               })
-              handleClose()
-            }
-          } catch (e) {
-            console.error(e)
-            setLaunchViewError(e)
+            })
           }
         }}
         onCancel={handleClose}

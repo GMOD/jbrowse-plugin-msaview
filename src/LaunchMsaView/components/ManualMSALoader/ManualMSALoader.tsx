@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 
 import { FileSelector } from '@jbrowse/core/ui'
+import { openLocation } from '@jbrowse/core/util/io'
 import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
+import { useDebounced, useFetch } from '../../../utils/useFetch'
 import { useQueryRowName } from '../../useQueryRowName'
 import { getGeneDisplayName, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
@@ -13,14 +15,28 @@ import QueryRowSelector from '../QueryRowSelector'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
+import { launchConnectedView, useLaunchSubmit } from '../launchConnectedView'
 import { useTranscriptSelection } from '../useTranscriptSelection'
-import { launchView } from './launchView'
 
 import type {
   AbstractTrackModel,
   Feature,
   FileLocation,
 } from '@jbrowse/core/util'
+
+/**
+ * The chosen file's text, so its query row is found by sequence the way a
+ * pasted alignment's is; without it a file launch named no row and never
+ * linked to the genome. Debounced because a URL arrives a keystroke at a time.
+ */
+function useMsaFileText(location: FileLocation | undefined) {
+  const debounced = useDebounced(location, 500)
+  const { data } = useFetch(
+    debounced ? [JSON.stringify(debounced), 'msa-file-text'] : null,
+    () => openLocation(debounced!).readFile('utf8'),
+  )
+  return data ?? ''
+}
 
 const useStyles = makeStyles()({
   textAreaFont: {
@@ -51,7 +67,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
 }) {
   const view = getLinearGenomeView(model)
   const { classes } = useStyles()
-  const [launchViewError, setLaunchViewError] = useState<unknown>()
+  const { launchError, submit } = useLaunchSubmit(handleClose)
   const [inputMethod, setInputMethod] = useState<'file' | 'text'>('file')
   const [msaText, setMsaText] = useState('')
   const [treeText, setTreeText] = useState('')
@@ -64,9 +80,15 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   })
   const { selectedTranscript, proteinSequence, error, sequenceStatus } =
     transcriptSelection
-  const queryRow = useQueryRowName(msaText, proteinSequence)
+  const msaFileText = useMsaFileText(
+    inputMethod === 'file' ? msaFileLocation : undefined,
+  )
+  const queryRow = useQueryRowName(
+    inputMethod === 'file' ? msaFileText : msaText,
+    proteinSequence,
+  )
 
-  const e = launchViewError ?? error
+  const e = launchError ?? error
   return (
     <>
       <LaunchPanelContent error={e}>
@@ -153,14 +175,14 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
           (inputMethod === 'file' && !msaFileLocation) ||
           (inputMethod === 'text' && !msaText.trim())
         }
-        onSubmit={() => {
-          try {
-            if (selectedTranscript) {
-              setLaunchViewError(undefined)
-              launchView({
-                newViewTitle: getGeneDisplayName(selectedTranscript),
+        onSubmit={placement => {
+          if (selectedTranscript) {
+            submit(() => {
+              launchConnectedView({
                 view,
                 feature: selectedTranscript,
+                placement,
+                displayName: getGeneDisplayName(selectedTranscript),
                 querySeqName: queryRow.querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 ...(inputMethod === 'file'
@@ -168,18 +190,9 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                       msaFilehandle: msaFileLocation,
                       treeFilehandle: treeFileLocation,
                     }
-                  : {
-                      data: {
-                        msa: msaText,
-                        tree: treeText,
-                      },
-                    }),
+                  : { data: { msa: msaText, tree: treeText } }),
               })
-              handleClose()
-            }
-          } catch (err) {
-            console.error(err)
-            setLaunchViewError(err)
+            })
           }
         }}
         onCancel={handleClose}

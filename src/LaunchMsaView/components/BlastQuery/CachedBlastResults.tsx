@@ -20,7 +20,8 @@ import {
   getLinearGenomeView,
   getSortedTranscriptFeatures,
 } from '../../util'
-import { blastLaunchViewFromCache } from './blastLaunchView'
+import { builtAlignmentLook, launchConnectedView } from '../launchConnectedView'
+import { useLaunchPlacement } from '../launchPlacement'
 import { useCachedBlastResults } from './useCachedBlastResults'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
@@ -83,6 +84,7 @@ const CachedBlastResults = observer(function ({
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
   const [operationError, setOperationError] = useState<unknown>()
+  const [sideBySide] = useLaunchPlacement()
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
 
@@ -90,21 +92,20 @@ const CachedBlastResults = observer(function ({
     useCachedBlastResults(geneIds)
 
   const handleUseCached = (cached: CachedBlastResult) => {
-    // reconnect the cached MSA to the genome: the cached query row is named
-    // 'QUERY' (react-msaview's default querySeqName) and corresponds to the
-    // transcript stored as transcriptId. Resolving it here restores the
-    // MSA<->genome navigation and hover-sync a fresh BLAST gets.
-    const { transcriptId } = cached
-    const transcript = transcriptId
-      ? getSortedTranscriptFeatures(feature).find(t =>
-          featureMatchesId(t, transcriptId),
-        )
-      : undefined
-    blastLaunchViewFromCache({
+    // the cached query row is the plugin's default `QUERY`, translated from
+    // the transcript stored as transcriptId, so that transcript relinks it
+    const { transcriptId, msa, tree, treeMetadata } = cached
+    launchConnectedView({
       view,
-      cached,
-      newViewTitle: `BLAST - ${getResultDisplayName(cached)}`,
-      connectedFeature: transcript?.toJSON(),
+      feature: transcriptId
+        ? getSortedTranscriptFeatures(feature).find(t =>
+            featureMatchesId(t, transcriptId),
+          )
+        : undefined,
+      placement: sideBySide ? 'splitRight' : 'stack',
+      displayName: `BLAST - ${getResultDisplayName(cached)}`,
+      ...builtAlignmentLook,
+      data: { msa, tree, treeMetadata },
     })
     handleClose()
   }
