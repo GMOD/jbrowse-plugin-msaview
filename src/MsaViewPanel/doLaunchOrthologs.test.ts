@@ -215,7 +215,7 @@ describe('the query row sequence', () => {
     await launch({
       self: makeModel(params({ proteinSequence: 'MAGG*AWGR&' })),
     })
-    expect(queryRowSent()).toBe('MAGGAWGR')
+    expect(queryRowSent()).toBe('MAGGXAWGR')
   })
 
   test('throws when neither a sequence nor a representative is available', async () => {

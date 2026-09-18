@@ -95,8 +95,14 @@ export function getSortedTranscriptFeatures(feature: Feature) {
   )
 }
 
+/**
+ * A translation as a query, still one residue per codon: g2p numbers codons,
+ * and the query row is read through it. So the partial first codon (`&`), an
+ * internal stop and an unreadable codon become X, and only what trails the
+ * last whole codon is dropped.
+ */
 export function cleanProteinSequence(seq: string) {
-  return seq.replaceAll('*', '').replaceAll('&', '')
+  return seq.replace(/[*&]+$/, '').replaceAll(/[*&]/g, 'X')
 }
 
 export function getGeneIdentifiers(feature: Feature): string[] {

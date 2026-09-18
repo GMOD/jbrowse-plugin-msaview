@@ -1,5 +1,7 @@
 import { getUngappedSequence, parseMSA } from 'msa-parsers'
 
+import { cleanProteinSequence } from './util'
+
 /**
  * Which row of a pasted alignment is the gene the user launched from.
  *
@@ -36,15 +38,11 @@ export interface QueryRowMatch {
 }
 
 /**
- * A stop codon is present in the transcript's translation and absent from
- * anything an aligner returns, and case is not meaningful in either.
+ * The translation as a search launch would have sent it, so a row that launch
+ * built matches exactly; case means nothing on either side.
  */
 function normalize(seq: string) {
-  return seq
-    .replaceAll('*', '')
-    .replaceAll('-', '')
-    .replaceAll('.', '')
-    .toUpperCase()
+  return cleanProteinSequence(seq).toUpperCase()
 }
 
 function identityOverOverlap(a: string, b: string) {
