@@ -1,5 +1,4 @@
-import { efetchUrl } from './eutils'
-import { textfetch } from './fetch'
+import { decodeXmlEntities, efetchUrl, eutilsText } from './eutils'
 import { bestEffort, createDbOpener } from './idb'
 
 import type { DBSchema } from 'idb'
@@ -105,7 +104,7 @@ export async function fetchTaxonomyInfo(
       // error body that the regexes below silently find nothing in, so without
       // the status check a throttled batch looks like "these taxa have no
       // names" instead of reporting why
-      const text = await textfetch(
+      const text = await eutilsText(
         efetchUrl({ db: 'taxonomy', id: idsParam, retmode: 'xml' }),
       )
 
@@ -155,9 +154,10 @@ export async function fetchTaxonomyInfo(
           const sciName = /<ScientificName>(.*?)<\/ScientificName>/.exec(
             taxonXml,
           )
-          const name = genbankCommon?.[1] ?? commonName?.[1]
+          const rawName = genbankCommon?.[1] ?? commonName?.[1]
+          const name = rawName && decodeXmlEntities(rawName)
 
-          const sci = sciName?.[1] ?? ''
+          const sci = decodeXmlEntities(sciName?.[1] ?? '')
           result.set(taxid, { sciname: sci, commonName: name })
           toCache.push({ taxid, sciname: sci, commonName: name })
         }

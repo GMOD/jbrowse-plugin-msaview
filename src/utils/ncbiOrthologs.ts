@@ -15,14 +15,19 @@
 // Mirrors jb2hubs' website/src/components/proteinMsa.ts assembler, trimmed to
 // what the launch dialog needs and using this plugin's fetch/eutils helpers.
 
-import { NCBI_EMAIL, NCBI_TOOL, efetchPost } from './eutils'
-import { jsonfetch, textfetch } from './fetch'
+import {
+  efetchPost,
+  efetchUrl,
+  eutilsJson,
+  eutilsText,
+  eutilsUrl,
+} from './eutils'
+import { jsonfetch } from './fetch'
 
 // v2, not v2alpha: the alpha path still answers /orthologs but 404s
 // /product_report, so an assembler pointed at it silently resolves zero
 // representative proteins and reports "no orthologs" for every gene.
 const DATASETS = 'https://api.ncbi.nlm.nih.gov/datasets/v2'
-const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
 // NCBI's ortholog report IS the species panel. There is no list here to keep in
 // step with what NCBI knows, and the panel widens by itself as NCBI annotates
@@ -65,11 +70,6 @@ export interface OrthologRow {
   sequence: string
 }
 
-function ncbiUrl(url: string) {
-  const sep = url.includes('?') ? '&' : '?'
-  return `${url}${sep}tool=${NCBI_TOOL}&email=${encodeURIComponent(NCBI_EMAIL)}`
-}
-
 /**
  * A candidate gene reference as the ortholog services know it: a GFF ID prefix
  * (gene:TP53) and a version suffix (NM_000546.6) stripped off. Shared with
@@ -88,28 +88,32 @@ export function cleanGeneCandidate(raw: string) {
  * itself; anything else is searched as a gene name within the query taxon.
  * Several candidate identifiers are tried in order, because a JBrowse feature
  * carries whatever its GFF/BigBed had — `id()`, `name`, `gene_name` — and only
- * some of those are real symbols.
+ * some of those are real symbols. `gene:TP53` and `TP53` are one search.
  */
 export async function resolveGeneId(
   candidates: string[],
   taxId: number,
 ): Promise<{ geneId: string; matched: string } | undefined> {
+  const asked = new Set<string>()
   for (const raw of candidates) {
     const query = raw.trim()
-    if (!query) {
-      continue
-    }
     if (/^\d+$/.test(query)) {
       return { geneId: query, matched: query }
     }
     const cleaned = cleanGeneCandidate(query)
-    const term = `${cleaned}[Gene Name] AND ${taxId}[taxid]`
-    const json = await jsonfetch<{
+    if (!cleaned || asked.has(cleaned)) {
+      continue
+    }
+    asked.add(cleaned)
+    const json = await eutilsJson<{
       esearchresult?: { idlist?: string[] }
     }>(
-      ncbiUrl(
-        `${EUTILS}/esearch.fcgi?db=gene&term=${encodeURIComponent(term)}&retmode=json&retmax=1`,
-      ),
+      eutilsUrl('esearch', {
+        db: 'gene',
+        term: `${cleaned}[Gene Name] AND ${taxId}[taxid]`,
+        retmode: 'json',
+        retmax: '1',
+      }),
     )
     const geneId = json.esearchresult?.idlist?.[0]
     if (geneId) {
@@ -146,9 +150,7 @@ export async function fetchOrthologGenes(
   }: { taxa?: Set<number>; exclude?: number; limit?: number } = {},
 ) {
   const json = await jsonfetch<OrthologReport>(
-    ncbiUrl(
-      `${DATASETS}/gene/id/${geneId}/orthologs?returned_content=COMPLETE`,
-    ),
+    `${DATASETS}/gene/id/${geneId}/orthologs?returned_content=COMPLETE`,
   )
   const byTaxon = new Map<
     number,
@@ -218,9 +220,7 @@ export async function fetchRepresentativeProteins(geneIds: string[]) {
   for (let i = 0; i < geneIds.length; i += PRODUCT_REPORT_CHUNK) {
     const chunk = geneIds.slice(i, i + PRODUCT_REPORT_CHUNK)
     const json = await jsonfetch<ProductReport>(
-      ncbiUrl(
-        `${DATASETS}/gene/id/${chunk.join(',')}/product_report?page_size=${chunk.length}`,
-      ),
+      `${DATASETS}/gene/id/${chunk.join(',')}/product_report?page_size=${chunk.length}`,
     )
     for (const { product } of json.reports ?? []) {
       const candidates = (product?.transcripts ?? [])
@@ -305,10 +305,8 @@ export async function fetchProteinForGene(geneId: string) {
     return undefined
   }
   const seq = parseFasta(
-    await textfetch(
-      ncbiUrl(
-        `${EUTILS}/efetch.fcgi?db=protein&id=${acc}&rettype=fasta&retmode=text`,
-      ),
+    await eutilsText(
+      efetchUrl({ db: 'protein', id: acc, rettype: 'fasta', retmode: 'text' }),
     ),
   ).get(acc)
   return seq ? { accession: acc, sequence: seq } : undefined
@@ -354,7 +352,7 @@ export async function fetchOrthologRows({
   onProgress(`Fetching ${withProtein.length} protein sequences...`)
   const accessions = withProtein.map(g => proteinByGene.get(g.geneId)!)
   const seqByAcc = parseFasta(
-    await textfetch(
+    await eutilsText(
       ...efetchPost({
         db: 'protein',
         id: accessions.join(','),

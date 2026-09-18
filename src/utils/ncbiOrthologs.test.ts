@@ -6,6 +6,7 @@ import {
   fetchOrthologGenes,
   fetchRepresentativeProteins,
   parseFasta,
+  resolveGeneId,
 } from './ncbiOrthologs'
 
 describe('dedupeLabels', () => {
@@ -172,4 +173,23 @@ describe('the NCBI request ceilings', () => {
     expect(byGene.size).toBe(50)
     expect(seen.every(u => /page_size=\d+/.test(u))).toBe(true)
   })
+})
+
+// eutils allows three requests a second, so asking the same symbol twice is a
+// request spent on nothing
+test('resolveGeneId searches each cleaned symbol once', async () => {
+  const seen: string[] = []
+  vi.stubGlobal('fetch', (url: string) => {
+    seen.push(url)
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ esearchresult: { idlist: [] } }),
+    })
+  })
+  expect(
+    await resolveGeneId(['gene:TP53', 'TP53', ' TP53 ', 'NM_000546.6'], 9606),
+  ).toBeUndefined()
+  expect(seen).toHaveLength(2)
+  vi.unstubAllGlobals()
 })

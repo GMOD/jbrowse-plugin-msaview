@@ -1,17 +1,4 @@
-import { NCBI_EMAIL, NCBI_TOOL } from './eutils'
-import { jsonfetch } from './fetch'
-
-const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
-
-function eutilsUrl(endpoint: string, params: Record<string, string>) {
-  const search = new URLSearchParams({
-    ...params,
-    retmode: 'json',
-    tool: NCBI_TOOL,
-    email: NCBI_EMAIL,
-  })
-  return `${EUTILS}/${endpoint}?${search.toString()}`
-}
+import { eutilsJson, eutilsUrl } from './eutils'
 
 /**
  * Free text -> NCBI taxon id. A bare number is taken as the id itself; anything
@@ -31,8 +18,13 @@ export async function resolveTaxId(query: string) {
   if (/^\d+$/.test(term)) {
     return Number(term)
   }
-  const json = await jsonfetch<{ esearchresult?: { idlist?: string[] } }>(
-    eutilsUrl('esearch.fcgi', { db: 'taxonomy', term, retmax: '1' }),
+  const json = await eutilsJson<{ esearchresult?: { idlist?: string[] } }>(
+    eutilsUrl('esearch', {
+      db: 'taxonomy',
+      term,
+      retmax: '1',
+      retmode: 'json',
+    }),
   )
   const id = json.esearchresult?.idlist?.[0]
   return id ? Number(id) : undefined
@@ -62,15 +54,20 @@ export async function resolveAssemblySpecies(assemblyName: string) {
   if (!term) {
     return undefined
   }
-  const search = await jsonfetch<{ esearchresult?: { idlist?: string[] } }>(
-    eutilsUrl('esearch.fcgi', { db: 'assembly', term, retmax: '1' }),
+  const search = await eutilsJson<{ esearchresult?: { idlist?: string[] } }>(
+    eutilsUrl('esearch', {
+      db: 'assembly',
+      term,
+      retmax: '1',
+      retmode: 'json',
+    }),
   )
   const uid = search.esearchresult?.idlist?.[0]
   if (!uid) {
     return undefined
   }
-  const summary = await jsonfetch<AssemblySummary>(
-    eutilsUrl('esummary.fcgi', { db: 'assembly', id: uid }),
+  const summary = await eutilsJson<AssemblySummary>(
+    eutilsUrl('esummary', { db: 'assembly', id: uid, retmode: 'json' }),
   )
   const record = summary.result?.[uid]
   const taxId = Number(record?.speciestaxid)

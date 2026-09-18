@@ -1,13 +1,13 @@
 import { getCachedDomains, saveDomains } from './domainCache'
-import { efetchUrl } from './eutils'
-import { textfetch } from './fetch'
+import { decodeXmlEntities, efetchUrl, eutilsText } from './eutils'
 
 import type { InterProScanResults } from 'react-msaview'
 
 export type DomainMatch = InterProScanResults['matches'][number]
 
 function field(xml: string, tag: string) {
-  return new RegExp(`<${tag}>(.*?)</${tag}>`, 's').exec(xml)?.[1]
+  const text = new RegExp(`<${tag}>(.*?)</${tag}>`, 's').exec(xml)?.[1]
+  return text === undefined ? undefined : decodeXmlEntities(text)
 }
 
 function parseQualifiers(featureXml: string) {
@@ -153,7 +153,7 @@ export async function fetchProteinDomains(
   const batchSize = 100
   for (let i = 0; i < uncached.length; i += batchSize) {
     const batch = uncached.slice(i, i + batchSize)
-    const xml = await textfetch(
+    const xml = await eutilsText(
       efetchUrl({
         db: 'protein',
         id: batch.join(','),
