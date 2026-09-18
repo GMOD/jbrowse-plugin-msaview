@@ -4,7 +4,15 @@ import type { BlastParams, OrthologParams } from '../MsaViewPanel/model'
 import type { MsaViewPlacement } from '../utils/workspaces'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AbstractSessionModel } from '@jbrowse/core/util'
-import type { ColumnTrackSpec, Highlight } from 'react-msaview'
+import type {
+  Clade,
+  ColumnTrackSpec,
+  Encoding,
+  Highlight,
+  Region,
+  ResidueMapping,
+  RowPanelSpec,
+} from 'react-msaview'
 
 interface LaunchMsaViewArgs {
   session: AbstractSessionModel
@@ -49,6 +57,25 @@ interface LaunchMsaViewArgs {
   highlights?: Highlight[]
   /** per-column tracks supplied as data, see react-msaview's docs/layers.md */
   columnTracks?: ColumnTrackSpec[]
+  /**
+   * Where the view opens, in `highlights` coordinates: `{row, start, end}`
+   * zooms onto residues of that row, `{start, end}` onto alignment columns.
+   * Applied once the alignment has loaded, then dropped from the session.
+   */
+  region?: Region
+  /**
+   * Passed through untouched as react-msaview snapshot properties; see its
+   * docs/layers.md. A bare `{ uri }` is enough for the two filehandles.
+   */
+  clades?: Clade[]
+  encodings?: Encoding[]
+  rowPanels?: RowPanelSpec[]
+  relativeTo?: string
+  residueMappings?: ResidueMapping[]
+  trackHeights?: Record<string, number>
+  turnedOffFeatures?: Record<string, boolean>
+  gffFilehandle?: { uri: string }
+  treeMetadataFilehandle?: { uri: string }
   /**
    * Build the alignment from NCBI orthologs at launch time instead of naming a
    * file: `{ taxId, geneCandidates }` is enough, and `taxa` and

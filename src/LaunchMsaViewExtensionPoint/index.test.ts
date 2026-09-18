@@ -63,6 +63,22 @@ test('a launch naming no source at all is refused', () => {
   expect(() => launch({ connectedViewId: 'lgv1' })).toThrow(/searchParams/)
 })
 
+test('region and the data-layer keys reach the view as snapshot properties', () => {
+  const region = { row: 'Human', start: 245, end: 249 }
+  const clades = [{ mrca: ['Human', 'Mouse'], tips: 2, mark: 'bracket' }]
+  const snapshot = launch({
+    data: { msa: '>Human\nMEEP' },
+    region,
+    clades,
+    relativeTo: 'Human',
+    gffFilehandle: { uri: 'http://example.com/a.gff' },
+  })
+  expect(snapshot.region).toEqual(region)
+  expect(snapshot.clades).toEqual(clades)
+  expect(snapshot.relativeTo).toBe('Human')
+  expect(snapshot.gffFilehandle).toEqual({ uri: 'http://example.com/a.gff' })
+})
+
 test('one field set is enough to need init', () => {
   const snapshot = launch({ data: { msa: '>a\nMEEP' }, querySeqName: 'QUERY' })
   expect(snapshot.init).toEqual({

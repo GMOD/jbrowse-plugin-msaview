@@ -20,6 +20,7 @@ import {
   storeDataToIndexedDB,
   syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
+import { applyRegion } from './applyRegion'
 import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
@@ -39,6 +40,7 @@ import type { TranscriptRef } from './util'
 import type { MenuItem } from '@jbrowse/core/ui'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
+import type { Region } from 'react-msaview'
 
 type LGV = LinearGenomeViewModel
 
@@ -244,6 +246,14 @@ export default function stateModelFactory() {
          * #property
          */
         mafRegion: types.frozen<MafRegion | undefined>(),
+
+        /**
+         * #property
+         * where the view opens: 1-based residues of `row`, or alignment
+         * columns without one. Zoomed onto once and then cleared, so a
+         * reloaded session keeps the reader's own scroll.
+         */
+        region: types.frozen<Region | undefined>(),
       }),
     )
 
@@ -456,6 +466,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setRegion(arg?: Region) {
+        self.region = arg
+      },
+      /**
+       * #action
+       */
       setLoadingStoredData(arg: boolean) {
         self.loadingStoredData = arg
       },
@@ -655,6 +671,12 @@ export default function stateModelFactory() {
         // so they're factories returning the autorun body rather than plain fns
         addDisposer(self, autorun(syncGenomeHoverToMsaColumn(self)))
         addDisposer(self, autorun(observeProteinHighlights(self)))
+        addDisposer(
+          self,
+          autorun(() => {
+            applyRegion(self)
+          }),
+        )
       },
     }))
 }
