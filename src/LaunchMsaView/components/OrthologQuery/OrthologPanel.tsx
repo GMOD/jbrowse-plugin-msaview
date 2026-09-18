@@ -6,7 +6,6 @@ import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
 import { defaultMaxSpecies } from '../../../utils/ncbiOrthologs'
-import { useLocalStorage } from '../../../utils/useLocalStorage'
 import {
   getGeneDisplayName,
   getGeneIdentifiers,
@@ -21,7 +20,7 @@ import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { useTranscriptSelection } from '../useTranscriptSelection'
 import OrthologSourceSelect, {
-  ORTHOLOG_SOURCE_STORAGE_KEY,
+  useStoredOrthologSource,
 } from './OrthologSourceSelect'
 import QuerySpeciesSelect from './QuerySpeciesSelect'
 import { orthologLaunchView } from './orthologLaunchView'
@@ -59,10 +58,7 @@ const OrthologPanel = observer(function ({
   const view = getLinearGenomeView(model)
   const [launchViewError, setLaunchViewError] = useState<unknown>()
   const [taxId, setTaxId] = useState(9606)
-  const [source, setSource] = useLocalStorage<OrthologSource>(
-    ORTHOLOG_SOURCE_STORAGE_KEY,
-    'ncbi',
-  )
+  const [source, setSource] = useStoredOrthologSource()
   const [msaAlgorithm, setMsaAlgorithm] = useStoredMsaAlgorithm()
   const [maxSpecies, setMaxSpecies] = useState(String(defaultMaxSpecies))
 

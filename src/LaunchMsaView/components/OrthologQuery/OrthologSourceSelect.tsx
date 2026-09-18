@@ -3,15 +3,37 @@ import React from 'react'
 import { MenuItem } from '@mui/material'
 
 import TextField2 from '../../../components/TextField2'
+import { useLocalStorage } from '../../../utils/useLocalStorage'
 
 import type { OrthologSource } from '../../../MsaViewPanel/model'
 
-export const ORTHOLOG_SOURCE_STORAGE_KEY = 'msaview-ortholog-source'
+const ORTHOLOG_SOURCE_STORAGE_KEY = 'msaview-ortholog-source'
 
 export const orthologSourceLabels: Record<OrthologSource, string> = {
   ncbi: 'NCBI orthologs',
   panther: 'PANTHER',
   uniref: 'UniRef cluster',
+}
+
+const orthologSources = Object.keys(orthologSourceLabels) as OrthologSource[]
+
+// another plugin version on the same origin may have stored a source this one
+// lacks, and the tab indexes its hints by it
+export function validOrthologSource(stored: unknown): OrthologSource {
+  return orthologSources.find(s => s === stored) ?? 'ncbi'
+}
+
+export function useStoredOrthologSource() {
+  const [stored, setStored] = useLocalStorage<unknown>(
+    ORTHOLOG_SOURCE_STORAGE_KEY,
+    'ncbi',
+  )
+  return [
+    validOrthologSource(stored),
+    (source: OrthologSource) => {
+      setStored(source)
+    },
+  ] as const
 }
 
 // Which species a source can answer for, in the words a reader picking one
@@ -45,7 +67,7 @@ export default function OrthologSourceSelect({
         onChange(event.target.value as OrthologSource)
       }}
     >
-      {(Object.keys(orthologSourceLabels) as OrthologSource[]).map(val => (
+      {orthologSources.map(val => (
         <MenuItem value={val} key={val}>
           {orthologSourceLabels[val]}
         </MenuItem>
