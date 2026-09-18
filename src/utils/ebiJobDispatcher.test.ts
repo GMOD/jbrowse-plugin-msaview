@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
-import { waitForEbiJob } from './ebiJobDispatcher'
+import { STATUS_FAILURE_BUDGET_MS, waitForEbiJob } from './ebiJobDispatcher'
 
 // A long alignment is polled every ten seconds for minutes, so the chance of one
 // failed status check somewhere in that window is not small -- and the job is
@@ -8,11 +8,18 @@ import { waitForEbiJob } from './ebiJobDispatcher'
 describe('waitForEbiJob', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.useRealTimers()
+    vi.restoreAllMocks()
   })
 
-  const statuses = (seq: (string | Error)[]) => {
+  // each status check lands `minutesPerCheck` after the last, so a long outage
+  // is minutes of clock rather than minutes of test
+  const statuses = (seq: (string | Error)[], minutesPerCheck = 0) => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
     let i = 0
     vi.stubGlobal('fetch', () => {
+      vi.setSystemTime(Date.now() + minutesPerCheck * 60_000)
       const next = seq[Math.min(i++, seq.length - 1)]!
       return next instanceof Error
         ? Promise.reject(next)
@@ -51,9 +58,17 @@ describe('waitForEbiJob', () => {
     await expect(wait()).resolves.toBeUndefined()
   })
 
+  test('ten minutes of failed checks do not abandon a job that then finishes', async () => {
+    const outage = Array.from({ length: 10 }, () => new Error('HTTP 502'))
+    statuses(['RUNNING', ...outage, 'FINISHED'], 1)
+    await expect(wait()).resolves.toBeUndefined()
+  })
+
   test('an endpoint that has genuinely gone away is not polled forever', async () => {
-    statuses([new TypeError('Failed to fetch')])
+    statuses([new TypeError('Failed to fetch')], 1)
+    const start = Date.now()
     await expect(wait()).rejects.toThrow(/Could not reach EBI/)
+    expect(Date.now() - start).toBeGreaterThanOrEqual(STATUS_FAILURE_BUDGET_MS)
   })
 
   test('a job EBI reports as failed still ends the poll immediately', async () => {

@@ -52,15 +52,14 @@ export async function submitEbiJob({
 /**
  * A status check that could not reach EBI at all says nothing about the job, so
  * it is not a reason to abandon one. A job the server has accepted keeps running
- * whatever happens to the poller's connection, and the poll is the long part: an
- * alignment of a hundred sequences runs for minutes and is checked every ten
- * seconds, so a single blip anywhere in that window used to throw away a job
- * that went on to finish.
+ * whatever happens to the poller's connection, and EBI's cluster has answered
+ * status checks with a 502 for ten minutes on jobs that then finished (see
+ * docs/blast.md).
  *
- * Consecutive failures still end it, because an endpoint that has genuinely gone
- * away must not be polled forever.
+ * So the poll gives up only once checks have failed without a break for this
+ * long: an endpoint that has genuinely gone away must not be polled forever.
  */
-const MAX_CONSECUTIVE_STATUS_FAILURES = 5
+export const STATUS_FAILURE_BUDGET_MS = 15 * 60 * 1000
 
 export async function waitForEbiJob({
   tool,
@@ -75,7 +74,7 @@ export async function waitForEbiJob({
   onCountdown: (secondsRemaining: number) => void
   signal?: AbortSignal
 }) {
-  let consecutiveFailures = 0
+  let failingSince: number | undefined
   await pollLoop({
     intervalSeconds,
     onCountdown,
@@ -92,20 +91,17 @@ export async function waitForEbiJob({
         if (isAbortError(e)) {
           throw e
         }
-        consecutiveFailures += 1
-        if (consecutiveFailures >= MAX_CONSECUTIVE_STATUS_FAILURES) {
+        failingSince ??= Date.now()
+        if (Date.now() - failingSince >= STATUS_FAILURE_BUDGET_MS) {
           throw new Error(
-            `Could not reach EBI to check ${tool} job ${jobId} after ${consecutiveFailures} tries`,
+            `Could not reach EBI to check ${tool} job ${jobId} for ${Math.round(STATUS_FAILURE_BUDGET_MS / 60_000)} minutes`,
             { cause: e },
           )
         }
-        console.warn(
-          `[msaview] EBI status check ${consecutiveFailures} failed, retrying:`,
-          e,
-        )
+        console.warn('[msaview] EBI status check failed, retrying:', e)
         return false
       }
-      consecutiveFailures = 0
+      failingSince = undefined
       // exact match, not includes(): a job whose status is ERROR must not be
       // able to poll forever waiting for a FINISHED that will never arrive
       if (status === 'FINISHED') {
