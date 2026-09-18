@@ -125,7 +125,7 @@ export async function resolveUniProtEntry(
     }
     if (UNIPROT_ACCESSION.test(candidate)) {
       const json = await jsonfetch(
-        `${UNIPROT}/uniprotkb/${candidate.split('-')[0]}?fields=${ENTRY_FIELDS}`,
+        `${UNIPROT}/uniprotkb/${candidate}?fields=${ENTRY_FIELDS}`,
         { signal },
       )
       const entry = parseEntry(json as UniProtEntry)
@@ -134,7 +134,7 @@ export async function resolveUniProtEntry(
       }
       continue
     }
-    const query = `gene_exact:${candidate} AND organism_id:${taxId}`
+    const query = `gene_exact:"${candidate.replaceAll('"', '')}" AND organism_id:${taxId}`
     const json = await jsonfetch(
       `${UNIPROT}/uniprotkb/search?query=${encodeURIComponent(query)}&fields=${ENTRY_FIELDS}&size=25`,
       { signal },

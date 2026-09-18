@@ -144,6 +144,16 @@ test('resolveUniProtEntry fetches an accession directly and searches a symbol', 
   expect(calls[0]).toContain('/uniprotkb/P04637?')
   expect((await resolveUniProtEntry(['gene:TP53'], 9606))?.accession).toBe('Q2')
   expect(decodeURIComponent(calls[1]!)).toContain(
-    'gene_exact:TP53 AND organism_id:9606',
+    'gene_exact:"TP53" AND organism_id:9606',
   )
+})
+
+// the isoform is the query: dropping the suffix launched the canonical
+// sequence in its place, 393 residues for P04637-2's 341
+test('resolveUniProtEntry keeps an isoform suffix', async () => {
+  const calls = stubFetch([{ body: entry('P04637-2', 9606) }])
+  expect((await resolveUniProtEntry(['P04637-2'], 9606))?.accession).toBe(
+    'P04637-2',
+  )
+  expect(calls[0]).toContain('/uniprotkb/P04637-2?')
 })
