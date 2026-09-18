@@ -86,6 +86,25 @@ test('bare hits go to the chosen aligner, with the query first', async () => {
   expect(result.tree).toBe('tree')
 })
 
+// the history names the aligner that ran, which for a spec naming none is the
+// in-browser one -- not a key reading `db:undefined:...`
+test('a search naming no aligner is saved as aligned in the browser', async () => {
+  blastp.mockResolvedValue({ rid: 'job', hits: [{ ...HIT, sequence: 'MKWV' }] })
+  mockLaunchMSA.mockResolvedValue({ msa: 'aligned', tree: '' })
+
+  await launch(
+    makeModel({
+      blastDatabase: 'uniprotkb_swissprot',
+      maxHits: 20,
+      proteinSequence: 'MKWVTF',
+    }),
+  )
+
+  expect(saveBlastResult).toHaveBeenCalledWith(
+    expect.objectContaining({ msaAlgorithm: 'browser', maxHits: 20 }),
+  )
+})
+
 test('an aligned result skips the aligner and leaves the tree to the browser', async () => {
   phmmer.mockResolvedValue({
     rid: 'job',

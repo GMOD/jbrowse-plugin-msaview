@@ -1,3 +1,4 @@
+import { defaultMaxHits } from '../LaunchMsaView/components/BlastQuery/consts'
 import { bestEffort, createDbOpener } from './idb'
 
 import type {
@@ -33,6 +34,8 @@ export interface CachedBlastResult {
   searchProgram?: SearchProgram
   /** absent on phmmer rows, which are aligned by the search itself */
   msaAlgorithm?: MsaAlgorithm
+  /** absent on rows saved before it was recorded */
+  maxHits?: number
   msa: string
   tree: string
   treeMetadata: string
@@ -64,29 +67,35 @@ const getDB = createDbOpener<BlastCacheDB>(
   },
 )
 
-function createCacheKey({
+/**
+ * One history row per distinct search. Every input that changes the stored
+ * alignment is in the key, or re-running the query with another aligner or hit
+ * count overwrites the earlier row. A part added later is left out at its old
+ * value so rows saved before it still resolve: phmmer keys are prefixed and
+ * blastp keys are not, and the hit count appears only when it is not the
+ * default.
+ */
+export function createCacheKey({
   proteinSequence,
   blastDatabase,
   msaAlgorithm,
   searchProgram,
   transcriptId,
+  maxHits,
 }: {
   proteinSequence: string
   blastDatabase: BlastDatabase | PhmmerDatabase
   msaAlgorithm?: MsaAlgorithm
   searchProgram?: SearchProgram
   transcriptId?: string
+  maxHits?: number
 }) {
   const idPart = transcriptId ? `:${transcriptId}` : ''
-  // phmmer keys are prefixed and blastp keys are left exactly as they were, so
-  // results cached before phmmer existed still resolve
-  if (searchProgram === 'phmmer') {
-    return `phmmer:${blastDatabase}${idPart}:${proteinSequence}`
-  }
-  // msaAlgorithm is part of the key because the stored msa/tree are produced by
-  // it — without it, re-running the same query under a different algorithm
-  // overwrites the earlier result and drops it from the history list
-  return `${blastDatabase}:${msaAlgorithm}${idPart}:${proteinSequence}`
+  const hitsPart =
+    maxHits === undefined || maxHits === defaultMaxHits ? '' : `:n${maxHits}`
+  return searchProgram === 'phmmer'
+    ? `phmmer:${blastDatabase}${idPart}${hitsPart}:${proteinSequence}`
+    : `${blastDatabase}:${msaAlgorithm}${idPart}${hitsPart}:${proteinSequence}`
 }
 
 /**
@@ -99,6 +108,7 @@ export function saveBlastResult({
   blastDatabase,
   msaAlgorithm,
   searchProgram,
+  maxHits,
   msa,
   tree,
   treeMetadata,
@@ -112,6 +122,7 @@ export function saveBlastResult({
   blastDatabase: BlastDatabase | PhmmerDatabase
   msaAlgorithm?: MsaAlgorithm
   searchProgram?: SearchProgram
+  maxHits?: number
   msa: string
   tree: string
   treeMetadata: string
@@ -132,11 +143,13 @@ export function saveBlastResult({
           msaAlgorithm,
           searchProgram,
           transcriptId,
+          maxHits,
         }),
         proteinSequence,
         blastDatabase,
         msaAlgorithm,
         searchProgram,
+        maxHits,
         msa,
         tree,
         treeMetadata,

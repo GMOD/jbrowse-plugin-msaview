@@ -109,8 +109,9 @@ export async function doLaunchBlast({
   await saveBlastResult({
     proteinSequence: query,
     blastDatabase: params.blastDatabase,
-    msaAlgorithm: params.msaAlgorithm,
+    msaAlgorithm: queryRow ? undefined : (params.msaAlgorithm ?? 'browser'),
     searchProgram: params.searchProgram,
+    maxHits,
     msa,
     tree,
     treeMetadata: treeMetadataJson,

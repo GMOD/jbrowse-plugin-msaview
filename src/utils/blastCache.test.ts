@@ -1,6 +1,10 @@
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { getAllCachedResults, saveBlastResult } from './blastCache'
+import {
+  createCacheKey,
+  getAllCachedResults,
+  saveBlastResult,
+} from './blastCache'
 
 import type { CachedBlastResult } from './blastCache'
 
@@ -96,4 +100,26 @@ test('a store that refuses the write does not fail the save', async () => {
   vi.spyOn(console, 'warn').mockImplementation(() => {})
   store.refuses = true
   await expect(save(1)).resolves.toBeUndefined()
+})
+
+describe('createCacheKey', () => {
+  const base = {
+    proteinSequence: 'MKV',
+    blastDatabase: 'uniprotkb_swissprot',
+    msaAlgorithm: 'clustalo',
+  } as const
+
+  test('a different hit count is a different row', () => {
+    expect(createCacheKey({ ...base, maxHits: 50 })).not.toBe(
+      createCacheKey({ ...base, maxHits: 500 }),
+    )
+  })
+
+  // rows saved before the hit count was in the key must still resolve
+  test('the default hit count keeps the key it always had', () => {
+    expect(createCacheKey({ ...base, maxHits: 100 })).toBe(
+      'uniprotkb_swissprot:clustalo:MKV',
+    )
+    expect(createCacheKey(base)).toBe('uniprotkb_swissprot:clustalo:MKV')
+  })
 })
