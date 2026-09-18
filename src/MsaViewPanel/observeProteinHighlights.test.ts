@@ -34,7 +34,7 @@ function makeModel({
   const model = {
     querySeqName: 'query',
     querySeqOffset,
-    rows: [['query', 'MKVLTAEEK']],
+    rowMap: new Map([['query', 'MKVLTAEEK']]),
     connectedViewId: CONNECTED,
     // g2p is indexed by genome coord; identity keeps the arithmetic out of the way
     transcriptToMsaMap: {
@@ -274,11 +274,11 @@ describe('scope and redundant writes', () => {
     expect(calls).toEqual([])
   })
 
-  // seqPosToGlobalCol answers 0 for a row name it does not know, so without a
-  // guard a structure hover would light column 0 of whatever row is first
   test('a query row this alignment does not have contributes no column', () => {
     const { model, calls } = makeModel()
-    Object.assign(model, { rows: [['some_other_row', 'MKVLTAEEK']] })
+    Object.assign(model, {
+      rowMap: new Map([['some_other_row', 'MKVLTAEEK']]),
+    })
     const run = observeProteinHighlights(model)
 
     session({ hover: [{ start: 10, end: 12 }] })

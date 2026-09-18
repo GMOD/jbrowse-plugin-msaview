@@ -56,7 +56,7 @@ describe('genomeToMSA', () => {
 
     const model = {
       querySeqName: 'hg38.chr1',
-      rows: [['hg38.chr1', 'ACGTACGTAC']],
+      rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
       transcriptToMsaMap: undefined,
       mafRegion: {
         refName: 'chr1',
@@ -79,7 +79,7 @@ describe('genomeToMSA', () => {
 
     const model = {
       querySeqName: 'hg38.chr1',
-      rows: [['hg38.chr1', 'ACGTACGTAC']],
+      rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
       transcriptToMsaMap: undefined,
       mafRegion: {
         refName: 'chr1',
@@ -108,7 +108,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
-        rows: [['hg38.chr1', 'ACGTACGTAC']],
+        rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -121,6 +121,7 @@ describe('genomeToMSA', () => {
           assemblyNames: ['hg38'],
         },
         seqPosToVisibleCol: mockSeqPosToVisibleCol,
+        visibleColToSeqPos: () => 4,
       } as any
 
       const result = genomeToMSA({ model })
@@ -129,6 +130,37 @@ describe('genomeToMSA', () => {
       // which is ungapped position 4 of a region starting at 1000
       expect(mockSeqPosToVisibleCol).toHaveBeenCalledWith('hg38.chr1', 4)
       expect(result).toBe(5)
+    })
+
+    test('a position past the end of the row lights nothing', () => {
+      mockSession({
+        hovered: {
+          hoverFeature: {},
+          hoverPosition: { coord: 1009, refName: 'chr1' },
+        },
+      })
+
+      // react-msaview answers one column past the end for a residue the row
+      // does not have, and that column maps back to no residue
+      const model = {
+        querySeqName: 'hg38.chr1',
+        rowMap: new Map([['hg38.chr1', 'ACGTACG']]),
+        transcriptToMsaMap: undefined,
+        mafRegion: {
+          refName: 'chr1',
+          start: 1000,
+          end: 1010,
+          assemblyName: 'hg38',
+        },
+        connectedView: {
+          initialized: true,
+          assemblyNames: ['hg38'],
+        },
+        seqPosToVisibleCol: () => 7,
+        visibleColToSeqPos: () => undefined,
+      } as any
+
+      expect(genomeToMSA({ model })).toBeUndefined()
     })
 
     test('returns undefined when hover refName does not match mafRegion', () => {
@@ -141,7 +173,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
-        rows: [['hg38.chr1', 'ACGTACGTAC']],
+        rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -171,7 +203,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
-        rows: [['hg38.chr1', 'ACGTACGTAC']],
+        rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -201,7 +233,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
-        rows: [['hg38.chr1', 'ACGTACGTAC']],
+        rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -230,7 +262,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'hg38.chr1',
-        rows: [['hg38.chr1', 'ACGTACGTAC']],
+        rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -264,7 +296,7 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         querySeqOffset: 0,
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: {
           refName: 'chr1',
           // g2p is keyed by 0-based genome position, the hover coord is 1-based
@@ -295,7 +327,7 @@ describe('genomeToMSA', () => {
       const mockSeqPosToVisibleCol = vi.fn()
       const model = {
         querySeqName: 'QUERY',
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: {
           refName: 'chr1',
           g2p: { 1004: 10 },
@@ -323,7 +355,7 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         querySeqOffset: 4,
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
         mafRegion: undefined,
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -347,7 +379,7 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         querySeqOffset: 20,
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
         mafRegion: undefined,
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -372,7 +404,7 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         querySeqOffset: 0,
-        rows: [['QUERY', 'MKV']],
+        rowMap: new Map([['QUERY', 'MKV']]),
         transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
         mafRegion: undefined,
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -393,7 +425,7 @@ describe('genomeToMSA', () => {
 
       const model = {
         querySeqName: 'QUERY',
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: {
           refName: 'chr1',
           g2p: { 1000: 0 }, // No entry for 1004
@@ -418,7 +450,7 @@ describe('genomeToMSA', () => {
 
     const model = {
       querySeqName: 'QUERY',
-      rows: [['QUERY', 'MKVLTAEEK']],
+      rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
       transcriptToMsaMap: undefined,
       mafRegion: undefined,
       connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -429,10 +461,6 @@ describe('genomeToMSA', () => {
     expect(result).toBeUndefined()
   })
 
-  // seqPosToVisibleCol answers 0 for a row name it does not know, so without a
-  // guard an alignment whose query row is missing -- the default 'QUERY' on an
-  // uploaded file, or the empty name the manual panel leaves when it matches
-  // nothing -- lights column 0 on every genome hover
   test('returns undefined when querySeqName names no row here', () => {
     mockSession({
       hovered: {
@@ -444,7 +472,7 @@ describe('genomeToMSA', () => {
     const seqPosToVisibleCol = vi.fn(() => 0)
     const model = {
       querySeqName: 'QUERY',
-      rows: [['some_other_row', 'MKVLTAEEK']],
+      rowMap: new Map([['some_other_row', 'MKVLTAEEK']]),
       transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 3 } },
       mafRegion: undefined,
       connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -453,6 +481,29 @@ describe('genomeToMSA', () => {
 
     expect(genomeToMSA({ model })).toBeUndefined()
     expect(seqPosToVisibleCol).not.toHaveBeenCalled()
+  })
+
+  test('a query row folded into a collapsed clade still maps', () => {
+    mockSession({
+      hovered: {
+        hoverFeature: {},
+        hoverPosition: { coord: 1005, refName: 'chr1' },
+      },
+    })
+
+    const model = {
+      querySeqName: 'QUERY',
+      querySeqOffset: 0,
+      rows: [['collapsed_clade', 'MKVLTAEEK']],
+      rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
+      transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 3 } },
+      mafRegion: undefined,
+      connectedView: { initialized: true, assemblyNames: ['hg38'] },
+      seqPosToVisibleCol: (_name: string, pos: number) => pos,
+      visibleColToSeqPos: (_name: string, col: number) => col,
+    } as any
+
+    expect(genomeToMSA({ model })).toBe(3)
   })
 
   // A hover names the chromosome the assembly's way and the transcript names it
@@ -475,7 +526,7 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         querySeqOffset: 0,
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
         mafRegion: undefined,
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -500,7 +551,7 @@ describe('genomeToMSA', () => {
       const seqPosToVisibleCol = vi.fn()
       const model = {
         querySeqName: 'QUERY',
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
         mafRegion: undefined,
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -527,7 +578,7 @@ describe('genomeToMSA', () => {
       const model = {
         querySeqName: 'QUERY',
         querySeqOffset: 0,
-        rows: [['QUERY', 'MKVLTAEEK']],
+        rowMap: new Map([['QUERY', 'MKVLTAEEK']]),
         transcriptToMsaMap: { refName: 'chr1', g2p: { 1004: 10 } },
         mafRegion: undefined,
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
@@ -551,7 +602,7 @@ describe('genomeToMSA', () => {
       const seqPosToVisibleCol = vi.fn().mockReturnValue(5)
       const model = {
         querySeqName: 'hg38.chr1',
-        rows: [['hg38.chr1', 'ACGTACGTAC']],
+        rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
         transcriptToMsaMap: undefined,
         mafRegion: {
           refName: 'chr1',
@@ -561,6 +612,7 @@ describe('genomeToMSA', () => {
         },
         connectedView: { initialized: true, assemblyNames: ['hg38'] },
         seqPosToVisibleCol,
+        visibleColToSeqPos: () => 4,
       } as any
 
       expect(genomeToMSA({ model })).toBe(5)

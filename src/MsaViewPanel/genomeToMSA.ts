@@ -3,6 +3,7 @@ import { getSession } from '@jbrowse/core/util'
 import {
   hasHoverPosition,
   hasQueryRow,
+  querySeqPosToVisibleCol,
   transcriptPosToVisibleCol,
 } from './util'
 
@@ -10,7 +11,7 @@ import type { JBrowsePluginMsaViewModel } from './model'
 
 export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
   const { assemblyManager, hovered } = getSession(model)
-  const { querySeqName, transcriptToMsaMap, connectedView, mafRegion } = model
+  const { transcriptToMsaMap, connectedView, mafRegion } = model
 
   if (
     !connectedView?.initialized ||
@@ -56,7 +57,7 @@ export function genomeToMSA({ model }: { model: JBrowsePluginMsaViewModel }) {
     ) {
       return undefined
     }
-    return model.seqPosToVisibleCol(querySeqName, genomePos - mafRegion.start)
+    return querySeqPosToVisibleCol(model, genomePos - mafRegion.start)
   }
 
   // session.hovered is global -- set by whichever LinearGenomeView the cursor

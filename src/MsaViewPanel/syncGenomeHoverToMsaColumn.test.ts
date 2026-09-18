@@ -22,17 +22,18 @@ const mafRegion = {
 }
 
 // A model wired through the real genomeToMSA path: a connected genome view
-// over a maf region, with seqPosToVisibleCol as identity so the asserted
+// over a maf region, with the column converters as identity so the asserted
 // column equals the ungapped offset into the region.
 function makeModel() {
   const calls: (number | undefined)[] = []
   const model = {
     querySeqName: 'hg38.chr1',
-    rows: [['hg38.chr1', 'ACGTACGTAC']],
+    rowMap: new Map([['hg38.chr1', 'ACGTACGTAC']]),
     transcriptToMsaMap: undefined,
     mafRegion,
     connectedView: { initialized: true, assemblyNames: ['hg38'] },
     seqPosToVisibleCol: (_name: string, pos: number) => pos,
+    visibleColToSeqPos: (_name: string, col: number) => col,
     setMousePos: (col?: number) => {
       calls.push(col)
     },

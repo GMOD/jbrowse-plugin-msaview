@@ -1,19 +1,17 @@
 /**
- * Whether `querySeqName` names a row this alignment actually has.
+ * Whether `querySeqName` names a row this alignment actually has. The name
+ * defaults to `QUERY`, which an uploaded alignment has no reason to carry, so
+ * the genome and structure hovers ask this before mapping anything.
  *
- * react-msaview's `seqPosToGlobalCol` answers 0 for a name it does not know, so
- * without this every genome position maps to the first column and hovering the
- * genome — or a connected structure — lights column 0 of an unrelated row. The
- * name is wrong more often than it looks: it defaults to `QUERY`, which an
- * uploaded alignment has no reason to carry, and the manual panel leaves it
- * empty when it cannot match the protein to a row.
- *
- * The other direction has no such hole: msaCoordToGenomeRegions needs the query
- * row's sequence to map a column at all, so a missing row is already nothing
- * there.
+ * `rowMap`, not `rows`: `rows` is what is on screen, and a query row folded
+ * into a collapsed clade is still in the alignment, still has its columns, and
+ * still maps.
  */
-export function hasQueryRow(model: { rows: string[][]; querySeqName: string }) {
-  return model.rows.some(r => r[0] === model.querySeqName)
+export function hasQueryRow(model: {
+  rowMap: ReadonlyMap<string, string>
+  querySeqName: string
+}) {
+  return model.rowMap.has(model.querySeqName)
 }
 
 /**
@@ -53,9 +51,8 @@ export function transcriptName(transcript?: TranscriptRef) {
   return str(fields.name) ?? str(fields.id)
 }
 
-export interface QueryRowModel {
+interface QueryRowColumns {
   querySeqName: string
-  querySeqOffset: number
   seqPosToVisibleCol: (rowName: string, seqPos: number) => number | undefined
   visibleColToSeqPos: (
     rowName: string,
@@ -63,24 +60,24 @@ export interface QueryRowModel {
   ) => number | undefined
 }
 
+export interface QueryRowModel extends QueryRowColumns {
+  querySeqOffset: number
+}
+
 /**
- * The visible column showing residue `proteinPos` (0-based) of the transcript,
- * or undefined when the query row does not carry that residue or react-msaview
- * is hiding its column.
+ * The visible column showing residue `seqPos` (0-based) of the query row, or
+ * undefined when the row does not carry that residue or react-msaview is
+ * hiding its column.
  *
- * Two things separate the transcript from the row. `querySeqOffset` is the
- * trimming — a pasted BLAST alignment carries the aligned region, not the whole
- * protein. And the row can simply stop short: react-msaview answers one column
- * past the end for a position it does not have, which would light the last
- * column for every residue beyond the row, so the round trip back through
- * visibleColToSeqPos is what rejects those.
+ * react-msaview answers one column past the end for a position the row does not
+ * have, which would light the last column for every residue beyond the row, so
+ * the round trip back through visibleColToSeqPos is what rejects those.
  */
-export function transcriptPosToVisibleCol(
-  model: QueryRowModel,
-  proteinPos: number,
+export function querySeqPosToVisibleCol(
+  model: QueryRowColumns,
+  seqPos: number,
 ) {
-  const { querySeqName, querySeqOffset } = model
-  const seqPos = proteinPos - querySeqOffset
+  const { querySeqName } = model
   if (seqPos < 0) {
     return undefined
   }
@@ -89,6 +86,18 @@ export function transcriptPosToVisibleCol(
     model.visibleColToSeqPos(querySeqName, col) === seqPos
     ? col
     : undefined
+}
+
+/**
+ * The visible column showing residue `proteinPos` (0-based) of the transcript.
+ * `querySeqOffset` is what separates the two: a pasted BLAST alignment carries
+ * the aligned region, not the whole protein.
+ */
+export function transcriptPosToVisibleCol(
+  model: QueryRowModel,
+  proteinPos: number,
+) {
+  return querySeqPosToVisibleCol(model, proteinPos - model.querySeqOffset)
 }
 
 export function hasHoverPosition(
