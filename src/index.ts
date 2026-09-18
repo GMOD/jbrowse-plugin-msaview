@@ -28,16 +28,25 @@ export default class MsaViewPlugin extends Plugin {
   }
 
   configure(pluginManager: PluginManager) {
-    if (isAbstractMenuManager(pluginManager.rootModel)) {
-      pluginManager.rootModel.appendToSubMenu(['Add'], {
-        label: 'Multiple sequence alignment view',
-        icon: GridOn,
-        onClick: (session: AbstractSessionModel) => {
-          // stacked, by default: nothing was launched from, so there is no
-          // connected view for it to sit beside
-          launchMsaView(session, {})
-        },
-      })
+    // a throw here error-pages the whole app, and a menu entry is not worth a
+    // session: every released host's File menu already throws on append
+    try {
+      if (isAbstractMenuManager(pluginManager.rootModel)) {
+        pluginManager.rootModel.appendToSubMenu(['Add'], {
+          label: 'Multiple sequence alignment view',
+          icon: GridOn,
+          onClick: (session: AbstractSessionModel) => {
+            // stacked, by default: nothing was launched from, so there is no
+            // connected view for it to sit beside
+            launchMsaView(session, {})
+          },
+        })
+      }
+    } catch (e) {
+      console.error(
+        'jbrowse-plugin-msaview: could not add the Add menu item',
+        e,
+      )
     }
   }
 
