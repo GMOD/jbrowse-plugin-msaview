@@ -255,3 +255,67 @@ describe('getProteinSequenceFromFeature', () => {
     )
   })
 })
+
+describe('initiators and transl_except', () => {
+  it('reads an alternative initiator as M, as core does', () => {
+    const cds = [{ start: 0, end: 9, type: 'CDS' }]
+    expect(calculateProteinSequence({ cds, sequence: 'CTGCTGTAA' })).toBe('ML*')
+    expect(
+      calculateProteinSequence({
+        cds,
+        sequence: 'GTGGTGTAA',
+        geneticCodeId: 11,
+      }),
+    ).toBe('MV*')
+  })
+
+  it('leaves the codon after a partial first codon alone', () => {
+    expect(
+      calculateProteinSequence({
+        cds: [{ start: 0, end: 10, type: 'CDS', phase: 1 }],
+        sequence: 'GCTGCTGTAA',
+      }),
+    ).toBe('&LL*')
+  })
+
+  function selenoprotein(strand: 1 | -1, pos: string) {
+    return new SimpleFeature({
+      uniqueId: 'sel',
+      refName: 'chr1',
+      start: 100,
+      end: 112,
+      type: 'mRNA',
+      strand,
+      subfeatures: [
+        {
+          uniqueId: 'sel-cds',
+          refName: 'chr1',
+          start: 100,
+          end: 112,
+          type: 'CDS',
+          transl_except: `(pos:${pos},aa:Sec)`,
+        },
+      ],
+    })
+  }
+
+  // read as a stop, a selenocysteine truncates the protein and, once the stop
+  // is cleaned out, shifts every residue after it
+  it('translates a RefSeq selenocysteine on the forward strand', () => {
+    expect(
+      getProteinSequenceFromFeature({
+        seq: 'ATGGCTTGATAA',
+        feature: selenoprotein(1, '107..109'),
+      }),
+    ).toBe('MAU*')
+  })
+
+  it('translates a RefSeq selenocysteine on the reverse strand', () => {
+    expect(
+      getProteinSequenceFromFeature({
+        seq: 'TTATCAAGCCAT',
+        feature: selenoprotein(-1, 'complement(104..106)'),
+      }),
+    ).toBe('MAU*')
+  })
+})

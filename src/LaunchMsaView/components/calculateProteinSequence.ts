@@ -3,39 +3,38 @@ import { convertCodingSequenceToPeptides } from '@jbrowse/core/util/convertCodin
 import {
   getGeneticCode,
   parseTranslTable,
+  relativizeTranslExcept,
 } from '@jbrowse/core/util/geneticCodes'
 
 import type { Feat } from './types'
 import type { Feature } from '@jbrowse/core/util'
+import type { TranslExcept } from '@jbrowse/core/util/geneticCodes'
 
 // `@jbrowse/core/util/convertCodingSequenceToPeptides` and
-// `@jbrowse/core/util/geneticCodes` are deep paths, so unlike the
-// `@jbrowse/core/util` barrel they are absent from ReExports and get bundled
-// rather than resolved out of the host's JBrowseExports. That is what makes
-// reusing core's translation safe across every host a config names: this module
-// previously built its codon table at module scope from the barrel's
-// `defaultCodonTable`, and a core build that dropped that export turned it into
-// `Object.keys(undefined)` while the UMD was still evaluating -- the plugin
-// global was never assigned and PluginLoader error-paged the whole app.
+// `@jbrowse/core/util/geneticCodes` are deep paths absent from ReExports, so
+// they are bundled rather than resolved out of the host's JBrowseExports: every
+// host runs the version this build installs. Importing translation from the
+// `@jbrowse/core/util` barrel instead is what error-paged the whole app when a
+// core build dropped `defaultCodonTable`.
 
 export function calculateProteinSequence({
   cds,
   sequence,
   geneticCodeId,
+  translExcept,
 }: {
   cds: Feat[]
   sequence: string
   geneticCodeId?: number
+  translExcept?: TranslExcept[]
 }) {
-  // `starts` is deliberately not passed: @jbrowse/core 4.3.0's signature has no
-  // such parameter, so alternative initiators (GTG under table 11, ATA under
-  // table 2) render as their internal residue rather than M. Core main added it;
-  // pass it here when msaview's @jbrowse/core floor reaches that release.
-  const { codonTable } = getGeneticCode(geneticCodeId)
+  const { codonTable, starts } = getGeneticCode(geneticCodeId)
   return convertCodingSequenceToPeptides({
     cds,
     sequence,
     codonTable,
+    starts,
+    translExcept,
   })
 }
 
@@ -60,6 +59,11 @@ export function revlist(list: Feat[], seqlen: number) {
     .toSorted((a, b) => a.start - b.start)
 }
 
+/**
+ * The translation core's own feature panel shows: the contig's or the
+ * feature's genetic code, its alternative initiators, and any `transl_except`
+ * (RefSeq's selenocysteines), read off the transcript or its CDS as core does.
+ */
 export function getProteinSequenceFromFeature({
   feature,
   seq,
@@ -71,7 +75,7 @@ export function getProteinSequenceFromFeature({
    * configs; a transl_table on the feature wins */
   assemblyGeneticCodeId?: number
 }) {
-  const { subfeatures, start, strand } = feature.toJSON()
+  const { subfeatures, start, end, strand } = feature.toJSON()
   const cds = dedupe(
     subfeatures
       ?.toSorted((a, b) => a.start - b.start)
@@ -83,10 +87,6 @@ export function getProteinSequenceFromFeature({
       .filter(subfeature => subfeature.type === 'CDS') ?? [],
   )
 
-  // RefSeq declares transl_table=2 on a mitochondrial CDS, usually on the CDS
-  // rather than the transcript. GENCODE and UCSC declare nothing, so without
-  // the assembly's code all 13 human mitochondrial proteins read TGA as a stop
-  // and ATA as I.
   const cdsSubfeature = feature
     .get('subfeatures')
     ?.find((f: Feature) => f.get('type')?.toLowerCase() === 'cds')
@@ -94,10 +94,20 @@ export function getProteinSequenceFromFeature({
     parseTranslTable(feature.get('transl_table')) ??
     parseTranslTable(cdsSubfeature?.get('transl_table')) ??
     assemblyGeneticCodeId
+  const rawTranslExcept =
+    feature.get('transl_except') ?? cdsSubfeature?.get('transl_except')
 
   return calculateProteinSequence({
     cds: strand === -1 ? revlist(cds, seq.length) : cds,
     sequence: strand === -1 ? revcom(seq) : seq,
     geneticCodeId,
+    translExcept: rawTranslExcept
+      ? relativizeTranslExcept({
+          raw: rawTranslExcept,
+          featureStart: start,
+          featureLength: end - start,
+          strand,
+        })
+      : undefined,
   })
 }
