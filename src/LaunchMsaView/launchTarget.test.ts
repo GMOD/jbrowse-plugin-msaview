@@ -137,6 +137,20 @@ describe('launchTarget', () => {
     expect(target?.preferredTranscriptId).toBe(mrna.id())
   })
 
+  // the canvas host names the clicked isoform beside the gene it fetches, as
+  // its own Collapse introns dialog reads it
+  test('carries the isoform a canvas click landed on', () => {
+    const host = modernHost('gene')
+    const target = launchTarget({
+      ...host,
+      contextMenuInfo: {
+        ...host.contextMenuInfo,
+        subfeature: { featureId: 'mrna-2' },
+      },
+    })
+    expect(target?.preferredTranscriptId).toBe('mrna-2')
+  })
+
   // a host that has both shapes must not fall through to the legacy branch and
   // launch on a stale feature when the click was not on a gene
   test('a non-gene click on a host carrying both shapes offers nothing', () => {

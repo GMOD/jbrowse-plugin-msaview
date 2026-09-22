@@ -9,6 +9,8 @@ import type { Feature } from '@jbrowse/core/util'
 // synchronously as contextMenuFeature, and only have that one.
 export interface ContextMenuInfo {
   item: { featureId: string; type?: string }
+  // the isoform under the pointer when the click landed on a gene's child
+  subfeature?: { featureId: string }
   displayedRegionIndex: number
 }
 
@@ -86,6 +88,7 @@ export function launchTarget(self: DisplayModel): MenuTarget | undefined {
       ? {
           fetchFeature: () =>
             fetchFullFeature(info.item.featureId, info.displayedRegionIndex),
+          preferredTranscriptId: info.subfeature?.featureId,
         }
       : undefined
   }
