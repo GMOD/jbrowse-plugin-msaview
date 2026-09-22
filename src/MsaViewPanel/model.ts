@@ -426,12 +426,6 @@ export default function stateModelFactory() {
       /**
        * #action
        */
-      setQuerySeqOffset(arg: number) {
-        self.querySeqOffset = arg
-      },
-      /**
-       * #action
-       */
       setUniprotId(arg?: string) {
         self.uniprotId = arg
       },
@@ -446,12 +440,6 @@ export default function stateModelFactory() {
        */
       setLaunchCompleted(arg: boolean) {
         self.launchCompleted = arg
-      },
-      /**
-       * #action
-       */
-      setMafRegion(arg?: MafRegion) {
-        self.mafRegion = arg
       },
       /**
        * #action
