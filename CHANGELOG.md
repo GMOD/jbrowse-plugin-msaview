@@ -1,3 +1,17 @@
+## [3.8.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.7.1...v3.8.0) (2026-09-22)
+
+### Bug Fixes
+
+- Open the transcript picker on the isoform a canvas click landed on ([e4f044d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e4f044db4ab30fe89b131b6fa39c0ecc8243bb66))
+
+### Documentation
+
+- The canvas context-menu API is JBrowse 5, not 4.3 ([bc72bfd](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bc72bfd68576421d66052553d88004c06411c895))
+
+### Refactoring
+
+- Drop setMafRegion and setQuerySeqOffset, which nothing calls ([c659bef](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c659bef9474e1e97af369e81789e34794f8d1c40))
+
 ## [3.7.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.7.0...v3.7.1) (2026-09-18)
 
 ### Chores
