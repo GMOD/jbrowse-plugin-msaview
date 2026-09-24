@@ -1,3 +1,32 @@
+## [3.9.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.8.0...v3.9.0) (2026-09-24)
+
+### Bug Fixes
+
+- A cancel or closed dialog aborts the NCBI and PANTHER lookups in flight ([6d9821d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6d9821db29220bb27ca9c5309d3875373f0bf464))
+- The in-browser aligner refuses an alignment too big to run on the page ([208957e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/208957efcd3e86deed2888856389aa2831ab19ba))
+- A malformed linked transcript unlinks the view instead of throwing ([2dba656](https://github.com/GMOD/jbrowse-plugin-msaview/commit/2dba65644a4c4191467997780038a2a44d99c8cc))
+- A BLAST search survives an alignment that refuses or fails ([321d0f4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/321d0f4c1f7819906c924737b99414674bd2df52))
+- A cancelled taxonomy lookup keeps the names it fetched, and frees its eutils slot ([ab129e8](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ab129e8089eb8010274b0090ae043718bb32df59))
+- Saved BLAST hits expire after seven days, so a later relaunch searches afresh ([3db42da](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3db42da58a0c14e6d786d78d9b8d9638991675b6))
+- Highlight codons from every MSA view linked to a genome view ([069ce48](https://github.com/GMOD/jbrowse-plugin-msaview/commit/069ce488648427401208668e502564e770bc96c5))
+- Keep in IndexedDB exactly what a reload would lose ([6e6008c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6e6008c142c11ff629ca965d7b4c09370868f671))
+- Never write or delete a stored row another view may share ([443aae4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/443aae497d030f1242497411d2ebf537d74e2174))
+- Reset drops the stored id instead of deleting the row ([815a9fe](https://github.com/GMOD/jbrowse-plugin-msaview/commit/815a9febb05cbcb3f5fce8b31c6e233f7e4832d3))
+
+### Documentation
+
+- Note translateTranscript waits on a core release ([ebe3a9c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ebe3a9c849277dc620e4b5695445537a2218ee4f))
+- Drop the finished robustness items from the todo list ([543002c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/543002ca2ec9f0c356cc9ecb7303e37e37508036))
+
+### Refactoring
+
+- One runEbiJob drives every EBI Job Dispatcher run ([03a80d7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/03a80d72f131e8a00937a7096ebc17e6ff2561a2))
+- Drop exports nothing imports, and the unused SeqState type ([24c0f3f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/24c0f3f6b2bd6bf9f50d427f71f0cc80121884c1))
+
+### Styling
+
+- Drop the new doc comments, and the non-null assertions in transcriptMap's tests ([b2a8b78](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b2a8b789573bd632d1878b3ee20616af95acf476))
+
 ## [3.8.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.7.1...v3.8.0) (2026-09-22)
 
 ### Bug Fixes
