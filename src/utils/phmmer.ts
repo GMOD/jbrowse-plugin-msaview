@@ -1,6 +1,6 @@
 import { StockholmMSA } from 'msa-parsers'
 
-import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
+import { runEbiJob } from './ebiJobDispatcher'
 
 import type { PhmmerDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { SearchBackend, SearchHit } from './homologSearch'
@@ -170,9 +170,9 @@ export async function queryPhmmer({
   onRid: (arg: string) => void
   signal?: AbortSignal
 }) {
-  onProgress('Submitting to EBI phmmer...')
-  const jobId = await submitEbiJob({
+  const job = await runEbiJob({
     tool: TOOL,
+    label: 'phmmer',
     params: {
       database,
       sequence: query,
@@ -180,27 +180,18 @@ export async function queryPhmmer({
       alignView: 'true',
       ...(maxHits ? { nhits: String(maxHits) } : {}),
     },
+    onProgress,
+    onRid,
     signal,
   })
-  onRid(jobId)
-
-  await waitForEbiJob({
-    tool: TOOL,
-    jobId,
-    signal,
-    onCountdown: s => {
-      onProgress(`Re-checking phmmer status in... ${s}`)
-    },
-  })
-
   const alignment = parsePhmmerAlignment({
-    stockholm: await fetchEbiResult({ tool: TOOL, jobId, type: 'sto', signal }),
+    stockholm: await job.result('sto'),
     query,
   })
   if (alignment.rows.length === 0) {
     throw new Error('No hits found')
   }
-  return { rid: jobId, ...alignment }
+  return { rid: job.jobId, ...alignment }
 }
 
 /** phmmer's rows as search hits: the aligned row is the hit's sequence. */

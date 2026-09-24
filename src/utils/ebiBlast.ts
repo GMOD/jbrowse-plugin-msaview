@@ -1,6 +1,6 @@
 import { snapBlastHitCount } from '../LaunchMsaView/components/BlastQuery/consts'
 import { strip } from '../LaunchMsaView/components/util'
-import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
+import { runEbiJob } from './ebiJobDispatcher'
 
 import type { BlastDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { SearchBackend } from './homologSearch'
@@ -64,36 +64,6 @@ export function ebiBlastResultUrl(jobId: string) {
   return `https://www.ebi.ac.uk/jdispatcher/sss/${TOOL}/summary?jobId=${jobId}`
 }
 
-export async function queryEbiBlastFromJobId({
-  jobId,
-  onProgress,
-  signal,
-}: {
-  jobId: string
-  onProgress: (arg: string) => void
-  signal?: AbortSignal
-}) {
-  onProgress(`Checking BLAST status for job: ${jobId}...`)
-  await waitForEbiJob({
-    tool: TOOL,
-    jobId,
-    signal,
-    onCountdown: s => {
-      onProgress(`Re-checking BLAST status in... ${s}`)
-    },
-  })
-
-  const hits = normalizeEbiBlastHits(
-    JSON.parse(
-      await fetchEbiResult({ tool: TOOL, jobId, type: 'json', signal }),
-    ) as EbiBlastJson,
-  )
-  if (hits.length === 0) {
-    throw new Error('No hits found')
-  }
-  return { rid: jobId, hits }
-}
-
 export async function queryEbiBlast({
   query,
   blastDatabase,
@@ -110,10 +80,10 @@ export async function queryEbiBlast({
   onRid: (arg: string) => void
   signal?: AbortSignal
 }) {
-  onProgress('Submitting to EBI BLAST...')
   const hitCount = maxHits ? String(snapBlastHitCount(maxHits)) : undefined
-  const jobId = await submitEbiJob({
+  const job = await runEbiJob({
     tool: TOOL,
+    label: 'BLAST',
     params: {
       program: 'blastp',
       stype: 'protein',
@@ -121,10 +91,17 @@ export async function queryEbiBlast({
       sequence: query,
       ...(hitCount ? { alignments: hitCount, scores: hitCount } : {}),
     },
+    onProgress,
+    onRid,
     signal,
   })
-  onRid(jobId)
-  return queryEbiBlastFromJobId({ jobId, onProgress, signal })
+  const hits = normalizeEbiBlastHits(
+    JSON.parse(await job.result('json')) as EbiBlastJson,
+  )
+  if (hits.length === 0) {
+    throw new Error('No hits found')
+  }
+  return { rid: job.jobId, hits }
 }
 
 /**

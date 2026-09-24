@@ -1,5 +1,5 @@
 import { alignInBrowser, parseFastaRecords } from './browserAlign'
-import { fetchEbiResult, submitEbiJob, waitForEbiJob } from './ebiJobDispatcher'
+import { runEbiJob } from './ebiJobDispatcher'
 
 import type {
   EbiMsaAlgorithm,
@@ -63,26 +63,16 @@ export async function launchMSA({
     }
   }
   const config = algorithms[algorithm]
-
-  onProgress(`Launching ${algorithm} MSA...`)
-
-  const jobId = await submitEbiJob({
+  const job = await runEbiJob({
     tool: algorithm,
+    label: `${algorithm} MSA`,
     params: { ...config.params, sequence },
+    onProgress,
     signal,
   })
-  await waitForEbiJob({
-    tool: algorithm,
-    jobId,
-    signal,
-    onCountdown: s => {
-      onProgress(`Re-checking MSA status in... ${s}`)
-    },
-  })
-  // one finished job, two result files, neither derived from the other
   const [msa, tree] = await Promise.all([
-    fetchEbiResult({ tool: algorithm, jobId, type: config.msaResult, signal }),
-    fetchEbiResult({ tool: algorithm, jobId, type: config.treeResult, signal }),
+    job.result(config.msaResult),
+    job.result(config.treeResult),
   ])
   return { msa, tree }
 }

@@ -32,7 +32,7 @@ export function getEbiEmail() {
 /** Statuses that mean the job is over and produced no result. */
 const FAILED_STATUSES = new Set(['ERROR', 'FAILURE', 'NOT_FOUND'])
 
-export async function submitEbiJob({
+async function submitEbiJob({
   tool,
   params,
   signal,
@@ -116,16 +116,40 @@ export async function waitForEbiJob({
   })
 }
 
-export async function fetchEbiResult({
+/**
+ * One job from submission to result: submit, publish the job id, poll until
+ * it finishes, then hand back a reader for its result files. `label` names the
+ * job in the progress text.
+ */
+export async function runEbiJob({
   tool,
-  jobId,
-  type,
+  label,
+  params,
+  onProgress,
+  onRid,
   signal,
 }: {
   tool: string
-  jobId: string
-  type: string
+  label: string
+  params: Record<string, string>
+  onProgress: (arg: string) => void
+  onRid?: (jobId: string) => void
   signal?: AbortSignal
 }) {
-  return textfetch(`${EBI_BASE}/${tool}/result/${jobId}/${type}`, { signal })
+  onProgress(`Submitting ${label} to EBI...`)
+  const jobId = await submitEbiJob({ tool, params, signal })
+  onRid?.(jobId)
+  await waitForEbiJob({
+    tool,
+    jobId,
+    signal,
+    onCountdown: s => {
+      onProgress(`Re-checking ${label} status in... ${s}`)
+    },
+  })
+  return {
+    jobId,
+    result: (type: string) =>
+      textfetch(`${EBI_BASE}/${tool}/result/${jobId}/${type}`, { signal }),
+  }
 }
