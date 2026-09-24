@@ -193,3 +193,19 @@ test('resolveGeneId searches each cleaned symbol once', async () => {
   expect(seen).toHaveLength(2)
   vi.unstubAllGlobals()
 })
+
+test('an abort stops a chunked lookup at the request in flight', async () => {
+  const controller = new AbortController()
+  const seen: string[] = []
+  vi.stubGlobal('fetch', (url: string, init?: RequestInit) => {
+    seen.push(url)
+    controller.abort()
+    return Promise.reject(init?.signal?.reason)
+  })
+  const ids = Array.from({ length: 400 }, (_, i) => String(100000 + i))
+  await expect(
+    fetchRepresentativeProteins(ids, controller.signal),
+  ).rejects.toThrow(expect.objectContaining({ name: 'AbortError' }))
+  expect(seen).toHaveLength(1)
+  vi.unstubAllGlobals()
+})

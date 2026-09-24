@@ -93,6 +93,7 @@ export function cleanGeneCandidate(raw: string) {
 export async function resolveGeneId(
   candidates: string[],
   taxId: number,
+  signal?: AbortSignal,
 ): Promise<{ geneId: string; matched: string } | undefined> {
   const asked = new Set<string>()
   for (const raw of candidates) {
@@ -114,6 +115,7 @@ export async function resolveGeneId(
         retmode: 'json',
         retmax: '1',
       }),
+      { signal },
     )
     const geneId = json.esearchresult?.idlist?.[0]
     if (geneId) {
@@ -147,10 +149,17 @@ export async function fetchOrthologGenes(
     taxa,
     exclude,
     limit = defaultMaxSpecies,
-  }: { taxa?: Set<number>; exclude?: number; limit?: number } = {},
+    signal,
+  }: {
+    taxa?: Set<number>
+    exclude?: number
+    limit?: number
+    signal?: AbortSignal
+  } = {},
 ) {
   const json = await jsonfetch<OrthologReport>(
     `${DATASETS}/gene/id/${geneId}/orthologs?returned_content=COMPLETE`,
+    { signal },
   )
   const byTaxon = new Map<
     number,
@@ -215,12 +224,16 @@ const PRODUCT_REPORT_CHUNK = 150
  * the longest isoform. A stable, comparable choice across species — picking
  * "the first" would silently vary with NCBI's ordering.
  */
-export async function fetchRepresentativeProteins(geneIds: string[]) {
+export async function fetchRepresentativeProteins(
+  geneIds: string[],
+  signal?: AbortSignal,
+) {
   const byGene = new Map<string, string>()
   for (let i = 0; i < geneIds.length; i += PRODUCT_REPORT_CHUNK) {
     const chunk = geneIds.slice(i, i + PRODUCT_REPORT_CHUNK)
     const json = await jsonfetch<ProductReport>(
       `${DATASETS}/gene/id/${chunk.join(',')}/product_report?page_size=${chunk.length}`,
+      { signal },
     )
     for (const { product } of json.reports ?? []) {
       const candidates = (product?.transcripts ?? [])
@@ -299,14 +312,18 @@ export function dedupeLabels(names: string[]) {
  * RefSeq protein — if it is, that accession's precomputed CDD domains apply to
  * the query row exactly, and if it isn't, they would land at an offset.
  */
-export async function fetchProteinForGene(geneId: string) {
-  const acc = (await fetchRepresentativeProteins([geneId])).get(geneId)
+export async function fetchProteinForGene(
+  geneId: string,
+  signal?: AbortSignal,
+) {
+  const acc = (await fetchRepresentativeProteins([geneId], signal)).get(geneId)
   if (!acc) {
     return undefined
   }
   const seq = parseFasta(
     await eutilsText(
       efetchUrl({ db: 'protein', id: acc, rettype: 'fasta', retmode: 'text' }),
+      { signal },
     ),
   ).get(acc)
   return seq ? { accession: acc, sequence: seq } : undefined
@@ -323,15 +340,22 @@ export async function fetchOrthologRows({
   exclude,
   limit,
   onProgress,
+  signal,
 }: {
   geneId: string
   taxa?: Set<number>
   exclude?: number
   limit?: number
   onProgress: (arg: string) => void
+  signal?: AbortSignal
 }): Promise<OrthologRow[]> {
   onProgress('Finding orthologs across species...')
-  const genes = await fetchOrthologGenes(geneId, { taxa, exclude, limit })
+  const genes = await fetchOrthologGenes(geneId, {
+    taxa,
+    exclude,
+    limit,
+    signal,
+  })
   if (genes.length < 2) {
     throw new Error(
       `Only ${genes.length} ortholog(s) found for this gene — not enough to align`,
@@ -341,6 +365,7 @@ export async function fetchOrthologRows({
   onProgress('Selecting a representative protein per species...')
   const proteinByGene = await fetchRepresentativeProteins(
     genes.map(g => g.geneId),
+    signal,
   )
   const withProtein = genes.filter(g => proteinByGene.has(g.geneId))
   if (withProtein.length < 2) {
@@ -351,16 +376,13 @@ export async function fetchOrthologRows({
 
   onProgress(`Fetching ${withProtein.length} protein sequences...`)
   const accessions = withProtein.map(g => proteinByGene.get(g.geneId)!)
-  const seqByAcc = parseFasta(
-    await eutilsText(
-      ...efetchPost({
-        db: 'protein',
-        id: accessions.join(','),
-        rettype: 'fasta',
-        retmode: 'text',
-      }),
-    ),
-  )
+  const [efetch, init] = efetchPost({
+    db: 'protein',
+    id: accessions.join(','),
+    rettype: 'fasta',
+    retmode: 'text',
+  })
+  const seqByAcc = parseFasta(await eutilsText(efetch, { ...init, signal }))
 
   const labels = dedupeLabels(
     withProtein.map(g => g.commonName ?? g.scientificName),

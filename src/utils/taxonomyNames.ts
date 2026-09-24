@@ -1,4 +1,5 @@
 import { decodeXmlEntities, efetchUrl, eutilsText } from './eutils'
+import { isAbortError } from './fetch'
 import { bestEffort, createDbOpener } from './idb'
 
 import type { DBSchema } from 'idb'
@@ -65,6 +66,7 @@ export interface TaxonomyInfo {
 
 export async function fetchTaxonomyInfo(
   taxidsWithRepeats: number[],
+  signal?: AbortSignal,
 ): Promise<Map<number, TaxonomyInfo>> {
   // callers pass one taxid per alignment row, and a BLAST hit list is several
   // rows per species: 100 albumin hits are maybe 50 taxa, and asking as they
@@ -106,6 +108,7 @@ export async function fetchTaxonomyInfo(
       // names" instead of reporting why
       const text = await eutilsText(
         efetchUrl({ db: 'taxonomy', id: idsParam, retmode: 'xml' }),
+        { signal },
       )
 
       // Build a map of taxid -> taxon block by finding Taxon elements.
@@ -163,6 +166,9 @@ export async function fetchTaxonomyInfo(
         }
       }
     } catch (error) {
+      if (isAbortError(error)) {
+        throw error
+      }
       console.error('Failed to fetch taxonomy data:', error)
     }
   }

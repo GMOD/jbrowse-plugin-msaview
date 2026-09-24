@@ -234,6 +234,29 @@ describe('fetchPantherOrthologs', () => {
     ).rejects.toThrow(/no entry for NOTAGENEXYZ in Homo sapiens/)
   })
 
+  test('an abort stops the lookup at the request in flight', async () => {
+    const controller = new AbortController()
+    vi.stubGlobal('fetch', (url: string, init?: RequestInit) => {
+      seen.push(url)
+      if (url.includes('supportedgenomes')) {
+        const body = fixture('panther-genomes')
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(body) })
+      }
+      controller.abort()
+      return Promise.reject(init?.signal?.reason)
+    })
+    await expect(
+      fetchPantherOrthologs({
+        candidates: ['CDC28', 'YBR160W'],
+        taxId: 559292,
+        onProgress: () => {},
+        signal: controller.signal,
+      }),
+    ).rejects.toThrow(expect.objectContaining({ name: 'AbortError' }))
+    expect(seen.filter(u => u.includes('matchortho'))).toHaveLength(1)
+    expect(seen.some(u => u.includes('uniprot'))).toBe(false)
+  })
+
   test('a known gene with too few orthologs says so', async () => {
     stubFetch(fixture('panther-empty'))
     await expect(

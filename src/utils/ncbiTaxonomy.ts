@@ -10,7 +10,7 @@ import { eutilsJson, eutilsUrl } from './eutils'
  * searches `SYMBOL[Gene Name] AND <taxid>[taxid]` -- so a list that stops at 23
  * species silently resolves the wrong organism's gene for anyone outside it.
  */
-export async function resolveTaxId(query: string) {
+export async function resolveTaxId(query: string, signal?: AbortSignal) {
   const term = query.trim()
   if (!term) {
     return undefined
@@ -25,6 +25,7 @@ export async function resolveTaxId(query: string) {
       retmax: '1',
       retmode: 'json',
     }),
+    { signal },
   )
   const id = json.esearchresult?.idlist?.[0]
   return id ? Number(id) : undefined
@@ -49,7 +50,10 @@ interface AssemblySummary {
  * accessions. An assembly NCBI has never heard of resolves to nothing and the
  * caller keeps its own default, so this can only improve on guessing.
  */
-export async function resolveAssemblySpecies(assemblyName: string) {
+export async function resolveAssemblySpecies(
+  assemblyName: string,
+  signal?: AbortSignal,
+) {
   const term = assemblyName.trim()
   if (!term) {
     return undefined
@@ -61,6 +65,7 @@ export async function resolveAssemblySpecies(assemblyName: string) {
       retmax: '1',
       retmode: 'json',
     }),
+    { signal },
   )
   const uid = search.esearchresult?.idlist?.[0]
   if (!uid) {
@@ -68,6 +73,7 @@ export async function resolveAssemblySpecies(assemblyName: string) {
   }
   const summary = await eutilsJson<AssemblySummary>(
     eutilsUrl('esummary', { db: 'assembly', id: uid, retmode: 'json' }),
+    { signal },
   )
   const record = summary.result?.[uid]
   const taxId = Number(record?.speciestaxid)

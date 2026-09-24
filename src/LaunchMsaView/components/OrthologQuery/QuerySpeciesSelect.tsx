@@ -8,12 +8,12 @@ import {
 import { fetchTaxonomyInfo } from '../../../utils/taxonomyNames'
 import { useDebounced, useFetch } from '../../../utils/useFetch'
 
-async function describeTaxon(query: string) {
-  const taxId = await resolveTaxId(query)
+async function describeTaxon(query: string, signal: AbortSignal) {
+  const taxId = await resolveTaxId(query, signal)
   if (!taxId) {
     throw new Error(`No NCBI taxon matches "${query}"`)
   }
-  const info = (await fetchTaxonomyInfo([taxId])).get(taxId)
+  const info = (await fetchTaxonomyInfo([taxId], signal)).get(taxId)
   const label = [info?.sciname, info?.commonName && `(${info.commonName})`]
     .filter(Boolean)
     .join(' ')
@@ -59,7 +59,7 @@ export default function QuerySpeciesSelect({
     assemblyName && typed === undefined
       ? [assemblyName, 'assembly-species']
       : null,
-    () => resolveAssemblySpecies(assemblyName!),
+    signal => resolveAssemblySpecies(assemblyName!, signal),
     {
       onSuccess: found => {
         if (found) {
@@ -71,7 +71,7 @@ export default function QuerySpeciesSelect({
 
   const { data: fromText, error } = useFetch(
     debounced?.trim() ? [debounced.trim(), 'taxon'] : null,
-    () => describeTaxon(debounced!),
+    signal => describeTaxon(debounced!, signal),
     {
       onSuccess: ({ taxId }) => {
         onChange(taxId)

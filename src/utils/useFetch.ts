@@ -45,10 +45,14 @@ interface Settled<Data> {
  * frame showing the previous key's data as though it were the new key's. A
  * `mutate()` refetch under the same key does leave its data up, because it is
  * the same question asked again and blanking it flashes an empty list.
+ *
+ * The fetcher gets a signal that aborts when the key changes or the component
+ * unmounts, so closing the dialog or typing past a lookup stops its requests
+ * rather than letting them finish into a discarded result.
  */
 export function useFetch<Data>(
   key: FetchKey,
-  fetcher: () => Promise<Data>,
+  fetcher: (signal: AbortSignal) => Promise<Data>,
   { onSuccess }: { onSuccess?: (data: Data) => void } = {},
 ) {
   const serialized = serializeKey(key)
@@ -72,22 +76,22 @@ export function useFetch<Data>(
     if (attempt === null || serialized === null) {
       return undefined
     }
-    let alive = true
+    const controller = new AbortController()
     latest.current
-      .fetcher()
+      .fetcher(controller.signal)
       .then(data => {
-        if (alive) {
+        if (!controller.signal.aborted) {
           setSettled({ attempt, question: serialized, data })
           latest.current.onSuccess?.(data)
         }
       })
       .catch((error: unknown) => {
-        if (alive) {
+        if (!controller.signal.aborted) {
           setSettled({ attempt, question: serialized, error })
         }
       })
     return () => {
-      alive = false
+      controller.abort()
     }
   }, [attempt, serialized])
 

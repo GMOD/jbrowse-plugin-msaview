@@ -1,4 +1,5 @@
 import { cleanProteinSequence } from '../LaunchMsaView/util'
+import { isAbortError } from '../utils/fetch'
 import { launchMSA } from '../utils/msa'
 import {
   dedupeLabels,
@@ -75,6 +76,7 @@ export async function doLaunchOrthologs({
     exclude: taxId,
     limit: maxSpecies,
     onProgress,
+    signal,
   }
   const { geneId, representative, rows } =
     source === 'panther'
@@ -84,7 +86,6 @@ export async function doLaunchOrthologs({
             ...request,
             identity,
             referenceProteomesOnly,
-            signal,
           })
         : await findNcbiOrthologs(request)
 
@@ -115,7 +116,7 @@ export async function doLaunchOrthologs({
   // taxon is excluded from that set, but a subspecies can sanitize to the same
   // token, and a collision would silently point the coordinate mapping at
   // another animal's row.
-  const queryLabel = await queryRowLabel(taxId, rows)
+  const queryLabel = await queryRowLabel(taxId, rows, signal)
   act(() => {
     self.setQuerySeqName(queryLabel)
   })
@@ -150,6 +151,7 @@ interface OrthologRequest {
   exclude: number
   limit: number | undefined
   onProgress: (arg: string) => void
+  signal: AbortSignal
 }
 
 /**
@@ -162,19 +164,24 @@ async function findNcbiOrthologs({
   taxId,
   geneCandidates,
   onProgress,
+  signal,
   ...rest
 }: OrthologRequest): Promise<FoundOrthologs> {
   onProgress('Resolving gene at NCBI...')
-  const resolved = await resolveGeneId(geneCandidates, taxId)
+  const resolved = await resolveGeneId(geneCandidates, taxId, signal)
   if (!resolved) {
     throw new Error(
       `Could not resolve any of ${geneCandidates.join(', ')} to an NCBI gene in taxon ${taxId}. Try the NCBI BLAST tab, which needs no gene identifier.`,
     )
   }
-  const representative = await fetchRepresentativeQueryProtein(resolved.geneId)
+  const representative = await fetchRepresentativeQueryProtein(
+    resolved.geneId,
+    signal,
+  )
   const rows = await fetchOrthologRows({
     geneId: resolved.geneId,
     onProgress,
+    signal,
     ...rest,
   })
   return { geneId: resolved.geneId, representative, rows }
@@ -195,18 +202,15 @@ async function findUnirefHomologs({
   geneCandidates,
   identity,
   referenceProteomesOnly,
-  signal,
   ...rest
 }: OrthologRequest & {
   identity?: UnirefIdentity
   referenceProteomesOnly?: boolean
-  signal?: AbortSignal
 }): Promise<FoundOrthologs> {
   const found = await fetchUnirefHomologs({
     candidates: geneCandidates,
     identity,
     referenceProteomesOnly,
-    signal,
     ...rest,
   })
   return {
@@ -244,12 +248,19 @@ async function findPantherOrthologs({
  * marker when NCBI cannot name the taxon, which is a naming failure and must not
  * take down the launch.
  */
-async function queryRowLabel(taxId: number, rows: OrthologRow[]) {
+async function queryRowLabel(
+  taxId: number,
+  rows: OrthologRow[],
+  signal: AbortSignal,
+) {
   let name: string | undefined
   try {
-    const info = (await fetchTaxonomyInfo([taxId])).get(taxId)
+    const info = (await fetchTaxonomyInfo([taxId], signal)).get(taxId)
     name = info?.commonName ?? info?.sciname
   } catch (e) {
+    if (isAbortError(e)) {
+      throw e
+    }
     console.warn('[msaview-orthologs] taxonomy name lookup failed:', e)
   }
   return dedupeLabels([
@@ -263,10 +274,16 @@ async function queryRowLabel(taxId: number, rows: OrthologRow[]) {
  * that supplied no sequence of its own, the alignment — so it is reported by
  * returning nothing rather than by throwing here.
  */
-async function fetchRepresentativeQueryProtein(geneId: string) {
+async function fetchRepresentativeQueryProtein(
+  geneId: string,
+  signal: AbortSignal,
+) {
   try {
-    return await fetchProteinForGene(geneId)
+    return await fetchProteinForGene(geneId, signal)
   } catch (e) {
+    if (isAbortError(e)) {
+      throw e
+    }
     console.warn('[msaview-orthologs] query protein lookup failed:', e)
     return undefined
   }

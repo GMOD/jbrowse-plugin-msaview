@@ -16,7 +16,7 @@
 // GenPept records with CDD Region features, so the overlay attaches as it does
 // to a RefSeq accession.
 
-import { jsonfetch } from './fetch'
+import { isAbortError, jsonfetch } from './fetch'
 import {
   cleanGeneCandidate,
   dedupeLabels,
@@ -202,12 +202,13 @@ export function fetchGenomes() {
 // UniProt caps one `accessions` call at 100 ids
 const UNIPROT_CHUNK = 100
 
-async function fetchSequences(accessions: string[]) {
+async function fetchSequences(accessions: string[], signal?: AbortSignal) {
   const map = new Map<string, string>()
   for (let i = 0; i < accessions.length; i += UNIPROT_CHUNK) {
     const chunk = accessions.slice(i, i + UNIPROT_CHUNK)
     const json = await jsonfetch(
       `${UNIPROT}/accessions?accessions=${chunk.join(',')}&fields=accession,sequence&format=json`,
+      { signal },
     )
     for (const [acc, seq] of parseSequences(json)) {
       map.set(acc, seq)
@@ -226,6 +227,7 @@ async function matchOrthologs(
   candidates: string[],
   taxId: number,
   targets: PantherGenome[] | undefined,
+  signal?: AbortSignal,
 ) {
   let matched: string | undefined
   for (const raw of candidates) {
@@ -242,7 +244,9 @@ async function matchOrthologs(
       params.set('targetOrganism', targets.map(t => t.taxId).join(','))
     }
     const parsed = parseMatches(
-      await jsonfetch(`${PANTHER}/ortholog/matchortho?${params.toString()}`),
+      await jsonfetch(`${PANTHER}/ortholog/matchortho?${params.toString()}`, {
+        signal,
+      }),
     )
     if (!parsed.unmapped) {
       matched ??= query
@@ -282,6 +286,7 @@ export async function fetchPantherOrthologs({
   exclude,
   limit = defaultMaxSpecies,
   onProgress,
+  signal,
 }: {
   candidates: string[]
   taxId: number
@@ -289,8 +294,10 @@ export async function fetchPantherOrthologs({
   exclude?: number
   limit?: number
   onProgress: (arg: string) => void
+  signal?: AbortSignal
 }): Promise<PantherOrthologs> {
   const all = await fetchGenomes()
+  signal?.throwIfAborted()
   const byTaxId = new Map(all.map(g => [g.taxId, g]))
   const byCode = new Map(all.map(g => [g.code, g]))
   const queryGenome = byTaxId.get(taxId)
@@ -307,7 +314,7 @@ export async function fetchPantherOrthologs({
     : undefined
 
   onProgress('Matching orthologs at PANTHER...')
-  const match = await matchOrthologs(candidates, taxId, targets)
+  const match = await matchOrthologs(candidates, taxId, targets, signal)
   if (!match) {
     throw new Error(
       `PANTHER has no entry for ${candidates.join(', ')} in ${queryGenome.longName}. Try the NCBI BLAST tab, which needs no gene identifier.`,
@@ -335,11 +342,17 @@ export async function fetchPantherOrthologs({
 
   onProgress(`Fetching ${picks.length} protein sequences from UniProt...`)
   const [names, sequences] = await Promise.all([
-    taxonomyNames(picks.map(p => p.genome.taxId)),
-    fetchSequences([
-      ...(match.query ? [match.query.accession] : []),
-      ...picks.map(p => p.hit.accession),
-    ]),
+    taxonomyNames(
+      picks.map(p => p.genome.taxId),
+      signal,
+    ),
+    fetchSequences(
+      [
+        ...(match.query ? [match.query.accession] : []),
+        ...picks.map(p => p.hit.accession),
+      ],
+      signal,
+    ),
   ])
 
   const described = picks.map(({ hit, genome }) => {
@@ -384,10 +397,13 @@ export async function fetchPantherOrthologs({
  * are. A failed lookup only costs the labels, which fall back to PANTHER's own
  * short names, so it is logged rather than thrown.
  */
-async function taxonomyNames(taxIds: number[]) {
+async function taxonomyNames(taxIds: number[], signal?: AbortSignal) {
   try {
-    return await fetchTaxonomyInfo(taxIds)
+    return await fetchTaxonomyInfo(taxIds, signal)
   } catch (e) {
+    if (isAbortError(e)) {
+      throw e
+    }
     console.warn('[msaview-orthologs] taxonomy name lookup failed:', e)
     return new Map<number, { sciname: string; commonName?: string }>()
   }

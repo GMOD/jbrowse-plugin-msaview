@@ -87,6 +87,7 @@ export async function doLaunchBlast({
   onProgress('Fetching species taxonomy info...')
   const taxonomyInfo = await fetchTaxonomyInfo(
     hits.map(h => h.taxid).filter((t): t is number => t !== undefined),
+    signal,
   )
   const { msa: fasta, treeMetadata } = buildSearchMsa({
     hits,
