@@ -16,13 +16,18 @@ export function connectedHighlights(
   genomeViewId: string,
   genomeHovered: boolean,
 ) {
-  return views
+  const regions = views
     .filter(isLinkedMsaView)
     .filter(v => v.connectedViewId === genomeViewId)
     .flatMap(v => [
       ...v.connectedClickHighlights,
       ...(genomeHovered ? [] : v.connectedHoverHighlights),
     ])
+  return [
+    ...new Map(
+      regions.map(r => [`${r.refName}:${r.start}-${r.end}`, r]),
+    ).values(),
+  ]
 }
 
 function isLinkedMsaView(view: { type: string }): view is LinkedView {

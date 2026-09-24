@@ -9,13 +9,16 @@ const { rows, state } = vi.hoisted(() => ({
     string,
     { id: string; msa?: string; gff?: string; timestamp: number }
   >(),
-  state: { putFails: false },
+  state: { putFails: false, getFails: false },
 }))
 
 vi.mock('../utils/idb', () => ({
   createDbOpener: () => () =>
     Promise.resolve({
-      get: (_store: string, id: string) => Promise.resolve(rows.get(id)),
+      get: (_store: string, id: string) =>
+        state.getFails
+          ? Promise.reject(new Error('InvalidStateError'))
+          : Promise.resolve(rows.get(id)),
       put: (_store: string, value: { id: string; timestamp: number }) => {
         if (state.putFails) {
           return Promise.reject(new Error('QuotaExceededError'))
@@ -29,6 +32,7 @@ vi.mock('../utils/idb', () => ({
 beforeEach(() => {
   rows.clear()
   state.putFails = false
+  state.getFails = false
 })
 
 // cleanupOldData deletes by timestamp, so without this a session opened every
@@ -44,6 +48,13 @@ test('reading a row refreshes its timestamp, making the expiry "unused for 7 day
 test('a row that is no longer there reads as undefined and writes nothing', async () => {
   expect(await retrieveMsaData('msa-gone')).toBeUndefined()
   expect(rows.size).toBe(0)
+})
+
+test('a read that fails throws rather than reading as a missing row', async () => {
+  rows.set('msa-1', { id: 'msa-1', msa: '>a\nMK', timestamp: 1000 })
+  state.getFails = true
+
+  await expect(retrieveMsaData('msa-1')).rejects.toThrow('InvalidStateError')
 })
 
 // the refresh is housekeeping; failing it must not turn a readable alignment

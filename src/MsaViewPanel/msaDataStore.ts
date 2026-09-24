@@ -50,27 +50,23 @@ export async function storeMsaData(id: string, data: MsaDataPayload) {
   }
 }
 
+/** undefined only when no row has the id; a failed read throws */
 export async function retrieveMsaData(id: string) {
-  try {
-    const db = await getDB()
-    const result = await db.get(STORE_NAME, id)
-    if (!result) {
-      return undefined
-    }
-    // reading counts as use, which is what makes cleanupOldData's policy
-    // "unused for 7 days" rather than "written 7 days ago" -- a session opened
-    // every day used to lose its alignment on the eighth
-    try {
-      await db.put(STORE_NAME, { ...result, timestamp: Date.now() })
-    } catch (e) {
-      console.warn('Failed to refresh MSA data timestamp:', e)
-    }
-    const { id: _id, timestamp: _timestamp, ...payload } = result
-    return payload
-  } catch (e) {
-    console.warn('Failed to retrieve MSA data:', e)
+  const db = await getDB()
+  const result = await db.get(STORE_NAME, id)
+  if (!result) {
     return undefined
   }
+  // reading counts as use, which is what makes cleanupOldData's policy
+  // "unused for 7 days" rather than "written 7 days ago" -- a session opened
+  // every day used to lose its alignment on the eighth
+  try {
+    await db.put(STORE_NAME, { ...result, timestamp: Date.now() })
+  } catch (e) {
+    console.warn('Failed to refresh MSA data timestamp:', e)
+  }
+  const { id: _id, timestamp: _timestamp, ...payload } = result
+  return payload
 }
 
 /** drop one view's row, for a reset that just orphaned it */

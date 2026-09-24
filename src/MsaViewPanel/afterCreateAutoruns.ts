@@ -8,7 +8,6 @@ import { genomeToMSA } from './genomeToMSA'
 import { loadProteinDomains } from './loadProteinDomains'
 import {
   cleanupOldData,
-  deleteMsaData,
   generateDataStoreId,
   retrieveMsaData,
   storeMsaData,
@@ -33,14 +32,8 @@ const RELAUNCHABLE = ' Retry runs the original search again and rebuilds it.'
 const START_OVER = ' Relaunch it from the gene to rebuild it.'
 
 const EXPIRED_EXTRAS_WARNING =
-  'Annotations, a tree or row metadata this view loaded from a local file are no longer in browser storage, which keeps them for 7 days after they were last used.'
+  'Part of this view is no longer in browser storage: annotations, a tree or row metadata too large for the session. Stored documents are kept for 7 days after they were last used, and are lost when site data is cleared.'
 
-/**
- * Runs once, as the view is created: `dataStoreId` only names a row the view
- * did not write itself when it arrives in a restored snapshot. The alignment
- * may already be drawn by then, from the snapshot or a url, so the row is read
- * whatever the view holds and fills in only what it lacks.
- */
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   const { dataStoreId } = self
   if (!dataStoreId) {
@@ -50,6 +43,9 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
     try {
       self.setLoadingStoredData(true)
       const stored = await retrieveMsaData(dataStoreId)
+      if (self.dataStoreId !== dataStoreId) {
+        return
+      }
       transaction(() => {
         if (stored) {
           const { data } = self
@@ -118,34 +114,49 @@ function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
  * alignment still loses a large GFF read from a local file, and a pasted one
  * small enough for the snapshot needs no row at all.
  *
+ * A view writes only a row it created this session (`ownsDataStoreRow`); a
+ * restored view's first write takes a fresh id, because a copied view or a
+ * duplicated session names the same row. Nothing deletes a row when the set
+ * empties: the view drops the id, and cleanupOldData ages the row out. A view
+ * that never read its row, because the read failed, keeps the id.
+ *
  * `lastStoredData` separates "this is new" from "this is what we just wrote",
  * and is recorded whether or not the write succeeded, so a browser refusing
- * IndexedDB (private mode) fails once rather than in a loop. Nothing is written
- * while the restore is reading, which would clobber the row it reads.
+ * IndexedDB (private mode) fails once rather than in a loop.
  */
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
-  const { dataStoreId, isStoringData, loadingStoredData, lastStoredData } = self
+  const {
+    dataStoreId,
+    ownsDataStoreRow,
+    isStoringData,
+    loadingStoredData,
+    lastStoredData,
+  } = self
   const data = self.unsavedDocuments
-  if (
-    isStoringData ||
-    loadingStoredData ||
-    sameData(lastStoredData, data) ||
-    (!dataStoreId && isEmpty(data))
-  ) {
+  if (isStoringData || loadingStoredData || sameData(lastStoredData, data)) {
+    return
+  }
+  if (isEmpty(data)) {
+    if (lastStoredData) {
+      transaction(() => {
+        self.setDataStoreId(undefined)
+        self.setOwnsDataStoreRow(false)
+        self.setLastStoredData(data)
+      })
+    }
     return
   }
 
   self.setIsStoringData(true)
   void (async () => {
     try {
-      if (!isEmpty(data)) {
-        const id = dataStoreId ?? generateDataStoreId()
-        if (await storeMsaData(id, data)) {
+      const id =
+        dataStoreId && ownsDataStoreRow ? dataStoreId : generateDataStoreId()
+      if (await storeMsaData(id, data)) {
+        transaction(() => {
           self.setDataStoreId(id)
-        }
-      } else if (dataStoreId) {
-        await deleteMsaData(dataStoreId)
-        self.setDataStoreId(undefined)
+          self.setOwnsDataStoreRow(true)
+        })
       }
     } catch (e) {
       console.error('Failed to store MSA data to IndexedDB:', e)

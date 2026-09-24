@@ -185,11 +185,13 @@ describe('returning to the import form', () => {
     model.setDomainsRequested(true)
     model.setLastStoredData({ msa: '>a\nMK' })
     model.setDataStoreId('msa-1')
+    model.setOwnsDataStoreRow(true)
 
     model.reset()
 
     expect(model.domainsRequested).toBe(false)
     expect(model.lastStoredData).toBeUndefined()
+    expect(model.ownsDataStoreRow).toBe(false)
     expect(model.dataStoreId).toBeUndefined()
     expect(deleteMsaData).toHaveBeenCalledWith('msa-1')
   })

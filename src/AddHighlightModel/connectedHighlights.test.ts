@@ -33,6 +33,13 @@ describe('connectedHighlights', () => {
     ])
   })
 
+  it('draws a codon two views both highlight once', () => {
+    const both = [msaView('lgv1', 100, 200), msaView('lgv1', 100, 200)]
+    expect(connectedHighlights(both, 'lgv1', false).map(r => r.start)).toEqual([
+      100, 200,
+    ])
+  })
+
   it('returns nothing for an unlinked genome view', () => {
     expect(connectedHighlights(views, 'lgv3', false)).toEqual([])
   })

@@ -39,7 +39,7 @@ const MsaToGenomeHighlightRenderer = observer(function ({
 
   return (
     <>
-      {highlights.map((r, idx) => {
+      {highlights.map(r => {
         // bpToPx matches refNames exactly, so canonicalizing "chr17" to "17"
         // would miss a view whose regions say "chr17"
         const s = model.bpToPx({ refName: r.refName, coord: r.start })
@@ -49,7 +49,7 @@ const MsaToGenomeHighlightRenderer = observer(function ({
           const left = Math.min(s.offsetPx, e.offsetPx) - offsetPx
           return (
             <div
-              key={`${r.refName}-${r.start}-${r.end}-${idx}`}
+              key={`${r.refName}-${r.start}-${r.end}`}
               className={classes.highlight}
               style={{ left, width }}
             />

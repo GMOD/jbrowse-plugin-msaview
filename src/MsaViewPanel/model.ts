@@ -254,6 +254,7 @@ export default function stateModelFactory() {
         loadingStoredData: boolean
         isStoringData: boolean
         lastStoredData: MsaDataPayload | undefined
+        ownsDataStoreRow: boolean
         launchController: AbortController | undefined
         domainsRequested: boolean
       } => ({
@@ -280,6 +281,14 @@ export default function stateModelFactory() {
          * neighbor-joining tree, say) is recognized as needing a new one
          */
         lastStoredData: undefined,
+        /**
+         * #volatile
+         * whether this view wrote the row `dataStoreId` names, this session. A
+         * row named by a restored snapshot may be shared with a copied view or
+         * a duplicated session, so a view never writes or deletes one it did
+         * not create.
+         */
+        ownsDataStoreRow: false,
         /**
          * #volatile
          * aborts the launch currently in flight -- from the Cancel button, and
@@ -482,6 +491,12 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setOwnsDataStoreRow(arg: boolean) {
+        self.ownsDataStoreRow = arg
+      },
+      /**
+       * #action
+       */
       setLaunchController(arg?: AbortController) {
         self.launchController = arg
       },
@@ -591,7 +606,13 @@ export default function stateModelFactory() {
          * once per view, never fired again.
          */
         reset() {
-          const { displayName, minimized, zoomToBaseLevel, dataStoreId } = self
+          const {
+            displayName,
+            minimized,
+            zoomToBaseLevel,
+            dataStoreId,
+            ownsDataStoreRow,
+          } = self
           superReset()
           if (displayName !== undefined) {
             self.setDisplayName(displayName)
@@ -600,8 +621,8 @@ export default function stateModelFactory() {
           self.setZoomToBaseLevel(zoomToBaseLevel)
           self.setDomainsRequested(false)
           self.setLastStoredData(undefined)
-          if (dataStoreId) {
-            // nothing points at that row now
+          self.setOwnsDataStoreRow(false)
+          if (dataStoreId && ownsDataStoreRow) {
             void deleteMsaData(dataStoreId)
           }
         },
