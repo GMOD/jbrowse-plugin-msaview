@@ -4,7 +4,8 @@ import type { DBSchema } from 'idb'
 
 const DB_NAME = 'jbrowse-msaview-search-cache'
 const STORE_NAME = 'searches'
-const MAX_CACHED_SEARCHES = 20
+export const MAX_CACHED_SEARCHES = 20
+export const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
 export interface CachedSearch {
   id: string
@@ -44,7 +45,12 @@ export function searchKey({
 export function getCachedSearch(id: string) {
   return bestEffort(
     'search cache read',
-    async () => (await getDB()).get(STORE_NAME, id),
+    async () => {
+      const entry = await (await getDB()).get(STORE_NAME, id)
+      return entry && Date.now() - entry.timestamp < MAX_AGE_MS
+        ? entry
+        : undefined
+    },
     undefined,
   )
 }
