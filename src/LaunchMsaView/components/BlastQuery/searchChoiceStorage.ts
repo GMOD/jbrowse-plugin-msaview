@@ -16,8 +16,8 @@ import type { MsaAlgorithm, SearchChoice } from './consts'
 // comes back is checked against the current options before it is used — an
 // option this plugin has since dropped would otherwise reach EBI and come back
 // a 400, minutes after the user pressed Submit.
-export const SEARCH_CHOICE_STORAGE_KEY = 'msaView-blastSearch'
-export const MSA_ALGORITHM_STORAGE_KEY = 'msaView-msaAlgorithm'
+const SEARCH_CHOICE_STORAGE_KEY = 'msaView-blastSearch'
+const MSA_ALGORITHM_STORAGE_KEY = 'msaView-msaAlgorithm'
 
 const defaultSearch = defaultSearchFor('blastp')
 const defaultMsaAlgorithm: MsaAlgorithm = 'clustalo'

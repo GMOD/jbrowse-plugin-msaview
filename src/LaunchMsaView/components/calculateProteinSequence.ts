@@ -49,7 +49,7 @@ function dedupe(list: Feat[]) {
   )
 }
 
-export function revlist(list: Feat[], seqlen: number) {
+function revlist(list: Feat[], seqlen: number) {
   return list
     .map(sub => ({
       ...sub,

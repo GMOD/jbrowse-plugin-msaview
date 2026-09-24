@@ -42,7 +42,7 @@ export function buildRowMetadata(
  * duplicate names silently collapse rows in both the MSA and the tree, so the
  * envelope disambiguates them.
  */
-export function makeRowNames(
+function makeRowNames(
   hits: SearchHit[],
   taxonomyInfo: Map<number, TaxonomyInfo>,
 ) {

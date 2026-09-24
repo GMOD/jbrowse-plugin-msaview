@@ -56,7 +56,7 @@ export function getId(val?: Feature): string {
   return val?.id() ?? ''
 }
 
-export function getMatchableIds(val?: Feature): string[] {
+function getMatchableIds(val?: Feature): string[] {
   return val
     ? uniqueDefined([
         val.id(),

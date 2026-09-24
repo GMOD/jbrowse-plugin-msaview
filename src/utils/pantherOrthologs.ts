@@ -189,7 +189,7 @@ export function parseSequences(json: unknown): Map<string, string> {
 let genomes: Promise<PantherGenome[]> | undefined
 
 /** The proteome list, fetched once per page and forgotten on failure. */
-export function fetchGenomes() {
+function fetchGenomes() {
   genomes ??= jsonfetch(`${PANTHER}/supportedgenomes`)
     .then(parseGenomes)
     .catch((e: unknown) => {

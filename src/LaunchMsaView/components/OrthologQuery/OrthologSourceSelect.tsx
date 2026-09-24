@@ -9,7 +9,7 @@ import type { OrthologSource } from '../../../MsaViewPanel/model'
 
 const ORTHOLOG_SOURCE_STORAGE_KEY = 'msaview-ortholog-source'
 
-export const orthologSourceLabels: Record<OrthologSource, string> = {
+const orthologSourceLabels: Record<OrthologSource, string> = {
   ncbi: 'NCBI orthologs',
   panther: 'PANTHER',
   uniref: 'UniRef cluster',

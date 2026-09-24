@@ -6,7 +6,3 @@ export interface Feat {
   // off cds[0] to start translation in the right frame
   phase?: number
 }
-
-export interface SeqState {
-  seq: string
-}

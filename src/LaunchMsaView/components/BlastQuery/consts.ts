@@ -53,7 +53,7 @@ export type BlastDatabase = (typeof blastDatabaseOptions)[number]
 
 // curated, so it returns roughly one good sequence per species rather than the
 // many near-identical TrEMBL entries an alignment reads poorly
-export const defaultBlastDatabase: BlastDatabase = 'uniprotkb_swissprot'
+const defaultBlastDatabase: BlastDatabase = 'uniprotkb_swissprot'
 
 export const searchPrograms = ['blastp', 'phmmer'] as const
 export type SearchProgram = (typeof searchPrograms)[number]
@@ -86,7 +86,7 @@ export const phmmerDatabaseOptions = [
 ] as const
 export type PhmmerDatabase = (typeof phmmerDatabaseOptions)[number]
 
-export const defaultPhmmerDatabase: PhmmerDatabase = 'swissprot'
+const defaultPhmmerDatabase: PhmmerDatabase = 'swissprot'
 
 /**
  * The hit counts EBI's ncbiblast accepts for `alignments` and `scores`. A value

@@ -32,7 +32,7 @@ import type { OrthologRow } from './ncbiOrthologs'
 
 const UNIPROT = 'https://rest.uniprot.org'
 
-export const unirefIdentities = [50, 90] as const
+const unirefIdentities = [50, 90] as const
 export type UnirefIdentity = (typeof unirefIdentities)[number]
 
 // the "Reference proteome" keyword, KW-1185: one well-annotated proteome per
@@ -148,7 +148,7 @@ export async function resolveUniProtEntry(
 }
 
 /** `uniref/search` -> the id of the cluster an accession belongs to at `identity`. */
-export async function fetchClusterId(
+async function fetchClusterId(
   accession: string,
   identity: UnirefIdentity,
   signal?: AbortSignal,
