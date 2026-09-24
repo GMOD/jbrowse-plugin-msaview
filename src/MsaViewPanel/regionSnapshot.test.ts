@@ -8,7 +8,6 @@ vi.mock('@jbrowse/core/util', async importOriginal => ({
 }))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(async () => {}),
-  deleteMsaData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
   retrieveMsaData: vi.fn(),
   storeMsaData: vi.fn(async () => true),

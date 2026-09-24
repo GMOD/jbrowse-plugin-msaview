@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { doLaunchBlast } from './doLaunchBlast'
 import stateModelFactory from './model'
-import { deleteMsaData } from './msaDataStore'
 
 // the launch autoruns are live on a real model, and a blastParams write is what
 // wakes them -- so the search is mocked rather than sent to EBI. The session is
@@ -15,7 +14,6 @@ vi.mock('@jbrowse/core/util', async importOriginal => ({
 vi.mock('./doLaunchBlast', () => ({ doLaunchBlast: vi.fn() }))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(async () => {}),
-  deleteMsaData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
   retrieveMsaData: vi.fn(),
   storeMsaData: vi.fn(),
@@ -180,7 +178,7 @@ describe('returning to the import form', () => {
     expect(model.dataInitialized).toBe(false)
   })
 
-  test('clears the volatiles applySnapshot cannot reach, and the stored row', () => {
+  test('clears the volatiles applySnapshot cannot reach, and the stored id', () => {
     const model = view()
     model.setDomainsRequested(true)
     model.setLastStoredData({ msa: '>a\nMK' })
@@ -193,6 +191,5 @@ describe('returning to the import form', () => {
     expect(model.lastStoredData).toBeUndefined()
     expect(model.ownsDataStoreRow).toBe(false)
     expect(model.dataStoreId).toBeUndefined()
-    expect(deleteMsaData).toHaveBeenCalledWith('msa-1')
   })
 })

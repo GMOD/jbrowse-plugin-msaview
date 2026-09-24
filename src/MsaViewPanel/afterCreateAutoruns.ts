@@ -109,20 +109,11 @@ function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
 }
 
 /**
- * Keep IndexedDB holding `unsavedDocuments`, the documents a reload would
- * otherwise lose. That depends on the source, not on the view: a url-loaded
- * alignment still loses a large GFF read from a local file, and a pasted one
- * small enough for the snapshot needs no row at all.
- *
- * A view writes only a row it created this session (`ownsDataStoreRow`); a
- * restored view's first write takes a fresh id, because a copied view or a
- * duplicated session names the same row. Nothing deletes a row when the set
- * empties: the view drops the id, and cleanupOldData ages the row out. A view
- * that never read its row, because the read failed, keeps the id.
- *
- * `lastStoredData` separates "this is new" from "this is what we just wrote",
- * and is recorded whether or not the write succeeded, so a browser refusing
- * IndexedDB (private mode) fails once rather than in a loop.
+ * Keep IndexedDB holding `unsavedDocuments`. A view writes in place only to a
+ * row it created (`ownsDataStoreRow`), and never deletes one, since other
+ * views may name it: an emptied set drops the id and cleanupOldData ages the
+ * row out. `lastStoredData` is recorded even when a write fails, so a browser
+ * refusing IndexedDB fails once rather than in a loop.
  */
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
   const {

@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import stateModelFactory from './model'
 import {
-  deleteMsaData,
   generateDataStoreId,
   retrieveMsaData,
   storeMsaData,
@@ -17,7 +16,6 @@ vi.mock('@jbrowse/core/util', async importOriginal => ({
 }))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(async () => {}),
-  deleteMsaData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
   retrieveMsaData: vi.fn(),
   storeMsaData: vi.fn(),
@@ -28,7 +26,6 @@ vi.mock('./fetchIndexedMsa', () => ({
 
 const mockRetrieve = vi.mocked(retrieveMsaData)
 const mockStore = vi.mocked(storeMsaData)
-const mockDelete = vi.mocked(deleteMsaData)
 const mockGenerateId = vi.mocked(generateDataStoreId)
 
 const SMALL_MSA = '>a\nMK'
@@ -65,9 +62,6 @@ function sharedRowStore(initial: MsaDataPayload) {
   mockStore.mockImplementation(async (id, data) => {
     rows.set(id, data)
     return true
-  })
-  mockDelete.mockImplementation(async id => {
-    rows.delete(id)
   })
   return rows
 }
@@ -146,17 +140,15 @@ describe('restoring a view from IndexedDB', () => {
 
     expect(model.data.gff).toBe(BIG_GFF)
     expect(mockStore).not.toHaveBeenCalled()
-    expect(mockDelete).not.toHaveBeenCalled()
   })
 
-  test('a row holding nothing a reload would lose is let go, not deleted', async () => {
+  test('a row holding nothing a reload would lose is let go', async () => {
     mockRetrieve.mockResolvedValue({ msa: SMALL_MSA })
     const model = view({ dataStoreId: 'msa-1', data: { msa: SMALL_MSA } })
     await settle()
     await settle()
 
     expect(model.dataStoreId).toBeUndefined()
-    expect(mockDelete).not.toHaveBeenCalled()
     expect(mockStore).not.toHaveBeenCalled()
   })
 
@@ -227,7 +219,6 @@ describe('restoring a view from IndexedDB', () => {
     expect(model.data.msa).toBeUndefined()
     expect(model.dataStoreId).toBeUndefined()
     expect(mockStore).not.toHaveBeenCalled()
-    expect(mockDelete).not.toHaveBeenCalled()
   })
 })
 
@@ -243,7 +234,6 @@ describe('a row two views name', () => {
     await settle()
     await settle()
 
-    expect(mockDelete).not.toHaveBeenCalled()
     expect(rows.get('shared')).toEqual({ gff: BIG_GFF })
     expect(copy.dataStoreId).toBeUndefined()
 
@@ -271,14 +261,26 @@ describe('a row two views name', () => {
     expect(original.data.gff).toBe(BIG_GFF)
   })
 
-  test('a view resets only a row it wrote itself', async () => {
-    sharedRowStore({ gff: BIG_GFF })
-    const copy = view({ dataStoreId: 'shared', msaFilehandle: URL_MSA })
+  test("a copy made this session keeps its row through the original's reset", async () => {
+    sharedRowStore({})
+    const original = view({ msaFilehandle: URL_MSA })
+    original.setGFF(BIG_GFF)
+    await settle()
+    const id = original.dataStoreId
+    expect(id).toBe(`${NEW_ID}-1`)
+
+    const copy = view({ dataStoreId: id, msaFilehandle: URL_MSA })
+    await settle()
+    await settle()
+    expect(copy.data.gff).toBe(BIG_GFF)
+    expect(copy.dataStoreId).toBe(id)
+
+    original.reset()
     await settle()
 
-    copy.reset()
-
-    expect(mockDelete).not.toHaveBeenCalled()
+    const reloaded = view({ dataStoreId: id, msaFilehandle: URL_MSA })
+    await settle()
+    expect(reloaded.data.gff).toBe(BIG_GFF)
   })
 })
 
@@ -337,19 +339,21 @@ describe('keeping IndexedDB up to date', () => {
     model.setGFF('a\t.\tdomain\t1\t2')
     await settle()
 
-    expect(mockDelete).not.toHaveBeenCalled()
     expect(model.dataStoreId).toBeUndefined()
     expect(getSnapshot(model).dataStoreId).toBeUndefined()
   })
 
-  test('a reset deletes the row the view wrote', async () => {
+  test('a reset drops the id and leaves the row to age out', async () => {
+    const rows = sharedRowStore({})
     const model = view()
     model.setMSA(BIG_MSA)
     await settle()
 
     model.reset()
 
-    expect(mockDelete).toHaveBeenCalledWith(`${NEW_ID}-1`)
+    expect(model.dataStoreId).toBeUndefined()
+    expect(model.ownsDataStoreRow).toBe(false)
+    expect(rows.get(`${NEW_ID}-1`)?.msa).toBe(BIG_MSA)
   })
 
   test('a write that fails is not retried on the same data', async () => {

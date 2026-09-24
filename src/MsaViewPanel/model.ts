@@ -23,7 +23,6 @@ import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
-import { deleteMsaData } from './msaDataStore'
 import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript'
 import { transcriptMap } from './transcriptMap'
 
@@ -283,10 +282,9 @@ export default function stateModelFactory() {
         lastStoredData: undefined,
         /**
          * #volatile
-         * whether this view wrote the row `dataStoreId` names, this session. A
-         * row named by a restored snapshot may be shared with a copied view or
-         * a duplicated session, so a view never writes or deletes one it did
-         * not create.
+         * whether this view wrote the row `dataStoreId` names, this session;
+         * a restored row may be shared with a copied view or a duplicated
+         * session, so a write to one the view did not create takes a fresh id
          */
         ownsDataStoreRow: false,
         /**
@@ -606,13 +604,7 @@ export default function stateModelFactory() {
          * once per view, never fired again.
          */
         reset() {
-          const {
-            displayName,
-            minimized,
-            zoomToBaseLevel,
-            dataStoreId,
-            ownsDataStoreRow,
-          } = self
+          const { displayName, minimized, zoomToBaseLevel } = self
           superReset()
           if (displayName !== undefined) {
             self.setDisplayName(displayName)
@@ -622,9 +614,6 @@ export default function stateModelFactory() {
           self.setDomainsRequested(false)
           self.setLastStoredData(undefined)
           self.setOwnsDataStoreRow(false)
-          if (dataStoreId && ownsDataStoreRow) {
-            void deleteMsaData(dataStoreId)
-          }
         },
       }
     })
