@@ -37,3 +37,28 @@ test('concurrent eutils requests go out spaced under the rate limit', async () =
   expect(sentAt[1]! - sentAt[0]!).toBeGreaterThanOrEqual(EUTILS_SPACING_MS)
   expect(sentAt[2]! - sentAt[1]!).toBeGreaterThanOrEqual(EUTILS_SPACING_MS)
 })
+
+test('an aborted wait gives its slot to the next request', async () => {
+  vi.useFakeTimers()
+  const sentAt: number[] = []
+  vi.stubGlobal('fetch', () => {
+    sentAt.push(Date.now())
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(''),
+    })
+  })
+  await vi.advanceTimersByTimeAsync(10 * EUTILS_SPACING_MS)
+  const first = eutilsText('a')
+  const controller = new AbortController()
+  const aborted = eutilsText('b', { signal: controller.signal })
+  controller.abort()
+  await expect(aborted).rejects.toThrow(
+    expect.objectContaining({ name: 'AbortError' }),
+  )
+  const third = eutilsText('c')
+  await vi.advanceTimersByTimeAsync(3 * EUTILS_SPACING_MS)
+  await Promise.all([first, third])
+  expect(sentAt[1]! - sentAt[0]!).toBe(EUTILS_SPACING_MS)
+})

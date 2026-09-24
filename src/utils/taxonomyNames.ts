@@ -167,6 +167,7 @@ export async function fetchTaxonomyInfo(
       }
     } catch (error) {
       if (isAbortError(error)) {
+        await saveTaxonomyCache(toCache)
         throw error
       }
       console.error('Failed to fetch taxonomy data:', error)

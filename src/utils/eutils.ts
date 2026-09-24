@@ -49,7 +49,14 @@ async function eutilsSlot(signal?: AbortSignal | null) {
   const start = Math.max(now, nextSlot)
   nextSlot = start + EUTILS_SPACING_MS
   if (start > now) {
-    await timeout(start - now, signal ?? undefined)
+    try {
+      await timeout(start - now, signal ?? undefined)
+    } catch (e) {
+      if (nextSlot === start + EUTILS_SPACING_MS) {
+        nextSlot = start
+      }
+      throw e
+    }
   }
 }
 
