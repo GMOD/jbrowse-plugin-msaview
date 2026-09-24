@@ -116,11 +116,6 @@ export async function waitForEbiJob({
   })
 }
 
-/**
- * One job from submission to result: submit, publish the job id, poll until
- * it finishes, then hand back a reader for its result files. `label` names the
- * job in the progress text.
- */
 export async function runEbiJob({
   tool,
   label,

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { afterAll, afterEach, describe, expect, test, vi } from 'vitest'
 
 import {
   MAX_CODING_BASES,
@@ -6,8 +6,18 @@ import {
   transcriptMap,
 } from './transcriptMap'
 
+import type { TranscriptMap } from './transcriptMap'
+
 function cds(start: number, end: number, extra: Record<string, unknown> = {}) {
   return { type: 'CDS', start, end, ...extra }
+}
+
+function mapped(feature: unknown): TranscriptMap {
+  const map = transcriptMap(feature)
+  if (!map) {
+    throw new Error('expected the transcript to map')
+  }
+  return map
 }
 
 function transcript(extra: Record<string, unknown> = {}) {
@@ -25,6 +35,9 @@ describe('transcriptMap on a malformed transcript', () => {
   const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
   afterEach(() => {
     warn.mockClear()
+  })
+  afterAll(() => {
+    warn.mockRestore()
   })
 
   test.each([
@@ -96,12 +109,11 @@ describe('transcriptMap on a malformed transcript', () => {
 })
 
 describe('proteinPositionsInRange', () => {
-  // three exons, 3 + 3 + 3 coding bases, separated by 10 kb introns
-  const map = transcriptMap(
+  const map = mapped(
     transcript({
       subfeatures: [cds(0, 3), cds(10_000, 10_003), cds(20_000, 20_003)],
     }),
-  )!
+  )
 
   test('a range across the introns yields each codon once', () => {
     expect([...proteinPositionsInRange(map, 0, 20_003)]).toEqual([0, 1, 2])
@@ -116,9 +128,9 @@ describe('proteinPositionsInRange', () => {
   })
 
   test('on the reverse strand the positions still come from g2p', () => {
-    const reverse = transcriptMap(
+    const reverse = mapped(
       transcript({ strand: -1, subfeatures: [cds(0, 3), cds(10_000, 10_003)] }),
-    )!
+    )
     expect([...proteinPositionsInRange(reverse, 0, 3)]).toEqual([1])
     expect([...proteinPositionsInRange(reverse, 10_000, 10_003)]).toEqual([0])
   })

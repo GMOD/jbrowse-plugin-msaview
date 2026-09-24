@@ -2,15 +2,9 @@ import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 
 import type { Feat } from 'g2p_mapper'
 
-/**
- * Titin, the longest human CDS, is about 108 kb. A coding length past this is
- * a malformed record -- a CDS spanning a chromosome -- and mapping it base by
- * base would build a hundred-million-key object on every hover recompute.
- */
 export const MAX_CODING_BASES = 1_000_000
 
 export type TranscriptMap = ReturnType<typeof genomeToTranscriptSeqMapping> & {
-  /** every coding genome position, ascending */
   codingPositions: number[]
 }
 
@@ -71,16 +65,6 @@ function mappableTranscript(
 
 const warned = new WeakSet<object>()
 
-/**
- * The genome <-> protein maps for the transcript an MSA view is linked to, or
- * undefined when the transcript cannot be mapped. `connectedFeature` is frozen
- * JSON from a session spec or a saved session, so its shape is whatever the
- * author wrote; g2p_mapper throws on a missing strand or refName, and this
- * runs in getters that the genome view's highlight renders, where a throw
- * would take that view down rather than just the linkage. Says why once per
- * feature, since an unlinked view otherwise looks like a linked one nobody
- * has hovered.
- */
 export function transcriptMap(feature: unknown): TranscriptMap | undefined {
   const checked = mappableTranscript(feature)
   if ('reason' in checked) {
@@ -115,11 +99,6 @@ function lowerBound(sorted: number[], value: number) {
   return lo
 }
 
-/**
- * The protein positions whose codons touch genome `[start, end)`, each once.
- * Walks only the coding bases in range, so a highlight spanning introns costs
- * its codons rather than every base between them.
- */
 export function proteinPositionsInRange(
   map: Pick<TranscriptMap, 'g2p' | 'codingPositions'>,
   start: number,
