@@ -14,6 +14,7 @@ import {
 } from './msaDataStore'
 import { runLaunch } from './runLaunch'
 import { getProteinViews } from './structureConnection'
+import { proteinPositionsInRange } from './transcriptMap'
 import {
   getUniprotIdFromAlphaFoldUrl,
   hasQueryRow,
@@ -335,7 +336,6 @@ function genomeHighlightsToVisibleColumns(
   if (!transcriptToMsaMap || !hasQueryRow(self)) {
     return []
   }
-  const { g2p } = transcriptToMsaMap
   const columns = new Set<number>()
 
   for (const view of getProteinViews(getSession(self).views)) {
@@ -343,13 +343,13 @@ function genomeHighlightsToVisibleColumns(
       if (structure.connectedViewId !== connectedViewId) {
         continue
       }
-      for (const highlight of structure[field] ?? []) {
-        for (let coord = highlight.start; coord < highlight.end; coord++) {
-          const proteinPos = g2p[coord]
-          const col =
-            proteinPos === undefined
-              ? undefined
-              : transcriptPosToVisibleCol(self, proteinPos)
+      for (const { start, end } of structure[field] ?? []) {
+        for (const proteinPos of proteinPositionsInRange(
+          transcriptToMsaMap,
+          start,
+          end,
+        )) {
+          const col = transcriptPosToVisibleCol(self, proteinPos)
           if (col !== undefined) {
             columns.add(col)
           }

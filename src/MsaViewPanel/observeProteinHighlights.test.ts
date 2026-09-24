@@ -39,6 +39,7 @@ function makeModel({
     // g2p is indexed by genome coord; identity keeps the arithmetic out of the way
     transcriptToMsaMap: {
       g2p: Object.fromEntries([...Array(200).keys()].map(i => [i, i])),
+      codingPositions: [...Array(200).keys()],
     },
     highlightColumns,
     highlightedColumns: undefined as number[] | undefined,

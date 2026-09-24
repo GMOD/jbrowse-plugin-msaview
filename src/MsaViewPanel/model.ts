@@ -1,7 +1,6 @@
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
 import { addDisposer, types } from '@jbrowse/mobx-state-tree'
-import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
 
@@ -26,6 +25,7 @@ import {
 } from './msaCoordToGenomeCoord'
 import { deleteMsaData } from './msaDataStore'
 import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript'
+import { transcriptMap } from './transcriptMap'
 
 import type {
   BlastDatabase,
@@ -303,7 +303,7 @@ export default function stateModelFactory() {
        */
       get transcriptToMsaMap() {
         return self.connectedFeature
-          ? genomeToTranscriptSeqMapping(self.connectedFeature)
+          ? transcriptMap(self.connectedFeature)
           : undefined
       },
 
