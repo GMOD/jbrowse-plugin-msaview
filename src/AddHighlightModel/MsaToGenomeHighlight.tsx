@@ -3,7 +3,7 @@ import React from 'react'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
-import { isMsaView } from '../MsaViewPanel/model'
+import { connectedHighlights } from './connectedHighlights'
 import { hasHoverPosition, useStyles } from './util'
 
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
@@ -16,26 +16,17 @@ const MsaToGenomeHighlight = observer(function MsaToGenomeHighlight2({
   model: LGV
 }) {
   const { views, hovered } = getSession(model)
-  const msaView = views
-    .filter(isMsaView)
-    .find(v => v.connectedViewId === model.id)
-
-  // The persistent click selection always shows. The hover codon is suppressed
-  // while hovering the LGV — GenomeMouseoverHighlight handles the single-bp
-  // display in that case, so we don't stack a wider codon band on top of it.
-  const highlights = [
-    ...(msaView?.connectedClickHighlights ?? []),
-    ...(hasHoverPosition(hovered)
-      ? []
-      : (msaView?.connectedHoverHighlights ?? [])),
-  ]
+  const highlights = connectedHighlights(
+    views,
+    model.id,
+    hasHoverPosition(hovered),
+  )
 
   return highlights.length ? (
     <MsaToGenomeHighlightRenderer model={model} highlights={highlights} />
   ) : null
 })
 
-// Inner component: handles the scroll-dependent rendering
 const MsaToGenomeHighlightRenderer = observer(function ({
   model,
   highlights,
@@ -49,12 +40,8 @@ const MsaToGenomeHighlightRenderer = observer(function ({
   return (
     <>
       {highlights.map((r, idx) => {
-        // Use the highlight's own refName, which is already in the connected
-        // view's coordinate space (it comes from the connectedFeature the
-        // launcher set on this LGV). Do NOT canonicalize: bpToPx matches
-        // displayed regions by exact refName with no alias resolution, so
-        // rewriting e.g. "chr17" to the assembly-canonical "17" misses a view
-        // whose regions are "chr17". (GenomeMouseoverHighlight does the same.)
+        // bpToPx matches refNames exactly, so canonicalizing "chr17" to "17"
+        // would miss a view whose regions say "chr17"
         const s = model.bpToPx({ refName: r.refName, coord: r.start })
         const e = model.bpToPx({ refName: r.refName, coord: r.end })
         if (s && e) {
