@@ -1,8 +1,10 @@
 import { beforeEach, expect, test, vi } from 'vitest'
 
 import { saveBlastResult } from '../utils/blastCache'
+import { MAX_PAIR_CELLS } from '../utils/browserAlign'
 import { searchBackends } from '../utils/homologSearch'
 import { launchMSA } from '../utils/msa'
+import { getCachedSearch, saveSearch } from '../utils/searchCache'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 import { resolveUniProtEntry } from '../utils/unirefHomologs'
 import { doLaunchBlast } from './doLaunchBlast'
@@ -19,6 +21,11 @@ vi.mock('../utils/msa', () => ({ launchMSA: vi.fn() }))
 vi.mock('../utils/taxonomyNames', () => ({ fetchTaxonomyInfo: vi.fn() }))
 vi.mock('../utils/blastCache', () => ({ saveBlastResult: vi.fn() }))
 vi.mock('../utils/unirefHomologs', () => ({ resolveUniProtEntry: vi.fn() }))
+vi.mock('../utils/searchCache', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getCachedSearch: vi.fn(),
+  saveSearch: vi.fn(),
+}))
 
 const blastp = vi.mocked(searchBackends.blastp)
 const phmmer = vi.mocked(searchBackends.phmmer)
@@ -53,6 +60,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(fetchTaxonomyInfo).mockResolvedValue(new Map())
   vi.mocked(saveBlastResult).mockResolvedValue(undefined)
+  vi.mocked(getCachedSearch).mockResolvedValue(undefined)
+  vi.mocked(saveSearch).mockResolvedValue(undefined)
 })
 
 test('bare hits go to the chosen aligner, with the query first', async () => {
@@ -223,4 +232,66 @@ test('a live Feature handed over in the same session labels it the same way', as
       geneName: 'TP53',
     }),
   )
+})
+
+const BLASTP_BROWSER = {
+  searchProgram: 'blastp',
+  blastDatabase: 'uniprotkb_swissprot',
+  msaAlgorithm: 'browser',
+  proteinSequence: 'MKWVTF',
+}
+
+test('the hits are saved before the aligner runs, so a failed alignment keeps them', async () => {
+  blastp.mockResolvedValue({ rid: 'job', hits: [{ ...HIT, sequence: 'MKWV' }] })
+  mockLaunchMSA.mockRejectedValue(new Error('aligner fell over'))
+
+  await expect(launch(makeModel(BLASTP_BROWSER))).rejects.toThrow(
+    'aligner fell over',
+  )
+  expect(saveSearch).toHaveBeenCalledWith(
+    expect.objectContaining({
+      fasta: '>QUERY\nMKWVTF\n>P1-Mus_musculus\nMKWV',
+      rid: 'job',
+    }),
+  )
+})
+
+test('a relaunch with saved hits aligns them without searching again', async () => {
+  vi.mocked(getCachedSearch).mockResolvedValue({
+    id: 'k',
+    fasta: '>QUERY\nMKWVTF\n>P1\nMKWV',
+    treeMetadata: {},
+    rid: 'job',
+    timestamp: 0,
+  })
+  mockLaunchMSA.mockResolvedValue({ msa: 'aligned', tree: '' })
+
+  const result = await launch(makeModel(BLASTP_BROWSER))
+  expect(blastp).not.toHaveBeenCalled()
+  expect(mockLaunchMSA).toHaveBeenCalledWith(
+    expect.objectContaining({ sequence: '>QUERY\nMKWVTF\n>P1\nMKWV' }),
+  )
+  expect(result.msa).toBe('aligned')
+})
+
+test('a query too long for the in-browser aligner is refused before the search', async () => {
+  const side = Math.ceil(Math.sqrt(MAX_PAIR_CELLS)) + 1
+  await expect(
+    launch(makeModel({ ...BLASTP_BROWSER, proteinSequence: 'M'.repeat(side) })),
+  ).rejects.toThrow(/too large to align in the browser/)
+  expect(blastp).not.toHaveBeenCalled()
+})
+
+test('the same long query goes to an EBI aligner without complaint', async () => {
+  const side = Math.ceil(Math.sqrt(MAX_PAIR_CELLS)) + 1
+  blastp.mockResolvedValue({ rid: 'job', hits: [{ ...HIT, sequence: 'MKWV' }] })
+  mockLaunchMSA.mockResolvedValue({ msa: 'aligned', tree: 'tree' })
+  await launch(
+    makeModel({
+      ...BLASTP_BROWSER,
+      msaAlgorithm: 'clustalo',
+      proteinSequence: 'M'.repeat(side),
+    }),
+  )
+  expect(blastp).toHaveBeenCalled()
 })

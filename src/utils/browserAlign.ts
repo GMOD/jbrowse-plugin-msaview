@@ -293,44 +293,26 @@ export function mergeOnQuery(
   ]
 }
 
-/**
- * The aligner fills one cell per residue pair on the page's own thread, so its
- * cost is cells: measured 2026-09-24 in node at about 40 ns a cell, 7000 x 7000
- * residues took 2.8 s and a thousand 1000-residue rows 48 s. One pair cannot
- * yield partway, so `MAX_PAIR_CELLS` bounds how long the page freezes, and
- * `MAX_TOTAL_CELLS` bounds the whole run at about a minute.
- */
 export const MAX_PAIR_CELLS = 50_000_000
-export const MAX_TOTAL_CELLS = 1_000_000_000
 
 const CELLS_PER_YIELD = 5_000_000
 
-const ebiInstead = 'Choose an EBI aligner such as Clustal Omega instead.'
-
-function checkAlignmentSize(query: NamedSequence, targets: NamedSequence[]) {
-  const n = query.sequence.length
-  let total = 0
-  for (const target of targets) {
-    const cells = n * target.sequence.length
-    if (cells > MAX_PAIR_CELLS) {
-      throw new Error(
-        `${target.name} (${target.sequence.length} residues) against the ${n}-residue query is too large to align in the browser, which stops at ${MAX_PAIR_CELLS / 1e6}M residue pairs per sequence. ${ebiInstead}`,
-      )
-    }
-    total += cells
-  }
-  if (total > MAX_TOTAL_CELLS) {
+export function checkPairSize(
+  name: string,
+  length: number,
+  queryLength: number,
+) {
+  if (length * queryLength > MAX_PAIR_CELLS) {
     throw new Error(
-      `${targets.length} sequences against the ${n}-residue query are too many to align in the browser: ${Math.round(total / 1e6)}M residue pairs, over its limit of ${MAX_TOTAL_CELLS / 1e6}M. ${ebiInstead}`,
+      `${name} (${length} residues) against the ${queryLength}-residue query is too large to align in the browser, which stops at ${MAX_PAIR_CELLS / 1e6}M residue pairs per sequence. Choose an EBI aligner such as Clustal Omega instead.`,
     )
   }
 }
 
 /**
  * Align `targets` to `query` in the browser and return the rows as FASTA, the
- * query first. Refuses up front an alignment over the size limits, and yields
- * every few million cells so the progress text moves and a cancel is honoured
- * mid-way.
+ * query first. Yields every few million cells so the UI stays responsive and a
+ * cancel is honoured mid-way.
  */
 export async function alignInBrowser({
   query,
@@ -343,7 +325,9 @@ export async function alignInBrowser({
   onProgress?: (arg: string) => void
   signal?: AbortSignal
 }) {
-  checkAlignmentSize(query, targets)
+  for (const target of targets) {
+    checkPairSize(target.name, target.sequence.length, query.sequence.length)
+  }
   const aligned: { name: string; alignment: QueryAnchored }[] = []
   let sinceYield = Infinity
   for (const target of targets) {

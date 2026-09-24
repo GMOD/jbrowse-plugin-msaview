@@ -2,7 +2,6 @@ import { expect, test } from 'vitest'
 
 import {
   MAX_PAIR_CELLS,
-  MAX_TOTAL_CELLS,
   alignInBrowser,
   alignToQuery,
   mergeOnQuery,
@@ -117,18 +116,4 @@ test('a pair over the per-pair limit is refused before anything is aligned', asy
     }),
   ).rejects.toThrow(/titin .* too large to align in the browser.*EBI aligner/)
   expect(progress).toEqual([])
-})
-
-test('a run over the total limit is refused, naming how far over it is', async () => {
-  const length = 5000
-  const count = Math.ceil(MAX_TOTAL_CELLS / (length * length)) + 1
-  await expect(
-    alignInBrowser({
-      query: { name: 'QUERY', sequence: 'M'.repeat(length) },
-      targets: Array.from({ length: count }, (_, i) => ({
-        name: `t${i}`,
-        sequence: 'M'.repeat(length),
-      })),
-    }),
-  ).rejects.toThrow(/too many to align in the browser: \d+M residue pairs/)
 })

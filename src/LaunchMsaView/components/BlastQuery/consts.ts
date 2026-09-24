@@ -22,7 +22,7 @@ export type EbiMsaAlgorithm = (typeof ebiMsaAlgorithms)[number]
  * that must not depend on EBI, and for one that wants to be quick -- a
  * hundred 400-residue rows take under a second, and a hundred 1400-residue
  * rows eight, against a Job Dispatcher queue that has been measured at
- * anything from ten seconds to fifteen minutes. Past the size limits in
+ * anything from ten seconds to fifteen minutes. Past the per-sequence limit in
  * browserAlign.ts it refuses and names an EBI aligner instead.
  */
 export const msaAlgorithms = [...ebiMsaAlgorithms, 'browser'] as const
