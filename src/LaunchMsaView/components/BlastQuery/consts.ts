@@ -20,8 +20,10 @@ export type EbiMsaAlgorithm = (typeof ebiMsaAlgorithms)[number]
  * page and the rows merged on the query (utils/browserAlign.ts), with the tree
  * built by react-msaview's neighbour joining. It is the aligner for a launch
  * that must not depend on EBI, and for one that wants to be quick -- a
- * hundred rows take a second or two against a Job Dispatcher queue that has
- * been measured at anything from ten seconds to fifteen minutes.
+ * hundred 400-residue rows take under a second, and a hundred 1400-residue
+ * rows eight, against a Job Dispatcher queue that has been measured at
+ * anything from ten seconds to fifteen minutes. Past the size limits in
+ * browserAlign.ts it refuses and names an EBI aligner instead.
  */
 export const msaAlgorithms = [...ebiMsaAlgorithms, 'browser'] as const
 export type MsaAlgorithm = (typeof msaAlgorithms)[number]

@@ -90,7 +90,7 @@ export interface QueryAnchored {
  * Gotoh's affine-gap alignment with free end gaps on both sequences. Three
  * states -- M pairs two residues, X puts a query residue against a gap, Y puts
  * a target residue against a gap -- with rolling score rows and one byte of
- * traceback per state per cell.
+ * traceback per cell, two bits per state.
  */
 export function alignToQuery(query: string, target: string): QueryAnchored {
   const q = encode(query)
@@ -99,9 +99,7 @@ export function alignToQuery(query: string, target: string): QueryAnchored {
   const m = t.length
   const w = m + 1
 
-  const ptrM = new Int8Array((n + 1) * w)
-  const ptrX = new Int8Array((n + 1) * w)
-  const ptrY = new Int8Array((n + 1) * w)
+  const ptr = new Uint8Array((n + 1) * w)
 
   let prevM = new Int32Array(w)
   let prevX = new Int32Array(w)
@@ -147,7 +145,6 @@ export function alignToQuery(query: string, target: string): QueryAnchored {
         mFrom = Y
       }
       curM[j] = mScore + s
-      ptrM[row + j] = mFrom
 
       // X: query residue i against a gap, from (i-1, j)
       let xScore = prevM[j]! - GAP_OPEN
@@ -161,7 +158,6 @@ export function alignToQuery(query: string, target: string): QueryAnchored {
         xFrom = Y
       }
       curX[j] = xScore
-      ptrX[row + j] = xFrom
 
       // Y: target residue j against a gap, from (i, j-1)
       let yScore = curM[j - 1]! - GAP_OPEN
@@ -175,7 +171,7 @@ export function alignToQuery(query: string, target: string): QueryAnchored {
         yFrom = X
       }
       curY[j] = yScore
-      ptrY[row + j] = yFrom
+      ptr[row + j] = mFrom | (xFrom << 2) | (yFrom << 4)
     }
 
     // trailing gaps are free too, so the alignment may end anywhere on the
@@ -236,16 +232,16 @@ export function alignToQuery(query: string, target: string): QueryAnchored {
     if (state === M) {
       flushInsert(i)
       matched[i - 1] = target[j - 1]!
-      state = ptrM[idx]!
+      state = ptr[idx]! & 3
       i--
       j--
     } else if (state === X) {
       flushInsert(i)
-      state = ptrX[idx]!
+      state = (ptr[idx]! >> 2) & 3
       i--
     } else {
       pending.push(target[j - 1]!)
-      state = ptrY[idx]!
+      state = ptr[idx]! >> 4
       j--
     }
   }
@@ -297,14 +293,44 @@ export function mergeOnQuery(
   ]
 }
 
-// how many targets to align between two yields to the event loop, so the
-// progress text moves and a cancel is honoured mid-way
-const BATCH = 8
+/**
+ * The aligner fills one cell per residue pair on the page's own thread, so its
+ * cost is cells: measured 2026-09-24 in node at about 40 ns a cell, 7000 x 7000
+ * residues took 2.8 s and a thousand 1000-residue rows 48 s. One pair cannot
+ * yield partway, so `MAX_PAIR_CELLS` bounds how long the page freezes, and
+ * `MAX_TOTAL_CELLS` bounds the whole run at about a minute.
+ */
+export const MAX_PAIR_CELLS = 50_000_000
+export const MAX_TOTAL_CELLS = 1_000_000_000
+
+const CELLS_PER_YIELD = 5_000_000
+
+const ebiInstead = 'Choose an EBI aligner such as Clustal Omega instead.'
+
+function checkAlignmentSize(query: NamedSequence, targets: NamedSequence[]) {
+  const n = query.sequence.length
+  let total = 0
+  for (const target of targets) {
+    const cells = n * target.sequence.length
+    if (cells > MAX_PAIR_CELLS) {
+      throw new Error(
+        `${target.name} (${target.sequence.length} residues) against the ${n}-residue query is too large to align in the browser, which stops at ${MAX_PAIR_CELLS / 1e6}M residue pairs per sequence. ${ebiInstead}`,
+      )
+    }
+    total += cells
+  }
+  if (total > MAX_TOTAL_CELLS) {
+    throw new Error(
+      `${targets.length} sequences against the ${n}-residue query are too many to align in the browser: ${Math.round(total / 1e6)}M residue pairs, over its limit of ${MAX_TOTAL_CELLS / 1e6}M. ${ebiInstead}`,
+    )
+  }
+}
 
 /**
  * Align `targets` to `query` in the browser and return the rows as FASTA, the
- * query first. Yields between batches so the UI stays responsive; the returned
- * FASTA is what the rest of the launch pipeline expects an aligner to produce.
+ * query first. Refuses up front an alignment over the size limits, and yields
+ * every few million cells so the progress text moves and a cancel is honoured
+ * mid-way.
  */
 export async function alignInBrowser({
   query,
@@ -317,18 +343,22 @@ export async function alignInBrowser({
   onProgress?: (arg: string) => void
   signal?: AbortSignal
 }) {
+  checkAlignmentSize(query, targets)
   const aligned: { name: string; alignment: QueryAnchored }[] = []
-  for (let i = 0; i < targets.length; i += BATCH) {
-    onProgress?.(
-      `Aligning ${Math.min(i + BATCH, targets.length)} of ${targets.length} sequences in the browser...`,
-    )
-    await timeout(0, signal)
-    for (const target of targets.slice(i, i + BATCH)) {
-      aligned.push({
-        name: target.name,
-        alignment: alignToQuery(query.sequence, target.sequence),
-      })
+  let sinceYield = Infinity
+  for (const target of targets) {
+    if (sinceYield >= CELLS_PER_YIELD) {
+      onProgress?.(
+        `Aligning ${aligned.length + 1} of ${targets.length} sequences in the browser...`,
+      )
+      await timeout(0, signal)
+      sinceYield = 0
     }
+    aligned.push({
+      name: target.name,
+      alignment: alignToQuery(query.sequence, target.sequence),
+    })
+    sinceYield += query.sequence.length * target.sequence.length
   }
   return mergeOnQuery(query, aligned)
     .map(r => `>${r.name}\n${r.sequence}`)
