@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, vi } from 'vitest'
 
-import { processInit, storeDataToIndexedDB } from './afterCreateAutoruns'
+import { processInit } from './afterCreateAutoruns'
 import { fetchIndexedMsa } from './fetchIndexedMsa'
 
 import type { JBrowsePluginMsaViewModel } from './model'
@@ -74,11 +74,4 @@ test('a url init is still resolved once and cleared', async () => {
   await settle()
   expect(model.setMSAFilehandle).toHaveBeenCalled()
   expect(model.setInit).toHaveBeenCalledWith(undefined)
-})
-
-test('an indexed view writes no IndexedDB row', async () => {
-  const model = makeModel({ rows: [['a', 'MK']], data: { msa: '>a\nMK' } })
-  storeDataToIndexedDB(model)
-  await settle()
-  expect(model.setDataStoreId).not.toHaveBeenCalled()
 })

@@ -21,12 +21,14 @@ residues it starts in, and the genome mapping accounts for it.
 
 ### Where a pasted or uploaded alignment is kept
 
-react-msaview strips large inline data from session snapshots, so the plugin
-keeps an alignment loaded from pasted text or a local file in the browser's
-IndexedDB (database `jbrowse-msaview-data`) and saves only a reference id,
-`dataStoreId`, in the session. On reload the plugin reads the alignment, tree
-and tree metadata back from there, and cleans up entries no session has opened
-for seven days.
+react-msaview drops any document over 50 kB from the session snapshot, and a
+document read from a local file or pasted in has nowhere else to come back from.
+The plugin keeps exactly those documents -- alignment, tree, row metadata or
+annotations -- in the browser's IndexedDB (database `jbrowse-msaview-data`) and
+saves a reference id, `dataStoreId`, in the session. A document loaded from a
+URL needs none of this, so a URL alignment with a large local GFF on top keeps
+only the GFF. On reload the plugin reads them back, and cleans up entries no
+session has opened for seven days.
 
 The consequence: a session holding an uploaded alignment reopens in the same
 browser, but a shared link or another machine finds nothing behind the

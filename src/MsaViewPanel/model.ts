@@ -1,6 +1,6 @@
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
 import { getSession } from '@jbrowse/core/util'
-import { addDisposer, types } from '@jbrowse/mobx-state-tree'
+import { addDisposer, getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
 
@@ -372,6 +372,26 @@ export default function stateModelFactory() {
         // away for every view this one does not speak for
         return self.hostCarriesData || !!(msaIndexedLocation && msaName)
       },
+      /**
+       * #getter
+       * the documents a reload would lose: too big for react-msaview to keep
+       * in the snapshot, and with no filehandle or kept init to refetch them
+       * from. IndexedDB holds exactly these.
+       */
+      get unsavedDocuments(): MsaDataPayload {
+        const { data, init } = self
+        const inSnapshot = getSnapshot(data)
+        const unsaved = (key: keyof MsaDataPayload, source: unknown) => {
+          const text = data[key]
+          return text && !source && !inSnapshot[key] ? text : undefined
+        }
+        return {
+          msa: unsaved('msa', self.msaFilehandle ?? init?.msaIndexedLocation),
+          tree: unsaved('tree', self.treeFilehandle),
+          treeMetadata: unsaved('treeMetadata', self.treeMetadataFilehandle),
+          gff: unsaved('gff', self.gffFilehandle),
+        }
+      },
     }))
 
     .actions(self => ({
@@ -623,8 +643,8 @@ export default function stateModelFactory() {
         addDisposer(self, () => {
           self.launchController?.abort()
         })
+        loadStoredData(self)
         for (const fn of [
-          loadStoredData,
           storeDataToIndexedDB,
           resolveConnectedTranscriptIfNeeded,
           launchBlastIfNeeded,

@@ -8,6 +8,7 @@ import { genomeToMSA } from './genomeToMSA'
 import { loadProteinDomains } from './loadProteinDomains'
 import {
   cleanupOldData,
+  deleteMsaData,
   generateDataStoreId,
   retrieveMsaData,
   storeMsaData,
@@ -31,39 +32,45 @@ const RELAUNCHABLE = ' Retry runs the original search again and rebuilds it.'
 
 const START_OVER = ' Relaunch it from the gene to rebuild it.'
 
+const EXPIRED_EXTRAS_WARNING =
+  'Annotations, a tree or row metadata this view loaded from a local file are no longer in browser storage, which keeps them for 7 days after they were last used.'
+
+/**
+ * Runs once, as the view is created: `dataStoreId` only names a row the view
+ * did not write itself when it arrives in a restored snapshot. The alignment
+ * may already be drawn by then, from the snapshot or a url, so the row is read
+ * whatever the view holds and fills in only what it lacks.
+ */
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
-  const { dataStoreId, rows } = self
-  if (dataStoreId && rows.length === 0) {
-    void (async () => {
-      try {
-        self.setLoadingStoredData(true)
-        const storedData = await retrieveMsaData(dataStoreId)
-        if (storedData) {
-          // one transaction, so storeDataToIndexedDB sees the restored data and
-          // the record of it together and does not write it straight back
-          transaction(() => {
-            if (storedData.msa) {
-              self.setMSA(storedData.msa)
-            }
-            if (storedData.tree) {
-              self.setTree(storedData.tree)
-            }
-            if (storedData.treeMetadata) {
-              self.setTreeMetadata(storedData.treeMetadata)
-            }
-            if (storedData.gff) {
-              self.setGFF(storedData.gff)
-            }
-            self.setLastStoredData(currentData(self))
-          })
+  const { dataStoreId } = self
+  if (!dataStoreId) {
+    return
+  }
+  void (async () => {
+    try {
+      self.setLoadingStoredData(true)
+      const stored = await retrieveMsaData(dataStoreId)
+      transaction(() => {
+        if (stored) {
+          const { data } = self
+          if (stored.msa && !data.msa) {
+            self.setMSA(stored.msa)
+          }
+          if (stored.tree && !data.tree) {
+            self.setTree(stored.tree)
+          }
+          if (stored.treeMetadata && !data.treeMetadata) {
+            self.setTreeMetadata(stored.treeMetadata)
+          }
+          if (stored.gff && !data.gff) {
+            self.setGFF(stored.gff)
+          }
+          self.setLastStoredData(stored)
         } else {
-          // the id names nothing, so clearing it is what lets react-msaview's
-          // "Return to import form" actually return instead of landing back
-          // here. The request that built the alignment is kept, though: it is
-          // the whole of a retry, and dropping it left the user reading an
-          // apology with nothing to press.
-          transaction(() => {
-            self.setDataStoreId(undefined)
+          self.setDataStoreId(undefined)
+          if (hasAlignmentSource(self)) {
+            self.addWarning(EXPIRED_EXTRAS_WARNING)
+          } else {
             self.setError(
               new Error(
                 EXPIRED_MESSAGE +
@@ -72,25 +79,27 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
                     : START_OVER),
               ),
             )
-          })
+          }
         }
-      } catch (e) {
-        console.error('Failed to load MSA data from IndexedDB:', e)
-      } finally {
-        self.setLoadingStoredData(false)
-      }
-    })()
-  }
+      })
+    } catch (e) {
+      console.error('Failed to load MSA data from IndexedDB:', e)
+    } finally {
+      self.setLoadingStoredData(false)
+    }
+  })()
 }
 
-/**
- * Everything react-msaview drops from the snapshot once it passes 50kB. The
- * GFF is among them: a local one's filehandle is cleared once it loads, so
- * this row is the only copy.
- */
-function currentData(self: JBrowsePluginMsaViewModel): MsaDataPayload {
-  const { msa, tree, treeMetadata, gff } = self.data
-  return { msa, tree, treeMetadata, gff }
+function hasAlignmentSource(self: JBrowsePluginMsaViewModel) {
+  return !!(
+    self.data.msa ||
+    self.msaFilehandle ||
+    self.init?.msaIndexedLocation
+  )
+}
+
+function isEmpty(data: MsaDataPayload) {
+  return !(data.msa || data.tree || data.treeMetadata || data.gff)
 }
 
 function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
@@ -104,47 +113,39 @@ function sameData(a: MsaDataPayload | undefined, b: MsaDataPayload) {
 }
 
 /**
- * Keep IndexedDB holding what the view holds. The first run writes a new row and
- * records its id in the session snapshot; later runs update that row, because
- * the alignment keeps changing after it arrives — react-msaview's
- * "calculate neighbor-joining tree" replaces `data.tree` — and a session
- * reopened against a stale row restores the wrong picture.
+ * Keep IndexedDB holding `unsavedDocuments`, the documents a reload would
+ * otherwise lose. That depends on the source, not on the view: a url-loaded
+ * alignment still loses a large GFF read from a local file, and a pasted one
+ * small enough for the snapshot needs no row at all.
  *
- * `lastStoredData` is what makes that safe to run on every data change: it is
- * the only thing separating "this is new" from "this is what we just wrote", and
- * it is recorded whether or not the write succeeded, so a browser refusing
- * IndexedDB (private mode) fails once rather than in a loop.
- *
- * A view whose data comes from a filehandle -- or from the indexed block its
- * kept `init` names -- stores nothing at all: the file is the source of truth
- * and it is refetched at startup.
+ * `lastStoredData` separates "this is new" from "this is what we just wrote",
+ * and is recorded whether or not the write succeeded, so a browser refusing
+ * IndexedDB (private mode) fails once rather than in a loop. Nothing is written
+ * while the restore is reading, which would clobber the row it reads.
  */
 export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
-  const { rows, dataStoreId, isStoringData, lastStoredData, init } = self
-  const data = currentData(self)
+  const { dataStoreId, isStoringData, loadingStoredData, lastStoredData } = self
+  const data = self.unsavedDocuments
   if (
-    rows.length === 0 ||
     isStoringData ||
-    self.msaFilehandle ||
-    self.treeFilehandle ||
-    // an indexed view keeps its init and refetches the block, so a row here
-    // would be one nothing ever reads
-    !!init?.msaIndexedLocation ||
-    !(data.msa || data.tree) ||
-    sameData(lastStoredData, data)
+    loadingStoredData ||
+    sameData(lastStoredData, data) ||
+    (!dataStoreId && isEmpty(data))
   ) {
     return
   }
 
-  // mark as storing synchronously so re-runs of this autorun (e.g. when data
-  // observables change while the write is pending) don't kick off a duplicate
-  // write and leave an orphan IndexedDB entry
   self.setIsStoringData(true)
   void (async () => {
     try {
-      const id = dataStoreId ?? generateDataStoreId()
-      if (await storeMsaData(id, data)) {
-        self.setDataStoreId(id)
+      if (!isEmpty(data)) {
+        const id = dataStoreId ?? generateDataStoreId()
+        if (await storeMsaData(id, data)) {
+          self.setDataStoreId(id)
+        }
+      } else if (dataStoreId) {
+        await deleteMsaData(dataStoreId)
+        self.setDataStoreId(undefined)
       }
     } catch (e) {
       console.error('Failed to store MSA data to IndexedDB:', e)

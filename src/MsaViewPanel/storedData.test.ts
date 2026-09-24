@@ -1,254 +1,261 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { loadStoredData, storeDataToIndexedDB } from './afterCreateAutoruns'
+import stateModelFactory from './model'
 import {
+  deleteMsaData,
   generateDataStoreId,
   retrieveMsaData,
   storeMsaData,
 } from './msaDataStore'
 
-import type { JBrowsePluginMsaViewModel } from './model'
-import type { MsaDataPayload } from './msaDataStore'
-
-// IndexedDB itself is msaDataStore.test.ts's subject; what is under test here is
-// which writes these two autoruns decide to make.
+vi.mock('@jbrowse/core/util', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  getSession: () => ({ views: [], hovered: undefined }),
+}))
 vi.mock('./msaDataStore', () => ({
-  cleanupOldData: vi.fn(),
+  cleanupOldData: vi.fn(async () => {}),
+  deleteMsaData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
   retrieveMsaData: vi.fn(),
   storeMsaData: vi.fn(),
 }))
+vi.mock('./fetchIndexedMsa', () => ({
+  fetchIndexedMsa: () => new Promise(() => {}),
+}))
 
 const mockRetrieve = vi.mocked(retrieveMsaData)
 const mockStore = vi.mocked(storeMsaData)
-const mockGenerateId = vi.mocked(generateDataStoreId)
+const mockDelete = vi.mocked(deleteMsaData)
 
-const MSA = '>a\nMK'
+const SMALL_MSA = '>a\nMK'
+const BIG_MSA = `>a\n${'M'.repeat(60_000)}`
+const BIG_GFF = 'a\t.\tdomain\t1\t2\n'.repeat(4_000)
+const BIG_TREE = `(${'a'.repeat(60_000)},b);`
 const NEW_ID = 'msa-generated'
+const URL_MSA: { uri: string; locationType: 'UriLocation' } = {
+  uri: 'https://example.com/msa.fa',
+  locationType: 'UriLocation',
+}
 
-function makeModel(over: Record<string, unknown> = {}) {
-  const model = {
-    dataStoreId: undefined as string | undefined,
-    rows: [] as string[][],
-    data: {} as MsaDataPayload,
-    msaFilehandle: undefined,
-    treeFilehandle: undefined,
-    isStoringData: false,
-    lastStoredData: undefined as MsaDataPayload | undefined,
-    loadingStoredData: false,
-    error: undefined as unknown,
-    setDataStoreId(arg?: string) {
-      model.dataStoreId = arg
-    },
-    setIsStoringData(arg: boolean) {
-      model.isStoringData = arg
-    },
-    setLastStoredData(arg?: MsaDataPayload) {
-      model.lastStoredData = arg
-    },
-    setLoadingStoredData(arg: boolean) {
-      model.loadingStoredData = arg
-    },
-    setError(arg: unknown) {
-      model.error = arg
-    },
-    setMSA(arg: string) {
-      model.data.msa = arg
-    },
-    setTree(arg: string) {
-      model.data.tree = arg
-    },
-    setTreeMetadata(arg: string) {
-      model.data.treeMetadata = arg
-    },
-    setGFF(arg: string) {
-      model.data.gff = arg
-    },
-    ...over,
-  }
-  return model as typeof model & JBrowsePluginMsaViewModel
+type Snapshot = Parameters<ReturnType<typeof stateModelFactory>['create']>[0]
+
+function view(snapshot: Partial<NonNullable<Snapshot>> = {}) {
+  return stateModelFactory().create({
+    type: 'MsaView',
+    id: 'msaview1',
+    ...snapshot,
+  })
 }
 
 const settle = () => new Promise(res => setTimeout(res, 0))
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockGenerateId.mockReturnValue(NEW_ID)
+  vi.stubGlobal('fetch', () => new Promise(() => {}))
+  vi.mocked(generateDataStoreId).mockReturnValue(NEW_ID)
   mockStore.mockResolvedValue(true)
 })
 
-describe('restoring a view from IndexedDB', () => {
-  test('a row that is still there is applied and recorded as stored', async () => {
-    mockRetrieve.mockResolvedValue({
-      msa: MSA,
-      tree: '(a);',
-      treeMetadata: '{}',
-    })
-    const model = makeModel({ dataStoreId: 'msa-1' })
+describe('what a reload would lose', () => {
+  test('a document small enough for the snapshot is not at risk', () => {
+    const model = view({ data: { msa: SMALL_MSA } })
+    expect(model.unsavedDocuments.msa).toBeUndefined()
+  })
 
-    loadStoredData(model)
+  test('a large pasted alignment is', () => {
+    const model = view()
+    model.setMSA(BIG_MSA)
+    expect(model.unsavedDocuments.msa).toBe(BIG_MSA)
+  })
+
+  test('a url-loaded alignment is not, but a large local GFF on it is', () => {
+    const model = view({ msaFilehandle: URL_MSA })
+    model.setMSA(BIG_MSA)
+    model.setGFF(BIG_GFF)
+    expect(model.unsavedDocuments).toEqual({
+      msa: undefined,
+      tree: undefined,
+      treeMetadata: undefined,
+      gff: BIG_GFF,
+    })
+  })
+
+  test('an indexed alignment is not, since its kept init refetches it', () => {
+    const model = view({
+      init: { msaIndexedLocation: { uri: 'msa.fa.gz' }, msaName: 'ENST1' },
+    })
+    model.setMSA(BIG_MSA)
+    expect(model.unsavedDocuments.msa).toBeUndefined()
+  })
+
+  test('a GFF read from a url is not', () => {
+    const model = view({
+      gffFilehandle: {
+        uri: 'https://example.com/a.gff',
+        locationType: 'UriLocation',
+      },
+    })
+    model.setGFF(BIG_GFF)
+    expect(model.unsavedDocuments.gff).toBeUndefined()
+  })
+})
+
+describe('restoring a view from IndexedDB', () => {
+  test('a stored alignment comes back and is not written straight back', async () => {
+    mockRetrieve.mockResolvedValue({ msa: BIG_MSA })
+    const model = view({ dataStoreId: 'msa-1' })
     await settle()
 
-    expect(model.data.msa).toBe(MSA)
+    expect(model.data.msa).toBe(BIG_MSA)
     expect(model.error).toBeUndefined()
-    // recorded, so the store autorun does not write the restored data straight
-    // back out again
-    expect(model.lastStoredData).toEqual({
-      msa: MSA,
-      tree: '(a);',
-      treeMetadata: '{}',
-    })
-    model.rows = [['a', 'MK']]
-    storeDataToIndexedDB(model)
     expect(mockStore).not.toHaveBeenCalled()
   })
 
-  // react-msaview drops a GFF over 50kB from the snapshot too
-  test('a stored GFF comes back with the alignment', async () => {
-    mockRetrieve.mockResolvedValue({ msa: MSA, gff: 'a\t.\tdomain\t1\t2' })
-    const model = makeModel({ dataStoreId: 'msa-1' })
-
-    loadStoredData(model)
+  test('a large GFF comes back on a url-loaded view', async () => {
+    mockRetrieve.mockResolvedValue({ gff: BIG_GFF })
+    const model = view({ dataStoreId: 'msa-1', msaFilehandle: URL_MSA })
     await settle()
 
-    expect(model.data.gff).toBe('a\t.\tdomain\t1\t2')
+    expect(model.data.gff).toBe(BIG_GFF)
+    expect(mockStore).not.toHaveBeenCalled()
   })
 
-  // the row expires or the user clears site data, and the view used to reopen as
-  // a blank import form with no hint that anything had been lost
+  // the alignment in the snapshot used to skip the read altogether, and the
+  // first write then replaced the row's GFF with nothing
+  test('a large GFF comes back on a view whose alignment is in the snapshot', async () => {
+    mockRetrieve.mockResolvedValue({ gff: BIG_GFF })
+    const model = view({ dataStoreId: 'msa-1', data: { msa: SMALL_MSA } })
+    await settle()
+
+    expect(model.data.gff).toBe(BIG_GFF)
+    expect(mockStore).not.toHaveBeenCalled()
+    expect(mockDelete).not.toHaveBeenCalled()
+  })
+
+  // rows written before only oversized documents were kept hold a small
+  // alignment the snapshot already carries
+  test('a row holding nothing a reload would lose is deleted', async () => {
+    mockRetrieve.mockResolvedValue({ msa: SMALL_MSA })
+    const model = view({ dataStoreId: 'msa-1', data: { msa: SMALL_MSA } })
+    await settle()
+    await settle()
+
+    expect(mockDelete).toHaveBeenCalledWith('msa-1')
+    expect(model.dataStoreId).toBeUndefined()
+    expect(mockStore).not.toHaveBeenCalled()
+  })
+
   test('a row that is gone says so, in words that name the policy', async () => {
     mockRetrieve.mockResolvedValue(undefined)
-    const model = makeModel({ dataStoreId: 'msa-1' })
-
-    loadStoredData(model)
+    const model = view({ dataStoreId: 'msa-1' })
     await settle()
 
     expect(model.error).toBeInstanceOf(Error)
-    expect((model.error as Error).message).toMatch(/7 days/)
-    // the id names nothing now, so it goes -- otherwise react-msaview's "Return
-    // to import form" lands straight back on this error
+    expect(`${model.error}`).toMatch(/7 days/)
+    expect(`${model.error}`).toMatch(/Relaunch it from the gene/)
     expect(model.dataStoreId).toBeUndefined()
   })
 
-  // the request that built the alignment is kept past the launch, so the view
-  // can offer to run it again instead of sending the user back to the gene
   test('a row that is gone points at Retry when the search is still known', async () => {
     mockRetrieve.mockResolvedValue(undefined)
-    const model = makeModel({
+    const model = view({
       dataStoreId: 'msa-1',
-      blastParams: { blastDatabase: 'uniprotkb_swissprot' },
+      blastParams: {
+        searchProgram: 'blastp',
+        blastDatabase: 'uniprotkb_swissprot',
+        msaAlgorithm: 'clustalo',
+        proteinSequence: 'MKV',
+      },
+      launchCompleted: true,
     })
-
-    loadStoredData(model)
     await settle()
 
-    expect((model.error as Error).message).toMatch(/Retry/)
+    expect(`${model.error}`).toMatch(/Retry/)
     expect(model.blastParams).toBeDefined()
   })
 
-  test('a row that is gone with no search behind it says to relaunch', async () => {
+  test('a row that is gone from a url-loaded view warns rather than errors', async () => {
     mockRetrieve.mockResolvedValue(undefined)
-    const model = makeModel({ dataStoreId: 'msa-1' })
-
-    loadStoredData(model)
+    const model = view({ dataStoreId: 'msa-1', msaFilehandle: URL_MSA })
     await settle()
 
-    expect((model.error as Error).message).toMatch(/Relaunch it from the gene/)
+    expect(model.error).toBeUndefined()
+    expect(model.warnings.join()).toMatch(/local file/)
+    expect(model.dataStoreId).toBeUndefined()
   })
 })
 
 describe('keeping IndexedDB up to date', () => {
-  test('the first alignment is written under a fresh id', async () => {
-    const model = makeModel({ rows: [['a', 'MK']], data: { msa: MSA } })
+  test('a small alignment needs no row', async () => {
+    view({ data: { msa: SMALL_MSA } })
+    await settle()
+    expect(mockStore).not.toHaveBeenCalled()
+  })
 
-    storeDataToIndexedDB(model)
+  test('a large alignment is written under a fresh id', async () => {
+    const model = view()
+    model.setMSA(BIG_MSA)
     await settle()
 
-    expect(mockStore).toHaveBeenCalledWith(NEW_ID, { msa: MSA })
+    expect(mockStore).toHaveBeenCalledWith(
+      NEW_ID,
+      expect.objectContaining({ msa: BIG_MSA }),
+    )
     expect(model.dataStoreId).toBe(NEW_ID)
     expect(model.isStoringData).toBe(false)
   })
 
-  // react-msaview's "calculate neighbor-joining tree" replaces data.tree long
-  // after the first write; the row used to keep the alignment's original tree
-  // forever, so a reopened session restored a picture the user had replaced
-  test('an edit after the first write updates the existing row', async () => {
-    const model = makeModel({
-      dataStoreId: 'msa-1',
-      rows: [['a', 'MK']],
-      data: { msa: MSA, tree: '(a);' },
-      lastStoredData: { msa: MSA, tree: '(a);' },
-    })
-
-    storeDataToIndexedDB(model)
-    expect(mockStore).not.toHaveBeenCalled()
-
-    model.data.tree = '(a:0.1);'
-    storeDataToIndexedDB(model)
+  test('a large local GFF on a url-loaded view is written, and only it', async () => {
+    const model = view({ msaFilehandle: URL_MSA })
+    model.setMSA(BIG_MSA)
+    model.setGFF(BIG_GFF)
     await settle()
 
-    expect(mockStore).toHaveBeenCalledWith('msa-1', {
-      msa: MSA,
-      tree: '(a:0.1);',
-      treeMetadata: undefined,
-    })
-    expect(model.dataStoreId).toBe('msa-1')
-  })
-
-  test('a GFF loaded after the first write updates the row', async () => {
-    const model = makeModel({
-      dataStoreId: 'msa-1',
-      rows: [['a', 'MK']],
-      data: { msa: MSA },
-      lastStoredData: { msa: MSA },
-    })
-
-    model.data.gff = 'a\t.\tdomain\t1\t2'
-    storeDataToIndexedDB(model)
-    await settle()
-
-    expect(mockStore).toHaveBeenCalledWith(
-      'msa-1',
-      expect.objectContaining({ gff: 'a\t.\tdomain\t1\t2' }),
-    )
-  })
-
-  // a browser that refuses IndexedDB (private mode) answers every write the same
-  // way, and the autorun reruns on its own isStoringData flag -- so a write that
-  // is not recorded as attempted is a write that retries forever
-  test('a write that fails is not retried on the same data', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-    mockStore.mockResolvedValue(false)
-    const model = makeModel({ rows: [['a', 'MK']], data: { msa: MSA } })
-
-    storeDataToIndexedDB(model)
-    await settle()
-    expect(model.dataStoreId).toBeUndefined()
-
-    storeDataToIndexedDB(model)
-    await settle()
     expect(mockStore).toHaveBeenCalledTimes(1)
+    expect(mockStore).toHaveBeenCalledWith(NEW_ID, {
+      msa: undefined,
+      tree: undefined,
+      treeMetadata: undefined,
+      gff: BIG_GFF,
+    })
   })
 
-  test('a view reading from a filehandle stores nothing, since the file is the source', () => {
-    storeDataToIndexedDB(
-      makeModel({
-        rows: [['a', 'MK']],
-        data: { msa: MSA },
-        msaFilehandle: { uri: 'msa.fa', locationType: 'UriLocation' },
-      }),
+  // react-msaview's "calculate neighbor-joining tree" replaces data.tree long
+  // after the first write
+  test('an edit after the first write updates the existing row', async () => {
+    const model = view()
+    model.setMSA(BIG_MSA)
+    await settle()
+    model.setTree(BIG_TREE)
+    await settle()
+
+    expect(mockStore).toHaveBeenLastCalledWith(
+      NEW_ID,
+      expect.objectContaining({ msa: BIG_MSA, tree: BIG_TREE }),
     )
-    expect(mockStore).not.toHaveBeenCalled()
   })
 
-  test('a write already in flight is not duplicated', () => {
-    storeDataToIndexedDB(
-      makeModel({
-        rows: [['a', 'MK']],
-        data: { msa: MSA },
-        isStoringData: true,
-      }),
-    )
-    expect(mockStore).not.toHaveBeenCalled()
+  test('a row left holding nothing a reload would lose is deleted', async () => {
+    const model = view({ data: { msa: SMALL_MSA } })
+    model.setGFF(BIG_GFF)
+    await settle()
+    model.setGFF('a\t.\tdomain\t1\t2')
+    await settle()
+
+    expect(mockDelete).toHaveBeenCalledWith(NEW_ID)
+    expect(model.dataStoreId).toBeUndefined()
+  })
+
+  // a browser that refuses IndexedDB (private mode) answers every write the
+  // same way, and the autorun reruns on its own isStoringData flag
+  test('a write that fails is not retried on the same data', async () => {
+    mockStore.mockResolvedValue(false)
+    const model = view()
+    model.setMSA(BIG_MSA)
+    await settle()
+    await settle()
+
+    expect(model.dataStoreId).toBeUndefined()
+    expect(mockStore).toHaveBeenCalledTimes(1)
   })
 })

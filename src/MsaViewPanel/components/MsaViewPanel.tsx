@@ -39,7 +39,7 @@ const MsaViewPanel = observer(function MsaViewPanel2({
       <div>
         {launching ? (
           <LaunchProgress model={model} />
-        ) : loadingStoredData ? (
+        ) : loadingStoredData && !model.dataInitialized ? (
           <div className={classes.loadingContainer}>
             <LoadingEllipses message="Loading MSA data" variant="h6" />
           </div>
