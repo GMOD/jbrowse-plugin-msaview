@@ -1,9 +1,9 @@
 import { SimpleFeature } from '@jbrowse/core/util'
+import { translateTranscript } from '@jbrowse/core/util/translateTranscript'
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 import { describe, expect, test } from 'vitest'
 
 import { transcriptPosToVisibleCol } from '../MsaViewPanel/util'
-import { getProteinSequenceFromFeature } from './components/calculateProteinSequence'
 import { findQueryRow } from './detectQueryRow'
 import { cleanProteinSequence } from './util'
 
@@ -27,7 +27,7 @@ describe('a launched query row read through g2p', () => {
     const seq = json.seq as string
     const feature = new SimpleFeature(json as never)
     const row = cleanProteinSequence(
-      getProteinSequenceFromFeature({ seq, feature }),
+      translateTranscript({ transcript: feature, seq })?.protein ?? '',
     )
     const { g2p } = genomeToTranscriptSeqMapping(feature.toJSON() as never)
     const col = transcriptPosToVisibleCol(
@@ -62,6 +62,41 @@ describe('a launched query row read through g2p', () => {
     const json = transcript('GATGGCCTGGAAATAA', { type: 'CDS', phase: 1 })
     expect(rowResidueUnder(4, json)).toBe('A')
     expect(rowResidueUnder(10, json)).toBe('K')
+  })
+
+  test('on the reverse strand, across an intron, after a partial first codon', () => {
+    // sense G | ATG GCC <intron> TGG AAA TAA, stored as the reverse complement
+    const json = {
+      uniqueId: 't1',
+      refName: 'chr1',
+      start: 0,
+      end: 24,
+      strand: -1,
+      type: 'mRNA',
+      seq: 'TTATTTCCACTACTTACGGCCATC',
+      subfeatures: [
+        {
+          uniqueId: 'c1',
+          refName: 'chr1',
+          type: 'CDS',
+          start: 17,
+          end: 24,
+          phase: 1,
+        },
+        {
+          uniqueId: 'c2',
+          refName: 'chr1',
+          type: 'CDS',
+          start: 0,
+          end: 9,
+          phase: 0,
+        },
+      ],
+    }
+    expect(rowResidueUnder(22, json)).toBe('M')
+    expect(rowResidueUnder(18, json)).toBe('A')
+    expect(rowResidueUnder(7, json)).toBe('W')
+    expect(rowResidueUnder(4, json)).toBe('K')
   })
 
   test('after an internal stop', () => {

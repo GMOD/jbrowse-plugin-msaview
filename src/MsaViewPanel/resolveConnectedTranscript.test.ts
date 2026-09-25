@@ -45,8 +45,8 @@ vi.mock('@jbrowse/core/configuration', async importOriginal => ({
 vi.mock('../LaunchMsaView/components/fetchSeq', () => ({
   fetchSeq: vi.fn(async () => ({ seq: 'ATGAAAGTG' })),
 }))
-vi.mock('../LaunchMsaView/components/calculateProteinSequence', () => ({
-  getProteinSequenceFromFeature: vi.fn(() => 'MKV'),
+vi.mock('@jbrowse/core/util/translateTranscript', () => ({
+  translateTranscript: vi.fn(() => ({ protein: 'MKV', cds: [] })),
 }))
 vi.mock('./doLaunchBlast', () => ({
   doLaunchBlast: vi.fn(() => new Promise(() => {})),

@@ -1,9 +1,9 @@
 import { getConf } from '@jbrowse/core/configuration'
 import { getSession } from '@jbrowse/core/util'
+import { translateTranscript } from '@jbrowse/core/util/translateTranscript'
 import { isAlive } from '@jbrowse/mobx-state-tree'
 import { transaction, untracked } from 'mobx'
 
-import { getProteinSequenceFromFeature } from '../LaunchMsaView/components/calculateProteinSequence'
 import { fetchSeq } from '../LaunchMsaView/components/fetchSeq'
 import { getTranscriptFeatures } from '../LaunchMsaView/util'
 
@@ -118,24 +118,14 @@ async function findTranscript(
 }
 
 async function translate(self: JBrowsePluginMsaViewModel, transcript: Feature) {
-  const { start, end, refName } = transcript.toJSON() as {
-    start: number
-    end: number
-    refName: string
-  }
-  const assemblyName = self.connectedView!.assemblyNames[0]!
-  const { seq, assemblyGeneticCodeId } = await fetchSeq({
-    start,
-    end,
-    refName,
-    assemblyName,
+  const sequence = await fetchSeq({
+    start: transcript.get('start'),
+    end: transcript.get('end'),
+    refName: transcript.get('refName'),
+    assemblyName: self.connectedView!.assemblyNames[0]!,
     session: getSession(self),
   })
-  return getProteinSequenceFromFeature({
-    seq,
-    feature: transcript,
-    assemblyGeneticCodeId,
-  })
+  return translateTranscript({ transcript, ...sequence })?.protein
 }
 
 /** the latest lookup per view; an older one finishing late writes nothing */

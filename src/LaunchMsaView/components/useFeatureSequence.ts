@@ -1,7 +1,7 @@
 import { getSession } from '@jbrowse/core/util'
+import { translateTranscript } from '@jbrowse/core/util/translateTranscript'
 
 import { useFetch } from '../../utils/useFetch'
-import { getProteinSequenceFromFeature } from './calculateProteinSequence'
 import { fetchSeq } from './fetchSeq'
 
 import type { Feature } from '@jbrowse/core/util'
@@ -45,11 +45,8 @@ export function useFeatureSequence({
   return {
     proteinSequence:
       sequence && feature
-        ? getProteinSequenceFromFeature({
-            seq: sequence.seq,
-            feature,
-            assemblyGeneticCodeId: sequence.assemblyGeneticCodeId,
-          })
+        ? (translateTranscript({ transcript: feature, ...sequence })?.protein ??
+          '')
         : '',
     sequence,
     error,

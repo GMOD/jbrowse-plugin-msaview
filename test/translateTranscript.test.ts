@@ -3,17 +3,13 @@ import {
   getGeneticCode,
   parseTranslTable,
 } from '@jbrowse/core/util/geneticCodes'
+import { translateTranscript } from '@jbrowse/core/util/translateTranscript'
 import { describe, expect, it } from 'vitest'
-
-import {
-  calculateProteinSequence,
-  getProteinSequenceFromFeature,
-} from '../src/LaunchMsaView/components/calculateProteinSequence'
 
 // The table @jbrowse/core/util exported as `defaultCodonTable` up to 4.3.0,
 // pinned here so core's NCBI strings can't drift from what every released host
-// translates with. The module is a deep path and therefore bundled, so the
-// version this build pins is the one every host runs.
+// translates with. No v4 host re-exports the translation modules, so esbuild
+// bundles them and the version this build pins is the one every host runs.
 const RELEASED_DEFAULT_CODON_TABLE: Record<string, string> = {
   TCA: 'S',
   TCC: 'S',
@@ -130,154 +126,113 @@ describe('genetic codes', () => {
   })
 })
 
-describe('calculateProteinSequence', () => {
-  const sequence = 'ATGGCTTGATAA'
+function transcript(
+  cds: { start: number; end: number; phase?: number }[],
+  attrs: Record<string, unknown> = {},
+) {
+  return new SimpleFeature({
+    uniqueId: 't1',
+    refName: 'chr1',
+    start: 0,
+    end: 12,
+    type: 'mRNA',
+    strand: 1,
+    subfeatures: cds.map((c, i) => ({
+      uniqueId: `cds${i}`,
+      refName: 'chr1',
+      type: 'CDS',
+      ...c,
+    })),
+    ...attrs,
+  })
+}
 
-  it('translates a single stitched CDS', () => {
-    expect(
-      calculateProteinSequence({
-        cds: [{ start: 0, end: 12, type: 'CDS' }],
-        sequence,
-      }),
-    ).toBe('MA**')
+function protein(
+  seq: string,
+  feature: SimpleFeature,
+  assemblyGeneticCodeId?: number,
+) {
+  return translateTranscript({
+    transcript: feature,
+    seq,
+    assemblyGeneticCodeId,
+  })?.protein
+}
+
+describe('translateTranscript', () => {
+  const seq = 'ATGGCTTGATAA'
+
+  it('translates a single CDS', () => {
+    expect(protein(seq, transcript([{ start: 0, end: 12 }]))).toBe('MA**')
   })
 
   it('stitches multiple CDS segments before translating', () => {
-    expect(
-      calculateProteinSequence({
-        cds: [
-          { start: 0, end: 3, type: 'CDS' },
-          { start: 6, end: 12, type: 'CDS' },
-        ],
-        sequence,
-      }),
-    ).toBe('M**')
-  })
-
-  it('honors the genetic code, so table 2 reads TGA as W', () => {
-    const cds = [{ start: 0, end: 12, type: 'CDS' }]
-    expect(calculateProteinSequence({ cds, sequence, geneticCodeId: 2 })).toBe(
-      'MAW*',
-    )
-    expect(calculateProteinSequence({ cds, sequence })).toBe('MA**')
-  })
-
-  it('reads ATA as M under table 2 and I under table 1', () => {
-    const cds = [{ start: 0, end: 9, type: 'CDS' }]
-    const ata = 'ATGATATGA'
-    expect(
-      calculateProteinSequence({ cds, sequence: ata, geneticCodeId: 2 }),
-    ).toBe('MMW')
-    expect(calculateProteinSequence({ cds, sequence: ata })).toBe('MI*')
+    const cds = [
+      { start: 0, end: 3 },
+      { start: 6, end: 12 },
+    ]
+    expect(protein(seq, transcript(cds))).toBe('M**')
   })
 
   it('offsets by the phase of the first CDS', () => {
     // phase 1 skips one base and marks the partial leading codon with '&'
+    expect(protein(seq, transcript([{ start: 0, end: 12, phase: 1 }]))).toBe(
+      '&WLD&',
+    )
     expect(
-      calculateProteinSequence({
-        cds: [{ start: 0, end: 12, type: 'CDS', phase: 1 }],
-        sequence,
-      }),
-    ).toBe('&WLD&')
+      protein('GCTGCTGTAA', transcript([{ start: 0, end: 10, phase: 1 }])),
+    ).toBe('&LL*')
   })
 
   it('marks an unknown or partial codon with &', () => {
-    expect(
-      calculateProteinSequence({
-        cds: [{ start: 0, end: 5, type: 'CDS' }],
-        sequence,
-      }),
-    ).toBe('M&')
-  })
-})
-
-describe('getProteinSequenceFromFeature', () => {
-  const sequence = 'ATGGCTTGATAA'
-
-  function transcript(attrs: Record<string, unknown> = {}) {
-    return new SimpleFeature({
-      uniqueId: 'mt-co1',
-      refName: 'chrM',
-      start: 0,
-      end: 12,
-      type: 'mRNA',
-      strand: 1,
-      subfeatures: [
-        { uniqueId: 'cds1', refName: 'chrM', start: 0, end: 12, type: 'CDS' },
-      ],
-      ...attrs,
-    })
-  }
-
-  // GENCODE and UCSC declare no transl_table at all, so a chrM gene read with
-  // the standard code stops at the first TGA
-  it('falls back to the assembly code for a contig that declares none', () => {
-    expect(
-      getProteinSequenceFromFeature({
-        seq: sequence,
-        feature: transcript(),
-        assemblyGeneticCodeId: 2,
-      }),
-    ).toBe('MAW*')
-    expect(
-      getProteinSequenceFromFeature({ seq: sequence, feature: transcript() }),
-    ).toBe('MA**')
+    expect(protein(seq, transcript([{ start: 0, end: 5 }]))).toBe('M&')
   })
 
-  it("prefers the feature's own transl_table over the assembly's", () => {
-    expect(
-      getProteinSequenceFromFeature({
-        seq: sequence,
-        feature: transcript({ transl_table: '1' }),
-        assemblyGeneticCodeId: 2,
-      }),
-    ).toBe('MA**')
+  it('is undefined for a transcript with no CDS', () => {
+    expect(protein(seq, transcript([]))).toBeUndefined()
   })
 
   // the CDS records of a transcript can repeat, and a duplicate stitched in
   // twice shifts the frame for everything after it
   it('drops a repeated CDS record', () => {
-    const feature = new SimpleFeature({
-      uniqueId: 'dup',
-      refName: 'chr1',
-      start: 0,
-      end: 12,
-      type: 'mRNA',
-      strand: 1,
-      subfeatures: [
-        { uniqueId: 'a', refName: 'chr1', start: 0, end: 6, type: 'CDS' },
-        { uniqueId: 'b', refName: 'chr1', start: 0, end: 6, type: 'CDS' },
-        { uniqueId: 'c', refName: 'chr1', start: 6, end: 12, type: 'CDS' },
-      ],
-    })
-    expect(getProteinSequenceFromFeature({ seq: sequence, feature })).toBe(
-      'MA**',
-    )
+    const cds = [
+      { start: 0, end: 6 },
+      { start: 0, end: 6 },
+      { start: 6, end: 12 },
+    ]
+    expect(protein(seq, transcript(cds))).toBe('MA**')
   })
 })
 
-describe('initiators and transl_except', () => {
-  it('reads an alternative initiator as M, as core does', () => {
-    const cds = [{ start: 0, end: 9, type: 'CDS' }]
-    expect(calculateProteinSequence({ cds, sequence: 'CTGCTGTAA' })).toBe('ML*')
-    expect(
-      calculateProteinSequence({
-        cds,
-        sequence: 'GTGGTGTAA',
-        geneticCodeId: 11,
-      }),
-    ).toBe('MV*')
+describe('genetic code of a transcript', () => {
+  const seq = 'ATGGCTTGATAA'
+  const cds = [{ start: 0, end: 12 }]
+
+  // GENCODE and UCSC declare no transl_table at all, so a chrM gene read with
+  // the standard code stops at the first TGA
+  it('falls back to the assembly code for a contig that declares none', () => {
+    expect(protein(seq, transcript(cds), 2)).toBe('MAW*')
+    expect(protein(seq, transcript(cds))).toBe('MA**')
   })
 
-  it('leaves the codon after a partial first codon alone', () => {
-    expect(
-      calculateProteinSequence({
-        cds: [{ start: 0, end: 10, type: 'CDS', phase: 1 }],
-        sequence: 'GCTGCTGTAA',
-      }),
-    ).toBe('&LL*')
+  it('reads ATA as M under table 2 and I under table 1', () => {
+    const ata = transcript([{ start: 0, end: 9 }])
+    expect(protein('ATGATATGA', ata, 2)).toBe('MMW')
+    expect(protein('ATGATATGA', ata)).toBe('MI*')
   })
 
+  it("prefers the feature's own transl_table over the assembly's", () => {
+    expect(protein(seq, transcript(cds, { transl_table: '1' }), 2)).toBe('MA**')
+  })
+
+  it('reads an alternative initiator as M', () => {
+    const codon = transcript([{ start: 0, end: 9 }])
+    expect(protein('CTGCTGTAA', codon)).toBe('ML*')
+    expect(protein('GTGGTGTAA', codon, 11)).toBe('MV*')
+  })
+})
+
+describe('transl_except', () => {
   function selenoprotein(strand: 1 | -1, pos: string) {
     return new SimpleFeature({
       uniqueId: 'sel',
@@ -302,20 +257,12 @@ describe('initiators and transl_except', () => {
   // read as a stop, a selenocysteine truncates the protein and, once the stop
   // is cleaned out, shifts every residue after it
   it('translates a RefSeq selenocysteine on the forward strand', () => {
-    expect(
-      getProteinSequenceFromFeature({
-        seq: 'ATGGCTTGATAA',
-        feature: selenoprotein(1, '107..109'),
-      }),
-    ).toBe('MAU*')
+    expect(protein('ATGGCTTGATAA', selenoprotein(1, '107..109'))).toBe('MAU*')
   })
 
   it('translates a RefSeq selenocysteine on the reverse strand', () => {
     expect(
-      getProteinSequenceFromFeature({
-        seq: 'TTATCAAGCCAT',
-        feature: selenoprotein(-1, 'complement(104..106)'),
-      }),
+      protein('TTATCAAGCCAT', selenoprotein(-1, 'complement(104..106)')),
     ).toBe('MAU*')
   })
 })
