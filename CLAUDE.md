@@ -66,11 +66,15 @@ every host. Nothing else catches it -- tsc resolves against the installed
 `@mui/material` where the export is real, and the probe loads the bundle without
 opening a panel, so an import that only evaluates on render stays invisible.
 
-`pnpm check-mui-imports` diffs src/'s named `@mui/material` imports against that
-list, and runs on push. When a component is genuinely missing from the map, the
-deep path (`@mui/material/StepContent`) is not in ReExports and so gets bundled
--- at the cost of shipping that component's MUI internals, and the shape risk in
-the root CLAUDE.md's SvgIcon note.
+Dependencies hit it too. react-msaview 8.3.0 called `createFilterOptions` at
+module scope, so the bundle threw while evaluating and error-paged the whole
+app, not just a dialog. So `pnpm check-mui-imports` reads the build's
+`meta.json` and diffs the named `@mui/material` imports of **every bundled
+module** against that list, and runs on push and from `preversion`. When a
+component is genuinely missing from the map, the deep path
+(`@mui/material/StepContent`) is not in ReExports and so gets bundled -- at the
+cost of shipping that component's MUI internals, and the shape risk in the root
+CLAUDE.md's SvgIcon note.
 
 ## A dep bump is a host-compatibility decision for mobx and typescript
 
