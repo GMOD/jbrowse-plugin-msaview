@@ -76,8 +76,7 @@ const SHAPE_VARIES_BY_HOST = new Set(['@mui/material/SvgIcon'])
 //
 // So the externals are the intersection: what this build's core re-exports AND
 // what the oldest supported host re-exports (host-reexports-floor.json, the
-// first version the probe boots). A path only the newer core lists is bundled,
-// which is what a deep path not in ReExports does anyway.
+// first version the probe boots). A path only the newer core lists is bundled.
 const hostFloor = new Set(floor.paths)
 const globals = JBrowseReExports.filter(
   x => hostFloor.has(x) && !SHAPE_VARIES_BY_HOST.has(x),

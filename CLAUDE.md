@@ -6,10 +6,11 @@ broken here has broken at that seam, in published bundles, after the fact.
 ## A `@jbrowse/core` import is only a host dependency if it is in ReExports
 
 An import binds to the host's export surface **only** when its path appears in
-`@jbrowse/core/ReExports/list`. A path absent from that list — say
-`@jbrowse/core/util/convertCodingSequenceToPeptides` — is bundled into the UMD
-by esbuild instead, so it runs identically on every host from v4.0.0 to `main`
-and cannot break when the host's exports change.
+`@jbrowse/core/ReExports/list` and in the oldest host's list (the intersection
+below). Anything else is bundled into the UMD by esbuild, so it runs identically
+on every host from v4.0.0 to `main` and cannot break when the host's exports
+change. `@jbrowse/core/util/translateTranscript`, which translates every query
+row, ships that way: core 5.0.0-beta.9 lists it and v4.0.0 does not.
 
 The barrel `@jbrowse/core/util` **is** in ReExports, which is what makes it
 dangerous: a name removed from it becomes `undefined` inside bundles that are
@@ -19,12 +20,13 @@ already published and in the wild. That bit this plugin on 2026-08-01 —
 error-paged the whole app. The same removal had already broken
 jbrowse-plugin-protein3d.
 
-**So: to reuse core logic, prefer a deep path that is not in ReExports over the
-barrel.** Check with `l.includes(path)` against the ReExports list, and verify
-what actually binds to the host by grepping the built bundle for
-`JBrowseExports["..."]`. The constraint is the _installed_ `@jbrowse/core`
-version, not the host's — the deep path has to exist in the released package you
-build against.
+**So: to reuse core logic, prefer a deep path v4.0.0 does not re-export over the
+barrel.** Since core 5.0.0-beta.9 the installed list names every subpath core
+publishes, so `l.includes(path)` against it answers yes for everything; check
+`scripts/host-reexports-floor.json` instead, and verify what actually binds to
+the host with `pnpm check-host-externals`, which greps the built bundle for
+`JBrowseExports[…]`. The deep path also has to exist in the _installed_
+`@jbrowse/core`, the release you build against.
 
 **The barrel really does shrink.** As of 2026-08-01 it exported 194 names at
 v4.3.0 and had lost 48 of them on `main` (barrel splits such as
@@ -40,9 +42,8 @@ and `main`.
 installed core re-exports but an older host does not is `undefined` there —
 absence in the other direction from the `@jbrowse/core/util` barrel's. So
 `esbuild.mjs` externalizes only what BOTH this build's `ReExports/list` and
-`scripts/host-reexports-floor.json` carry; everything else is bundled, which is
-what a deep path off the list gets anyway. The floor is the oldest version the
-host-compat probe boots, regenerated with
+`scripts/host-reexports-floor.json` carry; everything else is bundled. The floor
+is the oldest version the host-compat probe boots, regenerated with
 `node scripts/update-host-reexports-floor.mjs` (it packs that `@jbrowse/core`
 from npm — don't hand-edit the json), and `pnpm check-host-externals` greps the
 built bundle for `JBrowseExports[…]` so the artifact is checked, not the intent.
