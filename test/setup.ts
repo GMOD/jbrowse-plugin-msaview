@@ -8,7 +8,7 @@ import { saveStableScreenshot } from '../scripts/pngSnapshot.mjs'
 
 import type { Browser, Page } from 'puppeteer'
 
-export const JBROWSE_PORT = 9876
+export const JBROWSE_PORT = Number(process.env.JBROWSE_PORT ?? 9876)
 
 const JBROWSE_VERSION = process.env.TEST_JBROWSE_VERSION ?? 'nightly'
 const VERSION_SUFFIX =
