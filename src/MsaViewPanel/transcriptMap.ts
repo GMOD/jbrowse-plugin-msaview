@@ -12,12 +12,24 @@ function isRecord(val: unknown): val is Record<string, unknown> {
   return typeof val === 'object' && val !== null
 }
 
-function isCds(val: unknown): val is Feat {
+interface CdsRow {
+  start: number
+  end: number
+  phase?: unknown
+}
+
+function isCoordinate(val: unknown): val is number {
+  return Number.isSafeInteger(val)
+}
+
+function isCds(val: unknown): val is CdsRow {
   return (
     isRecord(val) &&
-    val.type === 'CDS' &&
-    Number.isSafeInteger(val.start) &&
-    Number.isSafeInteger(val.end)
+    typeof val.type === 'string' &&
+    val.type.toLowerCase() === 'cds' &&
+    isCoordinate(val.start) &&
+    isCoordinate(val.end) &&
+    val.start < val.end
   )
 }
 
@@ -26,23 +38,38 @@ function phaseOf(val: unknown) {
   return phase === 1 || phase === 2 ? phase : 0
 }
 
+// The rows core's translateTranscript reads, so the query row and the codons
+// count alike: the CDS children, or a standalone CDS (a polyprotein's) as its
+// own one segment.
+function cdsRows(feature: Record<string, unknown>): CdsRow[] {
+  const { subfeatures } = feature
+  const children = (Array.isArray(subfeatures) ? subfeatures : []).filter(isCds)
+  if (children.length > 0) {
+    return children
+  }
+  return isCds(feature) ? [feature] : []
+}
+
 function mappableTranscript(
   feature: unknown,
 ): { transcript: Feat } | { reason: string } {
   if (!isRecord(feature)) {
     return { reason: 'it is not a feature' }
   }
-  const { refName, strand, subfeatures } = feature
+  const { refName, strand } = feature
   if (typeof refName !== 'string' || !refName) {
     return { reason: 'it has no refName' }
   }
   if (strand !== 1 && strand !== -1) {
     return { reason: `its strand is ${JSON.stringify(strand)}, not 1 or -1` }
   }
-  const cds = (Array.isArray(subfeatures) ? subfeatures : [])
-    .filter(isCds)
-    .filter(f => f.start < f.end)
-    .map(f => ({ ...f, phase: phaseOf(f.phase) }))
+  const cds = cdsRows(feature).map(f => ({
+    refName,
+    type: 'CDS',
+    start: f.start,
+    end: f.end,
+    phase: phaseOf(f.phase),
+  }))
   if (cds.length === 0) {
     return { reason: 'it has no CDS with numeric start < end' }
   }

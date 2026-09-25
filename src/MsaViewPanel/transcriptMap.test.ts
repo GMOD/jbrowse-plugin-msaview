@@ -108,6 +108,29 @@ describe('transcriptMap on a malformed transcript', () => {
   })
 })
 
+describe('transcriptMap reads the CDS rows translation reads', () => {
+  test('a lowercase cds row', () => {
+    const map = mapped(
+      transcript({ subfeatures: [{ ...cds(100, 103), type: 'cds' }] }),
+    )
+    expect(map.codingPositions).toEqual([100, 101, 102])
+  })
+
+  test('a standalone CDS, as its own one segment', () => {
+    const polyprotein = transcript({
+      type: 'CDS',
+      start: 100,
+      end: 106,
+      subfeatures: [
+        { type: 'mature_protein_region_of_CDS', start: 100, end: 103 },
+      ],
+    })
+    expect(mapped(polyprotein).codingPositions).toEqual([
+      100, 101, 102, 103, 104, 105,
+    ])
+  })
+})
+
 describe('proteinPositionsInRange', () => {
   const map = mapped(
     transcript({
