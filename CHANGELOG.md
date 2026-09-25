@@ -1,3 +1,35 @@
+## [3.10.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.9.0...v3.10.0) (2026-09-25)
+
+### Bug Fixes
+
+- Update react-msaview to 8.4.0, which no longer calls createFilterOptions ([8d00ef5](https://github.com/GMOD/jbrowse-plugin-msaview/commit/8d00ef526510e9aec656d51b4b59039437dd20c2))
+- Map the CDS rows translation reads ([cca2fec](https://github.com/GMOD/jbrowse-plugin-msaview/commit/cca2fecd5a56594b0ecf6feac10c82fadbea9538))
+- Update react-msaview to 8.4.1, whose Go to box renders on MUI 7 hosts ([bbaeed4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bbaeed4f34270290b7837d32cb64ce415ed703a8))
+
+### Chores
+
+- Check every bundled module's @mui/material imports, not just src's ([831bd37](https://github.com/GMOD/jbrowse-plugin-msaview/commit/831bd37dfff953efe8bd58765fce8151f4500247))
+- Drop v3.7.0 support; the v4.3.0 leg covers the legacy context menu ([a7b6111](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a7b611152bcc7e712e1619e00f580f9a26f6aaac))
+- Bump @jbrowse/core and plugin-linear-genome-view to 5.0.0-beta.9 ([46605bf](https://github.com/GMOD/jbrowse-plugin-msaview/commit/46605bf59b3178006f64892c5176ec5b52c3244d))
+
+### Documentation
+
+- The floor, not the ReExports list, is what bundles a deep core path ([e184562](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e1845626a1af056083d13db105027c5a7d969514))
+
+### Other Changes
+
+- Bump deps ([a33c354](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a33c35461648f88984f09be39955eb7a039a0ca8))
+
+### Refactoring
+
+- Translate transcripts with core's translateTranscript ([a38e389](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a38e3898b0ccb5d0be43bb31c572f340a9e584c8))
+
+### Tests
+
+- Read the e2e server port from JBROWSE_PORT, so two sessions' runs stop killing each other's server ([111ed37](https://github.com/GMOD/jbrowse-plugin-msaview/commit/111ed375048693e205ff7df8cfe9463c3c3eb8e9))
+- Fail the transcript e2e when the MSA view shows an error instead of its header ([97d9c19](https://github.com/GMOD/jbrowse-plugin-msaview/commit/97d9c199576d89092f8f728e3e1c6c26bf398549))
+- Recapture the v4.3.0 final screenshot with the Go to box ([42f61c1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/42f61c1db1c19d669eee5647f1a158858a8412c4))
+
 ## [3.9.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.8.0...v3.9.0) (2026-09-24)
 
 ### Bug Fixes
