@@ -149,17 +149,19 @@ concrete cases: `let browser: Browser` is a lie until `beforeAll` succeeds, so
 detects deliberately probe for members the types claim are always there. The
 rule is right about the types and wrong about the code.
 
-## Don't drop the v3.7.0 leg from the integration matrix
+## Keep a released-host leg in the integration matrix
 
-It is the only check that has ever caught the legacy context-menu regression —
-the class of failure where a plugin reads only `main`'s API shape and silently
-renders no menu item on every host a user actually runs. Nothing else in CI is
-sensitive to it.
+The v4.3.0 leg is what catches the legacy context-menu regression — the class of
+failure where a plugin reads only `main`'s API shape and silently renders no
+menu item on every host a user actually runs. Every release before JBrowse 5
+exposes only the synchronous `contextMenuFeature`, and nightly does not, so no
+nightly-only matrix is sensitive to it. A v3.7.0 leg caught it first (2.7.0); we
+dropped v3.7.0 support on 2026-09-25.
 
 **The corollary catches tests, not just source: every leg runs the WHOLE
-suite.** `pnpm vitest run` executes against nightly, v4.3.0 and v3.7.0 in turn,
-so a test that asserts a feature only `main` has fails on two legs out of three.
-Workspaces are the live example — v4.3.0 and v3.7.0 have no tiling at all, and
+suite.** `pnpm vitest run` executes against nightly and v4.3.0 in turn, so a
+test that asserts a feature only `main` has fails on the released leg.
+Workspaces are the live example — v4.3.0 has no tiling at all, and
 `test/placement.test.ts` asserting two grid cells would have been asserting that
 an old release grew a feature. A test over host-dependent behaviour has to
 feature-detect exactly as the source does, then assert the documented

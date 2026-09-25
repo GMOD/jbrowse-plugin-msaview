@@ -137,5 +137,4 @@ host-compat.json
 # Only the hosts we gate screenshots on keep committed references: nightly and
 # v4.3.0. A run still writes the other versions' images to look at, but an
 # uncommitted set cannot go stale and cannot dirty the tree.
-test-screenshots/v3.7.0-*
 test-screenshots/v4.0.4-*

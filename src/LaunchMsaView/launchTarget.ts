@@ -5,9 +5,8 @@ import type { Feature } from '@jbrowse/core/util'
 
 // The canvas LinearBasicDisplay (JBrowse 5; no release through v4.3.0 has it)
 // exposes the right-clicked feature via contextMenuInfo + async
-// fetchFullFeature. Hosts before that -- v4.3.0, and the v3.7.0 in the wild
-// that shipped configs still name -- expose it synchronously as
-// contextMenuFeature, and only have that one.
+// fetchFullFeature. Hosts before that, v4.3.0 included, expose it
+// synchronously as contextMenuFeature, and only have that one.
 export interface ContextMenuInfo {
   item: { featureId: string; type?: string }
   // the isoform under the pointer when the click landed on a gene's child

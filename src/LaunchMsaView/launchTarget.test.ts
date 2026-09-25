@@ -72,7 +72,7 @@ describe('launchTarget', () => {
     expect(launchTarget({ contextMenuItems: () => [] })).toBeUndefined()
   })
 
-  // v3.7.0 hosts have contextMenuFeature and nothing else; dropping this
+  // v4.3.0 and earlier have contextMenuFeature and nothing else; dropping this
   // fallback once took "Launch MSA view" off every host in the wild.
   test('falls back to a synchronous contextMenuFeature', () => {
     const target = launchTarget(legacyHost(feature('mRNA')))

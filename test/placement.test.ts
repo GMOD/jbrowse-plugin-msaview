@@ -48,9 +48,9 @@ async function panelBoxes(page: Page) {
 }
 
 // Whether THIS host can tile at all -- the same two actions the plugin itself
-// feature-detects. The test matrix runs every leg against v4.3.0 and v3.7.0 as
-// well as nightly, and those hosts have no workspaces: asserting a split there
-// would be asserting that an old release grew a feature.
+// feature-detects. The test matrix runs every leg against v4.3.0 as well as
+// nightly, and v4.3.0 has no workspaces: asserting a split there would be
+// asserting that an old release grew a feature.
 async function hostCanTile(page: Page) {
   return page.evaluate(() => {
     const session = (

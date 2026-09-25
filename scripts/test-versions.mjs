@@ -5,7 +5,7 @@ import { execSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const JBROWSE_VERSIONS = ['v3.7.0', 'v4.0.4']
+const JBROWSE_VERSIONS = ['v4.0.4', 'v4.3.0']
 
 function getTestDir(version) {
   return path.join(process.cwd(), `.test-jbrowse-${version}`)
@@ -36,7 +36,7 @@ function runTestsForVersion(version) {
   console.log(`Running tests against JBrowse ${version}`)
   console.log(`${'='.repeat(60)}\n`)
 
-  const result = spawnSync('yarn', ['vitest', 'run'], {
+  const result = spawnSync('pnpm', ['vitest', 'run'], {
     stdio: 'inherit',
     env: {
       ...process.env,
@@ -81,7 +81,7 @@ function main() {
         const testDir = getTestDir(v)
         if (!fs.existsSync(testDir)) {
           console.log(`\nJBrowse ${v} not found at ${testDir}`)
-          console.log(`Run: yarn test:setup:version ${v}`)
+          console.log(`Run: pnpm test:setup:version ${v}`)
           results.push({ version: v, passed: false, reason: 'not setup' })
           allPassed = false
           continue
@@ -122,7 +122,7 @@ Commands:
 
 Examples:
   node scripts/test-versions.mjs setup           # Setup all versions
-  node scripts/test-versions.mjs setup v3.7.0   # Setup only v3.7.0
+  node scripts/test-versions.mjs setup v4.3.0   # Setup only v4.3.0
   node scripts/test-versions.mjs run            # Test all versions
   node scripts/test-versions.mjs run v4.0.4     # Test only v4.0.4
 
