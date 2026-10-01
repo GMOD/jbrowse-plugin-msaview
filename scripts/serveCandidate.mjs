@@ -1,37 +1,34 @@
 // Answers a hosted JBrowse's requests for this plugin with a local build, so a
 // real shipped config loads the candidate instead of what the store serves.
 // Shared by host-compat-probe.mjs and readme-figure.mjs.
-import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 
 const PACKAGE_PATH = '/jbrowse-plugin-msaview/'
+const PUBLISHED_ESM =
+  'https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/jbrowse-plugin-msaview.esm.js'
 
-export function candidateServer(bundlePath) {
-  const bundle = fs.readFileSync(bundlePath, 'utf8')
-  const bundleDir = path.dirname(bundlePath)
-  const mainName = path.basename(bundlePath)
+export function candidateServer(entryPath) {
+  const dist = path.dirname(entryPath)
+  const entryName = path.basename(entryPath)
+  const publishedEntryName = path.basename(PUBLISHED_ESM)
 
-  // core@main resolves a config's `storePlugin` entries through the v2 store
-  // manifest, which pins a versioned url AND a subresource-integrity hash — so a
-  // substituted bundle fails SRI on that host however valid it is. The manifest
-  // is rewritten so this plugin's integrity matches the candidate being served
-  // (not stripped: the SRI machinery itself stays exercised), and every other
-  // plugin's pin is left alone.
-  const bundleIntegrity = `sha384-${crypto
-    .createHash('sha384')
-    .update(bundle)
-    .digest('base64')}`
-
+  // core@main resolves a config's `storePlugin` entry through the v2 store
+  // manifest, which names this plugin's build. The manifest is rewritten so
+  // every build of this plugin is the ESM entry at its store path, which the
+  // handler below answers from the local dist; every other plugin is left
+  // alone.
   let manifestPromise
   function rewrittenStoreManifest(url) {
     manifestPromise ??= (async () => {
       const manifest = await (await fetch(url)).json()
       for (const plugin of manifest.plugins ?? []) {
-        if (plugin.url?.includes(PACKAGE_PATH)) {
-          plugin.integrity = bundleIntegrity
-          for (const version of plugin.versions ?? []) {
-            version.integrity = bundleIntegrity
+        if (plugin.name === 'MsaView') {
+          for (const build of [plugin, ...(plugin.versions ?? [])]) {
+            delete build.url
+            delete build.umdUrl
+            delete build.integrity
+            build.esmUrl = PUBLISHED_ESM
           }
         }
       }
@@ -40,33 +37,36 @@ export function candidateServer(bundlePath) {
     return manifestPromise
   }
 
-  // Serves the whole local dist for the plugin's store path, not just the one
-  // file: a build that code-splits fetches sibling chunks by their own hashed
-  // names, and answering those with the main bundle produces a failure that
-  // looks like a host incompatibility but is a probe bug.
-  //
+  // Resolved by path under dist/: the entry imports its chunks from
+  // dist/chunks/ relative to its own url, and answering a chunk request with
+  // the entry produces a failure that looks like a host incompatibility but is
+  // a probe bug. A path the local dist lacks goes to the network and fails
+  // there, loudly.
+  function candidateFile(url) {
+    if (!url.includes(PACKAGE_PATH)) {
+      return undefined
+    }
+    const rel = new URL(url).pathname.split('/dist/').slice(1).join('/dist/')
+    if (rel === publishedEntryName || rel === entryName) {
+      serveCandidate.entryRequests += 1
+      return entryPath
+    }
+    const local = path.join(dist, rel)
+    return rel.endsWith('.js') && fs.existsSync(local) ? local : undefined
+  }
+
   // Fetch patterns rather than page.setRequestInterception: the latter pauses
   // every request, including the RPC workers' own, which puppeteer never sees
   // and so never resumes -- tracks stall on their first byte range.
-  function candidateBody(url) {
-    const name = path.basename(new URL(url).pathname)
-    const sibling = path.join(bundleDir, name)
-    if (!url.includes(PACKAGE_PATH) || !name.endsWith('.js')) {
-      return undefined
-    }
-    return name !== mainName && fs.existsSync(sibling)
-      ? fs.readFileSync(sibling, 'utf8')
-      : bundle
-  }
-
-  return async function serveCandidate(page) {
+  async function serveCandidate(page) {
     const client = await page.createCDPSession()
     client.on('Fetch.requestPaused', async ({ requestId, request }) => {
       try {
         const isManifest = /\/plugin-store\/.*plugins\.json/.test(request.url)
+        const file = isManifest ? undefined : candidateFile(request.url)
         const body = isManifest
           ? await rewrittenStoreManifest(request.url)
-          : candidateBody(request.url)
+          : file && fs.readFileSync(file, 'utf8')
         await (body === undefined
           ? client.send('Fetch.continueRequest', { requestId })
           : client.send('Fetch.fulfillRequest', {
@@ -96,4 +96,6 @@ export function candidateServer(bundlePath) {
       ],
     })
   }
+  serveCandidate.entryRequests = 0
+  return serveCandidate
 }

@@ -5,7 +5,7 @@ import LaunchMsaViewExtensionPointF from './index'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AbstractSessionModel } from '@jbrowse/core/util'
 
-function launch(args: Record<string, unknown>) {
+async function launch(args: Record<string, unknown>) {
   let run: ((args: unknown) => unknown) | undefined
   LaunchMsaViewExtensionPointF({
     addToExtensionPoint(_name: string, cb: (args: unknown) => unknown) {
@@ -14,22 +14,22 @@ function launch(args: Record<string, unknown>) {
   } as unknown as PluginManager)
   const added: Record<string, unknown>[] = []
   const session = {
-    addView(_type: string, snapshot: Record<string, unknown>) {
+    async launchView(_type: string, snapshot: Record<string, unknown>) {
       added.push(snapshot)
       return { id: 'view-1' }
     },
   } as unknown as AbstractSessionModel
-  run!({ session, ...args })
+  await run!({ session, ...args })
   return added[0]!
 }
 
-test('inline data carries no init, which the panel would read as a launch in flight', () => {
-  const snapshot = launch({ data: { msa: '>a\nMEEP' } })
+test('inline data carries no init, which the panel would read as a launch in flight', async () => {
+  const snapshot = await launch({ data: { msa: '>a\nMEEP' } })
   expect('init' in snapshot).toBe(false)
 })
 
-test('a file location travels through init', () => {
-  const snapshot = launch({
+test('a file location travels through init', async () => {
+  const snapshot = await launch({
     msaFileLocation: { uri: 'http://example.com/a.fa' },
   })
   expect(snapshot.init).toEqual({
@@ -40,8 +40,8 @@ test('a file location travels through init', () => {
   })
 })
 
-test('searchParams is a source, stored under the name the dialog uses', () => {
-  const snapshot = launch({
+test('searchParams is a source, stored under the name the dialog uses', async () => {
+  const snapshot = await launch({
     searchParams: {
       searchProgram: 'phmmer',
       blastDatabase: 'rp15',
@@ -59,14 +59,16 @@ test('searchParams is a source, stored under the name the dialog uses', () => {
   expect(snapshot.connectedTranscript).toBe('NM_000546.6')
 })
 
-test('a launch naming no source at all is refused', () => {
-  expect(() => launch({ connectedViewId: 'lgv1' })).toThrow(/searchParams/)
+test('a launch naming no source at all is refused', async () => {
+  await expect(launch({ connectedViewId: 'lgv1' })).rejects.toThrow(
+    /searchParams/,
+  )
 })
 
-test('region and the data-layer keys reach the view as snapshot properties', () => {
+test('region and the data-layer keys reach the view as snapshot properties', async () => {
   const region = { row: 'Human', start: 245, end: 249 }
   const clades = [{ mrca: ['Human', 'Mouse'], tips: 2, mark: 'bracket' }]
-  const snapshot = launch({
+  const snapshot = await launch({
     data: { msa: '>Human\nMEEP' },
     region,
     clades,
@@ -79,8 +81,11 @@ test('region and the data-layer keys reach the view as snapshot properties', () 
   expect(snapshot.gffFilehandle).toEqual({ uri: 'http://example.com/a.gff' })
 })
 
-test('one field set is enough to need init', () => {
-  const snapshot = launch({ data: { msa: '>a\nMEEP' }, querySeqName: 'QUERY' })
+test('one field set is enough to need init', async () => {
+  const snapshot = await launch({
+    data: { msa: '>a\nMEEP' },
+    querySeqName: 'QUERY',
+  })
   expect(snapshot.init).toEqual({
     msaUrl: undefined,
     msaIndexedLocation: undefined,
@@ -89,8 +94,8 @@ test('one field set is enough to need init', () => {
   })
 })
 
-test('msa and tree urls reach the plugin sources, query the query row', () => {
-  const snapshot = launch({
+test('msa and tree urls reach the plugin sources, query the query row', async () => {
+  const snapshot = await launch({
     msa: 'https://example.com/p53.afa',
     tree: 'https://example.com/p53.nh',
     query: 'Human',
@@ -107,14 +112,14 @@ test('msa and tree urls reach the plugin sources, query the query row', () => {
   expect('msa' in snapshot || 'query' in snapshot).toBe(false)
 })
 
-test('inline msa and newick text become inline data', () => {
-  const snapshot = launch({ msa: '>a\nMEEP\n>b\nMEEP', tree: '(a,b);' })
+test('inline msa and newick text become inline data', async () => {
+  const snapshot = await launch({ msa: '>a\nMEEP\n>b\nMEEP', tree: '(a,b);' })
   expect(snapshot.data).toEqual({ msa: '>a\nMEEP\n>b\nMEEP', tree: '(a,b);' })
   expect('init' in snapshot).toBe(false)
 })
 
-test('highlights, region and column tracks expand onto the query row', () => {
-  const snapshot = launch({
+test('highlights, region and column tracks expand onto the query row', async () => {
+  const snapshot = await launch({
     msa: 'https://example.com/p53.afa',
     query: 'Human',
     highlights: ['102-292 DNA-binding', 175],

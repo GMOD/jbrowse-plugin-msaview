@@ -142,7 +142,7 @@ const OrthologPanel = observer(function ({
         submitDisabled={!proteinSequence || !rowCountValid}
         onSubmit={placement => {
           if (selectedTranscript) {
-            submit(() => {
+            submit(() =>
               launchConnectedView({
                 view,
                 feature: selectedTranscript,
@@ -158,8 +158,8 @@ const OrthologPanel = observer(function ({
                   selectedTranscript: selectedTranscript.toJSON(),
                   proteinSequence,
                 },
-              })
-            })
+              }),
+            )
           }
         }}
         onCancel={handleClose}

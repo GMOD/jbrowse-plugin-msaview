@@ -20,11 +20,14 @@ export interface MsaViewLaunchSpec extends Record<string, unknown> {
  * placed the result, which is how a launch from a gene feature landed stacked
  * under the very genome view it was connected to.
  */
-export function launchMsaView(
+export async function launchMsaView(
   session: AbstractSessionModel,
   { placement = 'stack', ...snapshot }: MsaViewLaunchSpec,
 ) {
-  const view = session.addView('MsaView', { type: 'MsaView', ...snapshot })
+  const view = await session.launchView('MsaView', {
+    type: 'MsaView',
+    ...snapshot,
+  })
   placeMsaView(session, view.id, placement)
   return view
 }

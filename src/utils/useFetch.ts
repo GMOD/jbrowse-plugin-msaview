@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // {data, error, isLoading} the four call sites this replaced actually used --
 // they were on SWR, whose only feature we relied on was fetch-once-per-key with
 // background revalidation off, so dropping it also drops a dependency from the
-// UMD bundle.
+// bundle.
 
 export type FetchKey = string | readonly unknown[] | null | undefined | false
 

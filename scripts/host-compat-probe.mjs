@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 //
-// Boots a candidate umd build on hosted JBrowse releases and fails if any of
-// them cannot load it.
+// Boots a candidate build on hosted JBrowse and fails if it cannot load it.
 //
 // `plugins[].url` is the only config field that can kill a whole session rather
-// than one track: PluginLoader runs Promise.all over the plugin list, so a
-// bundle that throws while evaluating never defines its global, the promise
-// rejects, and every config naming it goes to the app's error page. The store
+// than one track: a bundle that throws while evaluating takes every config
+// naming it to the app's error page wherever the loader is all-or-nothing. The store
 // uploads `latest/` with no-cache, so a publish is a live change to configs
 // shipped months ago -- there is no staging step in which to notice.
 //
@@ -20,14 +18,13 @@
 //     turning a module-scope generateCodonTable(defaultCodonTable) into
 //     Object.keys(undefined)
 //
-// This asserts the catastrophic class only -- app boots, plugin global defined.
+// This asserts the catastrophic class only -- app boots, plugin registered.
 // It deliberately does not drive the MSA launch: that needs live alignment
 // fetches, and a release gate that fails on a slow third party gets bypassed,
 // which is worse than a narrower gate that is always trusted.
 //
 // Usage:
-//   node scripts/host-compat-probe.mjs --bundle dist/<name>.umd.production.min.js
-//   node scripts/host-compat-probe.mjs --bundle … --versions v4.0.0,main
+//   node scripts/host-compat-probe.mjs --bundle dist/jbrowse-plugin-msaview.esm.js
 //
 import fs from 'node:fs'
 import { parseArgs } from 'node:util'
@@ -36,16 +33,17 @@ import puppeteer from 'puppeteer'
 
 import { candidateServer } from './serveCandidate.mjs'
 
-// The oldest entry is the support floor: every host at or above it must load the
-// bundle. `main` is included because it is where a core change lands first, so
-// it is where a vanishing re-export shows up before any release carries it.
-const DEFAULT_VERSIONS = ['v4.0.0', 'v4.3.0', 'latest', 'main']
+// The ESM build needs JBrowse 5, and `main` is the only hosted 5.x build until
+// 5.0.0 is released. v4 hosts load the frozen 3.10.0 UMD from pinned urls.
+const DEFAULT_VERSIONS = ['main']
 
 // A real shipped config that names this plugin, rather than a fixture: the point
-// is to reproduce what a user's url actually loads.
+// is to reproduce what a user's url actually loads. It names the plugin by
+// `storePlugin`, which main resolves through the store manifest that
+// serveCandidate rewrites.
 const CONFIG = 'https://jbrowse.org/ucsc/hg38/config.json'
 const PLUGIN_NAME = 'MsaView'
-const PLUGIN_GLOBAL = 'JBrowsePluginMsaView'
+const PLUGIN_CLASS_NAME = 'MsaViewPlugin'
 
 const { values } = parseArgs({
   options: {
@@ -56,7 +54,7 @@ const { values } = parseArgs({
   },
 })
 if (!values.bundle) {
-  throw new Error('--bundle <path to built umd> is required')
+  throw new Error('--bundle <path to the built ESM entry> is required')
 }
 const versions = values.versions?.split(',') ?? DEFAULT_VERSIONS
 const timeout = Number(values.timeout)
@@ -76,6 +74,7 @@ async function probeOne(browser, version) {
   })
 
   const result = { version, consoleErrors }
+  const entryRequestsBefore = serveCandidate.entryRequests
   try {
     const url = `https://jbrowse.org/code/jb2/${version}/?config=${encodeURIComponent(CONFIG)}`
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 })
@@ -100,10 +99,14 @@ async function probeOne(browser, version) {
         : undefined
     })
 
-    result.globalDefined = await page.evaluate(
-      name => name in window,
-      PLUGIN_GLOBAL,
+    result.registered = await page.evaluate(
+      name =>
+        !!window.JBrowseRootModel?.pluginManager?.plugins?.some(
+          p => p.name === name,
+        ),
+      PLUGIN_CLASS_NAME,
     )
+    result.candidateServed = serveCandidate.entryRequests > entryRequestsBefore
   } catch (e) {
     result.threw = String(e).slice(0, 300)
   }
@@ -117,9 +120,11 @@ function failure(r) {
     : r.threw
       ? `probe threw: ${r.threw}`
       : r.settled
-        ? r.globalDefined
-          ? undefined
-          : `${PLUGIN_GLOBAL} is undefined (the bundle threw while evaluating)`
+        ? !r.candidateServed
+          ? 'the host never requested the candidate entry (did the store ref resolve?)'
+          : r.registered
+            ? undefined
+            : `${PLUGIN_CLASS_NAME} is not registered (the bundle threw while evaluating)`
         : 'never settled (no session and no error page)'
 }
 

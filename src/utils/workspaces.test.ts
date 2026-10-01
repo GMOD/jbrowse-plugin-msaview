@@ -25,7 +25,7 @@ function makeSession({
 }: { canPlace?: boolean; canEnable?: boolean } = {}) {
   const recorded: Recorded = { moves: [], workspaces: [], added: [] }
   const session: Record<string, unknown> = {
-    addView(type: string, snapshot: Record<string, unknown>) {
+    async launchView(type: string, snapshot: Record<string, unknown>) {
       recorded.added.push({ type, snapshot })
       return { id: `view-${recorded.added.length}` }
     },
@@ -113,9 +113,9 @@ test('the dialog default is side-by-side, and a junk value falls back to it', ()
   expect(readLaunchPlacement()).toBe('stack')
 })
 
-test('launchMsaView defaults to stack, so a spec written before placement existed is unchanged', () => {
+test('launchMsaView defaults to stack, so a spec written before placement existed is unchanged', async () => {
   const { session, recorded } = makeSession()
-  launchMsaView(session, { data: { msa: '>a\nAC' } })
+  await launchMsaView(session, { data: { msa: '>a\nAC' } })
   expect(recorded.added).toEqual([
     { type: 'MsaView', snapshot: { type: 'MsaView', data: { msa: '>a\nAC' } } },
   ])
@@ -124,9 +124,9 @@ test('launchMsaView defaults to stack, so a spec written before placement existe
 
 // placement is a launch instruction, not view state: MST would drop it from the
 // snapshot without a word, and the view would land stacked with nothing said
-test('launchMsaView keeps placement out of the view snapshot', () => {
+test('launchMsaView keeps placement out of the view snapshot', async () => {
   const { session, recorded } = makeSession()
-  launchMsaView(session, { placement: 'splitRight', colWidth: 10 })
+  await launchMsaView(session, { placement: 'splitRight', colWidth: 10 })
   expect(recorded.added[0]?.snapshot).toEqual({ type: 'MsaView', colWidth: 10 })
   expect(recorded.moves).toEqual([{ type: 'splitRight', viewId: 'view-1' }])
 })

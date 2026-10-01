@@ -29,7 +29,7 @@ export function launchConnectedView({
   feature?: Feature
   placement: MsaViewPlacement
 } & Record<string, unknown>) {
-  launchMsaView(getSession(view), {
+  return launchMsaView(getSession(view), {
     placement,
     connectedViewId: view.id,
     connectedFeature: feature?.toJSON(),
@@ -42,15 +42,12 @@ export function useLaunchSubmit(handleClose: () => void) {
   const [launchError, setLaunchError] = useState<unknown>()
   return {
     launchError,
-    submit: (launch: () => void) => {
-      try {
-        setLaunchError(undefined)
-        launch()
-        handleClose()
-      } catch (e) {
+    submit: (launch: () => Promise<unknown>) => {
+      setLaunchError(undefined)
+      launch().then(handleClose, (e: unknown) => {
         console.error(e)
         setLaunchError(e)
-      }
+      })
     },
   }
 }

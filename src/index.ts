@@ -38,7 +38,10 @@ export default class MsaViewPlugin extends Plugin {
           onClick: (session: AbstractSessionModel) => {
             // stacked, by default: nothing was launched from, so there is no
             // connected view for it to sit beside
-            launchMsaView(session, {})
+            launchMsaView(session, {}).catch((e: unknown) => {
+              console.error(e)
+              session.notifyError(`${e}`, e)
+            })
           },
         })
       }

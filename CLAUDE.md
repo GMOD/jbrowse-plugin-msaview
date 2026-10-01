@@ -1,57 +1,46 @@
 # jbrowse-plugin-msaview
 
-A UMD plugin loaded into a JBrowse host at runtime. Almost everything that has
-broken here has broken at that seam, in published bundles, after the fact.
+An ES module plugin loaded into a JBrowse 5 host at runtime, code-split so a
+config naming it evaluates the registration and nothing else. Almost everything
+that has broken here has broken at that seam, in published bundles, after the
+fact.
 
-## A `@jbrowse/core` import is only a host dependency if it is in ReExports
+## v4 hosts load the frozen 3.10.0 UMD
 
-An import binds to the host's export surface **only** when its path appears in
-`@jbrowse/core/ReExports/list` and in the oldest host's list (the intersection
-below). Anything else is bundled into the UMD by esbuild, so it runs identically
-on every host from v4.0.0 to `main` and cannot break when the host's exports
-change. `@jbrowse/core/util/translateTranscript`, which translates every query
-row, ships that way: core 5.0.0-beta.9 lists it and v4.0.0 does not.
+3.10.0 was the last UMD build. Later releases are ESM-only for JBrowse 5: the
+plugin store lists them under `>=5.0.0`, and the jb2hubs configs carry
+`storePlugin: "MsaView"` beside a url pinned to the 3.10.0 UMD, so a v5 host
+resolves this build and a v4 host never sees it. Until 5.0.0 is released, hosted
+`main` and the nightly zip are the only hosts, and `pnpm host-compat` and the
+e2e run there.
 
-The barrel `@jbrowse/core/util` **is** in ReExports, which is what makes it
-dangerous: a name removed from it becomes `undefined` inside bundles that are
-already published and in the wild. That bit this plugin on 2026-08-01 —
+The externals are the installed `@jbrowse/core/ReExports/list`. A key the host
+lacks throws at its first read, naming the key, so booting on `main` is the
+check; `check-host-externals` and the host floor compared the build against its
+own list once one host was left, and are gone.
+
+## The weight stays out of the entry
+
+The view registers its state model as a thunk and its component and launch
+dialog behind `lazy()`, so react-msaview, msa-parsers and the dialog panels load
+as chunks the first time someone uses them. Two consequences:
+
+- `session.addView('MsaView')` throws until the model has loaded. Every launch
+  goes through `launchMsaView`, which calls `session.launchView`.
+- One value import at module scope from an eagerly loaded file puts the
+  dependency back in the entry, and nothing in tsc, lint or the tests says so.
+  `isMsaView` lives apart from `model.ts` for that reason, and
+  `LaunchView-MsaView` imports `expandSpec` inside its handler. Read `meta.json`
+  after touching an import on the registration path.
+
+## `@jbrowse/core/util` is ReExports, and the barrel shrinks
+
+The barrel is served by the host, so a name removed from it is `undefined`
+inside bundles already published. That bit this plugin on 2026-08-01 —
 `generateCodonTable(defaultCodonTable)` at module scope became
-`Object.keys(undefined)`, the UMD global was never assigned, and PluginLoader
-error-paged the whole app. The same removal had already broken
-jbrowse-plugin-protein3d.
-
-**So: to reuse core logic, prefer a deep path v4.0.0 does not re-export over the
-barrel.** Since core 5.0.0-beta.9 the installed list names every subpath core
-publishes, so `l.includes(path)` against it answers yes for everything; check
-`scripts/host-reexports-floor.json` instead, and verify what actually binds to
-the host with `pnpm check-host-externals`, which greps the built bundle for
-`JBrowseExports[…]`. The deep path also has to exist in the _installed_
-`@jbrowse/core`, the release you build against.
-
-**The barrel really does shrink.** As of 2026-08-01 it exported 194 names at
-v4.3.0 and had lost 48 of them on `main` (barrel splits such as
-`3c921d59e1 refactor(util): split index.ts into focused modules`). Four were
-pure tidy-up losses and were restored in `b8c91bb110` — `useLocalStorage`,
-`useDebounce`, `useWidthSetter`, `renderToStaticMarkup`. The other 44 had their
-implementations deleted. `useLocalStorage` broke this plugin's NCBI BLAST panel
-on nightly with `(0 , PR.useLocalStorage) is not a function`. Before assuming a
-`@jbrowse/core/util` import works everywhere, check it against **both** v4.3.0
-and `main`.
-
-**The externals are the intersection, not the installed list.** A path the
-installed core re-exports but an older host does not is `undefined` there —
-absence in the other direction from the `@jbrowse/core/util` barrel's. So
-`esbuild.mjs` externalizes only what BOTH this build's `ReExports/list` and
-`scripts/host-reexports-floor.json` carry; everything else is bundled. The floor
-is the oldest version the host-compat probe boots, regenerated with
-`node scripts/update-host-reexports-floor.mjs` (it packs that `@jbrowse/core`
-from npm — don't hand-edit the json), and `pnpm check-host-externals` greps the
-built bundle for `JBrowseExports[…]` so the artifact is checked, not the intent.
-`@jbrowse/core/ui/BaseTooltip` is the case this was written for: on core
-`main`'s list, absent from v4.3.0's, and react-msaview imports it by default —
-so bumping the core devDep would have externalized it and thrown React #130 on
-the first hover on every v4.0–v4.3 host, invisibly to tsc, the linter, and a
-probe that never hovers.
+`Object.keys(undefined)` and PluginLoader error-paged the whole app — and
+`useLocalStorage` broke the BLAST panel on nightly the same way. Before assuming
+a barrel import works, check it against `main`.
 
 ## `@mui/material` is a hand-listed set, not all of MUI
 
@@ -95,12 +84,12 @@ reach a browser -- but the fix is the pin, not a dedupe override, because an
 override would silence the symptom and keep the rubber stamp.
 
 On 2026-09-13 we took the other exit and moved the core devDep to
-`5.0.0-beta.8`, which declares mobx 7 / mst 6 itself. That leaves tsc checking
-against v5 while almost every host in the wild runs v4, so where v5's types
-reject a call v4 needs, the code keeps the v4 call and adapts the typing:
-`addToExtensionPoint` over `contributeToExtensionPoint`, and `sessionId` inside
-`CoreGetFeatures` args, which v4.3.0 reads there to find the adapter cache. A
-clean tsc says nothing about v4 hosts; `pnpm host-compat` is what does.
+`5.0.0-beta.8`, which declares mobx 7 / mst 6 itself. The source still carries
+the v4 calls it kept then — `addToExtensionPoint` over
+`contributeToExtensionPoint`, `sessionId` inside `CoreGetFeatures` args, the
+synchronous `contextMenuFeature` fallback in `launchTarget.ts`, the v4.3.0
+placement fallback in `utils/workspaces.ts` — which no host this build reaches
+needs any more, and which can go in one pass.
 
 **typescript stays on 6.x** for an unrelated reason with the same shape.
 TypeScript 7's package entry is a stub -- `require('typescript')` yields
@@ -149,30 +138,6 @@ concrete cases: `let browser: Browser` is a lie until `beforeAll` succeeds, so
 `Cannot read properties of undefined (reading 'close')`; and the host feature
 detects deliberately probe for members the types claim are always there. The
 rule is right about the types and wrong about the code.
-
-## Keep a released-host leg in the integration matrix
-
-The v4.3.0 leg is what catches the legacy context-menu regression — the class of
-failure where a plugin reads only `main`'s API shape and silently renders no
-menu item on every host a user actually runs. Every release before JBrowse 5
-exposes only the synchronous `contextMenuFeature`, and nightly does not, so no
-nightly-only matrix is sensitive to it. A v3.7.0 leg caught it first (2.7.0); we
-dropped v3.7.0 support on 2026-09-25.
-
-**The corollary catches tests, not just source: every leg runs the WHOLE
-suite.** `pnpm vitest run` executes against nightly and v4.3.0 in turn, so a
-test that asserts a feature only `main` has fails on the released leg.
-Workspaces are the live example — v4.3.0 has no tiling at all, and
-`test/placement.test.ts` asserting two grid cells would have been asserting that
-an old release grew a feature. A test over host-dependent behaviour has to
-feature-detect exactly as the source does, then assert the documented
-degradation on the hosts that lack it.
-
-Detect on the session, never on `TEST_JBROWSE_VERSION`: the version tells you
-what was downloaded, the session tells you what the plugin will actually find,
-and only the second is the thing under test. Guard the _reads_ too —
-`panelContainingView` does not exist on v4.3.0, so a helper reaching for it
-throws there rather than returning nothing.
 
 ## BLAST runs on EBI, not NCBI, and that is not a preference
 

@@ -5,10 +5,15 @@ import { execSync, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
-const JBROWSE_VERSIONS = ['v4.0.4', 'v4.3.0']
+// The ESM build needs JBrowse 5, so until 5.0.0 is released nightly is the
+// only host. Keep in sync with the test matrix in .github/workflows/integration.yml
+const JBROWSE_VERSIONS = ['nightly']
 
 function getTestDir(version) {
-  return path.join(process.cwd(), `.test-jbrowse-${version}`)
+  return path.join(
+    process.cwd(),
+    version === 'nightly' ? '.test-jbrowse' : `.test-jbrowse-${version}`,
+  )
 }
 
 function setupVersion(version) {
@@ -21,7 +26,8 @@ function setupVersion(version) {
   }
   console.log(`Creating JBrowse ${version} at ${testDir}...`)
   try {
-    execSync(`npx @jbrowse/cli create ${testDir} --tag ${version}`, {
+    const source = version === 'nightly' ? '--nightly' : `--tag ${version}`
+    execSync(`npx @jbrowse/cli create ${testDir} ${source}`, {
       stdio: 'inherit',
     })
     return true
@@ -122,9 +128,9 @@ Commands:
 
 Examples:
   node scripts/test-versions.mjs setup           # Setup all versions
-  node scripts/test-versions.mjs setup v4.3.0   # Setup only v4.3.0
+  node scripts/test-versions.mjs setup nightly  # Setup only nightly
   node scripts/test-versions.mjs run            # Test all versions
-  node scripts/test-versions.mjs run v4.0.4     # Test only v4.0.4
+  node scripts/test-versions.mjs run nightly    # Test only nightly
 
 Environment:
   TEST_JBROWSE_VERSION - Set to test against a specific version with vitest directly

@@ -25,18 +25,15 @@ genome connection.
 
 ## Checks
 
-| Command                     | What it checks                                                     |
-| --------------------------- | ------------------------------------------------------------------ |
-| `pnpm lint`                 | oxlint with type information                                       |
-| `pnpm test`                 | Unit tests plus the e2e suite on a freshly fetched nightly JBrowse |
-| `pnpm test:setup`           | Creates the released JBrowse instances the version matrix runs on  |
-| `pnpm test:versions`        | The whole suite again on each of those releases                    |
-| `pnpm check-host-externals` | Every externalized import is one every supported host re-exports   |
-| `pnpm host-compat`          | Boots `dist/` on hosted JBrowse releases                           |
+| Command            | What it checks                                                     |
+| ------------------ | ------------------------------------------------------------------ |
+| `pnpm lint`        | oxlint with type information                                       |
+| `pnpm test`        | Unit tests plus the e2e suite on a freshly fetched nightly JBrowse |
+| `pnpm host-compat` | Boots `dist/` on hosted JBrowse `main`                             |
 
-The version matrix and `host-compat` exist because a published bundle reaches
-configs already in the wild on every host a user runs, and the failures that
-matter there pass tsc and lint. `CLAUDE.md` records which legs to keep and why.
+`host-compat` exists because a published bundle reaches configs already in the
+wild, and the failures that matter there pass tsc and lint. The build is an ES
+module for JBrowse 5; v4 hosts keep the 3.10.0 UMD from pinned urls.
 
 ## Screenshots
 

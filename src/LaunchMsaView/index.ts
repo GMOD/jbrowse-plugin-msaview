@@ -1,8 +1,9 @@
+import { lazy } from 'react'
+
 import { getContainingTrack, getSession } from '@jbrowse/core/util'
 import AddIcon from '@mui/icons-material/Add'
 
 import { isCodingFeature } from './codingFeature'
-import LaunchMsaViewDialog from './components/LaunchMsaViewDialog'
 import { launchTarget } from './launchTarget'
 
 import type { DisplayModel, MenuTarget } from './launchTarget'
@@ -11,6 +12,10 @@ import type { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
 import type DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
 import type { Feature } from '@jbrowse/core/util'
 import type { IAnyModelType } from '@jbrowse/mobx-state-tree'
+
+const LaunchMsaViewDialog = lazy(
+  () => import('./components/LaunchMsaViewDialog'),
+)
 
 function isDisplay(elt: { name: string }): elt is DisplayType {
   return elt.name === 'LinearBasicDisplay'

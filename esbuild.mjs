@@ -6,8 +6,6 @@ import JBrowseReExports from '@jbrowse/core/ReExports/list'
 import * as esbuild from 'esbuild'
 import prettyBytes from 'pretty-bytes'
 
-import floor from './scripts/host-reexports-floor.json' with { type: 'json' }
-
 const isWatch = process.argv.includes('--watch')
 const PORT = process.env.PORT ? +process.env.PORT : 9000
 
@@ -19,9 +17,7 @@ function createGlobalMap(jbrowseGlobals) {
       type: 'cjs',
     }
   }
-  // Map @jbrowse/mobx-state-tree to mobx-state-tree for backwards compatibility
-  // In v4.0.0+, JBrowse uses @jbrowse/mobx-state-tree but exports it as 'mobx-state-tree'
-  // In v3.x, JBrowse used mobx-state-tree directly
+  // JBrowse serves @jbrowse/mobx-state-tree under its old key
   globalMap['@jbrowse/mobx-state-tree'] = {
     varName: `JBrowseExports["mobx-state-tree"]`,
     type: 'cjs',
@@ -49,54 +45,25 @@ const rebuildLogPlugin = {
   },
 }
 
-// Modules whose EXPORTED SHAPE differs across the MUI majors that hosts bundle.
-// The key being present in JBrowseReExports is not enough: we build against the
-// core we dev on, but the bundle runs on every host a config names.
-//
-// @mui/material/SvgIcon is the case that bit us. Released hosts (v4.0.0 through
-// latest, on MUI 7) expose it as the SvgIcon component itself -- $$typeof,
-// render, displayName -- while MUI 9 also hangs createSvgIcon off it, which is
-// what @mui/icons-material v9 calls. Externalizing it meant 2.7.0 threw
-// "createSvgIcon is not a function" while evaluating, so its global was never
-// defined, so PluginLoader's Promise.all rejected and error-paged the entire
-// app on every released host. 2.6.8 bundled it and was fine.
-//
-// Bundling it pulls in some MUI internals -- roughly 433KB -> 503KB -- and works
-// on both MUI generations. Worth 70KB to not error-page every host.
-const SHAPE_VARIES_BY_HOST = new Set(['@mui/material/SvgIcon'])
-
-// Absence is the other half of the same hazard, and it runs the opposite way
-// from SvgIcon's: a path the INSTALLED core re-exports but an older host does
-// not is `undefined` there, and rendering undefined as a component throws React
-// error #130 on the first hover. `@jbrowse/core/ui/BaseTooltip` is the live
-// example -- on core main's list, not in v4.3.0's, and react-msaview imports it
-// by default -- so bumping the core devDep would have externalized it and broken
-// every v4.0-v4.3 host, invisibly to tsc, the linter and the host-compat probe,
-// which never hovers.
-//
-// So the externals are the intersection: what this build's core re-exports AND
-// what the oldest supported host re-exports (host-reexports-floor.json, the
-// first version the probe boots). A path only the newer core lists is bundled.
-const hostFloor = new Set(floor.paths)
-const globals = JBrowseReExports.filter(
-  x => hostFloor.has(x) && !SHAPE_VARIES_BY_HOST.has(x),
-)
-const bundledForOldHosts = JBrowseReExports.filter(x => !hostFloor.has(x))
-if (bundledForOldHosts.length > 0) {
-  console.log(
-    `Bundling ${bundledForOldHosts.length} re-export(s) absent from @jbrowse/core@${floor.version}: ${bundledForOldHosts.join(', ')}`,
-  )
-}
 const config = {
   entryPoints: ['src/index.ts'],
   bundle: true,
-  globalName: 'JBrowsePluginMsaView',
+  // react-msaview sits behind the view's state-model thunk and lazy()
+  // components, which splitting emits as chunks under dist/chunks/ resolved
+  // against the entry's own url, on the main thread and in the RPC worker alike
+  format: 'esm',
+  splitting: true,
+  outdir: 'dist',
+  chunkNames: 'chunks/[name]-[hash]',
   metafile: true,
-  plugins: [globalExternals(createGlobalMap(globals)), rebuildLogPlugin],
+  plugins: [
+    globalExternals(createGlobalMap(JBrowseReExports)),
+    rebuildLogPlugin,
+  ],
   ...(isWatch
-    ? { outfile: 'dist/out.js' }
+    ? { entryNames: 'out' }
     : {
-        outfile: 'dist/jbrowse-plugin-msaview.umd.production.min.js',
+        entryNames: 'jbrowse-plugin-msaview.esm',
         sourcemap: true,
         minify: true,
       }),

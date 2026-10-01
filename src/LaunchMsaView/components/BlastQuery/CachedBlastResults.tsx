@@ -106,8 +106,10 @@ const CachedBlastResults = observer(function ({
       displayName: `BLAST - ${getResultDisplayName(cached)}`,
       ...builtAlignmentLook,
       data: { msa, tree, treeMetadata },
+    }).then(handleClose, (e: unknown) => {
+      console.error(e)
+      setOperationError(e)
     })
-    handleClose()
   }
 
   const displayError = error ?? operationError

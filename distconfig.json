@@ -2,7 +2,7 @@
   "plugins": [
     {
       "name": "MsaView",
-      "url": "https://unpkg.com/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.umd.production.min.js"
+      "esmUrl": "https://unpkg.com/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.esm.js"
     }
   ]
 }

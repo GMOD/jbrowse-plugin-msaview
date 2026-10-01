@@ -188,7 +188,7 @@ const PreLoadedMSA = observer(function ({
         }
         onSubmit={placement => {
           if (selectedTranscript && msaText) {
-            submit(() => {
+            submit(() =>
               launchConnectedView({
                 view,
                 feature: selectedTranscript,
@@ -205,8 +205,8 @@ const PreLoadedMSA = observer(function ({
                 querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 data: { msa: msaText },
-              })
-            })
+              }),
+            )
           }
         }}
         onCancel={handleClose}

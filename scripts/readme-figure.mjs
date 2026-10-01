@@ -24,7 +24,7 @@ const { values } = parseArgs({
   options: {
     bundle: {
       type: 'string',
-      default: 'dist/jbrowse-plugin-msaview.umd.production.min.js',
+      default: 'dist/jbrowse-plugin-msaview.esm.js',
     },
     host: { type: 'string' },
     out: { type: 'string', default: 'img/1.png' },

@@ -177,7 +177,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
         }
         onSubmit={placement => {
           if (selectedTranscript) {
-            submit(() => {
+            submit(() =>
               launchConnectedView({
                 view,
                 feature: selectedTranscript,
@@ -191,8 +191,8 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                       treeFilehandle: treeFileLocation,
                     }
                   : { data: { msa: msaText, tree: treeText } }),
-              })
-            })
+              }),
+            )
           }
         }}
         onCancel={handleClose}

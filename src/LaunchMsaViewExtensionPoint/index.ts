@@ -1,5 +1,3 @@
-import { expandSpec } from 'react-msaview'
-
 import { launchMsaView } from '../utils/launchMsaView'
 
 import type { BlastParams, OrthologParams } from '../MsaViewPanel/model'
@@ -161,7 +159,7 @@ export default function LaunchMsaViewExtensionPointF(
 ) {
   pluginManager.addToExtensionPoint(
     'LaunchView-MsaView',
-    (args: LaunchMsaViewArgs) => {
+    async (args: LaunchMsaViewArgs) => {
       const {
         session,
         query,
@@ -204,7 +202,8 @@ export default function LaunchMsaViewExtensionPointF(
         msaName,
         querySeqName,
       }
-      launchMsaView(session, {
+      const { expandSpec } = await import('react-msaview')
+      await launchMsaView(session, {
         ...expandSpec({ ...rest, query }),
         ...(searchParams ? { blastParams: searchParams } : {}),
         data,

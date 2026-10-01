@@ -218,7 +218,7 @@ const BlastAutomaticPanel = observer(function ({
                     selectedTranscript: selectedTranscript.toJSON(),
                     proteinSequence,
                   }
-            submit(() => {
+            submit(() =>
               launchConnectedView({
                 view,
                 feature: selectedTranscript,
@@ -226,8 +226,8 @@ const BlastAutomaticPanel = observer(function ({
                 displayName: getBlastViewTitle(feature, selectedTranscript),
                 ...builtAlignmentLook,
                 blastParams,
-              })
-            })
+              }),
+            )
           }
         }}
         onCancel={handleClose}

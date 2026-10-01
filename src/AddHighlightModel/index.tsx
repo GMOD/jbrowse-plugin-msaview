@@ -2,7 +2,7 @@ import React from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 
-import { isMsaView } from '../MsaViewPanel/model'
+import { isMsaView } from '../MsaViewPanel/isMsaView'
 import HighlightComponents from './HighlightComponents'
 
 import type PluginManager from '@jbrowse/core/PluginManager'

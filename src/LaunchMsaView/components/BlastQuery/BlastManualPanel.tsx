@@ -166,7 +166,7 @@ const BlastManualPanel = observer(function ({
         submitDisabled={!selectedTranscript || !msaText.trim()}
         onSubmit={placement => {
           if (selectedTranscript) {
-            submit(() => {
+            submit(() =>
               launchConnectedView({
                 view,
                 feature: selectedTranscript,
@@ -175,8 +175,8 @@ const BlastManualPanel = observer(function ({
                 querySeqName: queryRow.querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 data: { msa: msaText, tree: treeText },
-              })
-            })
+              }),
+            )
           }
         }}
         onCancel={handleClose}

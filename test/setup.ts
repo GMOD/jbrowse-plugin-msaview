@@ -49,7 +49,7 @@ export function setupJBrowse() {
   testConfig.plugins = [
     {
       name: 'MsaView',
-      url: `http://localhost:${JBROWSE_PORT}/plugin/jbrowse-plugin-msaview.umd.production.min.js`,
+      esmUrl: `http://localhost:${JBROWSE_PORT}/plugin/jbrowse-plugin-msaview.esm.js`,
     },
   ]
   fs.writeFileSync(
