@@ -1,3 +1,9 @@
+## [4.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.10.0...v4.0.0) (2026-10-01)
+
+### Other Changes
+
+- Ship as a code-split ES module for JBrowse 5, and stop building the UMD ([c6d2e88](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c6d2e880b538c0d0ff6b460c1d00f0a09f291a1e))
+
 ## [3.10.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.9.0...v3.10.0) (2026-09-25)
 
 ### Bug Fixes
