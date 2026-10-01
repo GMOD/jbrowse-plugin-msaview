@@ -10,7 +10,7 @@
 //
 // Usage:
 //   node scripts/readme-figure.mjs
-//   node scripts/readme-figure.mjs --host v4.3.0 --out /tmp/figure.png
+//   node scripts/readme-figure.mjs --host main --out /tmp/figure.png
 //
 import fs from 'node:fs'
 import { parseArgs } from 'node:util'

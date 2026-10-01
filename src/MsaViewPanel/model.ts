@@ -181,12 +181,7 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        // Plain defaults, not types.stripDefault: that postdates the
-        // mobx-state-tree every released core exposes (present only on main), and
-        // the missing function throws while this model is being built, which
-        // error-pages the whole app rather than just this view. Restore
-        // stripDefault once a release ships it.
-        querySeqName: 'QUERY',
+        querySeqName: types.stripDefault(types.string, 'QUERY'),
 
         /**
          * #property
@@ -197,8 +192,7 @@ export default function stateModelFactory() {
          * transcript's first residue put every click off by the trimmed
          * amount. Negative when the row runs past the transcript's start.
          */
-        // see querySeqName above re: types.stripDefault
-        querySeqOffset: 0,
+        querySeqOffset: types.stripDefault(types.number, 0),
 
         /**
          * #property
@@ -208,8 +202,7 @@ export default function stateModelFactory() {
         /**
          * #property
          */
-        // see querySeqName above re: types.stripDefault
-        zoomToBaseLevel: false,
+        zoomToBaseLevel: types.stripDefault(types.boolean, false),
 
         /**
          * #property

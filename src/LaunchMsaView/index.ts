@@ -39,10 +39,6 @@ function openDialog(self: DisplayModel, target: MenuTarget) {
       { model: track, handleClose, feature, preferredTranscriptId },
     ])
   }
-  if ('feature' in target) {
-    open(target.feature)
-    return
-  }
   target
     .fetchFeature()
     .then(feature => {
@@ -72,14 +68,8 @@ export function extendStateModel(stateModel: IAnyModelType) {
       contextMenuItems() {
         const target = launchTarget(self)
         return [
-          // .call(self), not a bare call: a host's own contextMenuItems may
-          // reach its sibling views through `this`, which is undefined when the
-          // captured super is invoked detached. It throws, the ErrorBoundary the
-          // menu builds inside swallows it, and the user right-clicks a feature
-          // and gets no menu at all -- the host's own rows gone too, which is
-          // worse than this plugin contributing nothing. jbrowse-components hit
-          // exactly this with `this.isGeneLike` and fixed its side in
-          // 104bbfc581, but a plugin cannot choose which host build it runs on.
+          // a detached call leaves `this` undefined for a host method that
+          // reads it, and the throw takes the host's own rows with it
           ...superContextMenuItems.call(self),
           ...(target
             ? [

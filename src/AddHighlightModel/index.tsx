@@ -6,30 +6,20 @@ import { isMsaView } from '../MsaViewPanel/isMsaView'
 import HighlightComponents from './HighlightComponents'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
-import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 export default function AddHighlightComponentsModelF(
   pluginManager: PluginManager,
 ) {
-  pluginManager.addToExtensionPoint(
-    // @ts-expect-error v4 hosts have no contributeToExtensionPoint
+  pluginManager.contributeToExtensionPoint(
     'LinearGenomeView-TracksContainerComponent',
-    (rest: React.ReactNode[], { model }: { model: LinearGenomeViewModel }) => {
+    ({ model }) => {
       const { views } = getSession(model)
-      const hasMsaView = views.some(
-        v => isMsaView(v) && v.connectedViewId === model.id,
-      )
-      if (!hasMsaView) {
-        return rest
-      }
-
-      return [
-        ...rest,
+      return views.some(v => isMsaView(v) && v.connectedViewId === model.id) ? (
         <HighlightComponents
           key="highlight_protein_viewer_msaview"
           model={model}
-        />,
-      ]
+        />
+      ) : undefined
     },
   )
 }

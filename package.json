@@ -45,7 +45,6 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@emotion/styled": "^11.14.1",
     "@gmod/bgzf-filehandle": "^6.7.0",
     "g2p_mapper": "^2.1.7",
     "idb": "^8.0.3"

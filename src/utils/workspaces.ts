@@ -65,36 +65,17 @@ function isSessionWithWorkspaces(
   const canEnable = hasAction(session, 'setUseWorkspaces')
   const canPlace = hasAction(session, 'setPendingMove')
 
-  // Missing BOTH is an embedded session: it has no workspaces, there is nothing
-  // to ask for, and silence is the right answer.
-  //
-  // Missing ONE is a host that has workspaces but places views some other way,
-  // and silence there is how the same feature broke in jbrowse-plugin-protein3d
-  // — jbrowse-web folded `setPendingMove` into its layout `init`, the guard went
-  // false, and the plugin simply stopped asking: no error, no missing feature,
-  // two views quietly stacking, nobody noticed for weeks. Feature detection
-  // cannot ask a host to announce a change, but it can tell "not supported here"
-  // from "supported, and gone".
-  //
-  // Two very different hosts produce this one shape and nothing on the session
-  // tells them apart, so the message carries both rather than a guess:
-  //
-  // - releases through v4.3.0, where placement is `setPendingMoveToSplitRight`,
-  //   a module function in @jbrowse/app-core rather than a session action.
-  //   Nothing is wrong and nothing needs fixing
-  // - a newer host that moved the action out from under us, which is the
-  //   regression this warning exists to catch
-  //
-  // Do not quiet the first case by sniffing the version. The alarm is only worth
-  // having if it fires on a shape it cannot explain, and these two are identical.
+  // Missing BOTH is an embedded session, with nothing to ask for. Missing ONE
+  // is a host that moved the action out from under us: protein3d once stopped
+  // tiling silently for weeks when jbrowse-web folded `setPendingMove` into its
+  // layout `init`.
   if (canEnable !== canPlace && !warnedPartial) {
     warnedPartial = true
     console.warn(
       `jbrowse-plugin-msaview: this session supports workspaces but not ` +
         `${canPlace ? 'setUseWorkspaces' : 'setPendingMove'}, so the MSA view ` +
-        `was stacked instead of tiled. Expected on releases through v4.3.0, ` +
-        `which place views through @jbrowse/app-core instead; on a newer host ` +
-        `it means the session API moved and the plugin needs updating to match.`,
+        `was stacked instead of tiled: the session API moved and the plugin ` +
+        `needs updating to match.`,
     )
   }
   return canEnable && canPlace

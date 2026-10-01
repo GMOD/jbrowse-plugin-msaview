@@ -42,9 +42,9 @@ for (const extra of ['alpha', 'useTheme', 'createTheme']) {
 
 // Known, and not fixable from here: react-msaview deep-imports core's
 // CascadingMenuButton, which bundles core's Dialog by way of the menu help
-// icon, and that Dialog renders ThemeProvider, which no released host serves.
+// icon, and that Dialog renders ThemeProvider, which the host does not serve.
 // Its own ErrorBoundary catches the #130, so a help dialog shows an error rather
-// than the app error-paging. jbrowse-components main re-exports it now.
+// than the app error-paging.
 const KNOWN = [
   { name: 'ThemeProvider', file: '@jbrowse/core/esm/ui/Dialog.js' },
 ]

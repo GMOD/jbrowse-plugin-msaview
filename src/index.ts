@@ -29,7 +29,7 @@ export default class MsaViewPlugin extends Plugin {
 
   configure(pluginManager: PluginManager) {
     // a throw here error-pages the whole app, and a menu entry is not worth a
-    // session: every released host's File menu already throws on append
+    // session
     try {
       if (isAbstractMenuManager(pluginManager.rootModel)) {
         pluginManager.rootModel.appendToSubMenu(['Add'], {

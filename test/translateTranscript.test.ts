@@ -6,11 +6,8 @@ import {
 import { translateTranscript } from '@jbrowse/core/util/translateTranscript'
 import { describe, expect, it } from 'vitest'
 
-// The table @jbrowse/core/util exported as `defaultCodonTable` up to 4.3.0,
-// pinned here so core's NCBI strings can't drift from what every released host
-// translates with. No v4 host re-exports the translation modules, so esbuild
-// bundles them and the version this build pins is the one every host runs.
-const RELEASED_DEFAULT_CODON_TABLE: Record<string, string> = {
+// The standard code, pinned so core's NCBI strings can't drift from it
+const STANDARD_CODON_TABLE: Record<string, string> = {
   TCA: 'S',
   TCC: 'S',
   TCG: 'S',
@@ -78,12 +75,12 @@ const RELEASED_DEFAULT_CODON_TABLE: Record<string, string> = {
 }
 
 describe('genetic codes', () => {
-  it('table 1 matches the codon table released hosts ship', () => {
+  it('table 1 is the standard code', () => {
     const { codonTable } = getGeneticCode(1)
-    for (const [codon, aa] of Object.entries(RELEASED_DEFAULT_CODON_TABLE)) {
+    for (const [codon, aa] of Object.entries(STANDARD_CODON_TABLE)) {
       expect(codonTable[codon]).toBe(aa)
     }
-    expect(Object.keys(RELEASED_DEFAULT_CODON_TABLE)).toHaveLength(64)
+    expect(Object.keys(STANDARD_CODON_TABLE)).toHaveLength(64)
   })
 
   it('resolves every case combination of a codon', () => {

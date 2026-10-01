@@ -66,5 +66,5 @@ pnpm version patch
 ```
 
 `preversion` waits for green CI, checks the host dependency pins, lints, builds
-and boots the bundle on hosted JBrowse releases; `postversion` pushes the tag,
-and CI publishes to npm and writes the GitHub release from `CHANGELOG.md`.
+and boots the bundle on hosted JBrowse `main`; `postversion` pushes the tag, and
+CI publishes to npm and writes the GitHub release from `CHANGELOG.md`.

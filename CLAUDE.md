@@ -63,8 +63,7 @@ app, not just a dialog. So `pnpm check-mui-imports` reads the build's
 module** against that list, and runs on push and from `preversion`. When a
 component is genuinely missing from the map, the deep path
 (`@mui/material/StepContent`) is not in ReExports and so gets bundled -- at the
-cost of shipping that component's MUI internals, and the shape risk in the root
-CLAUDE.md's SvgIcon note.
+cost of shipping that component's MUI internals.
 
 ## A dep bump is a host-compatibility decision for mobx and typescript
 
@@ -84,12 +83,7 @@ reach a browser -- but the fix is the pin, not a dedupe override, because an
 override would silence the symptom and keep the rubber stamp.
 
 On 2026-09-13 we took the other exit and moved the core devDep to
-`5.0.0-beta.8`, which declares mobx 7 / mst 6 itself. The source still carries
-the v4 calls it kept then — `addToExtensionPoint` over
-`contributeToExtensionPoint`, `sessionId` inside `CoreGetFeatures` args, the
-synchronous `contextMenuFeature` fallback in `launchTarget.ts`, the v4.3.0
-placement fallback in `utils/workspaces.ts` — which no host this build reaches
-needs any more, and which can go in one pass.
+`5.0.0-beta.8`, which declares mobx 7 / mst 6 itself.
 
 **typescript stays on 6.x** for an unrelated reason with the same shape.
 TypeScript 7's package entry is a stub -- `require('typescript')` yields

@@ -47,25 +47,7 @@ async function panelBoxes(page: Page) {
   )
 }
 
-// Whether THIS host can tile at all -- the same two actions the plugin itself
-// feature-detects. The test matrix runs every leg against v4.3.0 as well as
-// nightly, and v4.3.0 has no workspaces: asserting a split there would be
-// asserting that an old release grew a feature.
-async function hostCanTile(page: Page) {
-  return page.evaluate(() => {
-    const session = (
-      window as unknown as { JBrowseSession?: Record<string, unknown> }
-    ).JBrowseSession
-    return (
-      typeof session?.setPendingMove === 'function' &&
-      typeof session?.setUseWorkspaces === 'function'
-    )
-  })
-}
-
-// What the spec actually launched. Separate from the panel lookup below
-// because `panelContainingView` is a workspaces-only action and does not exist
-// on the older matrix legs at all.
+// What the spec actually launched.
 async function viewTypes(page: Page) {
   return page.evaluate(
     () =>
@@ -127,18 +109,7 @@ describe('spec placement', () => {
     const page = await createJBrowsePage(browser)
     await load(page, specUrl('splitRight'))
 
-    // Both views launched, whatever the host then does with them -- without
-    // this the older legs below would pass just as well on a page that failed
-    // to load anything at all.
     expect(await viewTypes(page)).toEqual(['LinearGenomeView', 'MsaView'])
-
-    // The documented degradation, and what the older matrix legs assert: a host
-    // with no workspaces stacks, and the link still opens.
-    if (!(await hostCanTile(page))) {
-      expect(await panelBoxes(page)).toHaveLength(0)
-      await page.close()
-      return
-    }
 
     const boxes = await panelBoxes(page)
     expect(boxes).toHaveLength(2)
