@@ -1,3 +1,9 @@
+## [5.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v4.0.0...v5.0.0) (2026-10-01)
+
+### Other Changes
+
+- Drop the code paths that only JBrowse 4.x hosts needed ([0e2ea1f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/0e2ea1f111da903677bebc6503ea2db8f39b13fd))
+
 ## [4.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v3.10.0...v4.0.0) (2026-10-01)
 
 ### Other Changes
