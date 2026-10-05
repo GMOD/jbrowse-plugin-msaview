@@ -1,3 +1,9 @@
+## [5.1.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.0.0...v5.1.0) (2026-10-05)
+
+### Other Changes
+
+- Place a launched MSA view with the host's move actions where it has them ([22ec834](https://github.com/GMOD/jbrowse-plugin-msaview/commit/22ec834f766cfb909baf78b45fdfb3b33d9f718e))
+
 ## [5.0.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v4.0.0...v5.0.0) (2026-10-01)
 
 ### Other Changes
