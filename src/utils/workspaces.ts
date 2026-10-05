@@ -25,6 +25,12 @@ export const LAUNCH_PLACEMENT_KEY = 'msaView-launchPlacement'
  * The session actions that place a view in a tiled workspace. Only jbrowse-web
  * and desktop have them, so feature-detect rather than import.
  */
+interface SessionWithMoves {
+  moveViewToNewTab: (viewId: string) => unknown
+  moveViewToSplit: (viewId: string, direction: 'row' | 'column') => unknown
+}
+
+// a host from before the workspace was always on
 interface SessionWithWorkspaces {
   setUseWorkspaces: (useWorkspaces: boolean) => void
   setPendingMove: (move: {
@@ -54,8 +60,18 @@ export function resetWorkspacesWarning() {
  */
 export function sessionSupportsPlacement(session: AbstractSessionModel) {
   return (
-    hasAction(session, 'setUseWorkspaces') &&
-    hasAction(session, 'setPendingMove')
+    isSessionWithMoves(session) ||
+    (hasAction(session, 'setUseWorkspaces') &&
+      hasAction(session, 'setPendingMove'))
+  )
+}
+
+function isSessionWithMoves(
+  session: AbstractSessionModel,
+): session is AbstractSessionModel & SessionWithMoves {
+  return (
+    hasAction(session, 'moveViewToNewTab') &&
+    hasAction(session, 'moveViewToSplit')
   )
 }
 
@@ -90,14 +106,19 @@ export function placeMsaView(
   viewId: string,
   placement: MsaViewPlacement,
 ) {
-  if (placement === 'stack' || !isSessionWithWorkspaces(session)) {
+  if (placement === 'stack') {
     return
   }
-  session.setPendingMove({ type: placement, viewId })
-  // Session-scoped: turning workspaces on for this session leaves the user's
-  // own default alone, which is what `setUseWorkspaces` (as against
-  // `setUseWorkspacesPreference`) is for.
-  session.setUseWorkspaces(true)
+  if (isSessionWithMoves(session)) {
+    if (placement === 'newTab') {
+      session.moveViewToNewTab(viewId)
+    } else {
+      session.moveViewToSplit(viewId, 'row')
+    }
+  } else if (isSessionWithWorkspaces(session)) {
+    session.setPendingMove({ type: placement, viewId })
+    session.setUseWorkspaces(true)
+  }
 }
 
 function isPlacement(value: unknown): value is MsaViewPlacement {

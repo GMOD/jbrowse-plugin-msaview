@@ -19,6 +19,20 @@ interface Recorded {
   added: { type: string; snapshot: Record<string, unknown> }[]
 }
 
+// a host whose workspace is always on, with the move actions the View menu uses
+function makeMovesSession() {
+  const recorded: Recorded = { moves: [], workspaces: [], added: [] }
+  const session = {
+    moveViewToNewTab: (viewId: string) =>
+      recorded.moves.push({ to: 'tab', viewId }),
+    moveViewToSplit: (viewId: string, direction: string) =>
+      recorded.moves.push({ to: direction, viewId }),
+    setPendingMove: (move: unknown) => recorded.moves.push({ pending: move }),
+    setUseWorkspaces: (on: boolean) => recorded.workspaces.push(on),
+  } as unknown as AbstractSessionModel
+  return { session, recorded }
+}
+
 function makeSession({
   canPlace = true,
   canEnable = true,
@@ -57,6 +71,18 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
+})
+
+test('a host with the move actions gets them, not setPendingMove', () => {
+  const { session, recorded } = makeMovesSession()
+  placeMsaView(session, 'view-1', 'splitRight')
+  placeMsaView(session, 'view-2', 'newTab')
+  expect(recorded.moves).toEqual([
+    { to: 'row', viewId: 'view-1' },
+    { to: 'tab', viewId: 'view-2' },
+  ])
+  expect(recorded.workspaces).toEqual([])
+  expect(sessionSupportsPlacement(session)).toBe(true)
 })
 
 test('stack places nothing, on a host that could tile', () => {
