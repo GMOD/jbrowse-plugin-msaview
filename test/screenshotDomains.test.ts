@@ -27,7 +27,7 @@ const ACCESSIONS = ['NP_002736.3', 'NP_001035145.1', 'NP_620407.1']
 const SCREENSHOT_DIR = path.join(process.cwd(), 'test-screenshots')
 
 async function fetchFasta(accession: string) {
-  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=${accession}&rettype=fasta&retmode=text&tool=jbrowse-plugin-msaview&email=colin.diesh@gmail.com`
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=${accession}&rettype=fasta&retmode=text&tool=jbrowse-plugin-msaview&email=jbrowse2@berkeley.edu`
   const text = await (await fetch(url)).text()
   return text.split('\n').slice(1).join('').replace(/\s/g, '')
 }

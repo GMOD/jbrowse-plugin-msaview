@@ -14,12 +14,12 @@ export const EBI_BASE = 'https://www.ebi.ac.uk/Tools/services/rest'
 
 /**
  * EBI asks for a contact address on every submission so they can reach whoever
- * is generating the load. A deployment that sends real volume should point this
- * at its own maintainer via the BLAST settings dialog — otherwise every
- * msaview job in the world is attributed to one person.
+ * is generating the load. The default is the project's mailbox; a deployment
+ * that sends real volume should name its own maintainer in the BLAST settings
+ * dialog.
  */
 export const EBI_EMAIL_STORAGE_KEY = 'msa-ebiContactEmail'
-export const DEFAULT_EBI_EMAIL = 'colin.diesh@gmail.com'
+export const DEFAULT_EBI_EMAIL = 'jbrowse2@berkeley.edu'
 
 export function getEbiEmail() {
   const configured = readLocalStorage(

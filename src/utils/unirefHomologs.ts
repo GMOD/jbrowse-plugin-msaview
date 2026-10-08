@@ -234,15 +234,22 @@ export async function fetchClusterMembers({
     onProgress?.(
       `Read ${scanned}${total ? ` of ${total}` : ''} cluster members, ${bySpecies.size} species...`,
     )
-    // every species asked for has been seen, or the cap is met and the rest
-    // of the listing could only replace picks with lower-ranked ones
-    if (taxa && [...taxa].every(t => bySpecies.has(t) || t === exclude)) {
+    // every species asked for has its reviewed entry, which nothing later in
+    // the listing outranks
+    if (
+      taxa &&
+      [...taxa].every(t => t === exclude || bySpecies.get(t)?.reviewed)
+    ) {
       break
     }
     url = members.length ? nextLink(response) : undefined
   }
   return {
     total,
+    /** members read, short of `total` when the scan stopped at its cap */
+    scanned,
+    /** whether the listing went on past what was read */
+    truncated: !!url && scanned >= MAX_SCANNED,
     rows: [...bySpecies.values()].sort(rank).slice(0, limit),
   }
 }
@@ -252,6 +259,8 @@ export interface UnirefHomologs {
   clusterId: string
   /** how many UniProtKB entries the cluster listing held before the one-per-species pick */
   total?: number
+  /** set when the cluster was too large to read whole */
+  warning?: string
   rows: OrthologRow[]
 }
 
@@ -295,7 +304,12 @@ export async function fetchUnirefHomologs({
     throw new Error(`${query.accession} is in no UniRef${identity} cluster`)
   }
 
-  const { total, rows: members } = await fetchClusterMembers({
+  const {
+    total,
+    scanned,
+    truncated,
+    rows: members,
+  } = await fetchClusterMembers({
     clusterId: cluster.id,
     identity,
     referenceProteomesOnly,
@@ -318,6 +332,9 @@ export async function fetchUnirefHomologs({
     query,
     clusterId: cluster.id,
     total,
+    warning: truncated
+      ? `${cluster.id} lists ${total ?? 'more than ' + scanned} UniProtKB entries and the first ${scanned} were read, so species whose only entries come later are missing.`
+      : undefined,
     rows: members.map((m, i) => ({
       taxId: m.taxId,
       label: labels[i]!,

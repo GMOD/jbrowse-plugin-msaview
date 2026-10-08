@@ -34,6 +34,9 @@ const RELAUNCHABLE = ' Retry runs the original search again and rebuilds it.'
 
 const START_OVER = ' Relaunch it from the gene to rebuild it.'
 
+const UNREADABLE_MESSAGE =
+  "This view's alignment could not be read from browser storage."
+
 const EXPIRED_EXTRAS_WARNING =
   'Part of this view is no longer in browser storage: annotations, a tree or row metadata too large for the session. Stored documents are kept for 7 days after they were last used, and are lost when site data is cleared.'
 
@@ -83,6 +86,14 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
       })
     } catch (e) {
       console.error('Failed to load MSA data from IndexedDB:', e)
+      // the row may still be there, so the id is kept for the next reload
+      if (isAlive(self) && !hasAlignmentSource(self)) {
+        self.setError(
+          new Error(
+            `${UNREADABLE_MESSAGE} ${e}.${(self.blastParams ?? self.orthologParams) ? RELAUNCHABLE : START_OVER}`,
+          ),
+        )
+      }
     } finally {
       self.setLoadingStoredData(false)
     }

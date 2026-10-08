@@ -109,10 +109,12 @@ test('fetchClusterMembers follows the Link header and asks for reference proteom
   expect(calls[1]).toBe('https://next.page')
 })
 
-test('fetchClusterMembers stops paging once every requested species is in hand', async () => {
+const reviewed = { entryType: 'UniProtKB reviewed (Swiss-Prot)' }
+
+test('fetchClusterMembers stops paging once every requested species has its reviewed entry', async () => {
   const calls = stubFetch([
     {
-      body: { results: [entry('A1', 1), entry('A2', 2)] },
+      body: { results: [entry('A1', 1, reviewed), entry('A2', 2, reviewed)] },
       next: 'https://next.page',
     },
     { body: { results: [entry('A3', 3)] } },
@@ -124,6 +126,41 @@ test('fetchClusterMembers stops paging once every requested species is in hand',
   })
   expect(rows.map(r => r.taxId)).toEqual([1, 2])
   expect(calls).toHaveLength(1)
+})
+
+// stopping at the first entry seen per species returned a fragment whose
+// Swiss-Prot entry was on the next page
+test('fetchClusterMembers reads on for a species seen only unreviewed', async () => {
+  stubFetch([
+    { body: { results: [entry('A1', 1)] }, next: 'https://next.page' },
+    { body: { results: [entry('A2', 1, reviewed)] } },
+  ])
+  const { rows, truncated } = await fetchClusterMembers({
+    clusterId: 'UniRef50_X',
+    identity: 50,
+    taxa: new Set([1]),
+  })
+  expect(rows.map(r => r.accession)).toEqual(['A2'])
+  expect(truncated).toBe(false)
+})
+
+test('fetchClusterMembers says when the cluster was too large to read whole', async () => {
+  const page = (n: number) => ({
+    body: {
+      results: Array.from({ length: 500 }, (_, i) =>
+        entry(`A${n}_${i}`, n + 1),
+      ),
+    },
+    next: 'https://next.page',
+    total: 12_000,
+  })
+  stubFetch(Array.from({ length: 11 }, (_, n) => page(n)))
+  const { scanned, truncated } = await fetchClusterMembers({
+    clusterId: 'UniRef50_X',
+    identity: 50,
+  })
+  expect(scanned).toBe(5000)
+  expect(truncated).toBe(true)
 })
 
 test('resolveUniProtEntry fetches an accession directly and searches a symbol', async () => {

@@ -28,6 +28,7 @@ interface FoundOrthologs {
   geneId: string
   representative: Representative | undefined
   rows: OrthologRow[]
+  warning?: string
 }
 
 /**
@@ -78,7 +79,7 @@ export async function doLaunchOrthologs({
     onProgress,
     signal,
   }
-  const { geneId, representative, rows } =
+  const { geneId, representative, rows, warning } =
     source === 'panther'
       ? await findPantherOrthologs(request)
       : source === 'uniref'
@@ -141,6 +142,7 @@ export async function doLaunchOrthologs({
   return {
     ...result,
     treeMetadata: JSON.stringify(treeMetadata),
+    warnings: warning ? [warning] : [],
   }
 }
 
@@ -220,6 +222,7 @@ async function findUnirefHomologs({
       sequence: found.query.sequence,
     },
     rows: found.rows,
+    warning: found.warning,
   }
 }
 

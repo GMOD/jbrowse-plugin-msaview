@@ -59,6 +59,8 @@ export interface LaunchedData {
   /** empty when the aligner built no tree, and one is then built in the browser */
   tree: string
   treeMetadata: string
+  /** what the launch left out, shown over the alignment it still built */
+  warnings?: string[]
 }
 
 /**
@@ -121,9 +123,12 @@ function startLaunch({
         self.setProgress(message)
         self.setError(undefined)
       })
-      const data = await launch(scope)
+      const { warnings = [], ...data } = await launch(scope)
       act(() => {
         self.setData(data)
+        for (const warning of warnings) {
+          self.addWarning(warning)
+        }
         onLaunched()
       })
       if (!data.tree) {

@@ -84,8 +84,10 @@ export function cleanGeneCandidate(raw: string) {
 }
 
 /**
- * A free-text gene reference -> NCBI gene id. A bare number is taken as the id
- * itself; anything else is searched as a gene name within the query taxon.
+ * A free-text gene reference -> NCBI gene id. Names are searched within the
+ * query taxon first. A bare number is taken as the id itself only when no name
+ * resolves, since nothing checks whose gene it is: a GFF `ID=12345` beside
+ * `Name=TP53` would otherwise align some other organism's orthologs.
  * Several candidate identifiers are tried in order, because a JBrowse feature
  * carries whatever its GFF/BigBed had — `id()`, `name`, `gene_name` — and only
  * some of those are real symbols. `gene:TP53` and `TP53` are one search.
@@ -96,11 +98,9 @@ export async function resolveGeneId(
   signal?: AbortSignal,
 ): Promise<{ geneId: string; matched: string } | undefined> {
   const asked = new Set<string>()
-  for (const raw of candidates) {
-    const query = raw.trim()
-    if (/^\d+$/.test(query)) {
-      return { geneId: query, matched: query }
-    }
+  const queries = candidates.map(c => c.trim())
+  const isId = (query: string) => /^\d+$/.test(query)
+  for (const query of queries.filter(q => !isId(q))) {
     const cleaned = cleanGeneCandidate(query)
     if (!cleaned || asked.has(cleaned)) {
       continue
@@ -122,7 +122,8 @@ export async function resolveGeneId(
       return { geneId, matched: cleaned }
     }
   }
-  return undefined
+  const id = queries.find(isId)
+  return id ? { geneId: id, matched: id } : undefined
 }
 
 interface OrthologReport {

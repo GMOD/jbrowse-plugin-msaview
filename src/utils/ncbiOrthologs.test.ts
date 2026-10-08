@@ -194,6 +194,29 @@ test('resolveGeneId searches each cleaned symbol once', async () => {
   vi.unstubAllGlobals()
 })
 
+// a GFF's `ID=12345` is not an NCBI GeneID, and taking it as one aligned some
+// other organism's orthologs under the user's transcript
+test('resolveGeneId takes a bare number only when no name resolves', async () => {
+  const idlists = [['7157'], []]
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({ esearchresult: { idlist: idlists.shift() } }),
+    }),
+  )
+  expect(await resolveGeneId(['12345', 'TP53'], 9606)).toEqual({
+    geneId: '7157',
+    matched: 'TP53',
+  })
+  expect(await resolveGeneId(['12345', 'nonesuch'], 9606)).toEqual({
+    geneId: '12345',
+    matched: '12345',
+  })
+  vi.unstubAllGlobals()
+})
+
 test('an abort stops a chunked lookup at the request in flight', async () => {
   const controller = new AbortController()
   const seen: string[] = []

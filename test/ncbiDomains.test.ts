@@ -145,7 +145,7 @@ describe('parseCddDomains', () => {
 // This is a REAL response recorded verbatim from NCBI on 2026-06-03 via:
 //   curl 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein\
 //     &id=NP_002736.3&rettype=gp&retmode=xml&tool=jbrowse-plugin-msaview\
-//     &email=colin.diesh@gmail.com'
+//     &email=jbrowse2@berkeley.edu'
 // NP_002736.3 is human MAPK1/ERK2: one CDD kinase domain plus CDD active/other
 // sites. Re-record with the command above if NCBI changes the GenPept format;
 // the live test below verifies the real endpoint still matches this fixture.

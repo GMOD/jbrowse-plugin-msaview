@@ -4,7 +4,7 @@ import { jsonfetch, textfetch, timeout } from './fetch'
 // tool name and contact email so they can reach out before throttling, rather
 // than silently rate-limiting. https://www.ncbi.nlm.nih.gov/books/NBK25497/
 const NCBI_TOOL = 'jbrowse-plugin-msaview'
-const NCBI_EMAIL = 'colin.diesh@gmail.com'
+const NCBI_EMAIL = 'jbrowse2@berkeley.edu'
 
 const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 
