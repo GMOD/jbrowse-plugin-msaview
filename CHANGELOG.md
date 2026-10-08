@@ -1,3 +1,18 @@
+## [5.1.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.1.0...v5.1.1) (2026-10-08)
+
+### Other Changes
+
+- Bump deps ([3f16177](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3f16177638e9f9102836ffc7f05fc1ada89de635))
+- Normalize EBI BLAST hits straight into search hits ([736597a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/736597a42720f69423ccf201a05a1a405ff29fe9))
+- Show the domain fetch in the view header and let it be cancelled ([6a03171](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6a031711790b8fb7fa710398effefc0b9953df54))
+- Fix the launch dialog's stale and mismatched state ([f17516e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f17516ed3a98d2828e29c6624b0105d9ccf364f4))
+- Scope two browser tests to a host whose workspace is always on ([a4d13a4](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a4d13a4a36efd58ef14502a30b7c92f2e8e0d572))
+- Say what a launch left out, and use the project mailbox for EBI and NCBI ([76fc5d8](https://github.com/GMOD/jbrowse-plugin-msaview/commit/76fc5d864a9c5816bdfe506cdf23832d2b65fa05))
+- Pin the MsaView snapshot that session links carry ([3f3e013](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3f3e013a505f3421f9850be80057ecacb04c96bc))
+- Test that a session link may carry an alignment past the snapshot limit ([dc62085](https://github.com/GMOD/jbrowse-plugin-msaview/commit/dc620858dab6af4a0d78f1ab14fc79a8228099b0))
+- Report a refused species-name lookup instead of reading it as no name ([7d71ceb](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7d71ceb86a74df3782da569d133252083d585600))
+- Resolve a gene symbol to the gene that owns it, not the first alias NCBI lists ([7ad8444](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7ad844494c8328868768b361d3262ae65af7f377))
+
 ## [5.1.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.0.0...v5.1.0) (2026-10-05)
 
 ### Other Changes
