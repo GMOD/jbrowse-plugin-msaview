@@ -234,6 +234,36 @@ describe('the MsaView snapshot a session link carries', () => {
     ])
   }, 180_000)
 
+  // react-msaview leaves a document over 50,000 characters out of the snapshot
+  // it writes, not out of the one it reads: a link may carry a larger
+  // alignment, and the view keeps it in IndexedDB from then on
+  it('an inline alignment past the snapshot limit, whole', async () => {
+    const rows = Array.from(
+      { length: 300 },
+      (_, i) => `>row${i}\n${'MKVL'.repeat(100)}`,
+    )
+    const msa = `${rows.join('\n')}\n`
+    expect(msa.length).toBeGreaterThan(120_000)
+    await load(page, [
+      lgv,
+      { ...linked, id: 'msa-large', querySeqName: 'row0', data: { msa } },
+    ])
+    await waitForRows(page, 'msa-large')
+
+    const view = await readView(page, 'msa-large')
+    expect(view.error).toBeUndefined()
+    expect(view.rows).toBe(300)
+    await page.waitForFunction(
+      () =>
+        !!(
+          window as unknown as {
+            JBrowseSession: { views: { id: string; dataStoreId?: string }[] }
+          }
+        ).JBrowseSession.views.find(v => v.id === 'msa-large')?.dataStoreId,
+      { timeout: 30_000 },
+    )
+  }, 180_000)
+
   it('one named block of a hosted indexed alignment', async () => {
     const base = 'https://jbrowse.org/demos/msaview/100way'
     await load(page, [
