@@ -13,7 +13,18 @@ async function describeTaxon(query: string, signal: AbortSignal) {
   if (!taxId) {
     throw new Error(`No NCBI taxon matches "${query}"`)
   }
-  const info = (await fetchTaxonomyInfo([taxId], signal)).get(taxId)
+  const failures: unknown[] = []
+  const info = (
+    await fetchTaxonomyInfo([taxId], signal, e => {
+      failures.push(e)
+    })
+  ).get(taxId)
+  // a throttle would otherwise read as a taxon NCBI has no name for
+  if (!info && failures.length > 0) {
+    throw new Error(`NCBI did not answer for the name of taxon ${taxId}`, {
+      cause: failures[0],
+    })
+  }
   const label = [info?.sciname, info?.commonName && `(${info.commonName})`]
     .filter(Boolean)
     .join(' ')

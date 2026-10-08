@@ -39,3 +39,18 @@ test('a browser without IndexedDB still gets the names from NCBI', async () => {
     commonName: 'house mouse',
   })
 })
+
+// a throttle used to read as a taxon with no name, with nothing said
+test('a refused batch is reported to the caller and leaves its taxa out', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve(new Response('throttled', { status: 429 })),
+  )
+  const failures: unknown[] = []
+  const info = await fetchTaxonomyInfo([424242], undefined, e => {
+    failures.push(e)
+  })
+  expect(info.size).toBe(0)
+  expect(failures).toHaveLength(1)
+})

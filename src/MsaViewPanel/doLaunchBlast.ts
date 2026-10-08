@@ -11,7 +11,7 @@ import { resolveUniProtEntry } from '../utils/unirefHomologs'
 import { str, transcriptFields, transcriptName } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
-import type { LaunchScope } from './runLaunch'
+import type { LaunchScope, LaunchedData } from './runLaunch'
 
 /**
  * The query sequence, and what its row is called. The dialog hands over the
@@ -53,6 +53,7 @@ interface SearchOutcome {
   treeMetadata: Record<string, Record<string, string>>
   rid?: string
   queryRow?: string
+  warnings?: string[]
 }
 
 async function search({
@@ -87,9 +88,13 @@ async function search({
   }
 
   onProgress('Fetching species taxonomy info...')
+  const nameFailures: unknown[] = []
   const taxonomyInfo = await fetchTaxonomyInfo(
     hits.map(h => h.taxid).filter((t): t is number => t !== undefined),
     signal,
+    e => {
+      nameFailures.push(e)
+    },
   )
   const { msa: fasta, treeMetadata } = buildSearchMsa({
     hits,
@@ -98,10 +103,22 @@ async function search({
     taxonomyInfo,
     querySeqName,
   })
-  if (!queryRow) {
+  // rows named without NCBI's answer are not worth reusing for a week
+  const namesFailed = nameFailures.length > 0
+  if (!queryRow && !namesFailed) {
     await saveSearch({ id: key, fasta, treeMetadata, rid })
   }
-  return { fasta, treeMetadata, rid, queryRow }
+  return {
+    fasta,
+    treeMetadata,
+    rid,
+    queryRow,
+    warnings: namesFailed
+      ? [
+          'NCBI did not answer for some species names, so those rows are named by scientific name alone.',
+        ]
+      : [],
+  }
 }
 
 /**
@@ -118,7 +135,7 @@ export async function doLaunchBlast({
 }: {
   self: JBrowsePluginMsaViewModel
   scope: LaunchScope
-}) {
+}): Promise<LaunchedData> {
   const params = self.blastParams!
   const {
     selectedTranscript,
@@ -147,7 +164,7 @@ export async function doLaunchBlast({
       `Reusing the ${searchProgram} search from ${new Date(found.timestamp).toLocaleString()}...`,
     )
   }
-  const { fasta, treeMetadata, rid, queryRow }: SearchOutcome =
+  const { fasta, treeMetadata, rid, queryRow, warnings }: SearchOutcome =
     found ?? (await search({ self, scope, query, querySeqName, maxHits, key }))
   const { msa, tree } = queryRow
     ? { msa: fasta, tree: '' }
@@ -176,5 +193,5 @@ export async function doLaunchBlast({
     geneName: str(transcript.gene_name) ?? str(transcript.parentId),
   })
 
-  return { msa, tree, treeMetadata: treeMetadataJson }
+  return { msa, tree, treeMetadata: treeMetadataJson, warnings }
 }

@@ -64,9 +64,15 @@ export interface TaxonomyInfo {
   commonName?: string
 }
 
+/**
+ * Names are a nicety, so a batch NCBI refuses leaves its taxa out of the
+ * result rather than failing the caller. `onFailure` hears about each one, for
+ * a caller that wants to say the names are missing.
+ */
 export async function fetchTaxonomyInfo(
   taxidsWithRepeats: number[],
   signal?: AbortSignal,
+  onFailure?: (error: unknown) => void,
 ): Promise<Map<number, TaxonomyInfo>> {
   // callers pass one taxid per alignment row, and a BLAST hit list is several
   // rows per species: 100 albumin hits are maybe 50 taxa, and asking as they
@@ -171,6 +177,7 @@ export async function fetchTaxonomyInfo(
         throw error
       }
       console.error('Failed to fetch taxonomy data:', error)
+      onFailure?.(error)
     }
   }
 
