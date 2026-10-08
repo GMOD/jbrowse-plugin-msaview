@@ -22,7 +22,7 @@ import {
   eutilsText,
   eutilsUrl,
 } from './eutils'
-import { jsonfetch } from './fetch'
+import { HttpError, jsonfetch } from './fetch'
 
 // v2, not v2alpha: the alpha path still answers /orthologs but 404s
 // /product_report, so an assembler pointed at it silently resolves zero
@@ -83,14 +83,79 @@ export function cleanGeneCandidate(raw: string) {
     .replace(/\.\d+$/, '')
 }
 
+export interface SymbolCandidate {
+  gene_id?: string
+  symbol?: string
+  synonyms?: string[]
+}
+
 /**
- * A free-text gene reference -> NCBI gene id. Names are searched within the
- * query taxon first. A bare number is taken as the id itself only when no name
- * resolves, since nothing checks whose gene it is: a GFF `ID=12345` beside
- * `Name=TP53` would otherwise align some other organism's orthologs.
- * Several candidate identifiers are tried in order, because a JBrowse feature
- * carries whatever its GFF/BigBed had — `id()`, `name`, `gene_name` — and only
- * some of those are real symbols. `gene:TP53` and `TP53` are one search.
+ * NCBI's symbol lookups match aliases as well as symbols and rank neither
+ * first: `TTN` in human answers TTR (transthyretin, whose alias it is) ahead of
+ * titin, from Datasets and from an esearch `[Gene Name]` alike. Case decides
+ * before a case-blind match, because fly `Dl` (Delta) and `dl` (dorsal) differ
+ * by it alone. The first hit stands when nothing matches, which is what keeps
+ * an alias like `p53` working. The same rule as jb2hubs' orthologSet.ts.
+ */
+export function pickBySymbol(query: string, candidates: SymbolCandidate[]) {
+  const lower = query.toLowerCase()
+  const exact =
+    candidates.find(c => c.symbol === query) ??
+    candidates.find(c => c.synonyms?.includes(query)) ??
+    candidates.find(c => c.symbol?.toLowerCase() === lower)
+  return (exact ?? candidates[0])?.gene_id
+}
+
+/** Datasets answers an unknown symbol with `{}` and an unroutable one with a 404 */
+async function symbolCandidates(
+  symbol: string,
+  taxId: number,
+  signal?: AbortSignal,
+) {
+  try {
+    const json = await jsonfetch<{ reports?: { gene?: SymbolCandidate }[] }>(
+      `${DATASETS}/gene/symbol/${encodeURIComponent(symbol)}/taxon/${taxId}`,
+      { signal },
+    )
+    return (json.reports ?? []).flatMap(r => (r.gene ? [r.gene] : []))
+  } catch (e) {
+    if (e instanceof HttpError && (e.status === 400 || e.status === 404)) {
+      return []
+    }
+    throw e
+  }
+}
+
+async function searchGeneName(
+  name: string,
+  taxId: number,
+  signal?: AbortSignal,
+) {
+  const json = await eutilsJson<{
+    esearchresult?: { idlist?: string[] }
+  }>(
+    eutilsUrl('esearch', {
+      db: 'gene',
+      term: `${name}[Gene Name] AND ${taxId}[taxid]`,
+      retmode: 'json',
+      retmax: '1',
+    }),
+    { signal },
+  )
+  return json.esearchresult?.idlist?.[0]
+}
+
+/**
+ * A free-text gene reference -> NCBI gene id. Several candidate identifiers
+ * are tried in order, because a JBrowse feature carries whatever its GFF/BigBed
+ * had — `id()`, `name`, `gene_name` — and only some of those are real symbols.
+ * `gene:TP53` and `TP53` are one search. Each is asked of Datasets, whose
+ * candidates `pickBySymbol` ranks, and then of esearch, which also reaches
+ * descriptions.
+ *
+ * A bare number is taken as the id itself only when no name resolves, since
+ * nothing checks whose gene it is: a GFF `ID=12345` beside `Name=TP53` would
+ * otherwise align some other organism's orthologs.
  */
 export async function resolveGeneId(
   candidates: string[],
@@ -106,18 +171,9 @@ export async function resolveGeneId(
       continue
     }
     asked.add(cleaned)
-    const json = await eutilsJson<{
-      esearchresult?: { idlist?: string[] }
-    }>(
-      eutilsUrl('esearch', {
-        db: 'gene',
-        term: `${cleaned}[Gene Name] AND ${taxId}[taxid]`,
-        retmode: 'json',
-        retmax: '1',
-      }),
-      { signal },
-    )
-    const geneId = json.esearchresult?.idlist?.[0]
+    const geneId =
+      pickBySymbol(cleaned, await symbolCandidates(cleaned, taxId, signal)) ??
+      (await searchGeneName(cleaned, taxId, signal))
     if (geneId) {
       return { geneId, matched: cleaned }
     }

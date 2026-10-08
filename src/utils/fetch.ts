@@ -7,6 +7,15 @@ function hostOf(url: string) {
   }
 }
 
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message)
+  }
+}
+
 export async function handleFetch(url: string, args?: RequestInit) {
   let response: Response
   try {
@@ -27,8 +36,9 @@ export async function handleFetch(url: string, args?: RequestInit) {
   }
 
   if (!response.ok) {
-    throw new Error(
+    throw new HttpError(
       `HTTP ${response.status} fetching ${url} ${(await response.text()).slice(0, 500)}`,
+      response.status,
     )
   }
 

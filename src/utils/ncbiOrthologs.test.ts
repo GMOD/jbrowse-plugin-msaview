@@ -6,6 +6,7 @@ import {
   fetchOrthologGenes,
   fetchRepresentativeProteins,
   parseFasta,
+  pickBySymbol,
   resolveGeneId,
 } from './ncbiOrthologs'
 
@@ -177,35 +178,74 @@ describe('the NCBI request ceilings', () => {
 
 // eutils allows three requests a second, so asking the same symbol twice is a
 // request spent on nothing
-test('resolveGeneId searches each cleaned symbol once', async () => {
+// answers Datasets' symbol lookup with `reports` and esearch with `idlist`
+function stubGeneLookups({
+  reports = () => [],
+  idlist = () => [],
+}: {
+  reports?: (symbol: string) => unknown[]
+  idlist?: (term: string) => string[]
+}) {
   const seen: string[] = []
   vi.stubGlobal('fetch', (url: string) => {
     seen.push(url)
-    return Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ esearchresult: { idlist: [] } }),
-    })
+    const symbol = /gene\/symbol\/([^/]+)\/taxon/.exec(url)?.[1]
+    const body = symbol
+      ? { reports: reports(decodeURIComponent(symbol)) }
+      : {
+          esearchresult: {
+            idlist: idlist(new URL(url).searchParams.get('term') ?? ''),
+          },
+        }
+    return Promise.resolve(new Response(JSON.stringify(body)))
   })
+  return seen
+}
+
+test('resolveGeneId asks about each cleaned symbol once', async () => {
+  const seen = stubGeneLookups({})
   expect(
     await resolveGeneId(['gene:TP53', 'TP53', ' TP53 ', 'NM_000546.6'], 9606),
   ).toBeUndefined()
-  expect(seen).toHaveLength(2)
+  expect(seen.filter(url => url.includes('esearch'))).toHaveLength(2)
+  expect(seen.filter(url => url.includes('gene/symbol'))).toHaveLength(2)
   vi.unstubAllGlobals()
+})
+
+// NCBI lists TTR, whose alias TTN is, ahead of titin
+test('resolveGeneId prefers the gene whose own symbol was asked for', async () => {
+  stubGeneLookups({
+    reports: () => [
+      { gene: { gene_id: '7276', symbol: 'TTR', synonyms: ['TTN'] } },
+      { gene: { gene_id: '7273', symbol: 'TTN' } },
+    ],
+  })
+  expect(await resolveGeneId(['TTN'], 9606)).toEqual({
+    geneId: '7273',
+    matched: 'TTN',
+  })
+  vi.unstubAllGlobals()
+})
+
+test('pickBySymbol lets case decide before a case-blind match, and keeps an alias working', () => {
+  const fly = [
+    { gene_id: '42313', symbol: 'Delta', synonyms: ['Dl'] },
+    { gene_id: '35047', symbol: 'dl' },
+  ]
+  expect(pickBySymbol('Dl', fly)).toBe('42313')
+  expect(pickBySymbol('dl', fly)).toBe('35047')
+  expect(pickBySymbol('p53', [{ gene_id: '7157', symbol: 'TP53' }])).toBe(
+    '7157',
+  )
+  expect(pickBySymbol('nonesuch', [])).toBeUndefined()
 })
 
 // a GFF's `ID=12345` is not an NCBI GeneID, and taking it as one aligned some
 // other organism's orthologs under the user's transcript
 test('resolveGeneId takes a bare number only when no name resolves', async () => {
-  const idlists = [['7157'], []]
-  vi.stubGlobal('fetch', () =>
-    Promise.resolve({
-      ok: true,
-      status: 200,
-      json: () =>
-        Promise.resolve({ esearchresult: { idlist: idlists.shift() } }),
-    }),
-  )
+  stubGeneLookups({
+    idlist: term => (term.startsWith('TP53[') ? ['7157'] : []),
+  })
   expect(await resolveGeneId(['12345', 'TP53'], 9606)).toEqual({
     geneId: '7157',
     matched: 'TP53',
