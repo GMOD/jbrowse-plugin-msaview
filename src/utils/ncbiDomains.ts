@@ -1,5 +1,6 @@
 import { getCachedDomains, saveDomains } from './domainCache'
 import { decodeXmlEntities, efetchUrl, eutilsText } from './eutils'
+import { isAbortError } from './fetch'
 
 import type { InterProScanResults } from 'react-msaview'
 
@@ -134,6 +135,7 @@ export function parseCddDomains(xml: string): Map<string, DomainMatch[]> {
  */
 export async function fetchProteinDomains(
   accessions: string[],
+  signal?: AbortSignal,
 ): Promise<Map<string, DomainMatch[]>> {
   const unique = [...new Set(accessions)].filter(Boolean)
   const byAccession = new Map<string, DomainMatch[]>()
@@ -153,14 +155,25 @@ export async function fetchProteinDomains(
   const batchSize = 100
   for (let i = 0; i < uncached.length; i += batchSize) {
     const batch = uncached.slice(i, i + batchSize)
-    const xml = await eutilsText(
-      efetchUrl({
-        db: 'protein',
-        id: batch.join(','),
-        rettype: 'gp',
-        retmode: 'xml',
-      }),
-    )
+    let xml: string
+    try {
+      xml = await eutilsText(
+        efetchUrl({
+          db: 'protein',
+          id: batch.join(','),
+          rettype: 'gp',
+          retmode: 'xml',
+        }),
+        { signal },
+      )
+    } catch (e) {
+      if (isAbortError(e)) {
+        throw e
+      }
+      // the batches already answered are worth keeping and caching
+      console.warn('[msaview-domains] efetch failed, keeping what loaded:', e)
+      break
+    }
     const parsed = parseCddDomains(xml)
     for (const acc of batch) {
       // only cache accessions actually present in the response: a genuinely

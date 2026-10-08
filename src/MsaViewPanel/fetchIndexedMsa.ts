@@ -7,7 +7,7 @@ import { openLocation } from '@jbrowse/core/util/io'
 // offset + length) are found by suffix. We fetch the small `.idx` once, look up
 // the name, and random-read just that block — already valid FASTA
 // (`>hg38\nSEQ\n>panTro4\nSEQ\n...`). One genome-scale alignment serves any gene
-// with no per-gene files or coordinates. See react-msaview's gene-explorer.
+// with no per-gene files or coordinates.
 export async function fetchIndexedMsa({
   location,
   name,

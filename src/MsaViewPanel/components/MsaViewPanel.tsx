@@ -5,7 +5,6 @@ import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 import { makeStyles } from 'tss-react/mui'
 
-import { ErrorBoundary } from './ErrorBoundary'
 import LaunchProgress from './LaunchProgress'
 
 import type { JBrowsePluginMsaViewModel } from '../model'
@@ -31,23 +30,23 @@ const MsaViewPanel = observer(function MsaViewPanel2({
   const pending = !!request && !model.launchCompleted
   // a request that finished and then lost its alignment -- browser storage
   // expires one after 7 days -- is a request again, and LaunchProgress draws it
-  // with the Retry that runs it
-  const expired = !!request && !!model.error && !model.dataInitialized
+  // with the Retry that runs it. An error over an alignment still in hand is
+  // react-msaview's to draw.
+  const hasAlignment = !!(model.data.msa || model.data.tree)
+  const expired = !!request && !!model.error && !hasAlignment
   const launching = pending || expired || (!!init && !model.dataInitialized)
   return (
-    <ErrorBoundary>
-      <div>
-        {launching ? (
-          <LaunchProgress model={model} />
-        ) : loadingStoredData && !model.dataInitialized ? (
-          <div className={classes.loadingContainer}>
-            <LoadingEllipses message="Loading MSA data" variant="h6" />
-          </div>
-        ) : (
-          <MSAView model={model} />
-        )}
-      </div>
-    </ErrorBoundary>
+    <div>
+      {launching ? (
+        <LaunchProgress model={model} />
+      ) : loadingStoredData && !model.dataInitialized ? (
+        <div className={classes.loadingContainer}>
+          <LoadingEllipses message="Loading MSA data" variant="h6" />
+        </div>
+      ) : (
+        <MSAView model={model} />
+      )}
+    </div>
   )
 })
 

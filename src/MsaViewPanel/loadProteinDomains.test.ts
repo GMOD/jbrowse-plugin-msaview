@@ -14,8 +14,7 @@ const MATCH = {
 
 function model(treeMetadata: Record<string, Record<string, string>>) {
   return {
-    data: { treeMetadata: JSON.stringify(treeMetadata) },
-    setProgress: vi.fn(),
+    rowData: treeMetadata,
     setAnnotations: vi.fn(),
   }
 }

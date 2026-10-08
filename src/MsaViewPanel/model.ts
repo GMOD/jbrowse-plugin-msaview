@@ -612,9 +612,6 @@ export default function stateModelFactory() {
     })
 
     .views(self => {
-      // react-msaview's extraViewMenuItems() has had no caller since v5.6.0, in
-      // that package or in JBrowse; the view hamburger renders menuItems(), so
-      // extend that
       const superMenuItems = self.menuItems.bind(self)
       return {
         /**

@@ -1,6 +1,8 @@
 import { getSession } from '@jbrowse/core/util'
+import { addDisposer, isAlive } from '@jbrowse/mobx-state-tree'
 import { transaction } from 'mobx'
 
+import { isAbortError } from '../utils/fetch'
 import { doLaunchBlast } from './doLaunchBlast'
 import { doLaunchOrthologs } from './doLaunchOrthologs'
 import { fetchIndexedMsa } from './fetchIndexedMsa'
@@ -206,28 +208,39 @@ export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
 }
 
 /**
- * Once an accession-bearing alignment is present (fresh from BLAST or restored
- * from cache), fetch NCBI CDD domains for those accessions and overlay them.
- * Runs once per view; the domainsRequested guard prevents refiring when NCBI
- * returns no domains (which leaves the annotation list empty).
+ * Once an alignment whose rows carry accessions is present, fetch NCBI CDD
+ * domains for them and overlay them. `domainsRequested` makes this once per
+ * view, so NCBI returning no domains does not refire it.
  */
 export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
-  const { rows, domainsRequested, annotations } = self
-  const hasAccessions = self.data.treeMetadata?.includes('"Accession"') ?? false
+  const { rows, domainsRequested, annotations, rowData } = self
   if (
     rows.length > 0 &&
-    hasAccessions &&
     annotations.length === 0 &&
-    !domainsRequested
+    !domainsRequested &&
+    Object.values(rowData).some(row => row?.Accession)
   ) {
+    const controller = new AbortController()
+    const abort = () => {
+      controller.abort()
+    }
+    addDisposer(self, abort)
     self.setDomainsRequested(true)
+    self.setStatus({
+      msg: 'Fetching protein domains from NCBI',
+      onCancel: abort,
+    })
     void (async () => {
       try {
-        await loadProteinDomains(self)
+        await loadProteinDomains(self, controller.signal)
       } catch (e) {
-        console.error('[msaview-domains] auto-load failed:', e)
+        if (!isAbortError(e)) {
+          console.error('[msaview-domains] auto-load failed:', e)
+        }
       } finally {
-        self.setProgress('')
+        if (isAlive(self)) {
+          self.setStatus(undefined)
+        }
       }
     })()
   }

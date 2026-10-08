@@ -16,7 +16,7 @@ export interface MsaViewInitState {
   // index `.idx` (name<TAB>offset<TAB>length) are found by suffix. `msaName`
   // selects one transcript's block by name (a random read), so one genome-scale
   // alignment serves any gene without per-gene files or coordinates. This is the
-  // one alignment source with no native loader. See react-msaview's gene-explorer.
+  // one alignment source with no native loader.
   msaIndexedLocation?: { uri: string }
   msaName?: string
 }

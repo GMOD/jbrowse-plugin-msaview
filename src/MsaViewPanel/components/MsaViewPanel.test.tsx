@@ -15,7 +15,11 @@ vi.mock('react-msaview', () => ({
 }))
 
 function panel(model: Partial<JBrowsePluginMsaViewModel>) {
-  return render(<MsaViewPanel model={model as JBrowsePluginMsaViewModel} />)
+  return render(
+    <MsaViewPanel
+      model={{ data: {}, ...model } as JBrowsePluginMsaViewModel}
+    />,
+  )
 }
 
 afterEach(() => {
@@ -130,6 +134,19 @@ test('an expired alignment offers to run its original search again', () => {
   expect(screen.getByText('Alignment no longer available')).toBeTruthy()
   screen.getByRole('button', { name: 'Retry' }).click()
   expect(retryLaunch).toHaveBeenCalled()
+})
+
+// react-msaview draws an error over an alignment it still holds, with its own
+// way back; rerunning a fifteen minute search is the wrong offer there
+test('an error over an alignment still in hand is not an expiry', () => {
+  panel({
+    progress: '',
+    data: { msa: '>a\nMKV' },
+    error: new Error('bad tree'),
+    blastParams: { blastDatabase: 'uniprotkb_swissprot' },
+    launchCompleted: true,
+  } as never)
+  expect(screen.getByText('the alignment')).toBeTruthy()
 })
 
 // with nothing to retry from -- a pasted alignment, say -- the panel stays out
