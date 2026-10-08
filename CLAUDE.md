@@ -172,6 +172,17 @@ and a preflight that returns 200 carrying no CORS headers at all. That is the
 Blast.cgi failure exactly, at a different institute. Same host, same institute,
 neighbouring url: still check.
 
+## Session links carry raw snapshots, so property names are a contract
+
+jb2hubs' protein browser links to a session whose `views[]` holds an `MsaView`
+snapshot outright (`website/src/components/proteinSession.ts` there), not a
+`LaunchView-MsaView` spec. mobx-state-tree drops a key it does not know without
+a word, so renaming `connectedFeature`, `querySeqOffset`,
+`init.msaIndexedLocation`, `orthologParams` or `blastParams` opens every
+published link on an empty import form. `test/sessionSnapshot.test.ts` boots
+each shape that site emits and reads the model back; extend it when jb2hubs
+starts sending a new one.
+
 ## Other things worth knowing
 
 - **NCBI CDD domain annotations are fetched in-browser**, and the CORS
