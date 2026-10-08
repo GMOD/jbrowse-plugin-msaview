@@ -32,29 +32,29 @@ describe('normalizeEbiBlastHits', () => {
   test('maps a UniProtKB hit onto the shape the MSA rows are built from', () => {
     const [hit] = normalizeEbiBlastHits(result)
 
-    expect(hit!.description[0]).toEqual({
+    expect(hit).toMatchObject({
       accession: 'P02769',
       id: 'ALBU_BOVIN',
       sciname: 'Bos taurus',
       taxid: 9913,
       title: 'Albumin',
     })
-    expect(hit!.hsps[0]!.hseq).toMatch(/^MKWVTFISLL/)
+    expect(hit!.sequence).toMatch(/^MKWVTFISLL/)
   })
 
   test('parses hit_uni_ox, which arrives as a string', () => {
     // taxid feeds fetchTaxonomyInfo and the Map lookup in makeId, both of which
     // silently miss on a string
     for (const hit of normalizeEbiBlastHits(result).slice(0, 2)) {
-      expect(typeof hit.description[0]!.taxid).toBe('number')
+      expect(typeof hit.taxid).toBe('number')
     }
-    expect(normalizeEbiBlastHits(result)[1]!.description[0]!.taxid).toBe(9541)
+    expect(normalizeEbiBlastHits(result)[1]!.taxid).toBe(9541)
   })
 
   test('falls back to the non-UniProt fields when hit_uni_* are absent', () => {
     const hit = normalizeEbiBlastHits(result)[2]!
 
-    expect(hit.description[0]).toEqual({
+    expect(hit).toMatchObject({
       accession: 'CAA76847',
       id: 'CAA76847',
       sciname: 'Ovis aries',
@@ -63,8 +63,8 @@ describe('normalizeEbiBlastHits', () => {
     })
   })
 
-  test('keeps gaps in hseq, which doLaunchBlast strips itself', () => {
-    expect(normalizeEbiBlastHits(result)[2]!.hsps[0]!.hseq).toBe('MKWV-TFISLL')
+  test('strips the pairwise gaps, since an aligner runs on the hits next', () => {
+    expect(normalizeEbiBlastHits(result)[2]!.sequence).toBe('MKWVTFISLL')
   })
 
   test('tolerates a result with no hits', () => {

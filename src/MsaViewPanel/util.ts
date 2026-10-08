@@ -41,7 +41,7 @@ export function transcriptFields(transcript?: TranscriptRef) {
     : (transcript as Record<string, unknown>)
 }
 
-function str(val: unknown) {
+export function str(val: unknown) {
   return typeof val === 'string' ? val : undefined
 }
 

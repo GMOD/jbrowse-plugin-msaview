@@ -1,10 +1,12 @@
-import { snapBlastHitCount } from '../LaunchMsaView/components/BlastQuery/consts'
+import {
+  defaultMaxHits,
+  snapBlastHitCount,
+} from '../LaunchMsaView/components/BlastQuery/consts'
 import { strip } from '../LaunchMsaView/components/util'
 import { runEbiJob } from './ebiJobDispatcher'
 
 import type { BlastDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
-import type { SearchBackend } from './homologSearch'
-import type { BlastHit } from './types'
+import type { SearchBackend, SearchHit } from './homologSearch'
 
 const TOOL = 'ncbiblast'
 
@@ -29,28 +31,23 @@ interface EbiBlastJson {
 }
 
 /**
- * Map EBI's hit shape onto the normalized one. Exported for testing against a
- * captured response — the field names are the whole risk here, and nothing else
- * in CI would notice if EBI renamed one.
+ * EBI's hits as search hits. BLAST's alignments are pairwise, one hit at a
+ * time, so the gaps come back off and an aligner gets bare sequences. Exported
+ * for testing against a captured response: nothing else in CI would notice if
+ * EBI renamed a field.
  */
-export function normalizeEbiBlastHits(result: EbiBlastJson): BlastHit[] {
+export function normalizeEbiBlastHits(result: EbiBlastJson): SearchHit[] {
   return (result.hits ?? []).map(hit => {
     const taxid = Number.parseInt(hit.hit_uni_ox ?? '', 10)
     return {
-      description: [
-        {
-          accession: hit.hit_acc ?? 'unknown',
-          id: hit.hit_id ?? hit.hit_acc ?? 'unknown',
-          sciname: hit.hit_uni_os ?? hit.hit_os ?? 'unknown',
-          taxid: Number.isNaN(taxid) ? undefined : taxid,
-          // hit_uni_de is the bare protein name; hit_desc repeats it with the
-          // OS=/OX=/GN= suffix that makeId already covers with real columns
-          title: hit.hit_uni_de ?? hit.hit_desc,
-        },
-      ],
-      hsps: (hit.hit_hsps ?? []).flatMap(hsp =>
-        hsp.hsp_hseq ? [{ hseq: hsp.hsp_hseq }] : [],
-      ),
+      accession: hit.hit_acc ?? 'unknown',
+      id: hit.hit_id ?? hit.hit_acc ?? 'unknown',
+      sciname: hit.hit_uni_os ?? hit.hit_os ?? 'unknown',
+      taxid: Number.isNaN(taxid) ? undefined : taxid,
+      // hit_uni_de is the bare protein name; hit_desc repeats it with the
+      // OS=/OX=/GN= suffix that makeId already covers with real columns
+      title: hit.hit_uni_de ?? hit.hit_desc,
+      sequence: strip(hit.hit_hsps?.[0]?.hsp_hseq ?? ''),
     }
   })
 }
@@ -74,13 +71,13 @@ export async function queryEbiBlast({
 }: {
   query: string
   blastDatabase: BlastDatabase
-  /** rounded up to a count EBI accepts; their default of 50 when omitted */
+  /** rounded up to a count EBI accepts */
   maxHits?: number
   onProgress: (arg: string) => void
   onRid: (arg: string) => void
   signal?: AbortSignal
 }) {
-  const hitCount = maxHits ? String(snapBlastHitCount(maxHits)) : undefined
+  const hitCount = String(snapBlastHitCount(maxHits ?? defaultMaxHits))
   const job = await runEbiJob({
     tool: TOOL,
     label: 'BLAST',
@@ -89,43 +86,20 @@ export async function queryEbiBlast({
       stype: 'protein',
       database: blastDatabase,
       sequence: query,
-      ...(hitCount ? { alignments: hitCount, scores: hitCount } : {}),
+      alignments: hitCount,
+      scores: hitCount,
     },
     onProgress,
     onRid,
     signal,
   })
-  const hits = normalizeEbiBlastHits(
-    JSON.parse(await job.result('json')) as EbiBlastJson,
-  )
-  if (hits.length === 0) {
-    throw new Error('No hits found')
+  return {
+    rid: job.jobId,
+    hits: normalizeEbiBlastHits(
+      JSON.parse(await job.result('json')) as EbiBlastJson,
+    ),
   }
-  return { rid: job.jobId, hits }
 }
 
-/**
- * BLAST as a search backend. Its alignments are pairwise and one hit at a
- * time, so they are stripped back off and the hits go to an aligner as bare
- * sequences: no `queryRow`.
- */
-export const searchEbiBlast: SearchBackend = async ({
-  database,
-  ...request
-}) => {
-  const { hits, rid } = await queryEbiBlast({
-    blastDatabase: database as BlastDatabase,
-    ...request,
-  })
-  return {
-    rid,
-    hits: hits.map(hit => ({
-      ...(hit.description[0] ?? {
-        accession: 'unknown',
-        id: 'unknown',
-        sciname: 'unknown',
-      }),
-      sequence: strip(hit.hsps[0]?.hseq ?? ''),
-    })),
-  }
-}
+export const searchEbiBlast: SearchBackend = ({ database, ...request }) =>
+  queryEbiBlast({ blastDatabase: database as BlastDatabase, ...request })

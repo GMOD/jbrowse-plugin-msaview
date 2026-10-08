@@ -184,14 +184,10 @@ export async function queryPhmmer({
     onRid,
     signal,
   })
-  const alignment = parsePhmmerAlignment({
-    stockholm: await job.result('sto'),
-    query,
-  })
-  if (alignment.rows.length === 0) {
-    throw new Error('No hits found')
+  return {
+    rid: job.jobId,
+    ...parsePhmmerAlignment({ stockholm: await job.result('sto'), query }),
   }
-  return { rid: job.jobId, ...alignment }
 }
 
 /** phmmer's rows as search hits: the aligned row is the hit's sequence. */

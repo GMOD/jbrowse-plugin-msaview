@@ -23,6 +23,7 @@ import {
 
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { MsaDataPayload } from './msaDataStore'
+import type { LaunchScope, LaunchedData } from './runLaunch'
 
 const EXPIRED_MESSAGE =
   "This view's alignment is no longer in browser storage. Stored alignments are kept for 7 days after they were last used, and are lost when site data is cleared."
@@ -161,55 +162,47 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
 }
 
 /**
- * Same shape as launchBlastIfNeeded, for the ortholog path: the params ARE the
- * request, and `launchCompleted` is what marks it done. They are left in place
- * either way -- on failure so the error stays attributable to a specific
- * request, and on success because they are the only durable statement of what
- * the view is, which is what a stored alignment that expired is rebuilt from.
- * The autorun tracks those two reads alone, so nothing refires until a new
- * request replaces them or a retry clears the mark.
- */
-export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
-  if (
-    self.orthologParams &&
-    !self.launchCompleted &&
-    !awaitingTranscript(self)
-  ) {
-    runLaunch({
-      self,
-      message: 'Resolving orthologs',
-      launch: scope => doLaunchOrthologs({ self, scope }),
-      // marked rather than dropped: the request is the only durable statement
-      // of what this view is, and a view whose stored alignment expired runs it
-      // again
-      onLaunched: () => {
-        self.setLaunchCompleted(true)
-      },
-    })
-  }
-}
-
-/**
- * A launch that names its transcript rather than its feature has to wait for
- * the lookup: the query row is that transcript's translation, and the launch
- * cannot start without a query. Both launchers read the same two fields, so
- * the resolver setting `connectedFeature` is what refires them.
+ * A launch that names its transcript rather than its feature waits for the
+ * lookup, since the query row is that transcript's translation. The resolver
+ * setting `connectedFeature` is what refires the launchers.
  */
 function awaitingTranscript(self: JBrowsePluginMsaViewModel) {
   return !!self.connectedTranscript && !self.connectedFeature
 }
 
-export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
-  if (self.blastParams && !self.launchCompleted && !awaitingTranscript(self)) {
+/**
+ * The params are the request and `launchCompleted` marks it done. They stay in
+ * place on failure, so the error is attributable, and on success, because a
+ * stored alignment that expired is rebuilt from them.
+ */
+function launchIfNeeded(
+  self: JBrowsePluginMsaViewModel,
+  requested: boolean,
+  message: string,
+  launch: (scope: LaunchScope) => Promise<LaunchedData>,
+) {
+  if (requested && !self.launchCompleted && !awaitingTranscript(self)) {
     runLaunch({
       self,
-      message: 'Submitting query',
-      launch: scope => doLaunchBlast({ self, scope }),
+      message,
+      launch,
       onLaunched: () => {
         self.setLaunchCompleted(true)
       },
     })
   }
+}
+
+export function launchOrthologsIfNeeded(self: JBrowsePluginMsaViewModel) {
+  launchIfNeeded(self, !!self.orthologParams, 'Resolving orthologs', scope =>
+    doLaunchOrthologs({ self, scope }),
+  )
+}
+
+export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
+  launchIfNeeded(self, !!self.blastParams, 'Submitting query', scope =>
+    doLaunchBlast({ self, scope }),
+  )
 }
 
 /**
@@ -266,15 +259,15 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
       try {
         self.setError(undefined)
 
-        if (msaUrl) {
-          const id = getUniprotIdFromAlphaFoldUrl(msaUrl)
-          if (id) {
-            self.setUniprotId(id)
-            self.setQuerySeqName('query')
-          }
+        const uniprotId = msaUrl
+          ? getUniprotIdFromAlphaFoldUrl(msaUrl)
+          : undefined
+        if (uniprotId) {
+          self.setUniprotId(uniprotId)
         }
-        if (querySeqName) {
-          self.setQuerySeqName(querySeqName)
+        const rowName = querySeqName ?? (uniprotId ? 'query' : undefined)
+        if (rowName) {
+          self.setQuerySeqName(rowName)
         }
 
         if (msaUrl) {
@@ -284,13 +277,12 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
             location: msaIndexedLocation,
             name: msaName,
           })
-          if (fasta) {
-            self.setMSA(fasta)
-          } else {
+          if (!fasta) {
             throw new Error(
               `No alignment named ${msaName} in ${msaIndexedLocation.uri}`,
             )
           }
+          self.setMSA(fasta)
         }
 
         if (!indexed) {

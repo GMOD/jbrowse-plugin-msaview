@@ -26,20 +26,17 @@ live('EBI BLAST, live', () => {
       expect(hits.length).toBeGreaterThan(0)
 
       const [first] = hits
-      expect(first!.description[0]!.accession).toBeTruthy()
-      expect(first!.description[0]!.sciname).not.toBe('unknown')
-      expect(typeof first!.description[0]!.taxid).toBe('number')
-      expect(first!.hsps[0]!.hseq).toMatch(/^[A-Z-]+$/)
+      expect(first!.accession).toBeTruthy()
+      expect(first!.sciname).not.toBe('unknown')
+      expect(typeof first!.taxid).toBe('number')
+      expect(first!.sequence).toMatch(/^[A-Z]+$/)
 
       // the MSA step is the other half of the pipeline and shares the transport
       const { msa, tree } = await launchMSA({
         algorithm: 'clustalo',
         sequence: hits
           .slice(0, 5)
-          .map(
-            (h, i) =>
-              `>${h.description[0]!.accession}_${i}\n${h.hsps[0]!.hseq.replaceAll('-', '')}`,
-          )
+          .map((h, i) => `>${h.accession}_${i}\n${h.sequence}`)
           .join('\n'),
         onProgress: s => progress.push(s),
       })

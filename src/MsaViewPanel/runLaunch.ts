@@ -54,7 +54,7 @@ export interface LaunchScope {
   onRid: (arg: string) => void
 }
 
-interface LaunchedData {
+export interface LaunchedData {
   msa: string
   /** empty when the aligner built no tree, and one is then built in the browser */
   tree: string
@@ -89,12 +89,7 @@ function startLaunch({
   message,
   launch,
   onLaunched,
-}: {
-  self: JBrowsePluginMsaViewModel
-  message: string
-  launch: (scope: LaunchScope) => Promise<LaunchedData>
-  onLaunched: () => void
-}) {
+}: Parameters<typeof runLaunch>[0]) {
   self.launchController?.abort()
   const controller = new AbortController()
   const { signal } = controller

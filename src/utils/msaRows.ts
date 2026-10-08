@@ -2,7 +2,6 @@ import { makeId } from '../LaunchMsaView/components/util'
 
 import type { SearchHit } from './homologSearch'
 import type { TaxonomyInfo } from './taxonomyNames'
-import type { BlastHitDescription } from './types'
 
 /**
  * Turning search results into the rows the view is given, kept free of any
@@ -10,7 +9,7 @@ import type { BlastHitDescription } from './types'
  * outside a browser — see test/phmmerLive.test.ts.
  */
 export function buildRowMetadata(
-  desc: BlastHitDescription,
+  desc: Omit<SearchHit, 'sequence' | 'range'>,
   taxonomyInfo: Map<number, TaxonomyInfo>,
 ) {
   const metadata: Record<string, string> = {}

@@ -1,3 +1,4 @@
+import { defaultMaxHits } from '../LaunchMsaView/components/BlastQuery/consts'
 import { cleanProteinSequence } from '../LaunchMsaView/util'
 import { saveBlastResult } from '../utils/blastCache'
 import { checkPairSize } from '../utils/browserAlign'
@@ -7,14 +8,10 @@ import { buildSearchMsa } from '../utils/msaRows'
 import { getCachedSearch, saveSearch, searchKey } from '../utils/searchCache'
 import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 import { resolveUniProtEntry } from '../utils/unirefHomologs'
-import { transcriptFields, transcriptName } from './util'
+import { str, transcriptFields, transcriptName } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
 import type { LaunchScope } from './runLaunch'
-
-function asString(val: unknown) {
-  return typeof val === 'string' ? val : undefined
-}
 
 /**
  * The query sequence, and what its row is called. The dialog hands over the
@@ -63,12 +60,14 @@ async function search({
   scope,
   query,
   querySeqName,
+  maxHits,
   key,
 }: {
   self: JBrowsePluginMsaViewModel
   scope: LaunchScope
   query: string
   querySeqName: string
+  maxHits: number
   key: string
 }): Promise<SearchOutcome> {
   const params = self.blastParams!
@@ -78,7 +77,7 @@ async function search({
   ]({
     query,
     database: params.blastDatabase,
-    maxHits: params.maxHits,
+    maxHits,
     onProgress,
     onRid,
     signal,
@@ -121,7 +120,11 @@ export async function doLaunchBlast({
   scope: LaunchScope
 }) {
   const params = self.blastParams!
-  const { selectedTranscript, maxHits, searchProgram = 'blastp' } = params
+  const {
+    selectedTranscript,
+    maxHits = defaultMaxHits,
+    searchProgram = 'blastp',
+  } = params
   const msaAlgorithm = params.msaAlgorithm ?? 'browser'
   const { sequence: query, name: querySeqName } = await resolveQuery(
     self,
@@ -145,7 +148,7 @@ export async function doLaunchBlast({
     )
   }
   const { fasta, treeMetadata, rid, queryRow }: SearchOutcome =
-    found ?? (await search({ self, scope, query, querySeqName, key }))
+    found ?? (await search({ self, scope, query, querySeqName, maxHits, key }))
   const { msa, tree } = queryRow
     ? { msa: fasta, tree: '' }
     : await launchMSA({
@@ -167,10 +170,10 @@ export async function doLaunchBlast({
     tree,
     treeMetadata: treeMetadataJson,
     rid: rid ?? '',
-    geneId: asString(transcript.parentId),
-    transcriptId: asString(transcript.uniqueId),
+    geneId: str(transcript.parentId),
+    transcriptId: str(transcript.uniqueId),
     transcriptName: transcriptName(selectedTranscript),
-    geneName: asString(transcript.gene_name) ?? asString(transcript.parentId),
+    geneName: str(transcript.gene_name) ?? str(transcript.parentId),
   })
 
   return { msa, tree, treeMetadata: treeMetadataJson }

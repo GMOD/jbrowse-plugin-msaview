@@ -2,7 +2,6 @@ import { searchEbiBlast } from './ebiBlast'
 import { searchEbiPhmmer } from './phmmer'
 
 import type { SearchProgram } from '../LaunchMsaView/components/BlastQuery/consts'
-import type { BlastHitDescription } from './types'
 
 // The seam a similarity search sits behind. Every search program answers the
 // same question -- what in a database looks like this sequence -- and differs
@@ -13,7 +12,12 @@ import type { BlastHitDescription } from './types'
 // self-hosted DIAMOND or MMseqs2 endpoint would be a `SearchBackend` that
 // returns unaligned hits and nothing else in the plugin would know.
 
-export interface SearchHit extends BlastHitDescription {
+export interface SearchHit {
+  accession: string
+  id: string
+  sciname: string
+  taxid?: number
+  title?: string
   /**
    * the hit's residues: aligned to the query (with gaps) when the result
    * carries `queryRow`, bare otherwise
