@@ -238,9 +238,9 @@ reads as a broken feature rather than a wrong field.
 
 So the panel now carries all three steps, and `detectQueryRow` finds the row by
 sequence instead of asking. The plugin already knows the protein it sent, so it
-ungaps each row and compares. Both aligners rename the query on the way through
--- COBALT emits `Query_1`, EBI's carry the accession -- which is why the name is
-no help and the residues are.
+ungaps each row and compares. Both aligners rename the query on the way
+through -- COBALT emits `Query_1`, EBI's carry the accession -- which is why the
+name is no help and the residues are.
 
 Detection only claims a match it can defend: an exact hit, a row that is the
 query trimmed to the aligned region and still covering half of it, or a 90%+
