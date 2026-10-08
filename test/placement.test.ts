@@ -129,7 +129,12 @@ describe('spec placement', () => {
   it('a spec that says nothing is not tiled', async () => {
     const page = await createJBrowsePage(browser)
     await load(page, specUrl())
-    expect(await panelBoxes(page)).toHaveLength(0)
+    // one cell at most: a host whose workspace is always on draws a single
+    // panel for a session nothing has tiled
+    expect((await panelBoxes(page)).length).toBeLessThanOrEqual(1)
+    const placed = await panelOfEachView(page)
+    expect(placed.map(v => v.type)).toEqual(['LinearGenomeView', 'MsaView'])
+    expect(placed[1]!.panel).toBe(placed[0]!.panel)
     await page.close()
   }, 180_000)
 })

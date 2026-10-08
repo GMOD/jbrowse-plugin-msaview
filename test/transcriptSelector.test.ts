@@ -298,9 +298,10 @@ describe('TranscriptSelector E2E', () => {
     // scoped to the visible panel: a tab the user has been on stays mounted
     // and hidden, so the document holds a Submit button per visited tab
     const submitHandle = await p.evaluateHandle(() => {
-      const panel = [...document.querySelectorAll('[role="tabpanel"]')].find(
-        el => !el.hasAttribute('hidden'),
-      )
+      // inside the dialog: the host's workspace panels are tabpanels too
+      const panel = [
+        ...document.querySelectorAll('[role="dialog"] [role="tabpanel"]'),
+      ].find(el => !el.hasAttribute('hidden'))
       const buttons = [...(panel ?? document).querySelectorAll('button')]
       return buttons.find(b => b.textContent?.trim() === 'Submit') ?? null
     })

@@ -313,6 +313,12 @@ export async function fetchPantherOrthologs({
       })
     : undefined
 
+  if (targets?.length === 0) {
+    throw new Error(
+      'None of the requested species has a PANTHER reference proteome. NCBI orthologs cover vertebrates and insects; try that source.',
+    )
+  }
+
   onProgress('Matching orthologs at PANTHER...')
   const match = await matchOrthologs(candidates, taxId, targets, signal)
   if (!match) {
