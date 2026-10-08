@@ -157,3 +157,21 @@ test('resolveUniProtEntry keeps an isoform suffix', async () => {
   )
   expect(calls[0]).toContain('/uniprotkb/P04637-2?')
 })
+
+// P2RY12 fits the accession grammar, and UniProt answers the entry url for it
+// with a 400, which used to fail the launch before the gene search was tried
+test('a gene symbol shaped like an accession still resolves by gene search', async () => {
+  const calls: string[] = []
+  vi.stubGlobal('fetch', (url: string) => {
+    calls.push(url)
+    return Promise.resolve(
+      url.includes('/uniprotkb/search')
+        ? new Response(JSON.stringify({ results: [entry('Q9H244', 9606)] }))
+        : new Response('bad accession', { status: 400 }),
+    )
+  })
+  expect(UNIPROT_ACCESSION.test('P2RY12')).toBe(true)
+  const found = await resolveUniProtEntry(['P2RY12'], 9606)
+  expect(found?.accession).toBe('Q9H244')
+  expect(calls).toHaveLength(2)
+})

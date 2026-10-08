@@ -360,7 +360,7 @@ export async function fetchPantherOrthologs({
     return {
       hit,
       genome,
-      name: info ? (info.commonName ?? info.sciname) : genome.name,
+      name: info?.commonName || info?.sciname || genome.name,
       scientificName: info?.sciname || genome.longName,
       commonName: info?.commonName,
     }

@@ -31,17 +31,18 @@ import type {
  */
 function useMsaFileText(location: FileLocation | undefined) {
   const debounced = useDebounced(location, 500)
-  const { data } = useFetch(
+  const { data, error, isLoading } = useFetch(
     debounced ? [JSON.stringify(debounced), 'msa-file-text'] : null,
     () => openLocation(debounced!).readFile('utf8'),
   )
-  return data ?? ''
+  return {
+    text: data ?? '',
+    error,
+    isLoading: isLoading || debounced !== location,
+  }
 }
 
 const useStyles = makeStyles()({
-  textAreaFont: {
-    fontFamily: 'Courier New',
-  },
   inputContainer: {
     marginBottom: 30,
   },
@@ -80,15 +81,15 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
   })
   const { selectedTranscript, proteinSequence, error, sequenceStatus } =
     transcriptSelection
-  const msaFileText = useMsaFileText(
+  const msaFile = useMsaFileText(
     inputMethod === 'file' ? msaFileLocation : undefined,
   )
   const queryRow = useQueryRowName(
-    inputMethod === 'file' ? msaFileText : msaText,
+    inputMethod === 'file' ? msaFile.text : msaText,
     proteinSequence,
   )
 
-  const e = launchError ?? error
+  const e = launchError ?? error ?? msaFile.error
   return (
     <>
       <LaunchPanelContent error={e}>
@@ -172,7 +173,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
         hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={
           !selectedTranscript ||
-          (inputMethod === 'file' && !msaFileLocation) ||
+          (inputMethod === 'file' && (!msaFileLocation || msaFile.isLoading)) ||
           (inputMethod === 'text' && !msaText.trim())
         }
         onSubmit={placement => {

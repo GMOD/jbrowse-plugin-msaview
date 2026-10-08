@@ -93,8 +93,7 @@ const BlastAutomaticPanel = observer(function ({
   const isPhmmer = search.program === 'phmmer'
 
   const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
-  const { results: cachedResults, error: cachedResultsError } =
-    useCachedBlastResults(geneIds)
+  const cached = useCachedBlastResults(geneIds)
 
   const transcriptSelection = useTranscriptSelection({
     feature,
@@ -103,7 +102,7 @@ const BlastAutomaticPanel = observer(function ({
   })
   const { selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
-  const e = transcriptSelection.error ?? launchError ?? cachedResultsError
+  const e = transcriptSelection.error ?? launchError ?? cached.error
   return (
     <>
       <LaunchPanelContent error={e}>
@@ -180,7 +179,7 @@ const BlastAutomaticPanel = observer(function ({
           The EBI queue is the wait, and it runs from seconds to many minutes.
         </Typography>
 
-        {cachedResults.length > 0 ? (
+        {cached.results.length > 0 ? (
           <Accordion className={classes.cachedResultsAccordion}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>Previous BLAST Results</Typography>
@@ -190,6 +189,7 @@ const BlastAutomaticPanel = observer(function ({
                 model={model}
                 handleClose={handleClose}
                 feature={feature}
+                cached={cached}
               />
             </AccordionDetails>
           </Accordion>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { getSession } from '@jbrowse/core/util'
 
@@ -40,11 +40,18 @@ export function launchConnectedView({
 /** runs a panel's launch, closing the dialog on success and keeping the error */
 export function useLaunchSubmit(handleClose: () => void) {
   const [launchError, setLaunchError] = useState<unknown>()
+  // the first launch loads the view's chunk, which is long enough to click twice
+  const launching = useRef(false)
   return {
     launchError,
     submit: (launch: () => Promise<unknown>) => {
+      if (launching.current) {
+        return
+      }
+      launching.current = true
       setLaunchError(undefined)
       launch().then(handleClose, (e: unknown) => {
+        launching.current = false
         console.error(e)
         setLaunchError(e)
       })

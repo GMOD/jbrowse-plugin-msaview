@@ -28,7 +28,7 @@ export async function handleFetch(url: string, args?: RequestInit) {
 
   if (!response.ok) {
     throw new Error(
-      `HTTP ${response.status} fetching ${url} ${await response.text()}`,
+      `HTTP ${response.status} fetching ${url} ${(await response.text()).slice(0, 500)}`,
     )
   }
 

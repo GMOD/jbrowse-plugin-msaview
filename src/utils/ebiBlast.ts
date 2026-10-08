@@ -2,7 +2,6 @@ import {
   defaultMaxHits,
   snapBlastHitCount,
 } from '../LaunchMsaView/components/BlastQuery/consts'
-import { strip } from '../LaunchMsaView/components/util'
 import { runEbiJob } from './ebiJobDispatcher'
 
 import type { BlastDatabase } from '../LaunchMsaView/components/BlastQuery/consts'
@@ -47,7 +46,7 @@ export function normalizeEbiBlastHits(result: EbiBlastJson): SearchHit[] {
       // hit_uni_de is the bare protein name; hit_desc repeats it with the
       // OS=/OX=/GN= suffix that makeId already covers with real columns
       title: hit.hit_uni_de ?? hit.hit_desc,
-      sequence: strip(hit.hit_hsps?.[0]?.hsp_hseq ?? ''),
+      sequence: (hit.hit_hsps?.[0]?.hsp_hseq ?? '').replaceAll('-', ''),
     }
   })
 }

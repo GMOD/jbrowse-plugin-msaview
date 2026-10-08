@@ -7,7 +7,7 @@ import type { BaseFeatureDataAdapter } from '@jbrowse/core/data_adapters/BaseAda
 export default class BgzipFastaMsaAdapter extends BaseAdapter {
   configureP: Promise<BaseFeatureDataAdapter> | undefined
 
-  refNamesP: Promise<string[]> | undefined
+  msaRowsP: Promise<Map<string, string[]>> | undefined
 
   async configurePre() {
     const getSubAdapter = this.getSubAdapter
@@ -30,34 +30,37 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
     return this.configureP
   }
 
-  async getMSARefs() {
-    this.refNamesP ??= this.configure()
-      .then(adapter => adapter.getRefNames())
-      .catch((e: unknown) => {
-        this.refNamesP = undefined
-        throw e
-      })
-    return this.refNamesP
+  async groupRows() {
+    const adapter = await this.configure()
+    const separator = new RegExp(this.getConf('msaRegex'))
+    const rows = new Map<string, string[]>()
+    for (const refName of await adapter.getRefNames()) {
+      const msaId = refName.split(separator)[0]!
+      const group = rows.get(msaId)
+      if (group) {
+        group.push(refName)
+      } else {
+        rows.set(msaId, [refName])
+      }
+    }
+    return rows
   }
 
-  getMsaRegex() {
-    return new RegExp(this.getConf('msaRegex'))
-  }
-
-  refNameToMsaId(refName: string) {
-    return refName.split(this.getMsaRegex())[0]!
+  getMSARows() {
+    this.msaRowsP ??= this.groupRows().catch((e: unknown) => {
+      this.msaRowsP = undefined
+      throw e
+    })
+    return this.msaRowsP
   }
 
   async getMSAList() {
-    const refNames = await this.getMSARefs()
-    const list = new Set(refNames.map(name => this.refNameToMsaId(name)))
-    return [...list]
+    return [...(await this.getMSARows()).keys()]
   }
 
   async getMSA(id: string) {
     const adapter = await this.configure()
-    const refNames = await this.getMSARefs()
-    const rows = refNames.filter(refName => this.refNameToMsaId(refName) === id)
+    const rows = (await this.getMSARows()).get(id) ?? []
     return firstValueFrom(
       adapter
         .getFeaturesInMultipleRegions(

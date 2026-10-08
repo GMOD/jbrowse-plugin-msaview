@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { getSession } from '@jbrowse/core/util'
 import { translateTranscript } from '@jbrowse/core/util/translateTranscript'
 
@@ -42,12 +44,16 @@ export function useFeatureSequence({
     },
   )
 
-  return {
-    proteinSequence:
+  const proteinSequence = useMemo(
+    () =>
       sequence && feature
         ? (translateTranscript({ transcript: feature, ...sequence })?.protein ??
           '')
         : '',
+    [sequence, feature],
+  )
+  return {
+    proteinSequence,
     sequence,
     error,
     isLoading,

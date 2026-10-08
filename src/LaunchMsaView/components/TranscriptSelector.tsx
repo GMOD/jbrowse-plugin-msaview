@@ -103,7 +103,9 @@ export default function TranscriptSelector({
               ? `>${getTranscriptDisplayName(selectedTranscript)}\n${proteinSequence}`
               : sequenceStatus === 'missing'
                 ? 'This transcript has no coding sequence, so there is nothing to translate.'
-                : 'Loading...'
+                : sequenceStatus === 'error'
+                  ? 'The sequence could not be fetched.'
+                  : 'Loading...'
           }
         />
       ) : null}

@@ -57,7 +57,6 @@ export default function SubmitCancelActions({
   submitDisabled,
   hint,
   submitLabel = 'Submit',
-  cancelLabel = 'Cancel',
   model,
 }: {
   /** handed the placement the box states, so no launch re-reads storage */
@@ -67,7 +66,6 @@ export default function SubmitCancelActions({
   /** why Submit is grey, shown beside it */
   hint?: React.ReactNode
   submitLabel?: string
-  cancelLabel?: string
   /** omitted by a panel that submits something other than a view launch */
   model?: AbstractTrackModel
 }) {
@@ -118,7 +116,7 @@ export default function SubmitCancelActions({
             onCancel()
           }}
         >
-          {cancelLabel}
+          Cancel
         </Button>
       </div>
     </DialogActions>

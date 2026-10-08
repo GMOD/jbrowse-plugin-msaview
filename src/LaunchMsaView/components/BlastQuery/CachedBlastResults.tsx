@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -16,15 +16,14 @@ import { makeStyles } from 'tss-react/mui'
 
 import {
   featureMatchesId,
-  getGeneIdentifiers,
   getLinearGenomeView,
   getSortedTranscriptFeatures,
 } from '../../util'
 import { builtAlignmentLook, launchConnectedView } from '../launchConnectedView'
 import { useLaunchPlacement } from '../launchPlacement'
-import { useCachedBlastResults } from './useCachedBlastResults'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
+import type { useCachedBlastResults } from './useCachedBlastResults'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
 const useStyles = makeStyles()({
@@ -76,20 +75,18 @@ const CachedBlastResults = observer(function ({
   model,
   handleClose,
   feature,
+  cached: { results, handleDelete, handleClearAll },
 }: {
   model: AbstractTrackModel
   handleClose: () => void
   feature: Feature
+  /** the panel's own listing, so clearing it here empties it there too */
+  cached: ReturnType<typeof useCachedBlastResults>
 }) {
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
   const [operationError, setOperationError] = useState<unknown>()
   const [sideBySide] = useLaunchPlacement()
-
-  const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
-
-  const { results, error, isLoading, handleDelete, handleClearAll } =
-    useCachedBlastResults(geneIds)
 
   const handleUseCached = (cached: CachedBlastResult) => {
     // the cached query row is the plugin's default `QUERY`, translated from
@@ -112,18 +109,9 @@ const CachedBlastResults = observer(function ({
     })
   }
 
-  const displayError = error ?? operationError
-  return displayError ? (
-    <ErrorMessage error={displayError} />
-  ) : isLoading ? (
-    <Typography>Loading cached results...</Typography>
-  ) : results.length === 0 ? (
-    <Typography color="textSecondary">
-      No cached BLAST results found for this gene. Run a BLAST query to cache
-      results.
-    </Typography>
-  ) : (
+  return (
     <div>
+      {operationError ? <ErrorMessage error={operationError} /> : null}
       <div className={classes.header}>
         <Typography variant="subtitle1">
           Cached BLAST Results ({results.length})

@@ -24,6 +24,21 @@ describe('useQueryRowName', () => {
     expect(result.current.querySeqName).toBe('other')
     expect(result.current.querySeqOffset).toBe(0)
   })
+
+  // the pick outlived the alignment it was made in, and the launch then named
+  // a row the new one does not have
+  test('a picked row is dropped once the alignment no longer has it', () => {
+    const { result, rerender } = renderHook(
+      ({ msa }) => useQueryRowName(msa, protein),
+      { initialProps: { msa: trimmed } },
+    )
+    act(() => {
+      result.current.setQuerySeqName('other')
+    })
+    rerender({ msa: trimmed.replace('>other', '>renamed') })
+    expect(result.current.querySeqName).toBe('aligned_query')
+    expect(result.current.isAutoDetected).toBe(true)
+  })
 })
 
 // a pre-loaded dataset names its rows by a convention of its own, and the

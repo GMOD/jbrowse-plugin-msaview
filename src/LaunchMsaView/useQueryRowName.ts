@@ -37,7 +37,12 @@ export function useQueryRowName(msaText: string, proteinSequence: string) {
     [msaText, proteinSequence],
   )
 
-  const querySeqName = override ?? match?.name ?? ''
+  // a row picked from one alignment says nothing about the next one pasted
+  const picked =
+    override !== undefined && (names.length === 0 || names.includes(override))
+      ? override
+      : undefined
+  const querySeqName = picked ?? match?.name ?? ''
   return {
     detected: match,
     names,
@@ -46,6 +51,6 @@ export function useQueryRowName(msaText: string, proteinSequence: string) {
     // taken at face value, residue 1 to residue 1
     querySeqOffset: querySeqName === match?.name ? match.offset : 0,
     setQuerySeqName: setOverride,
-    isAutoDetected: override === undefined && !!match,
+    isAutoDetected: picked === undefined && !!match,
   }
 }

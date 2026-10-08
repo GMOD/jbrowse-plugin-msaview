@@ -12,7 +12,6 @@ export default function TabPanel({
   children,
   value,
   index,
-  ...other
 }: {
   children?: React.ReactNode
   index: number | string
@@ -24,7 +23,7 @@ export default function TabPanel({
     setVisited(true)
   }
   return (
-    <div role="tabpanel" hidden={!active} {...other}>
+    <div role="tabpanel" hidden={!active}>
       {visited || active ? children : null}
     </div>
   )

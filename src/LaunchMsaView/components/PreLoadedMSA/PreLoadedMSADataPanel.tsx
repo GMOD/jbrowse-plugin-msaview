@@ -10,6 +10,7 @@ import TextField2 from '../../../components/TextField2'
 import { useFetch } from '../../../utils/useFetch'
 import { resolveQueryRowName, useQueryRowName } from '../../useQueryRowName'
 import {
+  featureMatchesId,
   getGeneDisplayName,
   getLinearGenomeView,
   getTranscriptDisplayName,
@@ -71,20 +72,25 @@ const PreLoadedMSA = observer(function ({
     validIds: msaList,
     preferredTranscriptId,
   })
-  const { selectedId, selectedTranscript, proteinSequence, sequenceStatus } =
+  const { selectedTranscript, proteinSequence, sequenceStatus } =
     transcriptSelection
 
+  // the dataset's name for this transcript, which a track is free not to use
+  // as the feature's own id
+  const msaId = selectedTranscript
+    ? msaList?.find(id => featureMatchesId(selectedTranscript, id))
+    : undefined
   const {
     data: msaData,
     isLoading: msaDataLoading,
     error: msaDataFetchError,
   } = useFetch(
-    selectedId && selectedDataset && msaList
-      ? `${selectedDataset.datasetId}-${selectedId}-msa`
+    msaId && selectedDataset
+      ? `${selectedDataset.datasetId}-${msaId}-msa`
       : null,
     () =>
       fetchMSA({
-        msaId: selectedId,
+        msaId: msaId!,
         config: selectedDataset!.adapter,
         pluginManager,
       }),
@@ -110,7 +116,7 @@ const PreLoadedMSA = observer(function ({
   // alignment really has it, which is the check the old code never made.
   const querySeqName = resolveQueryRowName(
     queryRow,
-    `${selectedId}_${assemblyNames[0] ?? ''}`,
+    `${msaId ?? ''}_${assemblyNames[0] ?? ''}`,
   )
 
   const e =
@@ -141,7 +147,7 @@ const PreLoadedMSA = observer(function ({
             {!msaListLoading && msaDataLoading ? (
               <LoadingEllipses
                 variant="h6"
-                message={`Loading MSA for ${getTranscriptDisplayName(selectedTranscript) || selectedId}`}
+                message={`Loading MSA for ${getTranscriptDisplayName(selectedTranscript) || msaId}`}
               />
             ) : null}
             {msaListLoading ? (

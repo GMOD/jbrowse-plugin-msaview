@@ -21,7 +21,7 @@
 // CDD overlay reads through efetch (Swiss-Prot rows only; see the PANTHER note
 // in docs/alignments-from-a-gene.md).
 
-import { handleFetch, jsonfetch } from './fetch'
+import { handleFetch, isAbortError, jsonfetch } from './fetch'
 import {
   cleanGeneCandidate,
   dedupeLabels,
@@ -123,16 +123,24 @@ export async function resolveUniProtEntry(
     if (!candidate) {
       continue
     }
+    // gene symbols fit the accession grammar too -- P2RY12, B3GAT1 -- and
+    // UniProt answers those with an error, so a miss goes on to the gene search
     if (UNIPROT_ACCESSION.test(candidate)) {
-      const json = await jsonfetch(
-        `${UNIPROT}/uniprotkb/${candidate}?fields=${ENTRY_FIELDS}`,
-        { signal },
-      )
-      const entry = parseEntry(json as UniProtEntry)
-      if (entry) {
-        return entry
+      try {
+        const entry = parseEntry(
+          await jsonfetch<UniProtEntry>(
+            `${UNIPROT}/uniprotkb/${candidate}?fields=${ENTRY_FIELDS}`,
+            { signal },
+          ),
+        )
+        if (entry) {
+          return entry
+        }
+      } catch (e) {
+        if (isAbortError(e)) {
+          throw e
+        }
       }
-      continue
     }
     const query = `gene_exact:"${candidate.replaceAll('"', '')}" AND organism_id:${taxId}`
     const json = await jsonfetch(
