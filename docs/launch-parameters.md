@@ -37,7 +37,7 @@ one at launch ([alignments from a gene](alignments-from-a-gene.md)).
 | `colWidth`            | Column width in pixels                                                 |
 | `rowHeight`           | Row height in pixels                                                   |
 | `allowedGappyness`    | Hide any column gappier than this percent, 100 to keep                 |
-| `treeAreaWidth`       | Tree area width                                                        |
+| `treeAreaWidth`       | Tree area width; unset fits the labels and the tree                    |
 | `treeWidth`           | Tree width                                                             |
 | `drawNodeBubbles`     | Show node bubbles on tree                                              |
 | `labelsAlignRight`    | Align labels to the right                                              |

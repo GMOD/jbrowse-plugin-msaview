@@ -200,8 +200,6 @@ const PreLoadedMSA = observer(function ({
                 feature: selectedTranscript,
                 placement,
                 displayName: getGeneDisplayName(selectedTranscript),
-                treeAreaWidth: 200,
-                treeWidth: 100,
                 drawNodeBubbles: false,
                 labelsAlignRight: true,
                 showBranchLen: false,
