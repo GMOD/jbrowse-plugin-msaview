@@ -1,3 +1,11 @@
+## [5.2.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.1.1...v5.2.0) (2026-10-12)
+
+### Other Changes
+
+- Bump react-msaview and msa-parsers to 9.0.0 ([4ff4d71](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4ff4d7184315cbba0be8e1c2ea037f39821bc31c))
+- Let the preloaded MSA panel fit its tree area to the labels ([6d377c9](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6d377c91268aa2fc838c7865fa39270b818ad2e1))
+- Refresh the launched-view screenshot for the fitted tree area ([534dc4a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/534dc4a34ce72c831c38405a06a9bb6d0c4b84c3))
+
 ## [5.1.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.1.0...v5.1.1) (2026-10-08)
 
 ### Other Changes
