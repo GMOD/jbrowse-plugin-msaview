@@ -1,3 +1,9 @@
+## [5.3.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.2.0...v5.3.0) (2026-10-15)
+
+### Other Changes
+
+- React-msaview 9.1.0: a region naming a row opens with that row in the middle ([b1027a7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b1027a75f279daa071ab11bd9a5e98bf7b0de081))
+
 ## [5.2.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.1.1...v5.2.0) (2026-10-12)
 
 ### Other Changes
