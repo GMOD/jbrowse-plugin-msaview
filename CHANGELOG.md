@@ -1,3 +1,9 @@
+## [5.4.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.3.0...v5.4.0) (2026-10-15)
+
+### Other Changes
+
+- Default embeddedMode on: icon-only toolbar in JBrowse ([1d7650a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/1d7650aa79d8a0eacfcc313d97f96448d936f882))
+
 ## [5.3.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.2.0...v5.3.0) (2026-10-15)
 
 ### Other Changes
