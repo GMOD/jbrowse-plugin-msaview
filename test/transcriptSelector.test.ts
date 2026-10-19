@@ -318,7 +318,7 @@ describe('TranscriptSelector E2E', () => {
     await new Promise(r => setTimeout(r, 3000))
     await saveScreenshot(p, getScreenshotPath('11-final-success'))
     // an error in the view replaces its header, which a screenshot lets through
-    await p.waitForSelector('input[aria-label="Go to row or column"]', {
+    await p.waitForSelector('[data-testid="view_menu"]', {
       timeout: 10_000,
     })
   }, 240_000)
