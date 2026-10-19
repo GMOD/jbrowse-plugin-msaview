@@ -1,3 +1,9 @@
+## [5.7.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.6.0...v5.7.0) (2026-10-19)
+
+### Other Changes
+
+- React-msaview 9.3: the File/View/Tools/Help menu bar ([30feed9](https://github.com/GMOD/jbrowse-plugin-msaview/commit/30feed90a8dd45f4ee6005094052a4650d9a1af4))
+
 ## [5.6.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.5.0...v5.6.0) (2026-10-19)
 
 ### Other Changes
