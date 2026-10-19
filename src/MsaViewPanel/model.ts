@@ -40,7 +40,7 @@ import type {
   PhmmerDatabase,
 } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { UnirefIdentity } from '../utils/unirefHomologs'
-import type { ConnectedDomain } from './connectedDomains'
+import type { ConnectedDomains } from './connectedDomains'
 import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { TranscriptRef } from './util'
@@ -378,11 +378,11 @@ export default function stateModelFactory() {
       },
       /**
        * #getter
-       * cross-plugin contract: jbrowse-plugin-protein3d reads this to paint the
-       * domains the alignment shows on the query row onto the structure, in
-       * the alignment's colors
+       * cross-plugin contract: the query row's domains on the genome, with
+       * the color object every surface paints them through.
+       * jbrowse-plugin-protein3d reads it to draw them on the structure
        */
-      get connectedDomains(): ConnectedDomain[] {
+      get connectedDomains(): ConnectedDomains {
         return connectedDomains(self)
       },
     }))
@@ -596,7 +596,7 @@ export default function stateModelFactory() {
         if (
           !connectedView ||
           !assemblyName ||
-          connectedDomains.length === 0 ||
+          connectedDomains.features.length === 0 ||
           !isSessionWithAddSessionTrack(session)
         ) {
           return
@@ -707,7 +707,7 @@ export default function stateModelFactory() {
                 self.setZoomToBaseLevel(!self.zoomToBaseLevel)
               },
             },
-            ...(self.connectedView && self.connectedDomains.length > 0
+            ...(self.connectedView && self.connectedDomains.features.length > 0
               ? [
                   {
                     label: 'Show domains on the genome',

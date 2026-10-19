@@ -474,7 +474,7 @@ export function showDomainsOnGenomeIfAsked(self: JBrowsePluginMsaViewModel) {
   if (
     self.domainsOnGenome &&
     self.connectedView &&
-    self.connectedDomains.length > 0
+    self.connectedDomains.features.length > 0
   ) {
     self.showDomainsOnGenome()
     self.setDomainsOnGenome(false)

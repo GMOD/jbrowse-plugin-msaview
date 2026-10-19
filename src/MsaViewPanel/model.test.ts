@@ -232,6 +232,7 @@ describe('connectedDomains', () => {
         accession: 'cd2',
         name: 'heme binding site',
         description: '',
+        featureType: 'Site',
         start: 2,
         end: 4,
       },
@@ -255,33 +256,44 @@ describe('connectedDomains', () => {
         c.fill,
       ]),
     )
-    expect(model.connectedDomains).toEqual([
-      {
-        name: 'Hb beta-like',
-        accession: 'cd1',
-        color: fills.get('QUERY:cd1'),
-        regions: [
-          { refName: 'chr1', start: 100, end: 107 },
-          { refName: 'chr1', start: 200, end: 208 },
-        ],
+    expect(model.connectedDomains).toEqual({
+      features: [
+        {
+          name: 'Hb beta-like',
+          accession: 'cd1',
+          kind: 'domain',
+          regions: [
+            { refName: 'chr1', start: 100, end: 107 },
+            { refName: 'chr1', start: 200, end: 208 },
+          ],
+        },
+        {
+          name: 'heme binding site',
+          accession: 'cd2',
+          kind: 'site',
+          regions: [
+            { refName: 'chr1', start: 103, end: 107 },
+            { refName: 'chr1', start: 200, end: 205 },
+          ],
+        },
+      ],
+      color: {
+        field: 'accession',
+        domain: ['cd1', 'cd2'],
+        range: [fills.get('QUERY:cd1'), fills.get('QUERY:cd2')],
+        labels: ['Hb beta-like', 'heme binding site'],
       },
-      {
-        name: 'heme binding site',
-        accession: 'cd2',
-        color: fills.get('QUERY:cd2'),
-        regions: [
-          { refName: 'chr1', start: 103, end: 107 },
-          { refName: 'chr1', start: 200, end: 205 },
-        ],
-      },
-    ])
+    })
   })
 
   test('follows the overlay and the legend filter', () => {
     const model = domainView()
     model.setFilter('cd2', false)
-    expect(model.connectedDomains.map(d => d.accession)).toEqual(['cd1'])
+    expect(model.connectedDomains.color.domain).toEqual(['cd1'])
     model.setShowDomains(false)
-    expect(model.connectedDomains).toEqual([])
+    expect(model.connectedDomains).toEqual({
+      features: [],
+      color: { field: 'accession', domain: [], range: [], labels: [] },
+    })
   })
 })

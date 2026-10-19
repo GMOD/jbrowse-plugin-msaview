@@ -1,4 +1,4 @@
-import type { ConnectedDomain } from './connectedDomains'
+import type { ConnectedDomains } from './connectedDomains'
 
 export function domainTrackId(viewId: string) {
   return `msaview-domains-${viewId}`
@@ -7,8 +7,9 @@ export function domainTrackId(viewId: string) {
 /**
  * A session FeatureTrack drawing `domains` on the genome: one feature per
  * domain, one subfeature per region, so a domain spanning exons draws as boxes
- * joined across the intron. Each feature paints the `color` it carries, and
- * the key names each color with its domain.
+ * joined across the intron. The display's color is the domains' color object,
+ * a categorical scale over each feature's `accession`, so its key names each
+ * color with its domain.
  */
 export function domainTrackConf({
   viewId,
@@ -21,16 +22,9 @@ export function domainTrackConf({
   assemblyName: string
   name: string
   strand?: number
-  domains: ConnectedDomain[]
+  domains: ConnectedDomains
 }) {
   const trackId = domainTrackId(viewId)
-  const labelOf = new Map<string, string>()
-  for (const { color, name } of domains) {
-    if (!labelOf.has(color)) {
-      labelOf.set(color, name)
-    }
-  }
-  const colors = [...labelOf.keys()]
   const stranded = strand === undefined ? {} : { strand }
   return {
     type: 'FeatureTrack',
@@ -39,7 +33,7 @@ export function domainTrackConf({
     assemblyNames: [assemblyName],
     adapter: {
       type: 'FromConfigAdapter',
-      features: domains.map(({ name, accession, color, regions }, i) => {
+      features: domains.features.map(({ name, accession, regions }, i) => {
         const uniqueId = `${trackId}-${i}`
         return {
           uniqueId,
@@ -50,7 +44,6 @@ export function domainTrackConf({
           type: 'protein_domain',
           name,
           accession,
-          color,
           subfeatures: regions.map((r, j) => ({
             uniqueId: `${uniqueId}-${j}`,
             refName: r.refName,
@@ -66,13 +59,7 @@ export function domainTrackConf({
       {
         type: 'LinearBasicDisplay',
         displayId: `${trackId}-LinearBasicDisplay`,
-        color: {
-          field: 'color',
-          domain: colors,
-          range: colors,
-          labels: colors.map(c => labelOf.get(c)!),
-          title: 'Domains',
-        },
+        color: { ...domains.color, title: 'Domains' },
       },
     ],
   }

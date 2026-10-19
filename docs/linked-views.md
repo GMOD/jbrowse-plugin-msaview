@@ -72,30 +72,56 @@ The two plugins talk through the genome view both are connected to, matched by
   the genome regions of the hovered column's codon, and lights the residue they
   translate to. That getter is a cross-plugin contract, as is
   `connectedHighlights`, which jbrowse-plugin-mafviewer reads.
-- **Domains to structure**: protein3d reads `connectedDomains` and paints each
-  domain on the residues its regions translate to, in the alignment's color. The
-  getter is a cross-plugin contract too; see below.
+- **Domains to structure**: protein3d reads `connectedDomains` and draws each
+  domain on the residues its regions translate to, through the domains' color
+  object. The getter is a cross-plugin contract too; see below.
 
 ## Domains: `connectedDomains`
 
-`connectedDomains` lists the domains the alignment draws on the query row
-(`querySeqName`), one entry per accession:
+`connectedDomains` holds the domains the alignment draws on the query row
+(`querySeqName`) as data plus one color object:
 
 ```ts
-interface ConnectedDomain {
-  name: string // the label the alignment's legend shows for the accession
-  accession: string
-  color: string // react-msaview's featureColors fill for the accession
-  regions: { refName: string; start: number; end: number }[]
+interface ConnectedDomains {
+  features: {
+    name: string // the label the alignment's legend shows for the accession
+    accession: string
+    kind: 'domain' | 'site'
+    regions: { refName: string; start: number; end: number }[]
+  }[]
+  color: {
+    field: 'accession'
+    domain: string[] // the accessions
+    range: string[] // the fill the alignment draws each in
+    labels: string[] // the legend names
+  }
 }
 ```
 
-- Empty while the domain overlay is off, and without any type unticked in the
-  legend
-- One entry gathers every annotation of an accession, so a CDD site, which
+In grammar-of-graphics terms, `features` is the data and `color` the color
+channel, a categorical scale over `accession` spelt as a JBrowse display's
+`color` config. Each consumer paints through that one object, and no feature has
+a color field:
+
+- the genome track below uses it as its display's `color`
+- protein3d's structure layers, its overview rows and its legend read it
+
+The data:
+
+- `features` and `color` are empty while the domain overlay is off, and leave
+  out any type unticked in the legend
+- One feature gathers every annotation of an accession, so a CDD site, which
   arrives as one annotation per run of residues, lists once
-- Largest first by residues covered, so a consumer painting in order puts a site
-  over the domain it sits in
+- `kind` is `site` for a set of functional residues and `domain` for anything
+  else, so a consumer can filter a layer on it. The annotation's `featureType`
+  decides it:
+  - sites: CDD's GenPept `Site`, a Sequence Ontology `*_site`, InterPro's
+    `Binding_site`, `Active_site` and `Conserved_site`, UniProt's `Binding site`
+  - domains: CDD `Region`s, GFF `protein_match`es and an annotation with no
+    `featureType`. msa-parsers sets none from an InterProScan JSON, so its sites
+    read as domains
+- `features` and `color.domain` run largest first by residues covered, so a
+  consumer drawing in that order puts a site over the domain it sits in
 - `regions` are 0-based half-open and ascending, with contiguous bases merged
   into one region per exon piece of a domain, or per run of a site's residues.
   The refName is spelled as the transcript spells it, as in
@@ -104,6 +130,10 @@ interface ConnectedDomain {
   inclusive. Residue `i` maps through `querySeqOffset` and `p2gCodon`, or one
   base per residue on a MAF view; residues past the transcript drop out, and so
   does a domain left with none
+
+msaview 5.5.0 sent a bare array of features, each with a `color` and no `kind`.
+protein3d releases after 1.11.0 read both shapes; protein3d 1.11.0 reads this
+one as no domains and leaves the structure grey.
 
 ## Domains on the genome
 
@@ -114,8 +144,8 @@ offers it once the view is connected and the query row has domains.
 - `FromConfigAdapter` holds one feature per entry, with one subfeature per
   region, so a domain spanning exons, or a site's scattered residues, draw as
   boxes joined by a line
-- Each feature has a `color` field, and the display colors by it, with a key
-  naming each color after its domain
+- Each feature has an `accession` field, and the display's `color` is the
+  domains' color object, so its key names each color after its domain
 - The trackId is `msaview-domains-<view id>`, so running it again replaces the
   track
 - A launch sets `domainsOnGenome: true` to add the track once the domains load

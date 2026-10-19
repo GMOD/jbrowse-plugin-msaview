@@ -67,7 +67,7 @@ interface SessionHandle {
     type: string
     tracks?: { configuration: { trackId: string } }[]
     domainsOnGenome?: boolean
-    connectedDomains?: { name: string; regions: unknown[] }[]
+    connectedDomains?: { features: { name: string; regions: unknown[] }[] }
   }[]
   sessionTracks: unknown[]
 }
@@ -81,7 +81,7 @@ function readSession(page: Page) {
     return {
       shown: lgv?.tracks?.map(t => t.configuration.trackId) ?? [],
       domainsOnGenome: msa?.domainsOnGenome,
-      domains: msa?.connectedDomains?.map(d => d.name) ?? [],
+      domains: msa?.connectedDomains?.features.map(d => d.name) ?? [],
       snapshot: JSON.parse(JSON.stringify(session)) as {
         sessionTracks: {
           trackId: string
