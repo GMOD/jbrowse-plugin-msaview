@@ -469,3 +469,14 @@ export function runCleanup() {
     console.error('Failed to cleanup old MSA data:', e)
   })
 }
+
+export function showDomainsOnGenomeIfAsked(self: JBrowsePluginMsaViewModel) {
+  if (
+    self.domainsOnGenome &&
+    self.connectedView &&
+    self.connectedDomains.length > 0
+  ) {
+    self.showDomainsOnGenome()
+    self.setDomainsOnGenome(false)
+  }
+}

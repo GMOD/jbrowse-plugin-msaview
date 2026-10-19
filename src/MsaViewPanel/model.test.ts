@@ -197,3 +197,91 @@ describe('returning to the import form', () => {
 test('the view asks react-msaview for its icon toolbar', () => {
   expect((view() as { embeddedMode?: boolean }).embeddedMode).toBe(true)
 })
+
+// two CDS on the reverse strand, so residue 3's codon straddles the intron
+const reverseTranscript = {
+  refName: 'chr1',
+  strand: -1,
+  start: 100,
+  end: 208,
+  subfeatures: [
+    { type: 'CDS', start: 100, end: 107, phase: 0 },
+    { type: 'CDS', start: 200, end: 208, phase: 0 },
+  ],
+}
+
+describe('connectedDomains', () => {
+  function domainView() {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      id: 'msaview1',
+      data: { msa: '>QUERY\nMKV-LA\n>Mouse\nMKVQLA' },
+      connectedFeature: reverseTranscript,
+    })
+    model.setAnnotations([
+      {
+        id: 'QUERY',
+        accession: 'cd1',
+        name: 'Hb beta-like',
+        description: '',
+        start: 1,
+        end: 5,
+      },
+      {
+        id: 'QUERY',
+        accession: 'cd2',
+        name: 'heme binding site',
+        description: '',
+        start: 2,
+        end: 4,
+      },
+      {
+        id: 'Mouse',
+        accession: 'cd1',
+        name: 'Hb beta-like',
+        description: '',
+        start: 1,
+        end: 6,
+      },
+    ])
+    return model
+  }
+
+  test('carries the query row domains in the colors the alignment draws', () => {
+    const model = domainView()
+    const fills = new Map(
+      [...model.featureColors].map(([a, c]) => [
+        `${a.id}:${a.accession}`,
+        c.fill,
+      ]),
+    )
+    expect(model.connectedDomains).toEqual([
+      {
+        name: 'Hb beta-like',
+        accession: 'cd1',
+        color: fills.get('QUERY:cd1'),
+        regions: [
+          { refName: 'chr1', start: 100, end: 107 },
+          { refName: 'chr1', start: 200, end: 208 },
+        ],
+      },
+      {
+        name: 'heme binding site',
+        accession: 'cd2',
+        color: fills.get('QUERY:cd2'),
+        regions: [
+          { refName: 'chr1', start: 103, end: 107 },
+          { refName: 'chr1', start: 200, end: 205 },
+        ],
+      },
+    ])
+  })
+
+  test('follows the overlay and the legend filter', () => {
+    const model = domainView()
+    model.setFilter('cd2', false)
+    expect(model.connectedDomains.map(d => d.accession)).toEqual(['cd1'])
+    model.setShowDomains(false)
+    expect(model.connectedDomains).toEqual([])
+  })
+})

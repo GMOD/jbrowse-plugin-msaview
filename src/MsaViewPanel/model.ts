@@ -1,5 +1,10 @@
 import { BaseViewModel } from '@jbrowse/core/pluggableElementTypes'
-import { getSession } from '@jbrowse/core/util'
+import {
+  getSession,
+  isSessionWithAddSessionTrack,
+  isSessionWithDeleteTrackConf,
+  isSessionWithSessionTracks,
+} from '@jbrowse/core/util'
 import { addDisposer, getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { MSAModelF } from 'react-msaview'
@@ -17,8 +22,11 @@ import {
   processInit,
   runCleanup,
   storeDataToIndexedDB,
+  showDomainsOnGenomeIfAsked,
   syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
+import { connectedDomains } from './connectedDomains'
+import { domainTrackConf } from './domainTrack'
 import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
@@ -32,6 +40,7 @@ import type {
   PhmmerDatabase,
 } from '../LaunchMsaView/components/BlastQuery/consts'
 import type { UnirefIdentity } from '../utils/unirefHomologs'
+import type { ConnectedDomain } from './connectedDomains'
 import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { TranscriptRef } from './util'
@@ -244,6 +253,14 @@ export default function stateModelFactory() {
          * it false for the labeled toolbar.
          */
         embeddedMode: true,
+
+        /**
+         * #property
+         * a launch asking for the domains on the genome: once the connected
+         * view and the query row's domains are both there, the view adds the
+         * domain track and clears this
+         */
+        domainsOnGenome: types.stripDefault(types.boolean, false),
       }),
     )
 
@@ -358,6 +375,15 @@ export default function stateModelFactory() {
           ...this.connectedHoverHighlights,
           ...this.connectedClickHighlights,
         ]
+      },
+      /**
+       * #getter
+       * cross-plugin contract: jbrowse-plugin-protein3d reads this to paint the
+       * domains the alignment shows on the query row onto the structure, in
+       * the alignment's colors
+       */
+      get connectedDomains(): ConnectedDomain[] {
+        return connectedDomains(self)
       },
     }))
 
@@ -555,6 +581,50 @@ export default function stateModelFactory() {
       /**
        * #action
        */
+      setDomainsOnGenome(arg: boolean) {
+        self.domainsOnGenome = arg
+      },
+      /**
+       * #action
+       * Add the query row's domains to the connected genome view as a session
+       * track, replacing the one an earlier call added.
+       */
+      showDomainsOnGenome() {
+        const session = getSession(self)
+        const { connectedView, connectedDomains, connectedFeature } = self
+        const assemblyName = connectedView?.assemblyNames[0]
+        if (
+          !connectedView ||
+          !assemblyName ||
+          connectedDomains.length === 0 ||
+          !isSessionWithAddSessionTrack(session)
+        ) {
+          return
+        }
+        const feature = connectedFeature as Record<string, unknown> | undefined
+        const label = [feature?.gene_name, feature?.gene, feature?.name].find(
+          (v): v is string => typeof v === 'string' && v !== '',
+        )
+        const conf = domainTrackConf({
+          viewId: self.id,
+          assemblyName,
+          name: `${label ?? self.querySeqName} domains (from the alignment)`,
+          strand: self.mafRegion ? undefined : self.transcriptToMsaMap?.strand,
+          domains: connectedDomains,
+        })
+        const existing = isSessionWithSessionTracks(session)
+          ? session.sessionTracks.find(t => t.trackId === conf.trackId)
+          : undefined
+        if (existing && isSessionWithDeleteTrackConf(session)) {
+          session.deleteTrackConf(existing)
+        }
+        if (session.addSessionTrackConf(conf)) {
+          void connectedView.launchTrack(conf.trackId)
+        }
+      },
+      /**
+       * #action
+       */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
         const r2 = msaCoordToGenomeCoord({ model: self, coord })
@@ -637,6 +707,16 @@ export default function stateModelFactory() {
                 self.setZoomToBaseLevel(!self.zoomToBaseLevel)
               },
             },
+            ...(self.connectedView && self.connectedDomains.length > 0
+              ? [
+                  {
+                    label: 'Show domains on the genome',
+                    onClick: () => {
+                      self.showDomainsOnGenome()
+                    },
+                  },
+                ]
+              : []),
           ]
         },
       }
@@ -659,6 +739,7 @@ export default function stateModelFactory() {
           launchOrthologsIfNeeded,
           processInit,
           autoLoadProteinDomains,
+          showDomainsOnGenomeIfAsked,
         ]) {
           addDisposer(
             self,
