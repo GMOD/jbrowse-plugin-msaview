@@ -79,25 +79,27 @@ The two plugins talk through the genome view both are connected to, matched by
 ## Domains: `connectedDomains`
 
 `connectedDomains` lists the domains the alignment draws on the query row
-(`querySeqName`), one entry per annotation:
+(`querySeqName`), one entry per accession:
 
 ```ts
 interface ConnectedDomain {
   name: string // the label the alignment's legend shows for the accession
   accession: string
-  color: string // react-msaview's featureColors.get(annotation).fill
+  color: string // react-msaview's featureColors fill for the accession
   regions: { refName: string; start: number; end: number }[]
 }
 ```
 
 - Empty while the domain overlay is off, and without any type unticked in the
   legend
-- Longest first, the order react-msaview draws in, so a consumer painting in
-  order puts a nested site over the domain it sits in
-- Annotations sharing an accession stay separate entries and share a color
-- `regions` are 0-based half-open and ascending, with contiguous bases merged,
-  so a domain spanning an intron gives one region per exon piece. The refName is
-  spelled as the transcript spells it, as in `connectedHoverHighlights`
+- One entry gathers every annotation of an accession, so a CDD site, which
+  arrives as one annotation per run of residues, lists once
+- Largest first by residues covered, so a consumer painting in order puts a site
+  over the domain it sits in
+- `regions` are 0-based half-open and ascending, with contiguous bases merged
+  into one region per exon piece of a domain, or per run of a site's residues.
+  The refName is spelled as the transcript spells it, as in
+  `connectedHoverHighlights`
 - Annotation `start`/`end` count the query row's ungapped residues, 1-based
   inclusive. Residue `i` maps through `querySeqOffset` and `p2gCodon`, or one
   base per residue on a MAF view; residues past the transcript drop out, and so
@@ -109,8 +111,9 @@ The view menu's **Show domains on the genome** adds `connectedDomains` to the
 connected genome view as a session `FeatureTrack` and shows it there. The menu
 offers it once the view is connected and the query row has domains.
 
-- `FromConfigAdapter` holds one feature per domain, with one subfeature per
-  region, so a domain spanning exons draws as boxes joined across the intron
+- `FromConfigAdapter` holds one feature per entry, with one subfeature per
+  region, so a domain spanning exons, or a site's scattered residues, draw as
+  boxes joined by a line
 - Each feature has a `color` field, and the display colors by it, with a key
   naming each color after its domain
 - The trackId is `msaview-domains-<view id>`, so running it again replaces the

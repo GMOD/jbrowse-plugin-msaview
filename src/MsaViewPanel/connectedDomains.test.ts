@@ -86,6 +86,28 @@ describe('connectedDomains on a reverse-strand transcript', () => {
     ])
   })
 
+  test('a scattered site is one entry, its residues merged where they touch', () => {
+    const domains = connectedDomains(
+      source([
+        annotation('small', 4, 5),
+        annotation('heme', 1, 1),
+        annotation('heme', 3, 3),
+        annotation('heme', 4, 4),
+      ]),
+    )
+    expect(domains.map(d => d.accession)).toEqual(['heme', 'small'])
+    expect(domains[0]).toEqual({
+      name: 'legend heme',
+      accession: 'heme',
+      color: 'fill-heme',
+      regions: [
+        { refName: 'chr1', start: 103, end: 107 },
+        { refName: 'chr1', start: 200, end: 202 },
+        { refName: 'chr1', start: 205, end: 208 },
+      ],
+    })
+  })
+
   test('a trimmed query row shifts by querySeqOffset', () => {
     const [domain] = connectedDomains(
       source([annotation('site', 1, 2)], { querySeqOffset: 1 }),
