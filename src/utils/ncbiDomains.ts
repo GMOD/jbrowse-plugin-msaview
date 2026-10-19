@@ -26,14 +26,12 @@ function parseQualifiers(featureXml: string) {
   return quals
 }
 
-// A feature can span several intervals: domains are usually one contiguous
-// range, but CDD Sites (e.g. an active site) are a set of scattered residues
-// expressed as multiple GBInterval ranges and single GBInterval_point residues.
-// We collapse those to a single bounding span so a site renders as one box
-// rather than a spray of 1px specks.
-function parseBoundingSpan(featureXml: string) {
-  const starts: number[] = []
-  const ends: number[] = []
+// A domain is usually one GBInterval range, while a CDD Site is a set of
+// scattered residues: several ranges plus single GBInterval_point residues.
+// Each becomes its own location, 1-based inclusive, so a site draws on the
+// residues it names.
+function parseLocations(featureXml: string) {
+  const locations: { start: number; end: number }[] = []
   const re = /<GBInterval>([\s\S]*?)<\/GBInterval>/g
   let m
   while ((m = re.exec(featureXml)) !== null) {
@@ -42,36 +40,27 @@ function parseBoundingSpan(featureXml: string) {
     const to = field(block, 'GBInterval_to')
     const point = field(block, 'GBInterval_point')
     if (from && to) {
-      starts.push(Number(from))
-      ends.push(Number(to))
+      locations.push({ start: Number(from), end: Number(to) })
     } else if (point) {
-      starts.push(Number(point))
-      ends.push(Number(point))
+      locations.push({ start: Number(point), end: Number(point) })
     }
   }
-  return starts.length > 0
-    ? { start: Math.min(...starts), end: Math.max(...ends) }
-    : undefined
+  return locations
 }
-
-// Drop single-residue specks (acetylation/phospho points) but keep every
-// genuine domain and functional site; react-msaview draws longest-first, so
-// smaller features (binding sites, loops) layer on top of the domain they sit
-// inside.
-const MIN_FEATURE_LENGTH = 2
 
 function parseFeature(featureXml: string): DomainMatch | undefined {
   const key = field(featureXml, 'GBFeature_key')
   const quals = parseQualifiers(featureXml)
   const xref = quals.db_xref
-  const span = parseBoundingSpan(featureXml)
+  const locations = parseLocations(featureXml)
   // only CDD-backed Regions/Sites are conserved-domain annotations; Regions and
-  // Sites without a CDD xref are UniProt-propagated point motifs we don't want
+  // Sites without a CDD xref are UniProt-propagated point motifs we don't want.
+  // A CDD site's single residues (a heme-binding histidine) are real, so no
+  // length rule drops them.
   if (
     (key === 'Region' || key === 'Site') &&
     xref?.startsWith('CDD:') &&
-    span &&
-    span.end - span.start + 1 >= MIN_FEATURE_LENGTH
+    locations.length > 0
   ) {
     const cddId = xref.replace('CDD:', '')
     const isDomain = key === 'Region'
@@ -87,7 +76,7 @@ function parseFeature(featureXml: string): DomainMatch | undefined {
       signature: {
         entry: { name, description: quals.note ?? name, accession },
       },
-      locations: [span],
+      locations,
     }
   }
   return undefined

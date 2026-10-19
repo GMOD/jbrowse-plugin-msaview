@@ -95,14 +95,16 @@ describe('parseCddDomains', () => {
     expect(domain.locations).toEqual([{ start: 19, end: 353 }])
   })
 
-  test('collapses a discontiguous site to one bounding span with a distinct accession', () => {
+  test('keeps each interval and point of a discontiguous site, under a distinct accession', () => {
     const site = parseCddDomains(xml)
       .get('NP_002736.3')!
       .find(m => m.signature.entry!.name === 'active')!
-    // intervals 31-34, point 52, point 149 collapse to a single 31-149 box so
-    // the site renders as one bar rather than a spray of 1px specks
     expect(site.signature.entry!.accession).toBe('270839:active')
-    expect(site.locations).toEqual([{ start: 31, end: 149 }])
+    expect(site.locations).toEqual([
+      { start: 31, end: 34 },
+      { start: 52, end: 52 },
+      { start: 149, end: 149 },
+    ])
   })
 
   test('keeps all CDD features, including ones nested inside larger domains', () => {
@@ -165,7 +167,7 @@ describe('parseCddDomains on a real recorded NCBI GenPept response', () => {
     expect(domain.locations).toEqual([{ start: 19, end: 353 }])
   })
 
-  test('keeps the kinase domain plus its functional sites, each a single box', () => {
+  test('keeps the kinase domain plus its functional sites, on their own residues', () => {
     const matches = parseCddDomains(realXml).get('NP_002736.3')!
     const names = matches.map(m => m.signature.entry!.name)
     // the domain and its distinct functional sites are all kept; sites layer on
@@ -173,8 +175,11 @@ describe('parseCddDomains on a real recorded NCBI GenPept response', () => {
     expect(names).toContain('STKc_ERK1_2_like')
     expect(names).toContain('ATP binding site')
     expect(matches.length).toBeGreaterThan(3)
-    // each feature collapses to one bounding box (no discontiguous specks)
-    expect(matches.every(m => m.locations.length === 1)).toBe(true)
+    const atp = matches.find(
+      m => m.signature.entry!.name === 'ATP binding site',
+    )!
+    expect(atp.locations.length).toBeGreaterThan(1)
+    expect(atp.locations.every(l => l.start <= l.end)).toBe(true)
   })
 
   test('keys by both versioned and primary accession', () => {
