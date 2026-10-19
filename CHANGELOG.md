@@ -1,3 +1,11 @@
+## [5.6.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.5.0...v5.6.0) (2026-10-19)
+
+### Other Changes
+
+- CDD annotations keep their GenPept key as featureType ([991606a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/991606ac53f990d7192c52632c35b6666e7e61d3))
+- ConnectedDomains is data plus one color object ([92d9238](https://github.com/GMOD/jbrowse-plugin-msaview/commit/92d923855a98bcec33d3a6ebd6dce6b01bb9c7dc))
+- Refresh domain screenshots from the SCREENSHOT_DOMAINS e2e ([8fcbd5d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/8fcbd5d4897cea35adfffd2c5990cc78054b96fe))
+
 ## [5.5.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.4.0...v5.5.0) (2026-10-19)
 
 ### Documentation
