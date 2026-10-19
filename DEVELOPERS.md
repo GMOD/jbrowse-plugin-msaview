@@ -31,6 +31,29 @@ genome connection.
 | `pnpm test`        | Unit tests plus the e2e suite on a freshly fetched nightly JBrowse |
 | `pnpm host-compat` | Boots `dist/` on hosted JBrowse `main`                             |
 
+### Opt-in e2e suites
+
+Suites that reach live services skip unless an environment variable is set:
+
+| Variable               | Suite                                       | What it reaches                                                                                |
+| ---------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `SCREENSHOT_DOMAINS=1` | `test/screenshotDomains.test.ts`            | NCBI efetch, CDD domains on the alignment                                                      |
+| `SCREENSHOT_DOMAINS=1` | `test/domainsOnGenome.test.ts`              | NCBI efetch, the domains as a genome track                                                     |
+| `SCREENSHOT_DOMAINS=1` | `test/domainContract.test.ts`               | hosted JBrowse `main`, the hg38 config, protein3d's `latest` store build, NCBI and RCSB (2HBS) |
+| `LIVE=1`               | `ebiBlastLive`, `phmmerLive`, `pantherLive` | EBI Job Dispatcher, PANTHER and UniProt                                                        |
+| `NCBI_LIVE_TESTS=1`    | `test/ncbiDomains.test.ts`                  | NCBI efetch                                                                                    |
+
+`domainContract` pins `connectedDomains`
+([docs/linked-views.md](docs/linked-views.md#domains-connecteddomains)) against
+the published protein3d build. It needs no `.test-jbrowse`: it builds `dist/`,
+opens `https://jbrowse.org/code/jb2/main/`, and answers the store's MsaView
+build from `dist/`, as `host-compat` does. Hosted `main` moves, so a red there
+may be the host's; `main/version.txt` names the build it ran on.
+
+```bash
+SCREENSHOT_DOMAINS=1 pnpm vitest run test/domainContract.test.ts
+```
+
 `host-compat` exists because a published bundle reaches configs already in the
 wild, and the failures that matter there pass tsc and lint. The build is an ES
 module for JBrowse 5; v4 hosts keep the 3.10.0 UMD from pinned urls.

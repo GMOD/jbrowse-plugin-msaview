@@ -131,6 +131,10 @@ The data:
   base per residue on a MAF view; residues past the transcript drop out, and so
   does a domain left with none
 
+`test/domainContract.test.ts` loads this build beside protein3d's published
+`latest` and checks the structure reads the domains, so a shape change on either
+side fails there even with both unit suites green.
+
 msaview 5.5.0 sent a bare array of features, each with a `color` and no `kind`.
 protein3d releases after 1.11.0 read both shapes; protein3d 1.11.0 reads this
 one as no domains and leaves the structure grey.
