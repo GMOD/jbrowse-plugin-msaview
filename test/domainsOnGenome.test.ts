@@ -184,4 +184,28 @@ run('domains on the genome', () => {
     expect(after.shown).toContain(TRACK_ID)
     expect(after.snapshot.sessionTracks).toEqual(before.snapshot.sessionTracks)
   }, 120_000)
+
+  test('running it again replaces the track rather than adding a second', async () => {
+    await page.evaluate(() => {
+      const msa = (
+        window as unknown as {
+          JBrowseSession: {
+            views: { type: string; menuItems: () => unknown[] }[]
+          }
+        }
+      ).JBrowseSession.views.find(v => v.type === 'MsaView')!
+      const item = msa
+        .menuItems()
+        .find(
+          i => (i as { label?: string }).label === 'Show domains on the genome',
+        ) as { onClick: () => void }
+      item.onClick()
+    })
+    await waitForDomainTrack(page)
+    const { shown, snapshot } = await readSession(page)
+    expect(shown.filter(id => id === TRACK_ID)).toHaveLength(1)
+    expect(
+      snapshot.sessionTracks.filter(t => t.trackId === TRACK_ID),
+    ).toHaveLength(1)
+  }, 120_000)
 })
