@@ -93,6 +93,7 @@ describe('parseCddDomains', () => {
       accession: '270839',
     })
     expect(domain.locations).toEqual([{ start: 19, end: 353 }])
+    expect(domain.featureType).toBe('Region')
   })
 
   test('keeps each interval and point of a discontiguous site, under a distinct accession', () => {
@@ -100,6 +101,7 @@ describe('parseCddDomains', () => {
       .get('NP_002736.3')!
       .find(m => m.signature.entry!.name === 'active')!
     expect(site.signature.entry!.accession).toBe('270839:active')
+    expect(site.featureType).toBe('Site')
     expect(site.locations).toEqual([
       { start: 31, end: 34 },
       { start: 52, end: 52 },

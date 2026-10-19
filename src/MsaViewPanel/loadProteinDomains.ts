@@ -33,17 +33,19 @@ export async function loadProteinDomains(
   )
 
   const annotations = rowAccessions.flatMap(({ rowName, accession }) =>
-    (byAccession.get(accession) ?? []).flatMap(({ signature, locations }) =>
-      signature.entry
-        ? locations.map(({ start, end }) => ({
-            id: rowName,
-            accession: signature.entry!.accession,
-            name: signature.entry!.name,
-            description: signature.entry!.description,
-            start,
-            end,
-          }))
-        : [],
+    (byAccession.get(accession) ?? []).flatMap(
+      ({ signature, locations, featureType }) =>
+        signature.entry
+          ? locations.map(({ start, end }) => ({
+              id: rowName,
+              accession: signature.entry!.accession,
+              name: signature.entry!.name,
+              description: signature.entry!.description,
+              featureType,
+              start,
+              end,
+            }))
+          : [],
     ),
   )
 

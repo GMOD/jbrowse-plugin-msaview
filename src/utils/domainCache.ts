@@ -6,9 +6,15 @@ import type { DomainMatch } from './ncbiDomains'
 import type { DBSchema } from 'idb'
 
 // v2: a site's locations are its residues, where v1 stored one bounding span.
-// A new name rather than a new version, so a v1 tab still open keeps its own
-// database instead of blocking the upgrade.
-const DB_NAME = 'jbrowse-msaview-domain-cache-v2'
+// v3: each match keeps its GenPept key, Region or Site, which a v2 entry lacks
+// and which would otherwise class every cached site as a domain for good.
+// A new name rather than a new version, so an older tab still open keeps its
+// own database instead of blocking the upgrade.
+const DB_NAME = 'jbrowse-msaview-domain-cache-v3'
+const RETIRED_DB_NAMES = [
+  'jbrowse-msaview-domain-cache',
+  'jbrowse-msaview-domain-cache-v2',
+]
 const STORE_NAME = 'domains'
 const DB_VERSION = 1
 
@@ -30,14 +36,16 @@ const openDB = createDbOpener<DomainCacheDB>(DB_NAME, DB_VERSION, db => {
   }
 })
 
-let v1Dropped = false
+let retiredDropped = false
 
 function getDB() {
-  if (!v1Dropped) {
-    v1Dropped = true
-    Promise.resolve()
-      .then(() => deleteDB('jbrowse-msaview-domain-cache'))
-      .catch(() => {})
+  if (!retiredDropped) {
+    retiredDropped = true
+    for (const name of RETIRED_DB_NAMES) {
+      Promise.resolve()
+        .then(() => deleteDB(name))
+        .catch(() => {})
+    }
   }
   return openDB()
 }

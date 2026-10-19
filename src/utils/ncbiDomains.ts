@@ -4,7 +4,10 @@ import { isAbortError } from './fetch'
 
 import type { InterProScanResults } from 'react-msaview'
 
-export type DomainMatch = InterProScanResults['matches'][number]
+/** a CDD match, under the GenPept feature key it came from */
+export type DomainMatch = InterProScanResults['matches'][number] & {
+  featureType: 'Region' | 'Site'
+}
 
 function field(xml: string, tag: string) {
   const text = new RegExp(`<${tag}>(.*?)</${tag}>`, 's').exec(xml)?.[1]
@@ -77,6 +80,7 @@ function parseFeature(featureXml: string): DomainMatch | undefined {
         entry: { name, description: quals.note ?? name, accession },
       },
       locations,
+      featureType: key,
     }
   }
   return undefined
