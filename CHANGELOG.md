@@ -1,3 +1,17 @@
+## [5.5.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.4.0...v5.5.0) (2026-10-19)
+
+### Documentation
+
+- ConnectedDomains contract and domainsOnGenome ([2c5402f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/2c5402fc74329c26834c178463ff882ebdc69b22))
+
+### Other Changes
+
+- ConnectedDomains getter and a domain track on the genome ([8266569](https://github.com/GMOD/jbrowse-plugin-msaview/commit/826656903b7643d9382c62d76cf03dbc94d13c74))
+- HBB domains reach the genome from a launch and survive a reload ([6dbeba2](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6dbeba2b1aeccf276dd6e1d6d871bd2ec7288d14))
+- The menu item replaces the domain track in place ([a99b0fc](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a99b0fc918ad7c6c382d99dc8a1b5b4c06a402ff))
+- CDD sites keep their residues instead of one bounding span ([1b39ede](https://github.com/GMOD/jbrowse-plugin-msaview/commit/1b39ede2dfae9bf2f418edc7fad6a22b1271c691))
+- One entry per accession, largest first ([78551ea](https://github.com/GMOD/jbrowse-plugin-msaview/commit/78551eabd7e298d2caef0bc6a667deb31d269be6))
+
 ## [5.4.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.3.0...v5.4.0) (2026-10-15)
 
 ### Other Changes
