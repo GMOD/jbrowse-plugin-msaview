@@ -1,3 +1,11 @@
+## [5.8.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.7.0...v5.8.0) (2026-10-19)
+
+### Other Changes
+
+- CandidateServer can load other store plugins from latestUrl; buildPlugin leaves setupJBrowse ([97ff40a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/97ff40a5afe55a53682de009f0d9c1033ce173f2))
+- Pin connectedDomains against protein3d's latest build on hosted main ([c0d49c8](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c0d49c8bb425358edcbd227395fce2c595323e71))
+- React-msaview 9.4.0: CDD domains take palette colors before their sites ([6ffe2a2](https://github.com/GMOD/jbrowse-plugin-msaview/commit/6ffe2a29da217df4045ffa05ce25ab895a653d87))
+
 ## [5.7.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.6.0...v5.7.0) (2026-10-19)
 
 ### Other Changes
