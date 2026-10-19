@@ -1,6 +1,7 @@
 // Answers a hosted JBrowse's requests for this plugin with a local build, so a
 // real shipped config loads the candidate instead of what the store serves.
-// Shared by host-compat-probe.mjs and readme-figure.mjs.
+// Shared by host-compat-probe.mjs, readme-figure.mjs and the domain contract
+// e2e. `latest` names other store plugins to load from their `latestUrl`.
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -8,7 +9,7 @@ const PACKAGE_PATH = '/jbrowse-plugin-msaview/'
 const PUBLISHED_ESM =
   'https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/jbrowse-plugin-msaview.esm.js'
 
-export function candidateServer(entryPath) {
+export function candidateServer(entryPath, { latest = [] } = {}) {
   const dist = path.dirname(entryPath)
   const entryName = path.basename(entryPath)
   const publishedEntryName = path.basename(PUBLISHED_ESM)
@@ -17,7 +18,7 @@ export function candidateServer(entryPath) {
   // manifest, which names this plugin's build. The manifest is rewritten so
   // every build of this plugin is the ESM entry at its store path, which the
   // handler below answers from the local dist; every other plugin is left
-  // alone.
+  // alone, except those named in `latest`.
   let manifestPromise
   function rewrittenStoreManifest(url) {
     manifestPromise ??= (async () => {
@@ -29,6 +30,13 @@ export function candidateServer(entryPath) {
             delete build.umdUrl
             delete build.integrity
             build.esmUrl = PUBLISHED_ESM
+          }
+        } else if (latest.includes(plugin.name)) {
+          for (const build of [plugin, ...(plugin.versions ?? [])]) {
+            delete build.url
+            delete build.umdUrl
+            delete build.integrity
+            build.esmUrl = plugin.latestUrl
           }
         }
       }

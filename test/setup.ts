@@ -27,6 +27,14 @@ export function getJBrowseVersion() {
   return JBROWSE_VERSION
 }
 
+export function buildPlugin() {
+  execSync('pnpm build', {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    timeout: 60_000,
+  })
+}
+
 export function setupJBrowse() {
   if (!fs.existsSync(TEST_JBROWSE_DIR)) {
     throw new Error(
@@ -34,11 +42,7 @@ export function setupJBrowse() {
     )
   }
 
-  execSync('pnpm build', {
-    cwd: process.cwd(),
-    stdio: 'inherit',
-    timeout: 60_000,
-  })
+  buildPlugin()
 
   const testConfig = JSON.parse(
     fs.readFileSync(
