@@ -39,6 +39,11 @@ interface LaunchMsaViewArgs {
    * no `proteinSequence` of its own.
    */
   connectedTranscript?: string
+  /**
+   * Add the query row's domains to the connected genome view as a track, once
+   * they have loaded
+   */
+  domainsOnGenome?: boolean
   displayName?: string
   colorSchemeName?: string
   colWidth?: number

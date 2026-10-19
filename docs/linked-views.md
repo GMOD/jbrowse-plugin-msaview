@@ -72,6 +72,51 @@ The two plugins talk through the genome view both are connected to, matched by
   the genome regions of the hovered column's codon, and lights the residue they
   translate to. That getter is a cross-plugin contract, as is
   `connectedHighlights`, which jbrowse-plugin-mafviewer reads.
+- **Domains to structure**: protein3d reads `connectedDomains` and paints each
+  domain on the residues its regions translate to, in the alignment's color. The
+  getter is a cross-plugin contract too; see below.
+
+## Domains: `connectedDomains`
+
+`connectedDomains` lists the domains the alignment draws on the query row
+(`querySeqName`), one entry per annotation:
+
+```ts
+interface ConnectedDomain {
+  name: string // the label the alignment's legend shows for the accession
+  accession: string
+  color: string // react-msaview's featureColors.get(annotation).fill
+  regions: { refName: string; start: number; end: number }[]
+}
+```
+
+- Empty while the domain overlay is off, and without any type unticked in the
+  legend
+- Longest first, the order react-msaview draws in, so a consumer painting in
+  order puts a nested site over the domain it sits in
+- Annotations sharing an accession stay separate entries and share a color
+- `regions` are 0-based half-open and ascending, with contiguous bases merged,
+  so a domain spanning an intron gives one region per exon piece. The refName is
+  spelled as the transcript spells it, as in `connectedHoverHighlights`
+- Annotation `start`/`end` count the query row's ungapped residues, 1-based
+  inclusive. Residue `i` maps through `querySeqOffset` and `p2gCodon`, or one
+  base per residue on a MAF view; residues past the transcript drop out, and so
+  does a domain left with none
+
+## Domains on the genome
+
+The view menu's **Show domains on the genome** adds `connectedDomains` to the
+connected genome view as a session `FeatureTrack` and shows it there. The menu
+offers it once the view is connected and the query row has domains.
+
+- `FromConfigAdapter` holds one feature per domain, with one subfeature per
+  region, so a domain spanning exons draws as boxes joined across the intron
+- Each feature has a `color` field, and the display colors by it, with a key
+  naming each color after its domain
+- The trackId is `msaview-domains-<view id>`, so running it again replaces the
+  track
+- A launch sets `domainsOnGenome: true` to add the track once the domains load
+  ([launch parameters](launch-parameters.md#everything-else))
 
 The README's demo connects all three views to one genome view;
 [launching](launching.md#the-readme-demo-taken-apart) takes it apart.

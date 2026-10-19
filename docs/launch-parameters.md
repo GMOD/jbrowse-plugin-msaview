@@ -32,6 +32,7 @@ one at launch ([alignments from a gene](alignments-from-a-gene.md)).
 | `connectedTranscript` | A transcript id looked up in the connected view instead                |
 | `querySeqName`        | The row that is the connected transcript's protein                     |
 | `querySeqOffset`      | Transcript residues before that row's first residue, for a trimmed row |
+| `domainsOnGenome`     | Add the query row's domains to the connected genome view once loaded   |
 | `displayName`         | Custom view display name                                               |
 | `colorSchemeName`     | Color scheme (e.g. 'percent_identity_dynamic')                         |
 | `colWidth`            | Column width in pixels                                                 |
