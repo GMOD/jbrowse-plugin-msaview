@@ -1,3 +1,9 @@
+## [5.13.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.12.0...v5.13.0) (2026-10-20)
+
+### Other Changes
+
+- React-msaview 9.8: a session highlight scrolled out of the alignment draws no label ([573fab2](https://github.com/GMOD/jbrowse-plugin-msaview/commit/573fab29ba6e9b5bc06ba9c7d1b0053734c7ceeb))
+
 ## [5.12.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.11.0...v5.12.0) (2026-10-20)
 
 ### Other Changes
