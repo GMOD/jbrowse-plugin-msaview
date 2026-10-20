@@ -1,3 +1,9 @@
+## [5.9.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.8.0...v5.9.0) (2026-10-20)
+
+### Other Changes
+
+- React-msaview 9.5.0: a phylogram always draws its scale bar ([81a0922](https://github.com/GMOD/jbrowse-plugin-msaview/commit/81a0922f4651ef8c4c138df28fc29f23ca598e07))
+
 ## [5.8.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.7.0...v5.8.0) (2026-10-19)
 
 ### Other Changes
