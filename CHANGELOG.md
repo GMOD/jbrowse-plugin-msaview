@@ -1,3 +1,9 @@
+## [5.11.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.10.0...v5.11.0) (2026-10-20)
+
+### Other Changes
+
+- React-msaview 9.7.0: domains take mid-light fills ([2b5a170](https://github.com/GMOD/jbrowse-plugin-msaview/commit/2b5a170269242bd6a94c99248c7f2f7c6c34b431))
+
 ## [5.10.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.9.0...v5.10.0) (2026-10-20)
 
 ### Other Changes
