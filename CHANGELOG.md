@@ -1,3 +1,9 @@
+## [5.10.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.9.0...v5.10.0) (2026-10-20)
+
+### Other Changes
+
+- React-msaview 9.6.0: domains take light fills and sites dark ones; annotationKind reads its isSiteType ([c492ac1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c492ac1b06b5078f6b357a5358fa6fd1f644f3b6))
+
 ## [5.9.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.8.0...v5.9.0) (2026-10-20)
 
 ### Other Changes
