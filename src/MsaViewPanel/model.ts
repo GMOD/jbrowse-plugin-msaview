@@ -32,6 +32,7 @@ import {
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
 import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript'
+import { syncSessionHighlights } from './sessionHighlights'
 import { transcriptMap } from './transcriptMap'
 
 import type {
@@ -752,6 +753,7 @@ export default function stateModelFactory() {
         // so they're factories returning the autorun body rather than plain fns
         addDisposer(self, autorun(syncGenomeHoverToMsaColumn(self)))
         addDisposer(self, autorun(observeProteinHighlights(self)))
+        addDisposer(self, autorun(syncSessionHighlights(self)))
       },
     }))
 }
