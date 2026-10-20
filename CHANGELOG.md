@@ -1,3 +1,9 @@
+## [5.12.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.11.0...v5.12.0) (2026-10-20)
+
+### Other Changes
+
+- The session's highlights light and label the alignment's query row ([9eaf026](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9eaf026787c5970ddd070e0e1f0dba3c28ae0dc7))
+
 ## [5.11.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.10.0...v5.11.0) (2026-10-20)
 
 ### Other Changes
