@@ -91,19 +91,21 @@ interface ConnectedDomains {
   }[]
   color: {
     field: 'accession'
-    domain: string[] // the accessions
-    range: string[] // the fill the alignment draws each in
-    labels: string[] // the legend names
+    scale: {
+      domain: string[] // the accessions
+      range: string[] // the fill the alignment draws each in
+      names: string[] // the legend names
+    }
   }
 }
 ```
 
 In grammar-of-graphics terms, `features` is the data and `color` the color
 channel, a categorical scale over `accession` spelt as a JBrowse display's
-`color` config. Each consumer paints through that one object, and no feature has
-a color field:
+`encoding.color`. Each consumer paints through that one object, and no feature
+has a color field:
 
-- the genome track below uses it as its display's `color`
+- the genome track below uses it as its display's `encoding.color`
 - protein3d's structure layers, its overview rows and its legend read it
 
 The data:
@@ -148,8 +150,9 @@ offers it once the view is connected and the query row has domains.
 - `FromConfigAdapter` holds one feature per entry, with one subfeature per
   region, so a domain spanning exons, or a site's scattered residues, draw as
   boxes joined by a line
-- Each feature has an `accession` field, and the display's `color` is the
-  domains' color object, so its key names each color after its domain
+- Each feature has an `accession` field, and the display's `encoding.color` is
+  the domains' color channel with the key titled Domains, so the key names each
+  color after its domain
 - The trackId is `msaview-domains-<view id>`, so running it again replaces the
   track
 - A launch sets `domainsOnGenome: true` to add the track once the domains load

@@ -121,7 +121,9 @@ interface ContractWindow {
           kind: string
           regions: unknown[]
         }[]
-        color?: { domain: string[]; range: string[]; labels: string[] }
+        color?: {
+          scale: { domain: string[]; range: string[]; names: string[] }
+        }
       }
       structures?: {
         statusMessage?: string
@@ -290,8 +292,8 @@ run('the connectedDomains contract with protein3d', () => {
         kind: 'site',
       }),
     )
-    expect(color?.domain).toEqual(features.map(f => f.accession))
-    expect(color?.labels).toEqual(features.map(f => f.name))
+    expect(color?.scale.domain).toEqual(features.map(f => f.accession))
+    expect(color?.scale.names).toEqual(features.map(f => f.name))
   })
 
   test('the genome view shows the domain track with a feature per domain', () => {
@@ -314,7 +316,7 @@ run('the connectedDomains contract with protein3d', () => {
     expect(entity?.seq[entity.seqIds.indexOf(HEME_HIS)]).toBe('H')
     expect(sites?.entityId).toBe(entity?.entityId)
     expect(sites?.byLabelSeqId[HEME_HIS]).toBe(
-      color?.domain.indexOf(heme.accession),
+      color?.scale.domain.indexOf(heme.accession),
     )
   })
 })
