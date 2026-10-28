@@ -1,3 +1,9 @@
+## [5.14.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.13.0...v5.14.0) (2026-10-28)
+
+### Other Changes
+
+- Domain color as a color channel: encoding.color with scale and legend ([23bb771](https://github.com/GMOD/jbrowse-plugin-msaview/commit/23bb771f2949875ea1d69a35cdce7bee546cc8e5))
+
 ## [5.13.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.12.0...v5.13.0) (2026-10-20)
 
 ### Other Changes
