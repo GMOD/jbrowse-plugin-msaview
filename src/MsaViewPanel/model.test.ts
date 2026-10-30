@@ -302,3 +302,31 @@ describe('connectedDomains', () => {
     })
   })
 })
+
+// jb.waitReady and the app's ready marker read showLoading, and read a view
+// without one as ready while its alignment is still being built
+describe('showLoading', () => {
+  test('a fresh view with nothing to load is not loading', () => {
+    expect(view().showLoading).toBe(false)
+  })
+
+  test('a running launch is loading until it fails', () => {
+    const model = view()
+    model.setBlastParams({ ...BLAST_PARAMS })
+    expect(model.showLoading).toBe(true)
+    model.setError(new Error('EBI said no'))
+    expect(model.showLoading).toBe(false)
+  })
+
+  test('a finished launch is not loading', async () => {
+    vi.mocked(doLaunchBlast).mockResolvedValue({
+      msa: '>a\nMK\n>b\nMK',
+      tree: '(a,b);',
+      treeMetadata: '{}',
+    })
+    const model = view()
+    model.setBlastParams({ ...BLAST_PARAMS })
+    await new Promise(res => setTimeout(res, 0))
+    expect(model.showLoading).toBe(false)
+  })
+})

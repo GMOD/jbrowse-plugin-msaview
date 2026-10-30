@@ -27,6 +27,7 @@ import {
 } from './afterCreateAutoruns'
 import { connectedDomains } from './connectedDomains'
 import { domainTrackConf } from './domainTrack'
+import { isLaunching } from './isLaunching'
 import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
@@ -426,6 +427,20 @@ export default function stateModelFactory() {
           treeMetadata: unsaved('treeMetadata', self.treeMetadataFilehandle),
           gff: unsaved('gff', self.gffFilehandle),
         }
+      },
+      /**
+       * #getter
+       * true while a launch, stored data or a file is still loading and no
+       * error has ended it. jb.waitReady, the app's ready marker and
+       * screenshot tools read it for a view.
+       */
+      get showLoading() {
+        return (
+          !self.error &&
+          (isLaunching(self) ||
+            (self.loadingStoredData && !self.dataInitialized) ||
+            self.isLoading)
+        )
       },
     }))
 

@@ -5,6 +5,7 @@ import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 import { makeStyles } from 'tss-react/mui'
 
+import { isLaunching } from '../isLaunching'
 import LaunchProgress from './LaunchProgress'
 
 import type { JBrowsePluginMsaViewModel } from '../model'
@@ -21,20 +22,8 @@ const MsaViewPanel = observer(function MsaViewPanel2({
   model: JBrowsePluginMsaViewModel
 }) {
   const { classes } = useStyles()
-  const { blastParams, orthologParams, init, loadingStoredData } = model
-  // an unresolved launch request means there is no alignment to draw yet, so all
-  // three gate the same panel -- see LaunchProgress. An indexed view keeps its
-  // init for the life of the view (it is how the block is refetched), so that
-  // one is only "launching" until the alignment arrives.
-  const request = blastParams ?? orthologParams
-  const pending = !!request && !model.launchCompleted
-  // a request that finished and then lost its alignment -- browser storage
-  // expires one after 7 days -- is a request again, and LaunchProgress draws it
-  // with the Retry that runs it. An error over an alignment still in hand is
-  // react-msaview's to draw.
-  const hasAlignment = !!(model.data.msa || model.data.tree)
-  const expired = !!request && !!model.error && !hasAlignment
-  const launching = pending || expired || (!!init && !model.dataInitialized)
+  const { loadingStoredData } = model
+  const launching = isLaunching(model)
   return (
     <div>
       {launching ? (
