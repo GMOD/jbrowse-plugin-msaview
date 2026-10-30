@@ -1,3 +1,9 @@
+## [5.14.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.14.0...v5.14.1) (2026-10-30)
+
+### Other Changes
+
+- MsaView publishes showLoading, and a test holds every view type to it ([ba12766](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ba127661bdd20997e39c2bea18d924682c78a95e))
+
 ## [5.14.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.13.0...v5.14.0) (2026-10-28)
 
 ### Other Changes
