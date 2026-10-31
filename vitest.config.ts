@@ -13,5 +13,6 @@ export default defineConfig({
     // .tsx for the component tests, which declare `@vitest-environment jsdom`
     // per file -- the rest run in node, where the puppeteer suites want to be
     include: ['test/**/*.test.ts', 'src/**/*.test.{ts,tsx}'],
+    setupFiles: ['test/contractGate.setup.ts'],
   },
 })
