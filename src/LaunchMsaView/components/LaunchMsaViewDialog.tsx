@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@jbrowse/core/ui'
 import { getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import BlastPanel from './BlastQuery/BlastPanel'
 import HelpButton from './HelpButton'
@@ -15,7 +16,7 @@ import { LaunchPlacementProvider } from './launchPlacement'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
-export default function LaunchMsaViewDialog({
+const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
   handleClose,
   feature,
   model,
@@ -97,4 +98,6 @@ export default function LaunchMsaViewDialog({
       </LaunchPlacementProvider>
     </Dialog>
   )
-}
+})
+
+export default LaunchMsaViewDialog

@@ -111,7 +111,11 @@ once a release supports the newer compiler.
 
 `pnpm lint` is `oxlint --type-aware`; `pnpm format` and `pnpm check-format` are
 oxfmt, which handles md/json/yaml here as well as ts/tsx, so prettier is gone.
-`pnpm lint:eslint` keeps the old eslint config as a fallback -- it is what pins
+`pnpm lint:eslint` keeps the old eslint config, which also carries display-kit's
+conformance rules (`@jbrowse/display-kit/conformance/lintRules`: every `.tsx`
+component an `observer`, every `rpcManager.call` passing `signal` and
+`statusCallback`), since those are `no-restricted-syntax` selectors oxlint
+cannot run. So it runs in CI and from `preversion` too, and it is what pins
 typescript, per the section above.
 
 **oxlint lints `test/` and `scripts/`; eslint only ever linted `src/`.** Turning

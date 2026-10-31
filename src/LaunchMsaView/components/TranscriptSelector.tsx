@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import { Button, MenuItem, TextField } from '@mui/material'
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
@@ -28,7 +29,7 @@ const useStyles = makeStyles()({
   },
 })
 
-export default function TranscriptSelector({
+const TranscriptSelector = observer(function TranscriptSelector({
   feature,
   options,
   selectedId,
@@ -111,4 +112,6 @@ export default function TranscriptSelector({
       ) : null}
     </>
   )
-}
+})
+
+export default TranscriptSelector

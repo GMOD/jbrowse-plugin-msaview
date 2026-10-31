@@ -28,6 +28,7 @@ genome connection.
 | Command                 | What it checks                                                     |
 | ----------------------- | ------------------------------------------------------------------ |
 | `pnpm lint`             | oxlint with type information                                       |
+| `pnpm lint:eslint`      | eslint, carrying display-kit's conformance rules                   |
 | `pnpm test`             | Unit tests plus the e2e suite on a freshly fetched nightly JBrowse |
 | `pnpm host-compat`      | Boots `dist/` on hosted JBrowse `main`                             |
 | `pnpm check-host-floor` | Builds against what JBrowse v5.0.0-beta.18 serves to plugins       |

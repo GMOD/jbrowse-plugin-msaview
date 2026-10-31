@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from './TextField2'
@@ -10,7 +11,11 @@ const useStyles = makeStyles()({
   },
 })
 
-export default function ReadOnlyTextField2({ value }: { value: string }) {
+const ReadOnlyTextField2 = observer(function ReadOnlyTextField2({
+  value,
+}: {
+  value: string
+}) {
   const { classes } = useStyles()
   return (
     <TextField2
@@ -30,4 +35,6 @@ export default function ReadOnlyTextField2({ value }: { value: string }) {
       }}
     />
   )
-}
+})
+
+export default ReadOnlyTextField2

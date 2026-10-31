@@ -2,6 +2,7 @@ import React from 'react'
 
 import { LoadingEllipses } from '@jbrowse/core/ui'
 import { Typography } from '@mui/material'
+import { observer } from 'mobx-react'
 
 export type SequenceStatus = 'loading' | 'ready' | 'missing' | 'error'
 
@@ -14,7 +15,7 @@ export type SequenceStatus = 'loading' | 'ready' | 'missing' | 'error'
  * An error says so through the panel's own ErrorMessage, so this stays quiet
  * for that one rather than saying it twice.
  */
-export default function SequenceStatusMessage({
+const SequenceStatusMessage = observer(function SequenceStatusMessage({
   status,
 }: {
   status: SequenceStatus
@@ -26,4 +27,6 @@ export default function SequenceStatusMessage({
       no coding sequence to align
     </Typography>
   ) : null
-}
+})
+
+export default SequenceStatusMessage

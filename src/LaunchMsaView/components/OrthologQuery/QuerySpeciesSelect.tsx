@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+import { observer } from 'mobx-react'
+
 import TextField2 from '../../../components/TextField2'
 import {
   resolveAssemblySpecies,
@@ -40,7 +42,7 @@ async function describeTaxon(query: string, signal: AbortSignal) {
  * organism rather than to nothing, and the only place that surfaces is the gene
  * lookup, as "could not resolve NLRP1 in taxon 9986".
  */
-export default function QuerySpeciesSelect({
+const QuerySpeciesSelect = observer(function QuerySpeciesSelect({
   value,
   assemblyName,
   onChange,
@@ -114,4 +116,6 @@ export default function QuerySpeciesSelect({
       }
     />
   )
-}
+})
+
+export default QuerySpeciesSelect

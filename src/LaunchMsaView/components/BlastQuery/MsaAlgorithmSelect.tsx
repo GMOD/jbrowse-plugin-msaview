@@ -1,13 +1,14 @@
 import React from 'react'
 
 import { MenuItem } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import TextField2 from '../../../components/TextField2'
 import { msaAlgorithmLabels, msaAlgorithms } from './consts'
 
 import type { MsaAlgorithm } from './consts'
 
-export default function MsaAlgorithmSelect({
+const MsaAlgorithmSelect = observer(function MsaAlgorithmSelect({
   value,
   onChange,
   className,
@@ -39,4 +40,6 @@ export default function MsaAlgorithmSelect({
       ))}
     </TextField2>
   )
-}
+})
+
+export default MsaAlgorithmSelect

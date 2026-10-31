@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState } from 'react'
 
+import { observer } from 'mobx-react'
+
 import { readLaunchPlacement } from '../../utils/workspaces'
 
 type PlacementState = [boolean, React.Dispatch<React.SetStateAction<boolean>>]
@@ -20,18 +22,20 @@ const LaunchPlacementContext = createContext<PlacementState | undefined>(
   undefined,
 )
 
-export function LaunchPlacementProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const state = useState(() => readLaunchPlacement() === 'splitRight')
-  return (
-    <LaunchPlacementContext.Provider value={state}>
-      {children}
-    </LaunchPlacementContext.Provider>
-  )
-}
+export const LaunchPlacementProvider = observer(
+  function LaunchPlacementProvider({
+    children,
+  }: {
+    children: React.ReactNode
+  }) {
+    const state = useState(() => readLaunchPlacement() === 'splitRight')
+    return (
+      <LaunchPlacementContext.Provider value={state}>
+        {children}
+      </LaunchPlacementContext.Provider>
+    )
+  },
+)
 
 /** the dialog's answer, or a private one for a panel rendered outside it */
 export function useLaunchPlacement(): PlacementState {

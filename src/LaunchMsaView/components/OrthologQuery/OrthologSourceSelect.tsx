@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { MenuItem } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import TextField2 from '../../../components/TextField2'
 import { useLocalStorage } from '../../../utils/useLocalStorage'
@@ -46,7 +47,7 @@ const hints: Record<OrthologSource, string> = {
   uniref: 'all of UniProtKB within 50% identity',
 }
 
-export default function OrthologSourceSelect({
+const OrthologSourceSelect = observer(function OrthologSourceSelect({
   value,
   onChange,
   className,
@@ -74,4 +75,6 @@ export default function OrthologSourceSelect({
       ))}
     </TextField2>
   )
-}
+})
+
+export default OrthologSourceSelect

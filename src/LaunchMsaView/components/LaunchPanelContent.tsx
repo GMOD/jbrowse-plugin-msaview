@@ -2,6 +2,7 @@ import React from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { DialogContent } from '@mui/material'
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 const useStyles = makeStyles()({
@@ -10,7 +11,7 @@ const useStyles = makeStyles()({
   },
 })
 
-export default function LaunchPanelContent({
+const LaunchPanelContent = observer(function LaunchPanelContent({
   error,
   children,
 }: {
@@ -24,4 +25,6 @@ export default function LaunchPanelContent({
       {children}
     </DialogContent>
   )
-}
+})
+
+export default LaunchPanelContent

@@ -7,6 +7,7 @@ import {
   DialogActions,
   FormControlLabel,
 } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import {
   readLaunchPlacement,
@@ -29,7 +30,7 @@ import type { AbstractTrackModel } from '@jbrowse/core/util'
  * release that places views its own way — because the box would do nothing
  * there and every launch would quietly ignore it.
  */
-function PlacementToggle({
+const PlacementToggle = observer(function PlacementToggle({
   checked,
   onChange,
 }: {
@@ -49,9 +50,9 @@ function PlacementToggle({
       }
     />
   )
-}
+})
 
-export default function SubmitCancelActions({
+const SubmitCancelActions = observer(function SubmitCancelActions({
   onSubmit,
   onCancel,
   submitDisabled,
@@ -121,4 +122,6 @@ export default function SubmitCancelActions({
       </div>
     </DialogActions>
   )
-}
+})
+
+export default SubmitCancelActions

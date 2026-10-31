@@ -8,6 +8,7 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material'
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
@@ -26,7 +27,7 @@ export interface BlastSettings {
   ebiEmail: string
 }
 
-export default function BlastSettingsDialog({
+const BlastSettingsDialog = observer(function BlastSettingsDialog({
   handleClose,
   ebiEmail,
 }: {
@@ -93,4 +94,6 @@ export default function BlastSettingsDialog({
       </DialogActions>
     </Dialog>
   )
-}
+})
+
+export default BlastSettingsDialog

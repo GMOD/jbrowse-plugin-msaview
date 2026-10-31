@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Alert, MenuItem } from '@mui/material'
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../components/TextField2'
@@ -43,7 +44,7 @@ function partialCoverage({
  * itself in from the pasted alignment and offers that alignment's own row names
  * rather than a free text box the user can typo.
  */
-export default function QueryRowSelector({
+const QueryRowSelector = observer(function QueryRowSelector({
   names,
   detected,
   querySeqName,
@@ -118,4 +119,6 @@ export default function QueryRowSelector({
       ) : null}
     </>
   )
-}
+})
+
+export default QueryRowSelector

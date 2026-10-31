@@ -1,10 +1,11 @@
 import React from 'react'
 
 import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import type { BlastLookupMethod } from './BlastPanel'
 
-export default function BlastMethodSelector({
+const BlastMethodSelector = observer(function BlastMethodSelector({
   lookupMethod,
   setLookupMethod,
 }: {
@@ -29,4 +30,6 @@ export default function BlastMethodSelector({
       </RadioGroup>
     </FormControl>
   )
-}
+})
+
+export default BlastMethodSelector

@@ -2,10 +2,11 @@ import React, { Suspense, lazy, useState } from 'react'
 
 import Help from '@mui/icons-material/Help'
 import { IconButton, Tooltip } from '@mui/material'
+import { observer } from 'mobx-react'
 
 const HelpDialog = lazy(() => import('./HelpDialog'))
 
-export default function HelpButton() {
+const HelpButton = observer(function HelpButton() {
   const [show, setShow] = useState(false)
   return (
     <>
@@ -30,4 +31,6 @@ export default function HelpButton() {
       ) : null}
     </>
   )
-}
+})
+
+export default HelpButton

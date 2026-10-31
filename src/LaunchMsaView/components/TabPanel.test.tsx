@@ -2,6 +2,7 @@
 import React from 'react'
 
 import { cleanup, render, screen } from '@testing-library/react'
+import { observer } from 'mobx-react'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import TabPanel from './TabPanel'
@@ -10,7 +11,7 @@ afterEach(() => {
   cleanup()
 })
 
-function Panels({ value }: { value: string }) {
+const Panels = observer(function Panels({ value }: { value: string }) {
   return (
     <>
       <TabPanel value={value} index="a">
@@ -21,16 +22,16 @@ function Panels({ value }: { value: string }) {
       </TabPanel>
     </>
   )
-}
+})
 
 const mounted = vi.fn()
 
-function Probe({ name }: { name: string }) {
+const Probe = observer(function Probe({ name }: { name: string }) {
   React.useEffect(() => {
     mounted(name)
   }, [name])
   return <input defaultValue={name} />
-}
+})
 
 test('a visited panel keeps its state while another tab is shown', () => {
   const { rerender } = render(<Panels value="a" />)

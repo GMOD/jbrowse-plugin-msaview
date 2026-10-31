@@ -7,6 +7,7 @@ import HighlightComponents from './HighlightComponents'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
 
+// eslint-disable-next-line no-restricted-syntax -- a plugin install step, not a component; the element it returns renders inside the genome view's observer
 export default function AddHighlightComponentsModelF(
   pluginManager: PluginManager,
 ) {

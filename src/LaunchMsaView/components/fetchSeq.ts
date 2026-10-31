@@ -26,6 +26,7 @@ export async function fetchSeq({
   if (!adapterConfig) {
     throw new Error(`assembly ${assemblyName} has no sequence adapter`)
   }
+  // eslint-disable-next-line no-restricted-syntax -- one transcript's span of reference sequence, and both callers already label the wait ("Translating transcript", "Looking up …")
   const feats = await rpcManager.call('getSequence', 'CoreGetFeatures', {
     adapterConfig,
     signal,

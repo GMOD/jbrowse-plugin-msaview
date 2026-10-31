@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import SettingsIcon from '@mui/icons-material/Settings'
 import { IconButton, Tooltip } from '@mui/material'
+import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import {
@@ -29,7 +30,7 @@ const panelMap = {
 
 export type BlastLookupMethod = keyof typeof panelMap
 
-export default function BlastPanel({
+const BlastPanel = observer(function BlastPanel({
   handleClose,
   model,
   feature,
@@ -96,4 +97,6 @@ export default function BlastPanel({
       ) : null}
     </>
   )
-}
+})
+
+export default BlastPanel

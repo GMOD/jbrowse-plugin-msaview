@@ -1,4 +1,9 @@
 import eslint from '@eslint/js'
+import {
+  displayRestrictedSyntax,
+  noUseEffectEvent,
+  unobservedComponents,
+} from '@jbrowse/display-kit/conformance/lintRules'
 import { importX } from 'eslint-plugin-import-x'
 import eslintPluginReact from 'eslint-plugin-react'
 import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
@@ -39,6 +44,8 @@ export default defineConfig(
   {
     rules: {
       'no-restricted-globals': ['error', 'Buffer'],
+      'no-restricted-syntax': ['error', ...displayRestrictedSyntax],
+      'no-restricted-imports': ['error', { paths: [noUseEffectEvent] }],
       'no-empty': 'off',
       'no-console': [
         'warn',
@@ -98,6 +105,16 @@ export default defineConfig(
           ignoreRestSiblings: true,
           caughtErrors: 'none',
         },
+      ],
+    },
+  },
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...displayRestrictedSyntax,
+        ...unobservedComponents,
       ],
     },
   },
