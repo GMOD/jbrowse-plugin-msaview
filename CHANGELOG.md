@@ -1,3 +1,15 @@
+## [5.15.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.14.1...v5.15.0) (2026-10-31)
+
+### Other Changes
+
+- Build against @jbrowse 5.0.0-beta.19 ([d537b34](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d537b34eeecade2dd50345c2ff5b8dec13c5a093))
+- Refresh nightly screenshot references on a beta.19 host ([bf8ae84](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bf8ae84f3fa17a709cd512919d8b1df75a9e5147))
+- Bind host imports through core's hostShim, floored at beta.18 ([212249c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/212249c9b1fe6c56b20ff965dfe2f2fc110ceca5))
+- Tests fail on a reported contract violation ([f16503c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f16503cdc487736515bc4b146c4b99b0860a8461))
+- Clear the eslint fallback's standing findings ([50f6827](https://github.com/GMOD/jbrowse-plugin-msaview/commit/50f6827c861f6a80a3d0b68807729a9306f84f4b))
+- Transcript lookups pass an AbortSignal, and report their reads ([61ea615](https://github.com/GMOD/jbrowse-plugin-msaview/commit/61ea61532b65437bd401fbeeb2def55fc5309731))
+- Lint src with display-kit's conformance rules ([5347d2a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/5347d2a8739c476104485143183a90aacd92ad04))
+
 ## [5.14.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.14.0...v5.14.1) (2026-10-30)
 
 ### Other Changes
