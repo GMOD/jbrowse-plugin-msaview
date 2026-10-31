@@ -260,10 +260,10 @@ test('resolveGeneId takes a bare number only when no name resolves', async () =>
 test('an abort stops a chunked lookup at the request in flight', async () => {
   const controller = new AbortController()
   const seen: string[] = []
-  vi.stubGlobal('fetch', (url: string, init?: RequestInit) => {
+  vi.stubGlobal('fetch', (url: string) => {
     seen.push(url)
     controller.abort()
-    return Promise.reject(init?.signal?.reason)
+    return Promise.reject(new DOMException('aborted', 'AbortError'))
   })
   const ids = Array.from({ length: 400 }, (_, i) => String(100000 + i))
   await expect(

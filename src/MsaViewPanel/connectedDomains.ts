@@ -69,7 +69,7 @@ function mergeAdjacent(regions: GenomeRegion[]) {
   const merged: GenomeRegion[] = []
   for (const region of regions.toSorted((a, b) => a.start - b.start)) {
     const last = merged.at(-1)
-    if (last && last.refName === region.refName && region.start <= last.end) {
+    if (last?.refName === region.refName && region.start <= last.end) {
       last.end = Math.max(last.end, region.end)
     } else {
       merged.push({ ...region })

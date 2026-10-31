@@ -23,7 +23,7 @@ vi.mock('./idb', async importOriginal => ({
 
 test('an abort between batches still caches the names already fetched', async () => {
   const controller = new AbortController()
-  vi.stubGlobal('fetch', (_url: string, init?: RequestInit) => {
+  vi.stubGlobal('fetch', () => {
     if (saved.length === 0 && !controller.signal.aborted) {
       controller.abort()
       return Promise.resolve({
@@ -35,7 +35,7 @@ test('an abort between batches still caches the names already fetched', async ()
           ),
       })
     }
-    return Promise.reject(init?.signal?.reason)
+    return Promise.reject(new DOMException('aborted', 'AbortError'))
   })
   const taxids = Array.from({ length: 150 }, (_, i) => i + 1)
   await expect(fetchTaxonomyInfo(taxids, controller.signal)).rejects.toThrow(

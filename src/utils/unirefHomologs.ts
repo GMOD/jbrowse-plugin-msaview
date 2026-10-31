@@ -32,8 +32,7 @@ import type { OrthologRow } from './ncbiOrthologs'
 
 const UNIPROT = 'https://rest.uniprot.org'
 
-const unirefIdentities = [50, 90] as const
-export type UnirefIdentity = (typeof unirefIdentities)[number]
+export type UnirefIdentity = 50 | 90
 
 // the "Reference proteome" keyword, KW-1185: one well-annotated proteome per
 // taxonomic neighbourhood, which is what keeps a cluster from being a hundred
@@ -162,10 +161,12 @@ async function fetchClusterId(
   signal?: AbortSignal,
 ) {
   const query = `(uniprot_id:${accession}) AND (identity:${identity / 100})`
-  const json = (await jsonfetch(
+  const json = await jsonfetch<{
+    results?: { id?: string; memberCount?: number }[]
+  }>(
     `${UNIPROT}/uniref/search?query=${encodeURIComponent(query)}&fields=id,count&size=1`,
     { signal },
-  )) as { results?: { id?: string; memberCount?: number }[] }
+  )
   const cluster = json.results?.[0]
   return cluster?.id
     ? { id: cluster.id, memberCount: cluster.memberCount }
