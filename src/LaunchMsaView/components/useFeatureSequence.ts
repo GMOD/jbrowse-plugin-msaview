@@ -28,7 +28,7 @@ export function useFeatureSequence({
     feature && assemblyName
       ? [feature.id(), assemblyName, 'feature-sequence']
       : null,
-    async () => {
+    async signal => {
       const { start, end, refName } = feature!.toJSON() as {
         start: number
         end: number
@@ -40,6 +40,7 @@ export function useFeatureSequence({
         refName,
         assemblyName: assemblyName!,
         session: getSession(view),
+        signal,
       })
     },
   )

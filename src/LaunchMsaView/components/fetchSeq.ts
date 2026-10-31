@@ -8,12 +8,14 @@ export async function fetchSeq({
   refName,
   session,
   assemblyName,
+  signal,
 }: {
   start: number
   end: number
   refName: string
   assemblyName: string
   session: AbstractSessionModel
+  signal: AbortSignal
 }) {
   const { assemblyManager, rpcManager } = session
   const assembly = await assemblyManager.waitForAssembly(assemblyName)
@@ -26,6 +28,7 @@ export async function fetchSeq({
   }
   const feats = await rpcManager.call('getSequence', 'CoreGetFeatures', {
     adapterConfig,
+    signal,
     regions: [
       {
         start,
