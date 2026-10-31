@@ -1,29 +1,13 @@
 import fs from 'node:fs'
 import http from 'node:http'
 
-import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
-import JBrowseReExports from '@jbrowse/core/ReExports/list'
 import * as esbuild from 'esbuild'
 import prettyBytes from 'pretty-bytes'
 
+import { buildOptions } from './scripts/buildOptions.mjs'
+
 const isWatch = process.argv.includes('--watch')
 const PORT = process.env.PORT ? +process.env.PORT : 9000
-
-function createGlobalMap(jbrowseGlobals) {
-  const globalMap = {}
-  for (const global of jbrowseGlobals) {
-    globalMap[global] = {
-      varName: `JBrowseExports["${global}"]`,
-      type: 'cjs',
-    }
-  }
-  // JBrowse serves @jbrowse/mobx-state-tree under its old key
-  globalMap['@jbrowse/mobx-state-tree'] = {
-    varName: `JBrowseExports["mobx-state-tree"]`,
-    type: 'cjs',
-  }
-  return globalMap
-}
 
 const rebuildLogPlugin = {
   name: 'rebuild-log',
@@ -45,21 +29,10 @@ const rebuildLogPlugin = {
   },
 }
 
+const options = buildOptions()
 const config = {
-  entryPoints: ['src/index.ts'],
-  bundle: true,
-  // react-msaview sits behind the view's state-model thunk and lazy()
-  // components, which splitting emits as chunks under dist/chunks/ resolved
-  // against the entry's own url, on the main thread and in the RPC worker alike
-  format: 'esm',
-  splitting: true,
-  outdir: 'dist',
-  chunkNames: 'chunks/[name]-[hash]',
-  metafile: true,
-  plugins: [
-    globalExternals(createGlobalMap(JBrowseReExports)),
-    rebuildLogPlugin,
-  ],
+  ...options,
+  plugins: [...options.plugins, rebuildLogPlugin],
   ...(isWatch
     ? { entryNames: 'out' }
     : {

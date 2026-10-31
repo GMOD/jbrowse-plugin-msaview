@@ -28,7 +28,7 @@
     "lint:eslint": "eslint src --report-unused-disable-directives --max-warnings 0",
     "check-text-source": "node scripts/check-text-source.mjs",
     "check-ebi-params": "node scripts/check-ebi-params.mjs",
-    "check-mui-imports": "node scripts/check-mui-imports.mjs",
+    "check-host-floor": "node scripts/check-host-floor.mjs",
     "check-host-dep-pins": "node scripts/check-host-dep-pins.mjs",
     "pretest": "rm -rf .test-jbrowse && npx @jbrowse/cli create .test-jbrowse --nightly",
     "test": "vitest run",
@@ -41,7 +41,7 @@
     "host-compat": "node scripts/host-compat-probe.mjs --bundle dist/jbrowse-plugin-msaview.esm.js",
     "prepack": "pnpm build",
     "check-ci": "node scripts/require-green-ci.mjs",
-    "preversion": "pnpm check-ci && pnpm check-host-dep-pins && pnpm lint && pnpm build && pnpm check-mui-imports && pnpm host-compat",
+    "preversion": "pnpm check-ci && pnpm check-host-dep-pins && pnpm lint && pnpm build && pnpm check-host-floor && pnpm host-compat",
     "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git-cliff --tag v$npm_package_version --unreleased --prepend CHANGELOG.md && (pnpm readme-figure || echo 'WARNING: README figure not refreshed, see above') && git add src/version.ts CHANGELOG.md img/1.png",
     "postversion": "git push --follow-tags"
   },
@@ -53,7 +53,6 @@
   "devDependencies": {
     "@emotion/react": "^11.14.0",
     "@eslint/js": "^10.0.1",
-    "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
     "@jbrowse/core": "5.0.0-beta.19",
     "@jbrowse/mobx-state-tree": "^6.10.0",
     "@jbrowse/plugin-linear-genome-view": "5.0.0-beta.19",

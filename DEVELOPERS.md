@@ -25,11 +25,12 @@ genome connection.
 
 ## Checks
 
-| Command            | What it checks                                                     |
-| ------------------ | ------------------------------------------------------------------ |
-| `pnpm lint`        | oxlint with type information                                       |
-| `pnpm test`        | Unit tests plus the e2e suite on a freshly fetched nightly JBrowse |
-| `pnpm host-compat` | Boots `dist/` on hosted JBrowse `main`                             |
+| Command                 | What it checks                                                     |
+| ----------------------- | ------------------------------------------------------------------ |
+| `pnpm lint`             | oxlint with type information                                       |
+| `pnpm test`             | Unit tests plus the e2e suite on a freshly fetched nightly JBrowse |
+| `pnpm host-compat`      | Boots `dist/` on hosted JBrowse `main`                             |
+| `pnpm check-host-floor` | Builds against what JBrowse v5.0.0-beta.18 serves to plugins       |
 
 ### Opt-in e2e suites
 
@@ -88,6 +89,7 @@ Change the demo link and the figure follows at the next release. Run
 pnpm version patch
 ```
 
-`preversion` waits for green CI, checks the host dependency pins, lints, builds
-and boots the bundle on hosted JBrowse `main`; `postversion` pushes the tag, and
-CI publishes to npm and writes the GitHub release from `CHANGELOG.md`.
+`preversion` waits for green CI, checks the host dependency pins, lints, builds,
+checks the build against the oldest supported host and boots the bundle on
+hosted JBrowse `main`; `postversion` pushes the tag, and CI publishes to npm and
+writes the GitHub release from `CHANGELOG.md`.

@@ -14,10 +14,13 @@ resolves this build and a v4 host never sees it. Until 5.0.0 is released, hosted
 `main` and the nightly zip are the only hosts, and `pnpm host-compat` and the
 e2e run there.
 
-The externals are the installed `@jbrowse/core/ReExports/list`. A key the host
-lacks throws at its first read, naming the key, so booting on `main` is the
-check; `check-host-externals` and the host floor compared the build against its
-own list once one host was left, and are gone.
+Host imports go through core's `hostShim` (`scripts/buildOptions.mjs`), which
+binds each re-exported specifier to `JBrowseExports` and fails the build on a
+name the installed core does not serve. A host lacking a name at runtime gets a
+function that throws naming it, where `globalExternals` read `undefined`.
+`pnpm check-host-floor` builds against what v5.0.0-beta.18 serves, the oldest
+host supported, and runs on push and from `preversion`; raising its `FLOOR`
+drops every host below it.
 
 ## The weight stays out of the entry
 
@@ -58,10 +61,9 @@ opening a panel, so an import that only evaluates on render stays invisible.
 
 Dependencies hit it too. react-msaview 8.3.0 called `createFilterOptions` at
 module scope, so the bundle threw while evaluating and error-paged the whole
-app, not just a dialog. So `pnpm check-mui-imports` reads the build's
-`meta.json` and diffs the named `@mui/material` imports of **every bundled
-module** against that list, and runs on push and from `preversion`. When a
-component is genuinely missing from the map, the deep path
+app, not just a dialog. `hostShim` now fails the build on either, in any bundled
+module, since every `@mui/material` import resolves to a shim exporting only the
+host's names. When a component is genuinely missing from the map, the deep path
 (`@mui/material/StepContent`) is not in ReExports and so gets bundled -- at the
 cost of shipping that component's MUI internals.
 
