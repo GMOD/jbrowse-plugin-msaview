@@ -8,3 +8,12 @@ minimumReleaseAgeExclude:
   - '@jbrowse/svgcanvas'
   - msa-parsers
   - '@gmod/newick@1.0.3'
+  - '@gmod/bgzf-filehandle@6.8.4'
+  - '@jbrowse/add-track-core@5.0.0-beta.19'
+  - '@jbrowse/cigar-utils@5.0.0-beta.19'
+  - '@jbrowse/core@5.0.0-beta.19'
+  - '@jbrowse/display-kit@5.0.0-beta.19'
+  - '@jbrowse/display-ui@5.0.0-beta.19'
+  - '@jbrowse/launch-args@5.0.0-beta.19'
+  - '@jbrowse/plugin-linear-genome-view@5.0.0-beta.19'
+  - '@jbrowse/render-core@5.0.0-beta.19'

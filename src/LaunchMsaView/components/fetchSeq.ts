@@ -1,4 +1,4 @@
-import { getConf } from '@jbrowse/core/configuration'
+import { getSequenceAdapterConfig } from '@jbrowse/core/assemblyManager/assembly'
 
 import type { AbstractSessionModel } from '@jbrowse/core/util'
 
@@ -20,8 +20,12 @@ export async function fetchSeq({
   if (!assembly) {
     throw new Error('assembly not found')
   }
+  const adapterConfig = getSequenceAdapterConfig(assembly)
+  if (!adapterConfig) {
+    throw new Error(`assembly ${assemblyName} has no sequence adapter`)
+  }
   const feats = await rpcManager.call('getSequence', 'CoreGetFeatures', {
-    adapterConfig: getConf(assembly, ['sequence', 'adapter']),
+    adapterConfig,
     regions: [
       {
         start,

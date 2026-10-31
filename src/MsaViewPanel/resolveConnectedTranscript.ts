@@ -12,6 +12,7 @@ import type {
   JBrowsePluginMsaViewModel,
   OrthologParams,
 } from './model'
+import type { AnyConfigurationModel } from '@jbrowse/core/configuration'
 import type { Feature } from '@jbrowse/core/util'
 
 // The short form of a connected launch. A spec that says
@@ -79,7 +80,9 @@ export function searchWindows(view: GenomeView) {
  * quantitative track for a chromosome's worth of features to look for a
  * transcript among them is the slowest possible way to find nothing.
  */
-export function transcriptTracks<T extends { type: string }>(tracks: T[]) {
+export function transcriptTracks<
+  T extends { type: string; configuration: AnyConfigurationModel },
+>(tracks: readonly T[]) {
   return tracks.filter(t => t.type === 'FeatureTrack')
 }
 
