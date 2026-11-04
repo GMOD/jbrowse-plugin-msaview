@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { getCachedDomains, saveDomains } from './domainCache'
-import { fetchProteinDomains } from './ncbiDomains'
+import { DOMAIN_REQUEST_TIMEOUT_MS, fetchProteinDomains } from './ncbiDomains'
 
 vi.mock('./domainCache', () => ({
   getCachedDomains: vi.fn(() => Promise.resolve([])),
@@ -9,6 +9,8 @@ vi.mock('./domainCache', () => ({
 }))
 
 afterEach(() => {
+  vi.useRealTimers()
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.mocked(saveDomains).mockClear()
 })
@@ -51,5 +53,58 @@ test('an abort ends the fetch rather than counting as a failed batch', async () 
   await expect(
     fetchProteinDomains(accessions, controller.signal),
   ).rejects.toThrow('Aborted')
+  expect(saveDomains).not.toHaveBeenCalled()
+})
+
+// vitest's fake timers do not drive AbortSignal.timeout, so it is rebuilt
+// on the faked setTimeout
+function timeoutsOnFakeTimers() {
+  vi.useFakeTimers()
+  vi.spyOn(AbortSignal, 'timeout').mockImplementation(ms => {
+    const controller = new AbortController()
+    setTimeout(() => {
+      controller.abort(new DOMException('signal timed out', 'TimeoutError'))
+    }, ms)
+    return controller.signal
+  })
+}
+
+function stalledResponse(init?: RequestInit) {
+  return new Promise<Response>((_, reject) => {
+    const signal = init?.signal
+    signal?.addEventListener('abort', () => {
+      const { reason } = signal
+      reject(reason instanceof Error ? reason : new Error('aborted'))
+    })
+  })
+}
+
+test('a batch NCBI never answers times out, keeping the batches before it', async () => {
+  timeoutsOnFakeTimers()
+  let call = 0
+  vi.stubGlobal('fetch', (_url: string, init?: RequestInit) =>
+    call++ === 0
+      ? Promise.resolve(new Response(genpept(accessions.slice(0, 100))))
+      : stalledResponse(init),
+  )
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  const pending = fetchProteinDomains(accessions)
+  await vi.advanceTimersByTimeAsync(DOMAIN_REQUEST_TIMEOUT_MS + 1000)
+  const { byAccession, failure } = await pending
+  expect(AbortSignal.timeout).toHaveBeenCalledWith(30_000)
+  expect(byAccession.size).toBe(100)
+  expect(String(failure)).toMatch(/NCBI did not answer within 30 s/)
+})
+
+test('an abort during a stalled batch still ends the fetch as an abort', async () => {
+  timeoutsOnFakeTimers()
+  const controller = new AbortController()
+  vi.stubGlobal('fetch', (_url: string, init?: RequestInit) =>
+    stalledResponse(init),
+  )
+  const pending = fetchProteinDomains(accessions, controller.signal)
+  await vi.advanceTimersByTimeAsync(1000)
+  controller.abort(new DOMException('Aborted', 'AbortError'))
+  await expect(pending).rejects.toThrow('Aborted')
   expect(saveDomains).not.toHaveBeenCalled()
 })

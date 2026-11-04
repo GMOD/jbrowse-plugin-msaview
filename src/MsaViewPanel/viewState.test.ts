@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { doLaunchBlast } from './doLaunchBlast'
 import { loadProteinDomains } from './loadProteinDomains'
@@ -24,6 +24,10 @@ vi.mock('@jbrowse/core/util', async importOriginal => ({
 }))
 vi.mock('./doLaunchBlast', () => ({ doLaunchBlast: vi.fn() }))
 vi.mock('./loadProteinDomains', () => ({ loadProteinDomains: vi.fn() }))
+vi.mock('../utils/domainCache', () => ({
+  getCachedDomains: vi.fn(async () => []),
+  saveDomains: vi.fn(async () => {}),
+}))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
@@ -238,6 +242,62 @@ describe('the domain auto-load', () => {
     expect(model.showLoading).toBe(false)
     expect(model.notices).toEqual([
       'Protein domains loaded for 1 of 2 proteins; NCBI failed on the rest: HTTP 429',
+    ])
+  })
+})
+
+describe('a domain fetch NCBI never answers', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  test('times out into the failure notice and ends the loading', async () => {
+    const actual = await vi.importActual<{
+      loadProteinDomains: typeof loadProteinDomains
+    }>('./loadProteinDomains')
+    vi.mocked(loadProteinDomains).mockImplementation(actual.loadProteinDomains)
+    vi.useFakeTimers()
+    vi.spyOn(AbortSignal, 'timeout').mockImplementation(ms => {
+      const controller = new AbortController()
+      setTimeout(() => {
+        controller.abort(new DOMException('signal timed out', 'TimeoutError'))
+      }, ms)
+      return controller.signal
+    })
+    vi.stubGlobal(
+      'fetch',
+      (_url: string, init?: RequestInit) =>
+        new Promise((_, reject) => {
+          const signal = init?.signal
+          signal?.addEventListener('abort', () => {
+            const { reason } = signal
+            reject(reason instanceof Error ? reason : new Error('aborted'))
+          })
+        }),
+    )
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: {
+        msa: MSA,
+        treeMetadata: JSON.stringify({
+          QUERY: { Accession: 'NP_1' },
+          mouse: { Accession: 'NP_2' },
+        }),
+      },
+    })
+    await vi.advanceTimersByTimeAsync(29_000)
+    expect(model.showLoading).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(model.loadingDomains).toBe(false)
+    expect(model.showLoading).toBe(false)
+    expect(model.notices).toEqual([
+      'Protein domains did not load from NCBI: NCBI did not answer within 30 s',
     ])
   })
 })

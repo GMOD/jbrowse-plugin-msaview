@@ -45,7 +45,11 @@ return view.report
   while a launch runs, stored or linked data loads, `connectedTranscript` is
   being looked up, the protein domains are being fetched, or a `domainsOnGenome`
   track waits on its genome view. Each of those ends on failure too, so
-  `loading` never outlasts the work.
+  `loading` never outlasts the work. The domain fetch asks NCBI for 100 proteins
+  at a time and gives each request 30 s, about fifteen times a normal answer;
+  one that runs out ends the fetch with the failure notice below, keeping the
+  batches already answered. A stalled NCBI holds `loading` 30 s, and the domains
+  hold it at most 30 s per 100 uncached proteins.
 - `error` is set only when the view cannot show an alignment at all: a launch
   that failed, an alignment that is gone from browser storage, a file that did
   not parse. It is the error's message.

@@ -1,6 +1,5 @@
 import { getCachedDomains, saveDomains } from './domainCache'
 import { decodeXmlEntities, efetchUrl, eutilsText } from './eutils'
-import { isAbortError } from './fetch'
 
 import type { InterProScanResults } from 'react-msaview'
 
@@ -121,13 +120,21 @@ export function parseCddDomains(xml: string): Map<string, DomainMatch[]> {
 }
 
 /**
+ * An efetch of 100 GenPept records answered in 1.5-2 s (measured 2026-11-04).
+ * Fifteen times that leaves a slow NCBI room, and bounds how long one stalled
+ * request holds the view's `showLoading`.
+ */
+export const DOMAIN_REQUEST_TIMEOUT_MS = 30_000
+
+/**
  * Fetch pre-computed CDD domain and site annotations for NCBI protein
  * accessions. These come baked into the GenPept records, so a single batched
  * efetch returns them with no job submission or polling. Results are cached in
  * IndexedDB so reopening a view doesn't refetch.
  *
- * A batch that fails ends the fetch and comes back as `failure` beside the
- * batches already answered, so the caller can say which part is missing.
+ * A batch that fails or outlasts DOMAIN_REQUEST_TIMEOUT_MS ends the fetch and
+ * comes back as `failure` beside the batches already answered, so the caller
+ * can say which part is missing.
  */
 export async function fetchProteinDomains(
   accessions: string[],
@@ -156,6 +163,10 @@ export async function fetchProteinDomains(
     i += batchSize
   ) {
     const batch = uncached.slice(i, i + batchSize)
+    const deadline = AbortSignal.timeout(DOMAIN_REQUEST_TIMEOUT_MS)
+    const requestSignal = signal
+      ? AbortSignal.any([signal, deadline])
+      : deadline
     let xml = ''
     try {
       xml = await eutilsText(
@@ -165,15 +176,20 @@ export async function fetchProteinDomains(
           rettype: 'gp',
           retmode: 'xml',
         }),
-        { signal },
+        { signal: requestSignal },
       )
     } catch (e) {
-      if (isAbortError(e)) {
+      if (signal?.aborted) {
         throw e
       }
       // the batches already answered are worth keeping and caching
       console.warn('[msaview-domains] efetch failed, keeping what loaded:', e)
-      failure = e
+      failure = deadline.aborted
+        ? new Error(
+            `NCBI did not answer within ${DOMAIN_REQUEST_TIMEOUT_MS / 1000} s`,
+            { cause: e },
+          )
+        : e
     }
     const parsed = parseCddDomains(xml)
     for (const acc of batch) {
