@@ -44,6 +44,11 @@ For an alignment file, also name the row that is the transcript's protein with
 launch that names no `proteinSequence`, the translated transcript becomes the
 query row.
 
+A lookup that misses, or cannot run because the genome view is absent or has no
+gene track open, ends a search or ortholog launch with an error naming what is
+missing. Beside an alignment from anywhere else it is a notice instead, and the
+alignment opens unlinked ([reading the view](reading-the-view.md#notices)).
+
 `allowedGappyness` is worth setting alongside it. Proteins that differ in length
 put one row's private N-terminal extension at column 0 with every other row gap
 underneath, so a launch that does not say otherwise can open on columns the link

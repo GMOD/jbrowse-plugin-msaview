@@ -33,6 +33,10 @@ one at launch ([alignments from a gene](alignments-from-a-gene.md)).
 | `querySeqName`        | The row that is the connected transcript's protein                     |
 | `querySeqOffset`      | Transcript residues before that row's first residue, for a trimmed row |
 | `domainsOnGenome`     | Add the query row's domains to the connected genome view once loaded   |
+| `zoomToBaseLevel`     | A column click zooms the genome view to the codon, not only centers it |
+| `uniprotId`           | The query's UniProt accession, for `report`; an AlphaFold url sets it  |
+| `mafRegion`           | Genome bases a MAF query row spans, columns mapping base for base      |
+| `embeddedMode`        | `false` for the labeled toolbar; the default draws its menus as icons  |
 | `displayName`         | Custom view display name                                               |
 | `colorSchemeName`     | Color scheme (e.g. 'percent_identity_dynamic')                         |
 | `colWidth`            | Column width in pixels                                                 |

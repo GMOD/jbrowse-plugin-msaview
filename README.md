@@ -79,6 +79,8 @@ Linking and embedding:
 - [Launch parameters](docs/launch-parameters.md): every argument and field.
 - [Linked views](docs/linked-views.md): how a column reaches its codon and a
   protein3d structure.
+- [Reading the view](docs/reading-the-view.md): `view.report` and `notices`,
+  what a launch resolved to, as data a script or an agent reads.
 
 Working on the plugin:
 
