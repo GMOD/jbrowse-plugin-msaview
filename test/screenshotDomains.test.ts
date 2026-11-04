@@ -7,11 +7,13 @@ import {
   createJBrowsePage,
   getTestJBrowseDir,
   launchBrowser,
+  readMsaReport,
   saveScreenshot,
   setupJBrowse,
   startJBrowseServer,
   stopServer,
   waitForJBrowseLoad,
+  waitReady,
 } from './setup'
 
 import type { ChildProcess } from 'node:child_process'
@@ -95,8 +97,11 @@ run('protein domain overlay screenshot', () => {
       path.join(SCREENSHOT_DIR, 'domains-01-loaded.png'),
     )
 
-    // wait for the auto-fetch (live efetch + parse + render) to complete
-    await new Promise(r => setTimeout(r, 12_000))
+    // the view reports loading until the auto-fetch settles, either way
+    expect(await waitReady(page)).toMatchObject({ settled: true })
+    const report = await readMsaReport(page)
+    expect(report).toMatchObject({ loading: false, notices: [] })
+    expect(report?.domainAnnotations).toBeGreaterThan(0)
     await saveScreenshot(
       page,
       path.join(SCREENSHOT_DIR, 'domains-02-overlay.png'),

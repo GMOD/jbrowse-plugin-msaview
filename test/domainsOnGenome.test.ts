@@ -7,10 +7,12 @@ import {
   JBROWSE_PORT,
   createJBrowsePage,
   launchBrowser,
+  readMsaReport,
   saveScreenshot,
   setupJBrowse,
   startJBrowseServer,
   stopServer,
+  waitReady,
 } from './setup'
 
 import type { ChildProcess } from 'node:child_process'
@@ -92,13 +94,19 @@ function readSession(page: Page) {
   })
 }
 
+// the genome view's tracks only: an MsaView has `tracks` too, its column
+// tracks, which carry no configuration, so reading one threw inside the
+// poller and stopped it, and a domain track added after the first poll was
+// never seen
 async function waitForDomainTrack(page: Page) {
   await page.waitForFunction(
     trackId =>
       (
         window as unknown as { JBrowseSession?: SessionHandle }
-      ).JBrowseSession?.views.some(v =>
-        v.tracks?.some(t => t.configuration.trackId === trackId),
+      ).JBrowseSession?.views.some(
+        v =>
+          v.type === 'LinearGenomeView' &&
+          v.tracks?.some(t => t.configuration.trackId === trackId),
       ),
     { timeout: 90_000 },
     TRACK_ID,
@@ -160,7 +168,27 @@ run('domains on the genome', () => {
 
   test('a launch with domainsOnGenome adds the domain track once the domains load', async () => {
     await waitForDomainTrack(page)
-    await new Promise(r => setTimeout(r, 5000))
+    expect(await waitReady(page)).toMatchObject({ settled: true })
+    // the example docs/reading-the-view.md shows; the annotation count is
+    // NCBI's live CDD content, so only its presence is pinned
+    const report = await readMsaReport(page)
+    expect(report?.domainAnnotations).toBeGreaterThan(0)
+    expect(report).toEqual({
+      loading: false,
+      notices: [],
+      source: { kind: 'inline' },
+      rows: 3,
+      columns: 147,
+      domainAnnotations: report?.domainAnnotations,
+      queryRow: { name: 'Human', found: true, offset: 0 },
+      connection: {
+        viewId: 'lgv1',
+        viewOpen: true,
+        transcript: 'HBB-201',
+        refName: 'chr11',
+        mapped: true,
+      },
+    })
     await saveScreenshot(
       page,
       path.join(SCREENSHOT_DIR, 'domains-on-genome-hbb.png'),

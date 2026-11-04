@@ -192,6 +192,44 @@ export async function saveScreenshot(
   saveStableScreenshot(await page.screenshot(), filePath)
 }
 
+export interface MsaViewReport {
+  loading: boolean
+  error?: string
+  notices: string[]
+  source: { kind: string }
+  rows: number
+  columns: number
+  domainAnnotations: number
+  queryRow: { name: string; found: boolean; offset: number }
+  connection?: { mapped: boolean; unmappedBecause?: string }
+}
+
+/**
+ * jb.waitReady: the app's ready marker, which reads every view's
+ * `showLoading` and every display's phase, held steady before it answers
+ */
+export async function waitReady(page: Page, timeoutMs = 90_000) {
+  return page.evaluate(async (ms: number) => {
+    interface JbApi {
+      waitReady: (ms: number) => Promise<{ settled: boolean; note?: string }>
+    }
+    const jb: JbApi | undefined = Reflect.get(window, 'jb')
+    return jb
+      ? jb.waitReady(ms)
+      : { settled: false, note: 'window.jb is absent on this host' }
+  }, timeoutMs)
+}
+
+export async function readMsaReport(page: Page) {
+  return page.evaluate(() => {
+    interface Session {
+      views: { type: string; report?: MsaViewReport }[]
+    }
+    const session: Session | undefined = Reflect.get(window, 'JBrowseSession')
+    return session?.views.find(v => v.type === 'MsaView')?.report
+  })
+}
+
 export async function waitForJBrowseLoad(page: Page): Promise<void> {
   await page.waitForFunction(
     () => {
