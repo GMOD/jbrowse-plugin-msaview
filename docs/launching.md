@@ -49,6 +49,17 @@ gene track open, ends a search or ortholog launch with an error naming what is
 missing. Beside an alignment from anywhere else it is a notice instead, and the
 alignment opens unlinked ([reading the view](reading-the-view.md#notices)).
 
+List the genome view before the MsaView. A spec launches its views one at a
+time, in order, and the host exposes no sign that a spec is still being applied,
+so an MsaView launched first finds no view with its `connectedViewId`. A search
+or ortholog launch shows `No view with id "lgv1" is open` as its error until the
+genome view arrives, then clears it and looks the transcript up. It heals by
+itself, but a screenshot taken in between shows the error, and the app's ready
+marker, which counts a view with an error as done, can read ready in that gap.
+The view does not wait instead: with no spec-in-progress signal (none on hosts
+from v5.0.0-beta.18 to `main`, checked 2026-11-04), a wait for a missing view
+could only be timed or unbounded, and unbounded would hang on a mistyped id.
+
 `allowedGappyness` is worth setting alongside it. Proteins that differ in length
 put one row's private N-terminal extension at column 0 with every other row gap
 underneath, so a launch that does not say otherwise can open on columns the link
