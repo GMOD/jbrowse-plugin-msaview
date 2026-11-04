@@ -84,8 +84,9 @@ reading without them:
   parts of a stored view that expired from browser storage.
 
 A lookup that cannot start says what is missing rather than waiting: no
-`connectedViewId`, no view with that id, a genome view that failed to load, or
-one with no feature track open. A genome view still loading its assembly or
+`connectedViewId`, no view with that id, an id naming a view that is not a
+genome view (a ProteinView, another MsaView), a genome view that failed to load,
+or one with no feature track open. A genome view still loading its assembly or
 opening the tracks its own launch names is waited for. The connection recovers
 by itself when what was missing arrives: a genome view added after the MsaView,
 or a gene track opened later.

@@ -229,15 +229,19 @@ interface ConnectableView {
  * Whether the connected genome view can be searched for `transcriptId` yet. A
  * view still initializing, or still opening the tracks its launch names, is
  * waited for; everything else that stops a lookup is a problem to report,
- * since nothing would otherwise end the wait.
+ * since nothing would otherwise end the wait. `namedViewType` is the type of
+ * whatever view `connectedViewId` names, and `connectedView` that view only
+ * when it is a genome view.
  */
 export function lookupReadiness<V extends ConnectableView>({
   transcriptId,
   connectedViewId,
+  namedViewType,
   connectedView,
 }: {
   transcriptId: string
   connectedViewId: string | undefined
+  namedViewType: string | undefined
   connectedView: V | undefined
 }): { problem: string } | { waiting: true } | { view: V } {
   const cannot = `so transcript "${transcriptId}" cannot be looked up`
@@ -245,19 +249,23 @@ export function lookupReadiness<V extends ConnectableView>({
     ? {
         problem: `connectedTranscript "${transcriptId}" needs a connectedViewId naming the genome view to look it up in`,
       }
-    : !connectedView
+    : namedViewType === undefined
       ? { problem: `No view with id "${connectedViewId}" is open, ${cannot}` }
-      : connectedView.error
+      : !connectedView
         ? {
-            problem: `The connected genome view failed to load, ${cannot}: ${errorMessage(connectedView.error)}`,
+            problem: `The view with id "${connectedViewId}" is a ${namedViewType}, not a LinearGenomeView, ${cannot}`,
           }
-        : !connectedView.initialized || connectedView.pendingLaunch
-          ? { waiting: true }
-          : !connectedView.tracks.some(t => isTranscriptTrack(t))
-            ? {
-                problem: `The connected genome view has no feature tracks open, ${cannot}. Open the gene track that carries it.`,
-              }
-            : { view: connectedView }
+        : connectedView.error
+          ? {
+              problem: `The connected genome view failed to load, ${cannot}: ${errorMessage(connectedView.error)}`,
+            }
+          : !connectedView.initialized || connectedView.pendingLaunch
+            ? { waiting: true }
+            : !connectedView.tracks.some(t => isTranscriptTrack(t))
+              ? {
+                  problem: `The connected genome view has no feature tracks open, ${cannot}. Open the gene track that carries it.`,
+                }
+              : { view: connectedView }
 }
 
 /**
@@ -277,6 +285,7 @@ export function resolveConnectedTranscriptIfNeeded(
     connectedTranscript,
     connectedFeature,
     connectedViewId,
+    viewNamedByConnectedViewId,
     connectedView,
     blastParams,
     orthologParams,
@@ -285,6 +294,7 @@ export function resolveConnectedTranscriptIfNeeded(
     const readiness = lookupReadiness({
       transcriptId: connectedTranscript,
       connectedViewId,
+      namedViewType: viewNamedByConnectedViewId?.type,
       connectedView,
     })
     if ('problem' in readiness) {

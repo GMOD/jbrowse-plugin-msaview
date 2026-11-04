@@ -115,7 +115,7 @@ function unmappedBecause(view: ReportedView) {
       ? `transcript "${connectedTranscript}" is still being looked up`
       : !connectedView
         ? connectedViewId
-          ? `no view with id "${connectedViewId}" is open`
+          ? `no genome view with id "${connectedViewId}" is open`
           : 'no connectedViewId names a genome view'
         : transcriptMapping && 'reason' in transcriptMapping
           ? `the transcript is not mapped to the genome: ${transcriptMapping.reason}`

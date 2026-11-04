@@ -15,6 +15,7 @@ const rpcCall =
   >()
 const lgv = {
   id: 'lgv1',
+  type: 'LinearGenomeView',
   initialized: true,
   pendingLaunch: undefined as unknown,
   error: undefined as unknown,
@@ -227,6 +228,20 @@ describe('a lookup that cannot start', () => {
       expect(rpcCall).not.toHaveBeenCalled()
     },
   )
+
+  test('ends a waiting launch when the id names a view that is not a genome view', async () => {
+    sessionViews.replace([{ ...lgv, type: 'ProteinView' }])
+    const model = connectedView()
+    await settle()
+
+    expect(String(model.error)).toMatch(
+      /"lgv1" is a ProteinView, not a LinearGenomeView/,
+    )
+    expect(model.connectedView).toBeUndefined()
+    expect(model.report.connection?.viewOpen).toBe(false)
+    expect(model.showLoading).toBe(false)
+    expect(rpcCall).not.toHaveBeenCalled()
+  })
 
   test('a genome view that arrives after the launch clears the error and looks', async () => {
     sessionViews.replace([])

@@ -50,12 +50,15 @@ import type { MsaDataPayload } from './msaDataStore'
 import type { MafRegion, MsaViewInitState } from './types'
 import type { TranscriptRef } from './util'
 import type { MenuItem } from '@jbrowse/core/ui'
+import type { AbstractViewModel } from '@jbrowse/core/util'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 type LGV = LinearGenomeViewModel
 
-type MaybeLGV = LGV | undefined
+function isLinearGenomeView(view: AbstractViewModel): view is LGV {
+  return view.type === 'LinearGenomeView'
+}
 
 export interface IRegion {
   refName: string
@@ -355,10 +358,22 @@ export default function stateModelFactory() {
 
       /**
        * #getter
+       * whatever view `connectedViewId` names, genome view or not
        */
-      get connectedView() {
+      get viewNamedByConnectedViewId() {
         const { views } = getSession(self)
-        return views.find(f => f.id === self.connectedViewId) as MaybeLGV
+        return views.find(f => f.id === self.connectedViewId)
+      },
+    }))
+
+    .views(self => ({
+      /**
+       * #getter
+       * the view `connectedViewId` names, when it is a genome view
+       */
+      get connectedView(): LGV | undefined {
+        const view = self.viewNamedByConnectedViewId
+        return view && isLinearGenomeView(view) ? view : undefined
       },
     }))
 

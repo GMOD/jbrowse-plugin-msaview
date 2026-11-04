@@ -6,6 +6,7 @@ import stateModelFactory from './model'
 
 const lgv = {
   id: 'lgv1',
+  type: 'LinearGenomeView',
   initialized: true,
   showLoading: false,
   assemblyNames: [] as string[],
