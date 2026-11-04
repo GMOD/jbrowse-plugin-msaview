@@ -37,6 +37,7 @@ import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript
 import { syncSessionHighlights } from './sessionHighlights'
 import { transcriptMapping } from './transcriptMap'
 import { errorMessage, hasQueryRow } from './util'
+import { viewReport } from './viewReport'
 
 import type {
   BlastDatabase,
@@ -546,6 +547,16 @@ export default function stateModelFactory() {
        */
       get notices() {
         return self.warnings
+      },
+    }))
+
+    .views(self => ({
+      /**
+       * #getter
+       * what the view resolved to, as plain JSON. See docs/reading-the-view.md
+       */
+      get report() {
+        return viewReport(self)
       },
     }))
 

@@ -52,6 +52,100 @@ beforeEach(() => {
   vi.mocked(loadProteinDomains).mockReturnValue(new Promise(() => {}))
 })
 
+describe('view.report', () => {
+  test('an inline alignment on its own', () => {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { msa: MSA },
+    })
+    expect(model.report).toEqual({
+      loading: false,
+      error: undefined,
+      notices: [],
+      source: { kind: 'inline' },
+      rows: 2,
+      columns: 4,
+      domainAnnotations: 0,
+      uniprotId: undefined,
+      queryRow: { name: 'QUERY', found: true, offset: 0 },
+      connection: undefined,
+    })
+  })
+
+  test('a search names its program, database and job while it runs', () => {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      blastParams: {
+        searchProgram: 'phmmer',
+        blastDatabase: 'swissprot',
+        proteinSequence: 'MKVL',
+        maxHits: 50,
+      },
+    })
+    model.setRid('hmmer3_phmmer-R20261104-000000-0000-1-p1m')
+    expect(model.report).toMatchObject({
+      loading: true,
+      source: {
+        kind: 'phmmer',
+        database: 'swissprot',
+        maxHits: 50,
+        queryLength: 4,
+        jobId: 'hmmer3_phmmer-R20261104-000000-0000-1-p1m',
+        completed: false,
+      },
+      rows: 0,
+      columns: 0,
+    })
+  })
+
+  test('an ortholog launch names its source and taxon', () => {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      orthologParams: {
+        taxId: 9606,
+        source: 'uniref',
+        identity: 90,
+        geneCandidates: ['TP53'],
+        msaAlgorithm: 'clustalo',
+      },
+      launchCompleted: true,
+      data: { msa: MSA },
+    })
+    expect(model.report.source).toMatchObject({
+      kind: 'orthologs',
+      orthologSource: 'uniref',
+      taxId: 9606,
+      identity: 90,
+      geneCandidates: ['TP53'],
+      completed: true,
+    })
+  })
+
+  test('an error is reported as its message', () => {
+    const model = stateModelFactory().create({ type: 'MsaView' })
+    model.setError(new Error('No alignment named X in msa.fa.gz'))
+    expect(model.report.error).toBe('No alignment named X in msa.fa.gz')
+  })
+
+  test('is plain JSON', () => {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { msa: MSA },
+      connectedViewId: 'lgv1',
+      connectedFeature: HBB_LIKE,
+    })
+    expect(JSON.parse(JSON.stringify(model.report))).toEqual(model.report)
+    expect(model.report.connection).toEqual({
+      viewId: 'lgv1',
+      viewOpen: true,
+      transcript: 'TX-201',
+      refName: 'chr11',
+      mapped: true,
+      unmappedBecause: undefined,
+    })
+  })
+})
+
 describe('notices', () => {
   test('a query row the alignment lacks, on a linked view', () => {
     const model = stateModelFactory().create({
@@ -64,6 +158,11 @@ describe('notices', () => {
     expect(model.notices).toEqual([
       'No row is named "human", the query row, so the alignment is not linked to the genome',
     ])
+    expect(model.report.queryRow.found).toBe(false)
+    expect(model.report.connection).toMatchObject({
+      mapped: false,
+      unmappedBecause: 'no row is named "human"',
+    })
   })
 
   test('no query-row notice for an alignment linked to nothing', () => {
@@ -112,6 +211,7 @@ describe('the domain auto-load', () => {
     const model = accessionAlignment()
     expect(loadProteinDomains).toHaveBeenCalledTimes(1)
     expect(model.showLoading).toBe(true)
+    expect(model.report.loading).toBe(true)
   })
 
   test('a failure is a notice and ends the loading', async () => {

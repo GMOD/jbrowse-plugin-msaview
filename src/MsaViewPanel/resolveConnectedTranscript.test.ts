@@ -159,6 +159,11 @@ describe('a lookup that misses beside an alignment in hand', () => {
     expect(model.notices).toEqual([
       expect.stringMatching(/Transcript "NM_000546.6" was not found/),
     ])
+    expect(model.report.connection).toMatchObject({
+      transcript: 'NM_000546.6',
+      mapped: false,
+      unmappedBecause: expect.stringMatching(/was not found/),
+    })
   })
 
   test('is still loading while the lookup runs', async () => {
@@ -182,7 +187,14 @@ describe('a lookup that misses beside an alignment in hand', () => {
 
     expect(model.notices).toEqual([])
     expect(model.showLoading).toBe(false)
-    expect(model.transcriptToMsaMap?.refName).toBe('chr17')
+    expect(model.report.connection).toEqual({
+      viewId: 'lgv1',
+      viewOpen: true,
+      transcript: 'NM_000546.6',
+      refName: 'chr17',
+      mapped: true,
+      unmappedBecause: undefined,
+    })
   })
 
   test('a transcript that lands but does not map says why', async () => {
@@ -195,7 +207,7 @@ describe('a lookup that misses beside an alignment in hand', () => {
         /linked transcript is not mapped to the genome: its strand is undefined/,
       ),
     ])
-    expect(model.transcriptToMsaMap).toBeUndefined()
+    expect(model.report.connection?.mapped).toBe(false)
   })
 })
 
