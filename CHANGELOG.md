@@ -1,3 +1,24 @@
+## [5.16.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.15.0...v5.16.0) (2026-11-04)
+
+### Bug Fixes
+
+- A failed genome link leaves the alignment up, and every wait settles ([d510151](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d510151611c98fa495f79d010f0238ee4713a618))
+- A connectedViewId naming a non-genome view settles with an error ([da1b9ca](https://github.com/GMOD/jbrowse-plugin-msaview/commit/da1b9ca254e9a1bc54756798af34dfe139e51e8f))
+- A stalled NCBI domain fetch times out instead of holding readiness ([e9ba1e6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e9ba1e679775fa706041d01e4ecf5a9de6294c65))
+- Say why a spec lists the genome view before its MsaView ([209b89c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/209b89c540272657a752ad8171de98726ba035e3))
+
+### Documentation
+
+- Reading the view, and the launch keys the parameter list missed ([76d3a5f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/76d3a5f5ed03dedc3792b7fb106d66df3b9cb3d8))
+
+### Features
+
+- View.report, what a launch resolved to as plain JSON ([b05255f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b05255f9b6b8010848b17517bd5380725ce027d7))
+
+### Tests
+
+- The domain legs wait for the view to report ready, not a fixed sleep ([7f771d3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/7f771d37347ac67852988038af8706d75bc52d9b))
+
 ## [5.15.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.14.1...v5.15.0) (2026-10-31)
 
 ### Other Changes
