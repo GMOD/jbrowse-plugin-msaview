@@ -18,6 +18,7 @@ import { runLaunch } from './runLaunch'
 import { getProteinViews } from './structureConnection'
 import { proteinPositionsInRange } from './transcriptMap'
 import {
+  errorMessage,
   getUniprotIdFromAlphaFoldUrl,
   hasQueryRow,
   transcriptPosToVisibleCol,
@@ -179,8 +180,28 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
  * lookup, since the query row is that transcript's translation. The resolver
  * setting `connectedFeature` is what refires the launchers.
  */
-function awaitingTranscript(self: JBrowsePluginMsaViewModel) {
+function awaitingTranscript(self: TranscriptWait) {
   return !!self.connectedTranscript && !self.connectedFeature
+}
+
+interface TranscriptWait {
+  connectedTranscript?: string
+  connectedFeature?: unknown
+  blastParams?: unknown
+  orthologParams?: unknown
+  launchCompleted: boolean
+}
+
+/**
+ * A launch that has not run yet and is held back by the transcript lookup, so
+ * a lookup that fails is a launch that cannot proceed.
+ */
+export function launchAwaitsTranscript(self: TranscriptWait) {
+  return (
+    !!(self.blastParams ?? self.orthologParams) &&
+    !self.launchCompleted &&
+    awaitingTranscript(self)
+  )
 }
 
 /**
@@ -237,20 +258,30 @@ export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
     }
     addDisposer(self, abort)
     self.setDomainsRequested(true)
+    self.setLoadingDomains(true)
     self.setStatus({
       msg: 'Fetching protein domains from NCBI',
       onCancel: abort,
     })
     void (async () => {
       try {
-        await loadProteinDomains(self, controller.signal)
+        const notice = await loadProteinDomains(self, controller.signal)
+        if (notice && isAlive(self)) {
+          self.addWarning(notice)
+        }
       } catch (e) {
         if (!isAbortError(e)) {
           console.error('[msaview-domains] auto-load failed:', e)
+          if (isAlive(self)) {
+            self.addWarning(
+              `Protein domains did not load from NCBI: ${errorMessage(e)}`,
+            )
+          }
         }
       } finally {
         if (isAlive(self)) {
           self.setStatus(undefined)
+          self.setLoadingDomains(false)
         }
       }
     })()
@@ -470,10 +501,15 @@ export function runCleanup() {
   })
 }
 
+/**
+ * Waits for the genome view to show an assembly, since the track is added to
+ * that assembly: before navigation `showDomainsOnGenome` has none to name, and
+ * clearing the request then dropped it unfulfilled.
+ */
 export function showDomainsOnGenomeIfAsked(self: JBrowsePluginMsaViewModel) {
   if (
     self.domainsOnGenome &&
-    self.connectedView &&
+    self.connectedView?.assemblyNames[0] &&
     self.connectedDomains.features.length > 0
   ) {
     self.showDomainsOnGenome()

@@ -1,15 +1,13 @@
 import { genomeToTranscriptSeqMapping } from 'g2p_mapper'
 
+import { isRecord } from './util'
+
 import type { Feat } from 'g2p_mapper'
 
 export const MAX_CODING_BASES = 1_000_000
 
 export type TranscriptMap = ReturnType<typeof genomeToTranscriptSeqMapping> & {
   codingPositions: number[]
-}
-
-function isRecord(val: unknown): val is Record<string, unknown> {
-  return typeof val === 'object' && val !== null
 }
 
 interface CdsRow {
@@ -90,20 +88,20 @@ function mappableTranscript(
   }
 }
 
-const warned = new WeakSet<object>()
-
-export function transcriptMap(feature: unknown): TranscriptMap | undefined {
+/**
+ * The genome mapping of the linked transcript, or why there is none. The
+ * reason reaches the view's notices: a transcript that does not map leaves
+ * every genome link dead with nothing else to say so.
+ */
+export function transcriptMapping(feature: unknown) {
   const checked = mappableTranscript(feature)
-  if ('reason' in checked) {
-    if (isRecord(feature) && !warned.has(feature)) {
-      warned.add(feature)
-      console.warn(
-        `[msaview] the linked transcript is not mapped to the genome: ${checked.reason}`,
-      )
-    }
-    return undefined
-  }
-  const mapping = genomeToTranscriptSeqMapping(checked.transcript)
+  return 'reason' in checked
+    ? checked
+    : { map: withCodingPositions(checked.transcript) }
+}
+
+function withCodingPositions(transcript: Feat) {
+  const mapping = genomeToTranscriptSeqMapping(transcript)
   return {
     ...mapping,
     codingPositions: Object.keys(mapping.g2p)

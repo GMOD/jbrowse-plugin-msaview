@@ -24,8 +24,8 @@ const genpept = (accessions: string[]) =>
 const accessions = Array.from({ length: 150 }, (_, i) => `NP_${i}`)
 
 // 1000 rows is ten batches, and a throttle on the seventh used to discard the
-// six already answered, uncached
-test('a failed batch keeps and caches the batches before it', async () => {
+// six already answered, uncached; the throttle itself only reached the console
+test('a failed batch keeps and caches the batches before it, and says why', async () => {
   let call = 0
   vi.stubGlobal('fetch', () =>
     Promise.resolve(
@@ -34,8 +34,10 @@ test('a failed batch keeps and caches the batches before it', async () => {
         : new Response('throttled', { status: 429 }),
     ),
   )
-  const found = await fetchProteinDomains(accessions)
-  expect(found.size).toBe(100)
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  const { byAccession, failure } = await fetchProteinDomains(accessions)
+  expect(byAccession.size).toBe(100)
+  expect(String(failure)).toMatch(/429/)
   expect(vi.mocked(saveDomains).mock.calls[0]![0]).toHaveLength(100)
   expect(getCachedDomains).toHaveBeenCalled()
 })

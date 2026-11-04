@@ -6,6 +6,7 @@ import { transaction, untracked } from 'mobx'
 
 import { fetchSeq } from '../LaunchMsaView/components/fetchSeq'
 import { getTranscriptFeatures } from '../LaunchMsaView/util'
+import { errorMessage } from './util'
 
 import type {
   BlastParams,
@@ -75,6 +76,10 @@ export function searchWindows(view: GenomeView) {
   return visible.length > 0 ? [visible, displayed] : [displayed]
 }
 
+function isTranscriptTrack(track: { type: string }) {
+  return track.type === 'FeatureTrack'
+}
+
 /**
  * Gene models live on feature tracks. Asking an alignments, variant or
  * quantitative track for a chromosome's worth of features to look for a
@@ -83,7 +88,7 @@ export function searchWindows(view: GenomeView) {
 export function transcriptTracks<
   T extends { type: string; configuration: AnyConfigurationModel },
 >(tracks: readonly T[]) {
-  return tracks.filter(t => t.type === 'FeatureTrack')
+  return tracks.filter(t => isTranscriptTrack(t))
 }
 
 async function findTranscript(
@@ -208,9 +213,51 @@ async function lookUp({
     if (isCurrent()) {
       console.error(e)
       self.setProgress('')
-      self.setError(e)
+      self.failConnection(e)
     }
   }
+}
+
+interface ConnectableView {
+  initialized: boolean
+  pendingLaunch?: unknown
+  error?: unknown
+  tracks: readonly { type: string }[]
+}
+
+/**
+ * Whether the connected genome view can be searched for `transcriptId` yet. A
+ * view still initializing, or still opening the tracks its launch names, is
+ * waited for; everything else that stops a lookup is a problem to report,
+ * since nothing would otherwise end the wait.
+ */
+export function lookupReadiness<V extends ConnectableView>({
+  transcriptId,
+  connectedViewId,
+  connectedView,
+}: {
+  transcriptId: string
+  connectedViewId: string | undefined
+  connectedView: V | undefined
+}): { problem: string } | { waiting: true } | { view: V } {
+  const cannot = `so transcript "${transcriptId}" cannot be looked up`
+  return !connectedViewId
+    ? {
+        problem: `connectedTranscript "${transcriptId}" needs a connectedViewId naming the genome view to look it up in`,
+      }
+    : !connectedView
+      ? { problem: `No view with id "${connectedViewId}" is open, ${cannot}` }
+      : connectedView.error
+        ? {
+            problem: `The connected genome view failed to load, ${cannot}: ${errorMessage(connectedView.error)}`,
+          }
+        : !connectedView.initialized || connectedView.pendingLaunch
+          ? { waiting: true }
+          : !connectedView.tracks.some(t => isTranscriptTrack(t))
+            ? {
+                problem: `The connected genome view has no feature tracks open, ${cannot}. Open the gene track that carries it.`,
+              }
+            : { view: connectedView }
 }
 
 /**
@@ -218,9 +265,10 @@ async function lookUp({
  * genome view has its assembly and tracks, then hand the translation to
  * whichever launch is waiting for a query.
  *
- * The autorun re-fires on the view's readiness (a track opened after a miss)
- * and on the request itself, which is what `retryLaunch` re-states. The lookup
- * runs untracked, so scrolling the genome view is not a reason to look again.
+ * The autorun re-fires on the view's readiness (a track opened after a miss,
+ * a view that arrives after this one) and on the request itself, which is what
+ * `retryLaunch` re-states. The lookup runs untracked, so scrolling the genome
+ * view is not a reason to look again.
  */
 export function resolveConnectedTranscriptIfNeeded(
   self: JBrowsePluginMsaViewModel,
@@ -228,28 +276,36 @@ export function resolveConnectedTranscriptIfNeeded(
   const {
     connectedTranscript,
     connectedFeature,
+    connectedViewId,
     connectedView,
     blastParams,
     orthologParams,
   } = self
-  if (
-    !connectedTranscript ||
-    connectedFeature ||
-    !connectedView?.initialized ||
-    connectedView.tracks.length === 0
-  ) {
-    return
-  }
-  latestLookup.get(self)?.abort()
-  const controller = new AbortController()
-  latestLookup.set(self, controller)
-  untracked(() => {
-    void lookUp({
-      self,
+  if (connectedTranscript && !connectedFeature) {
+    const readiness = lookupReadiness({
       transcriptId: connectedTranscript,
-      blastParams,
-      orthologParams,
-      signal: controller.signal,
+      connectedViewId,
+      connectedView,
     })
-  })
+    if ('problem' in readiness) {
+      latestLookup.get(self)?.abort()
+      self.failConnection(new Error(readiness.problem))
+    } else {
+      self.clearConnectionFailure()
+      if ('view' in readiness) {
+        latestLookup.get(self)?.abort()
+        const controller = new AbortController()
+        latestLookup.set(self, controller)
+        untracked(() => {
+          void lookUp({
+            self,
+            transcriptId: connectedTranscript,
+            blastParams,
+            orthologParams,
+            signal: controller.signal,
+          })
+        })
+      }
+    }
+  }
 }

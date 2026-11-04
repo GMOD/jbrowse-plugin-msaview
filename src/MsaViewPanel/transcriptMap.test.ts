@@ -1,9 +1,9 @@
-import { afterAll, afterEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test } from 'vitest'
 
 import {
   MAX_CODING_BASES,
   proteinPositionsInRange,
-  transcriptMap,
+  transcriptMapping,
 } from './transcriptMap'
 
 import type { TranscriptMap } from './transcriptMap'
@@ -13,11 +13,16 @@ function cds(start: number, end: number, extra: Record<string, unknown> = {}) {
 }
 
 function mapped(feature: unknown): TranscriptMap {
-  const map = transcriptMap(feature)
-  if (!map) {
-    throw new Error('expected the transcript to map')
+  const mapping = transcriptMapping(feature)
+  if ('reason' in mapping) {
+    throw new Error(`expected the transcript to map: ${mapping.reason}`)
   }
-  return map
+  return mapping.map
+}
+
+function unmappedReason(feature: unknown) {
+  const mapping = transcriptMapping(feature)
+  return 'reason' in mapping ? mapping.reason : undefined
 }
 
 function transcript(extra: Record<string, unknown> = {}) {
@@ -31,15 +36,7 @@ function transcript(extra: Record<string, unknown> = {}) {
   }
 }
 
-describe('transcriptMap on a malformed transcript', () => {
-  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-  afterEach(() => {
-    warn.mockClear()
-  })
-  afterAll(() => {
-    warn.mockRestore()
-  })
-
+describe('transcriptMapping on a malformed transcript', () => {
   test.each([
     ['nothing', null, /not a feature/],
     ['no refName', transcript({ refName: undefined }), /no refName/],
@@ -63,26 +60,14 @@ describe('transcriptMap on a malformed transcript', () => {
       /more than any real transcript/,
     ],
   ])('%s maps to nothing and says why', (_, feature, reason) => {
-    expect(transcriptMap(feature)).toBeUndefined()
-    expect(warn).toHaveBeenCalledTimes(feature ? 1 : 0)
-    if (feature) {
-      expect(String(warn.mock.calls[0]![0])).toMatch(reason)
-    }
-  })
-
-  test('says why once per feature, however often the getter recomputes', () => {
-    const feature = transcript({ strand: 0 })
-    transcriptMap(feature)
-    transcriptMap(feature)
-    expect(warn).toHaveBeenCalledTimes(1)
+    expect(unmappedReason(feature)).toMatch(reason)
   })
 
   test('a CDS that is not a multiple of 3 still maps its whole codons', () => {
-    const map = transcriptMap(transcript({ subfeatures: [cds(100, 107)] }))
-    expect(map?.g2p[100]).toBe(0)
-    expect(map?.g2p[105]).toBe(1)
-    expect(map?.g2p[106]).toBe(2)
-    expect(warn).not.toHaveBeenCalled()
+    const map = mapped(transcript({ subfeatures: [cds(100, 107)] }))
+    expect(map.g2p[100]).toBe(0)
+    expect(map.g2p[105]).toBe(1)
+    expect(map.g2p[106]).toBe(2)
   })
 
   test.each([
@@ -92,19 +77,17 @@ describe('transcriptMap on a malformed transcript', () => {
     [7, 0],
     [null, 0],
   ])('a phase of %j reads as %i', (phase, expected) => {
-    const map = transcriptMap(
-      transcript({ subfeatures: [cds(100, 109, { phase })] }),
-    )
-    expect(map?.g2p[100 + expected]).toBe(expected ? 1 : 0)
+    const map = mapped(transcript({ subfeatures: [cds(100, 109, { phase })] }))
+    expect(map.g2p[100 + expected]).toBe(expected ? 1 : 0)
   })
 
   test('the malformed CDS rows are dropped and the well-formed ones kept', () => {
-    const map = transcriptMap(
+    const map = mapped(
       transcript({
         subfeatures: [cds(100, 103), { type: 'CDS', start: 'x', end: 5 }],
       }),
     )
-    expect(map?.codingPositions).toEqual([100, 101, 102])
+    expect(map.codingPositions).toEqual([100, 101, 102])
   })
 })
 

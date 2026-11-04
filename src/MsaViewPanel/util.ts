@@ -41,6 +41,15 @@ export function transcriptFields(transcript?: TranscriptRef) {
     : (transcript as Record<string, unknown>)
 }
 
+export function isRecord(val: unknown): val is Record<string, unknown> {
+  return typeof val === 'object' && val !== null
+}
+
+/** an error's message, for a notice or a report; anything else as a string */
+export function errorMessage(e: unknown) {
+  return e instanceof Error ? e.message : String(e)
+}
+
 export function str(val: unknown) {
   return typeof val === 'string' ? val : undefined
 }
