@@ -153,11 +153,14 @@ and `WorkingDirectory/` is not read. As with any hosted file, the server must
 send `Access-Control-Allow-Origin`.
 
 OrthoFinder 3 writes the alignments by default, OrthoFinder 2 only with
-`-M msa`, and `-og` stops either before them. Both releases' tree layouts are
-read: 3's single `Resolved_Gene_Trees.txt` and 2's file per orthogroup.
-Orthogroups of fewer than four genes open as an alignment without a tree, and
-the few OrthoFinder does not align (111 of 13,333 over five flies) say so in the
-dialog.
+`-M msa`, and `-og` stops either before them. Run it with `-z` as well: without
+it OrthoFinder trims mostly-gap columns from a long alignment, which takes
+residues out of the rows (10 of human ADAM32's 787), and the dialog can neither
+find such a gene's row by its protein nor read a column back to its codon. Both
+releases' tree layouts are read: 3's single `Resolved_Gene_Trees.txt` and 2's
+file per orthogroup. Orthogroups of fewer than four genes open as an alignment
+without a tree, and the few OrthoFinder does not align (111 of 13,333 over five
+flies) say so in the dialog.
 
 The link to the genome is the protein's name, looked up in the column of
 `Orthogroups.tsv` named after the genome view's assembly, so name each proteome
