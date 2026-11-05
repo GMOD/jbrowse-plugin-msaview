@@ -56,6 +56,14 @@ export function getId(val?: Feature): string {
   return val?.id() ?? ''
 }
 
+// a proteome downloaded from NCBI or Ensembl names each protein by the CDS's
+// protein_id rather than by its transcript
+function getCdsProteinIds(transcript: Feature): unknown[] {
+  return (transcript.get('subfeatures') ?? [])
+    .filter(f => f.get('type') === 'CDS')
+    .map(f => f.get('protein_id'))
+}
+
 function getMatchableIds(val?: Feature): string[] {
   return val
     ? uniqueDefined([
@@ -64,12 +72,55 @@ function getMatchableIds(val?: Feature): string[] {
         val.get('id'),
         val.get('transcript_id'),
         val.get('gene_name'),
+        val.get('locus_tag'),
+        ...getCdsProteinIds(val),
       ])
     : []
 }
 
 export function featureMatchesId(feature: Feature, id: string): boolean {
   return getMatchableIds(feature).includes(id)
+}
+
+const geneIdPrefix = /^gene[-:]/
+
+// A set keyed by gene, such as an OrthoFinder run over one protein per gene,
+// names the gene by its GFF3 ID without NCBI's `gene-` or Ensembl's `gene:`
+function getGeneMatchableIds(gene: Feature): string[] {
+  const id = gene.get('id')
+  return uniqueDefined([
+    id,
+    id?.replace(geneIdPrefix, ''),
+    gene.get('gene_id'),
+    gene.get('locus_tag'),
+  ])
+}
+
+// OrthoFinder writes every gene name with each character that Newick or a TSV
+// cannot hold replaced by `_` (its utils/gene_ids.py clean_name), so NCBI's
+// gene `E(spl)m2-BFM` is `E_spl_m2-BFM` in its results. It also replaces control
+// characters, which a GFF3 attribute cannot carry unescaped.
+const orthoFinderUnsafe = /[\s:;(),[\]='"]/g
+
+function findIn(candidates: string[], ids: ReadonlySet<string>) {
+  return (
+    candidates.find(id => ids.has(id)) ??
+    candidates
+      .map(id => id.replace(orthoFinderUnsafe, '_'))
+      .find(id => ids.has(id))
+  )
+}
+
+/** the dataset entry for this transcript, else for the gene it belongs to */
+export function findDatasetId(
+  transcript: Feature,
+  gene: Feature,
+  ids: ReadonlySet<string>,
+) {
+  return (
+    findIn(getMatchableIds(transcript), ids) ??
+    findIn(getGeneMatchableIds(gene), ids)
+  )
 }
 
 export function getTranscriptDisplayName(val?: Feature) {

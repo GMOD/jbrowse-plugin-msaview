@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
 import { getEnv, getSession } from '@jbrowse/core/util'
@@ -10,7 +10,7 @@ import TextField2 from '../../../components/TextField2'
 import { useFetch } from '../../../utils/useFetch'
 import { resolveQueryRowName, useQueryRowName } from '../../useQueryRowName'
 import {
-  featureMatchesId,
+  findDatasetId,
   getGeneDisplayName,
   getLinearGenomeView,
   getTranscriptDisplayName,
@@ -66,10 +66,13 @@ const PreLoadedMSA = observer(function ({
     () => fetchMSAList({ config: selectedDataset!.adapter, pluginManager }),
   )
 
+  const msaIds = useMemo(() => msaList && new Set(msaList), [msaList])
   const transcriptSelection = useTranscriptSelection({
     feature,
     view,
-    validIds: msaList,
+    hasData: msaIds
+      ? transcript => !!findDatasetId(transcript, feature, msaIds)
+      : undefined,
     preferredTranscriptId,
   })
   const { selectedTranscript, proteinSequence, sequenceStatus } =
@@ -77,9 +80,10 @@ const PreLoadedMSA = observer(function ({
 
   // the dataset's name for this transcript, which a track is free not to use
   // as the feature's own id
-  const msaId = selectedTranscript
-    ? msaList?.find(id => featureMatchesId(selectedTranscript, id))
-    : undefined
+  const msaId =
+    selectedTranscript && msaIds
+      ? findDatasetId(selectedTranscript, feature, msaIds)
+      : undefined
   const {
     data: msaData,
     isLoading: msaDataLoading,

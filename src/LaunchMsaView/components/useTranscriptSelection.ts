@@ -6,24 +6,22 @@ import { useFeatureSequence } from './useFeatureSequence'
 import type { SequenceStatus } from './SequenceStatus'
 import type { Feature } from '@jbrowse/core/util'
 
-// Keep the current selection if it's valid for the given validIds, otherwise
-// fall back to the first valid option (or the current id if none qualify). With
-// no validIds constraint the current selection always stands.
+// Keep the current selection if it has data, otherwise fall back to the first
+// option that does (or the current id if none do). With no hasData constraint
+// the current selection always stands.
 function pickSelectedId(
   currentId: string,
   options: Feature[],
-  validIds: string[] | undefined,
+  hasData: ((transcript: Feature) => boolean) | undefined,
 ): string {
-  if (!validIds?.length) {
+  if (!hasData) {
     return currentId
   }
-  const isValid = (opt: Feature) =>
-    validIds.some(id => featureMatchesId(opt, id))
   const current = options.find(opt => getId(opt) === currentId)
-  if (current && isValid(current)) {
+  if (current && hasData(current)) {
     return currentId
   }
-  const firstValid = options.find(isValid)
+  const firstValid = options.find(hasData)
   return firstValid ? getId(firstValid) : currentId
 }
 
@@ -54,12 +52,13 @@ function sequenceStatus({
 export function useTranscriptSelection({
   feature,
   view,
-  validIds,
+  hasData,
   preferredTranscriptId,
 }: {
   feature: Feature
   view: { assemblyNames?: string[] } | undefined
-  validIds?: string[]
+  /** which transcripts the panel can offer, when it can only offer some */
+  hasData?: (transcript: Feature) => boolean
   /**
    * the isoform the user right-clicked, when the dialog opened on its gene.
    * Ignored when this gene does not carry it, so a stale id falls back to the
@@ -74,7 +73,7 @@ export function useTranscriptSelection({
         options[0],
     ),
   )
-  const validatedSelectedId = pickSelectedId(selectedId, options, validIds)
+  const validatedSelectedId = pickSelectedId(selectedId, options, hasData)
   const selectedTranscript = options.find(
     val => getId(val) === validatedSelectedId,
   )
@@ -92,6 +91,6 @@ export function useTranscriptSelection({
     error,
     isLoading,
     sequenceStatus: sequenceStatus({ error, isLoading, proteinSequence }),
-    validIds,
+    hasData,
   }
 }

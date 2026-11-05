@@ -6,7 +6,6 @@ import { makeStyles } from 'tss-react/mui'
 
 import ReadOnlyTextField2 from '../../components/ReadOnlyTextField2'
 import {
-  featureMatchesId,
   getGeneDisplayName,
   getId,
   getTranscriptDisplayName,
@@ -37,7 +36,7 @@ const TranscriptSelector = observer(function TranscriptSelector({
   setSelectedId,
   proteinSequence,
   sequenceStatus = 'ready',
-  validIds,
+  hasData,
 }: {
   feature: Feature
   options: Feature[]
@@ -46,7 +45,7 @@ const TranscriptSelector = observer(function TranscriptSelector({
   setSelectedId: (transcriptId: string) => void
   proteinSequence: string | undefined
   sequenceStatus?: SequenceStatus
-  validIds?: string[]
+  hasData?: (transcript: Feature) => boolean
 }) {
   const { classes } = useStyles()
   const [showSequence, setShowSequence] = useState(false)
@@ -71,15 +70,13 @@ const TranscriptSelector = observer(function TranscriptSelector({
           }}
         >
           {options.map(val => {
-            const inSet = validIds
-              ? validIds.some(id => featureMatchesId(val, id))
-              : true
+            const inSet = hasData ? hasData(val) : true
             const { len, mod } = getTranscriptLength(val)
             return (
               <MenuItem value={getId(val)} key={val.id()} disabled={!inSet}>
                 {getTranscriptDisplayName(val)} ({len} aa){' '}
                 {mod ? ` (possible fragment)` : ''}
-                {validIds ? (inSet ? ' (has data)' : ' (no data)') : ''}
+                {hasData ? (inSet ? ' (has data)' : ' (no data)') : ''}
               </MenuItem>
             )
           })}
