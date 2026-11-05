@@ -63,6 +63,7 @@ function getMatchableIds(val?: Feature): string[] {
         val.get('name'),
         val.get('id'),
         val.get('transcript_id'),
+        val.get('gene_name'),
       ])
     : []
 }

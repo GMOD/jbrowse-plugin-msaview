@@ -10,10 +10,10 @@
       {
         "datasetId": "ucsc_100way",
         "name": "UCSC 100-way",
-        "description": "The source data for these multiple sequence alignments is from <a href=\"https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/\">knownCanonical.multiz100way.protAA.fa.gz</a>",
+        "description": "The source data for these multiple sequence alignments is from <a href=\"https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/\">knownCanonical.multiz100way.exonAA.fa.gz</a>",
         "adapter": {
           "type": "BgzipFastaMsaAdapter",
-          "uri": "https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz"
+          "uri": "https://jbrowse.org/demos/msaview/100way/hg38.knownCanonical.multiz100way.aa.fa.gz"
         }
       }
     ]

@@ -2,11 +2,15 @@ import { getAdapter } from '@jbrowse/core/data_adapters/dataAdapterCache'
 
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AnyConfigurationModel } from '@jbrowse/core/configuration'
-import type { Feature } from '@jbrowse/core/util'
+
+export interface DatasetMsa {
+  msa: string
+  tree?: string
+}
 
 interface MsaDataAdapter {
   getMSAList(): Promise<string[]>
-  getMSA(msaId: string): Promise<Feature[]>
+  getMSA(msaId: string): Promise<DatasetMsa>
 }
 
 async function getMsaAdapter(
@@ -23,7 +27,7 @@ export async function fetchMSAList({
 }: {
   config: AnyConfigurationModel
   pluginManager: PluginManager
-}): Promise<string[]> {
+}) {
   const adapter = await getMsaAdapter(pluginManager, config)
   return adapter.getMSAList()
 }
@@ -36,7 +40,7 @@ export async function fetchMSA({
   config: AnyConfigurationModel
   pluginManager: PluginManager
   msaId: string
-}): Promise<Feature[]> {
+}) {
   const adapter = await getMsaAdapter(pluginManager, config)
   return adapter.getMSA(msaId)
 }

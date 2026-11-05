@@ -92,14 +92,13 @@ session=spec-{"views":[{
 ### Where new sources belong
 
 Live ortholog services are the sources that cost per-source code: an interactive
-lookup against NCBI, PANTHER or UniProt each needed its own client.
-`msaIndexedLocation` — a hosted bgzip alignment random-read by gene name — costs
-none, and new species coverage belongs there. A build script derives the
-alignment offline (react-msaview's `scripts/gene-explorer/build-data.mjs` does
-it for UCSC multiz) and the session names a URL, so the plugin renders it
-without knowing where the rows came from.
-[Your own alignments](your-own-alignments.md#one-file-read-by-transcript-msaindexedlocation)
-has the file layout.
+lookup against NCBI, PANTHER or UniProt each needed its own client. A hosted
+bgzip alignment random-read by gene name costs none: `msa.datasets` offers one
+in the dialog and `msaIndexedLocation` names one in a link, and new species
+coverage belongs there. The alignment is derived offline and the plugin renders
+it without knowing where the rows came from.
+[Your own alignments](your-own-alignments.md#a-dataset-for-every-gene) has the
+file layout.
 
 ## Searching: `searchParams`
 

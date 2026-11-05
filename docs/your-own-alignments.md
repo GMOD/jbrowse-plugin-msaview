@@ -59,8 +59,9 @@ has to send `Access-Control-Allow-Origin`. [Launching](launching.md) covers
 
 ## A dataset for every gene
 
-A site can offer a set of alignments, one per transcript, in the dialog's
-**Pre-loaded MSA datasets** tab. List them under `msa.datasets` in the config:
+A site can offer a set of alignments, one per gene or transcript, in the
+dialog's **Pre-loaded MSA datasets** tab. List them under `msa.datasets` in the
+config:
 
 ```json
 {
@@ -72,7 +73,7 @@ A site can offer a set of alignments, one per transcript, in the dialog's
         "description": "Protein alignments from UCSC's multiz100way",
         "adapter": {
           "type": "BgzipFastaMsaAdapter",
-          "uri": "https://jbrowse.org/demos/knownCanonical.multiz100way.protAA.fa.gz"
+          "uri": "https://jbrowse.org/demos/msaview/100way/hg38.knownCanonical.multiz100way.aa.fa.gz"
         }
       }
     ]
@@ -80,29 +81,56 @@ A site can offer a set of alignments, one per transcript, in the dialog's
 }
 ```
 
-The file is a bgzipped FASTA with its `.fai` and `.gzi` beside it
-(`samtools faidx` on a `bgzip`ped file writes both), holding every alignment's
-rows. The part of a sequence name before the first `_` names the alignment it
-belongs to, so `ENST00000269305.9_hg38` and `ENST00000269305.9_panTro4` are two
-rows of one alignment. `msaRegex` on the adapter changes that separator. The
-dialog offers an alignment when that name equals the transcript's id, `name` or
-`transcript_id` exactly, version included, and finds the query row by residues,
-falling back to `<transcriptId>_<assembly>`.
+The file is a bgzipped FASTA holding every alignment's rows, each alignment's
+rows written together, with a `.gzi` and an `.idx` beside it. `bgzip -i` writes
+the `.gzi`. The `.idx` names each alignment and gives its uncompressed byte
+offset and length, one line per alignment, so the dialog lists the set from it
+and reads a chosen alignment as one block. For UCSC's 100-way that is a 211 kB
+list and one ~70 kB read, where the per-row `.fai` the adapter would otherwise
+read is 2M lines and 91 MB. The adapter looks for `<uri>.idx` the way the host
+looks for `<uri>.fai`; `msaIndexLocation` names one kept elsewhere.
 
-## One file read by transcript: `msaIndexedLocation`
+The dialog offers an alignment when its name equals the transcript's id, `name`,
+`transcript_id` or `gene_name` exactly, so a set keyed by gene symbol serves
+every isoform of the gene, and finds the query row by residues.
+
+Without an `.idx` the adapter falls back to the `.fai` (`samtools faidx` on a
+bgzipped file writes it and the `.gzi`), and groups rows into alignments by
+name: the part before the first `_` names the alignment, so
+`ENST00000269305.9_hg38` and `ENST00000269305.9_panTro4` are two rows of one
+alignment. `msaRegex` on the adapter changes that separator, and the query row
+falls back to `<transcriptId>_<assembly>`. That suits a set of a few hundred
+alignments; at genome scale the `.fai` is the slow part.
+
+### Writing the `.idx`
+
+For a FASTA named that way, with each alignment's rows together, this writes the
+`.idx` from the uncompressed file:
+
+```sh
+bgzip -dc genes.fa.gz | LC_ALL=C awk '
+  /^>/ { id = substr($0, 2); sub(/_.*/, "", id)
+         if (id != cur) { if (cur != "") print cur "\t" start "\t" pos - start
+                          cur = id; start = pos + 0 } }
+  { pos += length($0) + 1 }
+  END { print cur "\t" start "\t" pos - start }' > genes.fa.gz.idx
+```
+
+A row name need not carry the alignment's name at all if the `.idx` is written
+some other way: the 100-way file's rows are named by assembly alone (`hg38`,
+`panTro4`), and only its `.idx` says which gene each block is.
+
+## One file read by gene: `msaIndexedLocation`
 
 For a genome-scale set behind a link rather than a dialog, `msaIndexedLocation`
-random-reads one transcript's alignment out of a single bgzip file:
+random-reads one alignment out of the same kind of file:
 
 ```
-{"type":"MsaView","msaIndexedLocation":{"uri":"https://example.org/genes.fa.gz"},"msaName":"ENST00000269305",
+{"type":"MsaView","msaIndexedLocation":{"uri":"https://example.org/genes.fa.gz"},"msaName":"TP53",
  "connectedViewId":"lgv1","connectedTranscript":"ENST00000269305.9","querySeqName":"hg38"}
 ```
 
-Beside `genes.fa.gz` the plugin expects `genes.fa.gz.gzi`, the bgzip index, and
-`genes.fa.gz.idx`, a TSV of `name`, uncompressed byte offset and length for each
-alignment's block. It fetches the small `.idx` once, looks up `msaName` ignoring
-any trailing version, and reads just that block, which is already plain FASTA.
-One file then serves every gene with no per-gene files or coordinates.
-react-msaview's `scripts/gene-explorer/build-data.mjs` builds such a file from
-UCSC's multiz alignments, and is the model for building one from your own.
+Beside `genes.fa.gz` the plugin expects `genes.fa.gz.gzi` and `genes.fa.gz.idx`,
+found by suffix. It fetches the `.idx` once, looks up `msaName` ignoring any
+trailing version, and reads just that block, which is already plain FASTA. One
+file then serves every gene with no per-gene files or coordinates.

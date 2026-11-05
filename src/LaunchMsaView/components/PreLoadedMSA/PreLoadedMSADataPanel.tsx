@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import { LoadingEllipses, SanitizedHTML } from '@jbrowse/core/ui'
 import { getEnv, getSession } from '@jbrowse/core/util'
@@ -96,12 +96,7 @@ const PreLoadedMSA = observer(function ({
       }),
   )
 
-  const msaText = useMemo(
-    () =>
-      msaData?.map(r => `>${r.get('refName')}\n${r.get('seq')}`).join('\n') ??
-      '',
-    [msaData],
-  )
+  const msaText = msaData?.msa ?? ''
 
   // The dataset's row for this transcript used to be assumed -- the launch
   // named `<transcriptId>_<assembly>` and hoped the file agreed. Nothing
@@ -178,7 +173,7 @@ const PreLoadedMSA = observer(function ({
         hint={
           msaDataLoading ? (
             <LoadingEllipses message="Loading alignment" />
-          ) : !!msaData?.length && !querySeqName ? (
+          ) : !!msaText && !querySeqName ? (
             <Typography color="textSecondary" variant="body2">
               no row matches this transcript
             </Typography>
@@ -189,9 +184,7 @@ const PreLoadedMSA = observer(function ({
         // launching without a query row opens a view that renders and then
         // never navigates, which reads as a broken feature rather than a
         // dataset that does not cover this gene
-        submitDisabled={
-          !selectedTranscript || !msaData?.length || !querySeqName
-        }
+        submitDisabled={!selectedTranscript || !msaText || !querySeqName}
         onSubmit={placement => {
           if (selectedTranscript && msaText) {
             submit(() =>
@@ -208,7 +201,7 @@ const PreLoadedMSA = observer(function ({
                 colorSchemeName: 'percent_identity_dynamic',
                 querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
-                data: { msa: msaText },
+                data: { msa: msaText, tree: msaData?.tree },
               }),
             )
           }
