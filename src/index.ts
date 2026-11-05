@@ -9,6 +9,7 @@ import BgzipFastaMsaAdapterF from './BgzipFastaMsaAdapter'
 import LaunchMsaViewF from './LaunchMsaView'
 import LaunchMsaViewExtensionPointF from './LaunchMsaViewExtensionPoint'
 import MsaViewF from './MsaViewPanel'
+import OrthoFinderMsaAdapterF from './OrthoFinderMsaAdapter'
 import { launchMsaView } from './utils/launchMsaView'
 import { version } from './version'
 
@@ -25,6 +26,7 @@ export default class MsaViewPlugin extends Plugin {
     LaunchMsaViewExtensionPointF(pluginManager)
     AddHighlightModelF(pluginManager)
     BgzipFastaMsaAdapterF(pluginManager)
+    OrthoFinderMsaAdapterF(pluginManager)
   }
 
   configure(pluginManager: PluginManager) {

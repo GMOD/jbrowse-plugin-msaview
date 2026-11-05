@@ -1,0 +1,1 @@
+OG0000055: ((Mycoplasma_gallisepticum_gi|31541268|gb|AAP56569.1|:0.79403,Mycoplasma_genitalium_gi|1045987|gb|AAC71511.1|:0.8715)n1:0.275965,(Mycoplasma_agalactiae_gi|290752526|emb|CBH40498.1|:0.76805,Mycoplasma_hyopneumoniae_gi|71851837|gb|AAZ44445.1|:0.90274)n2:0.275965)n0;

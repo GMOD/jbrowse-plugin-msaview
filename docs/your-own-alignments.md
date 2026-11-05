@@ -120,6 +120,62 @@ A row name need not carry the alignment's name at all if the `.idx` is written
 some other way: the 100-way file's rows are named by assembly alone (`hg38`,
 `panTro4`), and only its `.idx` says which gene each block is.
 
+## An OrthoFinder run
+
+[OrthoFinder](https://github.com/OrthoFinder/OrthoFinder) already writes an
+alignment and a gene tree for each orthogroup it finds across your proteomes.
+Put the `Results_*` folder it produced on a static web server and name it as a
+dataset:
+
+```json
+{
+  "msa": {
+    "datasets": [
+      {
+        "datasetId": "orthofinder",
+        "name": "Orthogroups",
+        "description": "OrthoFinder 3.2 over our twelve assemblies",
+        "adapter": {
+          "type": "OrthoFinderMsaAdapter",
+          "resultsLocation": {
+            "uri": "https://example.org/orthofinder/Results_Nov05/"
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+Nothing needs converting, and only the `Orthogroups/`,
+`MultipleSequenceAlignments/` and `Resolved_Gene_Trees/` folders are read, so
+`WorkingDirectory/` need not be uploaded. As with any hosted file, the server
+must send `Access-Control-Allow-Origin`. The dialog reads
+`Orthogroups/Orthogroups.tsv` once, finds the orthogroup holding the clicked
+gene's protein, and loads `MultipleSequenceAlignments/<orthogroup>.fa` with that
+orthogroup's resolved gene tree. OrthoFinder 3 writes alignments by default;
+OrthoFinder 2 only with `-M msa`. Both releases' tree layouts are read: 3's
+single `Resolved_Gene_Trees.txt` and 2's file per orthogroup. Orthogroups of
+fewer than four genes have no tree and open as an alignment alone, and the few
+that OrthoFinder does not align say so in the dialog.
+
+The link to the genome is the protein's name. OrthoFinder names each protein by
+the first word of its FASTA header, and the dialog offers a transcript when that
+name is the transcript's id, `name`, `transcript_id`, `locus_tag` or CDS
+`protein_id`, or else its gene's `ID` with NCBI's `gene-` or Ensembl's `gene:`
+dropped. A trailing `.N` version on the proteome's side is ignored. So any of
+the usual proteomes lines up with the GFF3 it came from:
+
+- `gffread -y proteins.fa -g genome.fa annotation.gff3` names each protein by
+  its transcript id.
+- NCBI's and Ensembl's downloaded protein files name it by `protein_id`.
+- One protein per gene renamed to the gene id, as the
+  [OrthoFinder synteny tutorial](https://jbrowse.org/jb2/docs/tutorials/orthofinder_synteny/)
+  builds them, matches through the gene.
+
+The query row is found by residues, as for any dataset; the alignment's own row
+names carry the proteome's file name as a prefix (`melanogaster_Dmel_CG2671`).
+
 ## One file read by gene: `msaIndexedLocation`
 
 For a genome-scale set behind a link rather than a dialog, `msaIndexedLocation`
