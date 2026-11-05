@@ -4,32 +4,60 @@ import type { FileLocation } from '@jbrowse/core/util/types'
 
 const versionSuffix = /\.\d+$/
 
+export interface ProteinEntry {
+  orthogroup: string
+  /** the id as OrthoFinder wrote it, which names the protein's alignment row */
+  id: string
+}
+
 /**
- * Maps every protein id in OrthoFinder's `Orthogroups/Orthogroups.tsv` to its
- * orthogroup. Each id is also listed without a trailing `.N` version, since a
- * proteome FASTA usually versions its ids where the matching GFF does not
- * (Ensembl's `ENSP00000269305.4` against `protein_id=ENSP00000269305`).
+ * OrthoFinder's `Orthogroups/Orthogroups.tsv`, one map per species column from
+ * protein id to its orthogroup. Per species because OrthoFinder leaves a name
+ * two species share unprefixed there: human's `ADAM32` and chicken's are
+ * different genes in different orthogroups. Each id is also listed without a
+ * trailing `.N` version, since a proteome FASTA usually versions its ids where
+ * the matching GFF does not (Ensembl's `ENSP00000269305.4` against
+ * `protein_id=ENSP00000269305`).
  */
 export function parseOrthogroups(tsv: string) {
-  const orthogroupOf = new Map<string, string>()
-  for (const line of tsv.split(/\r?\n/).slice(1)) {
-    const [orthogroup, ...speciesCells] = line.split('\t')
+  const [header = '', ...rows] = tsv.split(/\r?\n/)
+  const species = header.split('\t').slice(1)
+  const bySpecies = new Map(
+    species.map(name => [name, new Map<string, ProteinEntry>()]),
+  )
+  for (const row of rows) {
+    const [orthogroup, ...cells] = row.split('\t')
     if (orthogroup) {
-      for (const cell of speciesCells) {
+      cells.forEach((cell, i) => {
+        const proteins = bySpecies.get(species[i] ?? '')
         for (const geneId of cell.split(',')) {
           const id = geneId.trim()
-          if (id) {
-            orthogroupOf.set(id, orthogroup)
+          if (proteins && id) {
+            const entry = { orthogroup, id }
+            proteins.set(id, entry)
             const unversioned = id.replace(versionSuffix, '')
-            if (!orthogroupOf.has(unversioned)) {
-              orthogroupOf.set(unversioned, orthogroup)
+            if (!proteins.has(unversioned)) {
+              proteins.set(unversioned, entry)
             }
           }
         }
-      }
+      })
     }
   }
-  return orthogroupOf
+  return bySpecies
+}
+
+/**
+ * The alignment and tree name each protein `<species>_<id>`, the species with
+ * `.` and space made `_` (OrthoFinder's species_prefixes).
+ */
+export function alignmentRowName(species: string, id: string) {
+  return `${species.replace(/[. ]/g, '_')}_${id}`
+}
+
+/** a file the results folder does not hold, as opposed to one it failed to serve */
+export function isMissingFile(e: unknown) {
+  return e instanceof Error && /HTTP 40[34]\b|ENOENT/.test(e.message)
 }
 
 /**

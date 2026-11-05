@@ -9,7 +9,7 @@ import type { Feature } from '@jbrowse/core/util'
 // Keep the current selection if it has data, otherwise fall back to the first
 // option that does (or the current id if none do). With no hasData constraint
 // the current selection always stands.
-function pickSelectedId(
+export function pickSelectedId(
   currentId: string,
   options: Feature[],
   hasData: ((transcript: Feature) => boolean) | undefined,

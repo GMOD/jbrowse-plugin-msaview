@@ -27,14 +27,18 @@ export function resolveQueryRowName(
   )
 }
 
-export function useQueryRowName(msaText: string, proteinSequence: string) {
+export function useQueryRowName(
+  msaText: string,
+  proteinSequence: string,
+  preferredName?: string,
+) {
   const [override, setOverride] = useState<string>()
 
   // parsing runs on every keystroke in the paste box otherwise, and an
   // alignment of a few hundred rows is not free
   const { names, match } = useMemo(
-    () => findQueryRow(msaText, proteinSequence),
-    [msaText, proteinSequence],
+    () => findQueryRow(msaText, proteinSequence, preferredName),
+    [msaText, proteinSequence, preferredName],
   )
 
   // a row picked from one alignment says nothing about the next one pasted

@@ -1,29 +1,56 @@
 import { expect, test } from 'vitest'
 
 import {
+  alignmentRowName,
+  isMissingFile,
   parseOrthogroups,
   parseResolvedGeneTrees,
   resultsFile,
 } from './parseResults'
 
 test('a versioned protein id also answers to its unversioned form', () => {
-  const groups = parseOrthogroups(
+  const human = parseOrthogroups(
     'Orthogroup\tHuman\tMouse\nOG0000001\tENSP00000269305.4\tENSMUSP00000104298.3, ENSMUSP00000005371\n',
-  )
-  expect(groups.get('ENSP00000269305.4')).toBe('OG0000001')
-  expect(groups.get('ENSP00000269305')).toBe('OG0000001')
-  expect(groups.get('ENSMUSP00000005371')).toBe('OG0000001')
+  ).get('Human')
+  expect(human?.get('ENSP00000269305.4')?.orthogroup).toBe('OG0000001')
+  expect(human?.get('ENSP00000269305')).toEqual({
+    orthogroup: 'OG0000001',
+    id: 'ENSP00000269305.4',
+  })
 })
 
 test('an unversioned alias never displaces a real id of the same name', () => {
   const groups = parseOrthogroups(
     'Orthogroup\tA\nOG0000001\tP1.2\nOG0000002\tP1\n',
   )
-  expect(groups.get('P1')).toBe('OG0000002')
+  expect(groups.get('A')?.get('P1')?.orthogroup).toBe('OG0000002')
   const reversed = parseOrthogroups(
     'Orthogroup\tA\nOG0000002\tP1\nOG0000001\tP1.2\n',
   )
-  expect(reversed.get('P1')).toBe('OG0000002')
+  expect(reversed.get('A')?.get('P1')?.orthogroup).toBe('OG0000002')
+})
+
+test("a name two species share stays each species' own", () => {
+  const groups = parseOrthogroups(
+    'Orthogroup\tchicken\thuman\r\nOG0013180\t\tADAM32\r\nOG0015286\tADAM32\t\r\n',
+  )
+  expect(groups.get('human')?.get('ADAM32')?.orthogroup).toBe('OG0013180')
+  expect(groups.get('chicken')?.get('ADAM32')?.orthogroup).toBe('OG0015286')
+})
+
+test("an alignment row is the species, made OrthoFinder's prefix, and the id", () => {
+  expect(alignmentRowName('melanogaster', 'Dmel_CG2671')).toBe(
+    'melanogaster_Dmel_CG2671',
+  )
+  expect(alignmentRowName('Homo sapiens.v2', 'P1')).toBe('Homo_sapiens_v2_P1')
+})
+
+test('only a 403, 404 or absent local file reads as missing', () => {
+  expect(isMissingFile(new Error('HTTP 404 fetching https://x/a'))).toBe(true)
+  expect(isMissingFile(new Error('HTTP 403 fetching https://x/a'))).toBe(true)
+  expect(isMissingFile(new Error("ENOENT: no such file, open '/a'"))).toBe(true)
+  expect(isMissingFile(new Error('HTTP 503 fetching https://x/a'))).toBe(false)
+  expect(isMissingFile(new TypeError('Failed to fetch'))).toBe(false)
 })
 
 test('Resolved_Gene_Trees.txt splits on the first colon-space only', () => {

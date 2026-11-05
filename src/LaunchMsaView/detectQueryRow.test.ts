@@ -113,3 +113,14 @@ describe('findQueryRow row names', () => {
     expect(findQueryRow('', protein).names).toEqual([])
   })
 })
+
+test("an identical paralog loses the tie to the row the dataset names as the protein's own", () => {
+  const msa = '>sp_H4copy\nMSGRGKGG\n>sp_His4r\nMSGRGKGG\n>sp_other\nMSGRGKAA\n'
+  expect(findQueryRow(msa, 'MSGRGKGG').match?.name).toBe('sp_H4copy')
+  expect(findQueryRow(msa, 'MSGRGKGG', 'sp_His4r').match?.name).toBe('sp_His4r')
+})
+
+test('a named row that matches worse than another does not win', () => {
+  const msa = '>sp_exact\nMSGRGKGG\n>sp_named\nMSGRGKAA\n'
+  expect(findQueryRow(msa, 'MSGRGKGG', 'sp_named').match?.name).toBe('sp_exact')
+})

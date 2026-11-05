@@ -77,3 +77,34 @@ test('a v2 run, with CRLF tables and a file per tree, reads the same way', async
   const small = await adapter.getMSA('gi|71852101|gb|AAZ44709.1|')
   expect(small.tree).toBeUndefined()
 })
+
+test("an assembly named like a species column lists that species' ids only", async () => {
+  const ids = await makeAdapter('v3').getMSAList('Mycoplasma_gallisepticum')
+  expect(ids).toContain('gi|31541268|gb|AAP56569.1|')
+  expect(ids).not.toContain('gi|290752526|emb|CBH40498.1|')
+})
+
+test("the alignment names the clicked protein's own row", async () => {
+  const { msa, queryRowName } = await makeAdapter('v3').getMSA(
+    'gi|31541268|gb|AAP56569.1|',
+    'Mycoplasma_gallisepticum',
+  )
+  expect(queryRowName).toBe(
+    'Mycoplasma_gallisepticum_gi|31541268|gb|AAP56569.1|',
+  )
+  expect(parseMSA(msa).getNames()).toContain(queryRowName)
+})
+
+test('a tree file the server fails to serve is an error, not a missing tree', async () => {
+  const adapter = makeAdapter('v3')
+  const read = adapter.readResultsFile.bind(adapter)
+  adapter.readResultsFile = async (path: string) => {
+    if (path.startsWith('Resolved_Gene_Trees')) {
+      throw new Error('HTTP 503 fetching Resolved_Gene_Trees.txt')
+    }
+    return read(path)
+  }
+  await expect(adapter.getMSA('gi|31541268|gb|AAP56569.1|')).rejects.toThrow(
+    'HTTP 503',
+  )
+})
