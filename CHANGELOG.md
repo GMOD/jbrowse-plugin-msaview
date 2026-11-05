@@ -1,3 +1,15 @@
+## [5.16.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.16.0...v5.16.1) (2026-11-05)
+
+### Bug Fixes
+
+- A column click centers the connected view when its regions use an alias of the feature's refName ([3fa824b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3fa824b7ca9ee58d390218cd16110b291a76472f))
+
+### Features
+
+- A Pre-loaded dataset reads an .idx beside its FASTA instead of the per-row .fai ([3cd2657](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3cd2657b375dd2579e2d00289889564313705109))
+- A Pre-loaded dataset can be an OrthoFinder results folder ([fa8badd](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fa8baddac52937af10e06d43a1baff13335dfe12))
+- A dataset keyed by gene or protein id offers the clicked gene ([70a6a30](https://github.com/GMOD/jbrowse-plugin-msaview/commit/70a6a300c59c0f3f1022f5b9c90ce10347463a95))
+
 ## [5.16.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.15.0...v5.16.0) (2026-11-04)
 
 ### Bug Fixes
