@@ -1,3 +1,9 @@
+## [5.16.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.16.1...v5.16.2) (2026-11-05)
+
+### Bug Fixes
+
+- An OrthoFinder dataset reads the clicked assembly's own column and row ([ce2ac9a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/ce2ac9a04f1c6e6beb9e8937f54498aa262d0d04))
+
 ## [5.16.1](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.16.0...v5.16.1) (2026-11-05)
 
 ### Bug Fixes
