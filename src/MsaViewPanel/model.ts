@@ -27,6 +27,7 @@ import {
   syncGenomeHoverToMsaColumn,
 } from './afterCreateAutoruns'
 import { connectedDomains } from './connectedDomains'
+import { displayedRefName } from './displayedRefName'
 import { domainTrackConf } from './domainTrack'
 import { isLaunching } from './isLaunching'
 import {
@@ -804,19 +805,24 @@ export default function stateModelFactory() {
        */
       handleMsaClick(coord: number) {
         const { connectedView, zoomToBaseLevel } = self
+        const { assemblyManager } = getSession(self)
         const r2 = msaCoordToGenomeCoord({ model: self, coord })
 
-        if (!r2 || !connectedView) {
-          return
-        }
-
-        // Use the genome coord's own refName for both nav paths — it matches the
-        // connected view's displayed regions. Canonicalizing (e.g. "chr17"->"17")
-        // can miss a view whose regions are an alias (same as the bpToPx path).
-        if (zoomToBaseLevel) {
-          connectedView.navTo(r2)
-        } else {
-          connectedView.centerAt(r2.start, r2.refName)
+        if (r2 && connectedView) {
+          if (zoomToBaseLevel) {
+            connectedView.navTo(r2)
+          } else {
+            connectedView.centerAt(
+              r2.start,
+              displayedRefName({
+                displayedRegions: connectedView.displayedRegions,
+                assembly: assemblyManager.get(
+                  connectedView.assemblyNames[0] ?? '',
+                ),
+                refName: r2.refName,
+              }),
+            )
+          }
         }
       },
     }))
