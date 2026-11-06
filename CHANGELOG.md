@@ -1,3 +1,13 @@
+## [5.17.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.16.2...v5.17.0) (2026-11-06)
+
+### Documentation
+
+- An OrthoFinder run for MsaView needs -z, or trimmed rows lose residues ([4c89317](https://github.com/GMOD/jbrowse-plugin-msaview/commit/4c8931703ee6d4611422d12c20a9abd8e26d2b35))
+
+### Other Changes
+
+- React-msaview 10.0.0: channels nest their scale and legend, and a data setter drops its filehandle ([d520a80](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d520a805c26e439cc6906cd8a75b5c331c8686b8))
+
 ## [5.16.2](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.16.1...v5.16.2) (2026-11-05)
 
 ### Bug Fixes
