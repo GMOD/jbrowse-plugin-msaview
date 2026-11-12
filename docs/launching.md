@@ -195,7 +195,7 @@ pluginManager.evaluateExtensionPoint('LaunchView-MsaView', {
   session,
   data: { msa: clustalOutput, tree: newickTree },
   displayName: 'My MSA',
-  colorSchemeName: 'percent_identity_dynamic',
+  residueColor: { scale: { scheme: 'percent_identity_dynamic' } },
 })
 ```
 

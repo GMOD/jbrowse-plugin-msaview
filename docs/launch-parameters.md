@@ -38,7 +38,7 @@ one at launch ([alignments from a gene](alignments-from-a-gene.md)).
 | `mafRegion`           | Genome bases a MAF query row spans, columns mapping base for base      |
 | `embeddedMode`        | `false` for the labeled toolbar; the default draws its menus as icons  |
 | `displayName`         | Custom view display name                                               |
-| `colorSchemeName`     | Color scheme (e.g. 'percent_identity_dynamic')                         |
+| `residueColor`        | Cell color, e.g. `{scale: {scheme: 'percent_identity_dynamic'}}`       |
 | `colWidth`            | Column width in pixels                                                 |
 | `rowHeight`           | Row height in pixels                                                   |
 | `allowedGappyness`    | Hide any column gappier than this percent, 100 to keep                 |

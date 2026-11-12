@@ -10,6 +10,7 @@ import type {
   Encoding,
   HighlightShorthand,
   RegionShorthand,
+  ResidueColor,
   ResidueMapping,
   RowPanelSpec,
 } from 'react-msaview'
@@ -45,7 +46,7 @@ interface LaunchMsaViewArgs {
    */
   domainsOnGenome?: boolean
   displayName?: string
-  colorSchemeName?: string
+  residueColor?: ResidueColor
   colWidth?: number
   rowHeight?: number
   treeAreaWidth?: number

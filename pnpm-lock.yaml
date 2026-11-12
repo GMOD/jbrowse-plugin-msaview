@@ -91,8 +91,8 @@ importers:
         specifier: ^10.0.3
         version: 10.0.3(mobx@7.1.3)(react@19.3.1)
       msa-parsers:
-        specifier: ^10.0.0
-        version: 10.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       oxfmt:
         specifier: ^0.73.0
         version: 0.73.0
@@ -121,8 +121,8 @@ importers:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
       react-msaview:
-        specifier: ^10.0.0
-        version: 10.0.0(4d87629ce60f4a70309a0d727f3e914b)
+        specifier: ^11.0.0
+        version: 11.0.0(4d87629ce60f4a70309a0d727f3e914b)
       rimraf:
         specifier: ^6.1.3
         version: 6.1.3
@@ -597,8 +597,8 @@ packages:
   '@gmod/bgzf-filehandle@6.8.4':
     resolution: {integrity: sha512-eN3yOAfij5xTKARWFSAn61byFyRWjU5XQSvpm0+C7tptxHOGi/t0xMZt5V1/Lf4VxRT2By5yUu3RtBiG+oP0LA==}
 
-  '@gmod/newick@1.0.3':
-    resolution: {integrity: sha512-r8xab2D78LqYSuOmAEetzw5JNvsCSVHhhoCdKOxsOGbBMSCKvWZE5jkAq88iuHjvGcdkn0fRWfkvTr7szJVnng==}
+  '@gmod/newick@1.1.0':
+    resolution: {integrity: sha512-sqJ9AwgLqCKvmwufTNf9GhmGcxrDv8Mp7boCj390J40gSQkdAF9yyFteL/bcGWUxTJfGQXH928ezMyW/KHOuFQ==}
 
   '@gmod/range-cache-filehandle@2.0.0':
     resolution: {integrity: sha512-7sa2T4yeI4JNAQfzwrZedmpFtd3hLlH1/3xsSOxRNJWULtdKC++u0I1WRv+GLNqgHMdSTF/qZjIfawXK1QBt4w==}
@@ -680,8 +680,8 @@ packages:
     peerDependencies:
       react: '>=19.0.0'
 
-  '@jbrowse/svgcanvas@10.0.0':
-    resolution: {integrity: sha512-kEopvqQpFhqITyO5kWedCJ1r3mS6O9mBtQ2710ioeTmzJ+TeMxSJMwn8AV+idM77ETl14WTOyjFZuDj4Gnvcug==}
+  '@jbrowse/svgcanvas@11.0.0':
+    resolution: {integrity: sha512-w5wVmcftT/b8Z3L1te/agvlwTtapl5G7rAgHy79+cJhA+FpnfkUpAY147KEJa7fTCq5FpcpmVIDfDo+n8Dwp1g==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2149,8 +2149,8 @@ packages:
   flat-cache@6.1.23:
     resolution: {integrity: sha512-f++BY9pTk+983xK1FLzlLpmM0i0z+jHmx3QESGkURMXujQZz1k5wzwX6hjnQ8goaD0B+sYnDK1yZ6MTyZfUaqA==}
 
-  flatbush@4.6.2:
-    resolution: {integrity: sha512-nNT7MFJ58Q4IAm3aYsEg+zgZGpdRcmR1i4U+aa8c+r91jmYZg7FTQwNnIMC0FyBqVZTbClKdAnrJkKkfp1BOvw==}
+  flatbush@4.7.0:
+    resolution: {integrity: sha512-oFBkbYI3Rx6snZEBQOiJSaxt1MfZtbH2p862dRmIOOYRVxQWDyAn4oyKjoJv7TgmOft2yIavvooOU5itliagOw==}
 
   flatqueue@3.1.0:
     resolution: {integrity: sha512-Ia4qIYrrsEqIRx3c3XhkT+QDLQuUV5ovsr6ah1rIgKT5wclhoGK3lAMS1bWRAWxlx7wtlTBpV7QXB5d9fOSRxA==}
@@ -2811,8 +2811,11 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msa-parsers@10.0.0:
-    resolution: {integrity: sha512-P5sMzTTph2u4Pa5t1JbvzBML2yPGCkWioaVGt5gin7xPhZMSa7ZRTphqlYAw2zvsGaX7SKnW2VTwmiYpJ07V3g==}
+  msa-coordinates@11.0.0:
+    resolution: {integrity: sha512-De3rzWtOORrlkrv6xOKpOi5r0QAGNrl0rVbxDTP1rP0ae13pKJ0ve2LFFQwp7a/E/hLstZIoBsrp/xxf35hiww==}
+
+  msa-parsers@11.0.0:
+    resolution: {integrity: sha512-hg4PvTKPkk3yHONqoeHXBx1gnvF2NgFix3dAHaifshYBtwMB+1d+7g+T5coAjpXhVSdgkM0Iy+Qfk/Pj6Vjpng==}
 
   nanoid@3.3.16:
     resolution: {integrity: sha512-bzlKTyNJ7+LdGIIwy8ijFpIqEQIvafahV7eYykJ8Cvh42EdJeODoJ6gUJXpQJvej1BddH8OqTXZNE/KfbWAu8Q==}
@@ -3082,8 +3085,8 @@ packages:
   react-is@19.3.1:
     resolution: {integrity: sha512-RRieF6IyxQBkcK6pP8xOHprLTPW6QjRkbGdImtqNme+/hYVwCZkLQLdlZGOhUqXwkS9IEynaGvPJtv6XB/cz0Q==}
 
-  react-msaview@10.0.0:
-    resolution: {integrity: sha512-zGMfD5lFF0N5Ha/sERNHLMGGlgV2tycVfocK7j8Aw1q/klfva24IE8xy4AKP/6aUpJ1d0sWynHdbM+ER2taANQ==}
+  react-msaview@11.0.0:
+    resolution: {integrity: sha512-IUsXXptax2xLEkNB8XZfYUdCi9IB6WoW8N0yUIBwBuZK0XG6rXuUy5g3KZ3339+N7x2XKpW72x8Rlh0HoTU0Vg==}
     engines: {node: '>=18'}
     peerDependencies:
       '@jbrowse/core': '>=5.0.0-0'
@@ -4125,7 +4128,7 @@ snapshots:
       generic-filehandle2: 2.5.1
       pako-esm2: 2.0.2
 
-  '@gmod/newick@1.0.3': {}
+  '@gmod/newick@1.1.0': {}
 
   '@gmod/range-cache-filehandle@2.0.0':
     dependencies:
@@ -4267,7 +4270,7 @@ snapshots:
       mobx-react: 10.0.3(mobx@7.1.3)(react@19.3.1)
       react: 19.3.1
 
-  '@jbrowse/svgcanvas@10.0.0': {}
+  '@jbrowse/svgcanvas@11.0.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -5719,7 +5722,7 @@ snapshots:
       flatted: 3.4.4
       hookified: 1.15.1
 
-  flatbush@4.6.2:
+  flatbush@4.7.0:
     dependencies:
       flatqueue: 3.1.0
 
@@ -6386,9 +6389,11 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msa-parsers@10.0.0:
+  msa-coordinates@11.0.0: {}
+
+  msa-parsers@11.0.0:
     dependencies:
-      '@gmod/newick': 1.0.3
+      '@gmod/newick': 1.1.0
       clustal-js: 2.0.19
       emf-js: 2.0.0
 
@@ -6682,19 +6687,20 @@ snapshots:
 
   react-is@19.3.1: {}
 
-  react-msaview@10.0.0(4d87629ce60f4a70309a0d727f3e914b):
+  react-msaview@11.0.0(4d87629ce60f4a70309a0d727f3e914b):
     dependencies:
-      '@gmod/newick': 1.0.3
+      '@gmod/newick': 1.1.0
       '@jbrowse/core': 5.0.0-beta.19(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@7.2.0)
       '@jbrowse/mobx-state-tree': 6.10.0(mobx@7.1.3)
-      '@jbrowse/svgcanvas': 10.0.0
+      '@jbrowse/svgcanvas': 11.0.0
       '@mui/icons-material': 9.5.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1)
       '@mui/material': 9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       colord: 2.10.0
-      flatbush: 4.6.2
+      flatbush: 4.7.0
       mobx: 7.1.3
       mobx-react: 10.0.3(mobx@7.1.3)(react@19.3.1)
-      msa-parsers: 10.0.0
+      msa-coordinates: 11.0.0
+      msa-parsers: 11.0.0
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
 
