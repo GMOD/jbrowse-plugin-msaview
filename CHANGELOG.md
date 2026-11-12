@@ -1,3 +1,10 @@
+## [5.18.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.17.0...v5.18.0) (2026-11-12)
+
+### Other Changes
+
+- CLAUDE.md keeps four silent traps, and the host and CORS background moves to agent-docs ([d04eb47](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d04eb47104005751aec2b6901ea5be1bc4d7167d))
+- React-msaview 11.0.0: residueColor names the cell fill, and the README demo's bars take their scale again ([b6d3939](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b6d3939580915fe52ba82e0a19938cda3be51391))
+
 ## [5.17.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.16.2...v5.17.0) (2026-11-06)
 
 ### Documentation
