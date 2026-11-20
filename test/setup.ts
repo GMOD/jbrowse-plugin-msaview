@@ -250,3 +250,36 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
 
   await new Promise(r => setTimeout(r, 3000))
 }
+
+/**
+ * Click "MSA view..." in an open context menu's Launch submenu, which the
+ * plugin shares with every other plugin's launch rows.
+ */
+export async function clickLaunchMsaView(page: Page): Promise<void> {
+  const label = 'MSA view...'
+  const rows = await page.$$('[role="menuitem"]')
+  let launchRow
+  for (const row of rows) {
+    if ((await row.evaluate(el => el.textContent)) === 'Launch') {
+      launchRow = row
+    }
+  }
+  if (!launchRow) {
+    throw new Error('no "Launch" submenu in the context menu')
+  }
+  await launchRow.hover()
+  await page.waitForFunction(
+    text =>
+      [...document.querySelectorAll('[role="menuitem"]')].some(el =>
+        el.textContent.includes(text),
+      ),
+    { timeout: 5000 },
+    label,
+  )
+  for (const row of await page.$$('[role="menuitem"]')) {
+    if ((await row.evaluate(el => el.textContent)).includes(label)) {
+      await row.click()
+      return
+    }
+  }
+}

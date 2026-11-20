@@ -4,6 +4,7 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
+  clickLaunchMsaView,
   createJBrowsePage,
   getJBrowseVersion,
   launchBrowser,
@@ -75,7 +76,7 @@ async function openMsaDialog(p: Page) {
     await new Promise(r => setTimeout(r, 1000))
   }
 
-  let menuItems = await p.$$('[role="menuitem"]')
+  const menuItems = await p.$$('[role="menuitem"]')
   if (menuItems.length === 0) {
     // features paint on a canvas, so fall back to the GENCODE track's own box
     await p.keyboard.press('Escape')
@@ -109,17 +110,9 @@ async function openMsaDialog(p: Page) {
       { button: 'right' },
     )
     await new Promise(r => setTimeout(r, 1000))
-    menuItems = await p.$$('[role="menuitem"]')
   }
-  for (const item of menuItems) {
-    const text = await p.evaluate(el => (el as HTMLElement).textContent, item)
-    if (text?.includes('Launch MSA view')) {
-      await item.click()
-      await new Promise(r => setTimeout(r, 3000))
-      return
-    }
-  }
-  throw new Error('"Launch MSA view" not in context menu')
+  await clickLaunchMsaView(p)
+  await new Promise(r => setTimeout(r, 3000))
 }
 
 async function clickByText(p: Page, selector: string, text: string) {

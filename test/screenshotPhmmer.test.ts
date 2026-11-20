@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 
 import {
   JBROWSE_PORT,
+  clickLaunchMsaView,
   createJBrowsePage,
   getTestJBrowseDir,
   launchBrowser,
@@ -172,19 +173,7 @@ run('phmmer screenshots', () => {
     await page.mouse.click(target.x, target.y, { button: 'right' })
     await new Promise(r => setTimeout(r, 1200))
 
-    const items = await page.$$('[role="menuitem"]')
-    let launch = null
-    for (const item of items) {
-      const t = await page.evaluate(el => (el as HTMLElement).textContent, item)
-      if (t?.includes('Launch MSA view')) {
-        launch = item
-        break
-      }
-    }
-    if (!launch) {
-      throw new Error('"Launch MSA view" not in context menu')
-    }
-    await launch.click()
+    await clickLaunchMsaView(page)
     await new Promise(r => setTimeout(r, 3000))
 
     // the dialog opens on the orthologs tab

@@ -4,6 +4,7 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
+  clickLaunchMsaView,
   createJBrowsePage,
   getJBrowseVersion,
   launchBrowser,
@@ -174,26 +175,14 @@ describe('TranscriptSelector E2E', () => {
       )
     }
 
-    let launchItem = null
-    for (const item of menuItems) {
-      const text = await p.evaluate(el => (el as HTMLElement).textContent, item)
-      if (text?.includes('Launch MSA view')) {
-        launchItem = item
-        break
-      }
-    }
-    if (!launchItem) {
-      throw new Error('"Launch MSA view" not found in context menu')
-    }
-
-    await launchItem.click()
+    await clickLaunchMsaView(p)
     await new Promise(r => setTimeout(r, 3000))
     await saveScreenshot(p, getScreenshotPath('06-msa-dialog'))
 
     const dialog = await p.$('[role="dialog"]')
     if (!dialog) {
       throw new Error(
-        'MSA dialog did not open after clicking "Launch MSA view"',
+        'MSA dialog did not open after clicking "Launch › MSA view..."',
       )
     }
 
