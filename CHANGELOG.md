@@ -1,3 +1,9 @@
+## [5.19.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.18.0...v5.19.0) (2026-11-20)
+
+### Other Changes
+
+- "MSA view..." joins the host's shared Launch submenu ([2af8082](https://github.com/GMOD/jbrowse-plugin-msaview/commit/2af8082412911ec2fc3261c7315de2c6ccefd6a5))
+
 ## [5.18.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.17.0...v5.18.0) (2026-11-12)
 
 ### Other Changes
