@@ -8,7 +8,7 @@ import { readLocalStorage } from './useLocalStorage'
  * each tool only supplies its own parameters and result types.
  *
  * Unlike NCBI's Blast.cgi these endpoints send `Access-Control-Allow-Origin: *`,
- * which is why the BLAST backend moved here — see docs/blast.md.
+ * which is why the BLAST backend moved here — see agent-docs/blast-design.md.
  */
 export const EBI_BASE = 'https://www.ebi.ac.uk/Tools/services/rest'
 
@@ -54,7 +54,7 @@ async function submitEbiJob({
  * it is not a reason to abandon one. A job the server has accepted keeps running
  * whatever happens to the poller's connection, and EBI's cluster has answered
  * status checks with a 502 for ten minutes on jobs that then finished (see
- * docs/blast.md).
+ * agent-docs/blast-design.md).
  *
  * So the poll gives up only once checks have failed without a break for this
  * long: an endpoint that has genuinely gone away must not be polled forever.

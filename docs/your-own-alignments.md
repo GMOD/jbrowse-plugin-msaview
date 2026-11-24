@@ -1,39 +1,28 @@
 # Opening your own alignments
 
-The plugin builds alignments from ortholog services and searches, but it renders
-any alignment you made yourself — from a curated family, a Pfam seed, a
-genome-scale multiz, or your own pipeline — and connects it to the genome the
-same way. What changes is who supplies the file: you, a link, or the site's
-config.
-
-Alignments may be FASTA with gaps already inserted, Stockholm (including a
-multi-Stockholm file and an embedded Newick tree) or Clustal; a tree may also
-come separately as a Newick file.
+The plugin renders any alignment you made, from a curated family, a Pfam seed or
+your own pipeline, and connects it to the genome like a built one. Formats are
+FASTA with gaps inserted, Stockholm (multi-Stockholm and embedded Newick
+included) and Clustal; a tree may also be a separate Newick file.
 
 ## From the gene: Manual upload
 
-Right-click a gene, launch an MSA view, and open the **Manual upload** tab to
-pick an alignment and optionally a tree, from a file or a URL. The dialog finds
-the row that is the gene's protein by comparing residues against the translated
-transcript, not by name, since aligners rename the query on the way through. A
-row that covers only part of the protein is fine: the dialog records how many
-residues it starts in, and the genome mapping accounts for it.
+Right-click a gene, launch an MSA view and open **Manual upload** to pick an
+alignment and optionally a tree, from a file or a URL. The dialog finds the
+gene's protein row by comparing residues, not names, since aligners rename the
+query. A row covering only part of the protein is fine: the dialog records how
+many residues it starts in.
 
 ### Where a pasted or uploaded alignment is kept
 
-react-msaview drops any document over 50 kB from the session snapshot, and a
-document read from a local file or pasted in has nowhere else to come back from.
-The plugin keeps exactly those documents -- alignment, tree, row metadata or
-annotations -- in the browser's IndexedDB (database `jbrowse-msaview-data`) and
-saves a reference id, `dataStoreId`, in the session. A document loaded from a
-URL needs none of this, so a URL alignment with a large local GFF on top keeps
-only the GFF. On reload the plugin reads them back, and cleans up entries no
-session has opened for seven days.
+react-msaview drops any document over 50 kB from the session snapshot, so a
+document read from a local file or pasted in is kept in the browser's IndexedDB
+(`jbrowse-msaview-data`), with a `dataStoreId` in the session. Entries no
+session has opened for seven days are cleaned up. A URL alignment needs none of
+this.
 
-The consequence: a session holding an uploaded alignment reopens in the same
-browser, but a shared link or another machine finds nothing behind the
-reference. To share it, host the file and load it by URL, which needs no storage
-at all.
+Such a session reopens in the same browser only; a shared link finds nothing
+behind the reference. To share, host the file and load it by URL.
 
 ## From a link
 
@@ -51,11 +40,11 @@ session=spec-{"views":[
 ```
 
 A link has no dialog to find the query row, so `querySeqName` names it. If that
-row starts partway into the protein, `querySeqOffset` says how many transcript
-residues come before its first one; without it the genome mapping is off by that
-many codons. The browser fetches the files itself, so the server hosting them
-has to send `Access-Control-Allow-Origin`. [Launching](launching.md) covers
-`highlights`, `region`, `columnTracks` and placement for such a link.
+row starts partway into the protein, `querySeqOffset` gives the transcript
+residues before its first one, or the mapping is off by that many codons. The
+server hosting the files must send `Access-Control-Allow-Origin`.
+[Launching](launching.md) covers `highlights`, `region`, `columnTracks` and
+placement.
 
 ## A dataset for every gene
 
@@ -81,26 +70,21 @@ config:
 }
 ```
 
-The file is a bgzipped FASTA holding every alignment's rows, each alignment's
-rows written together, with a `.gzi` and an `.idx` beside it. `bgzip -i` writes
-the `.gzi`. The `.idx` names each alignment and gives its uncompressed byte
-offset and length, one line per alignment, so the dialog lists the set from it
-and reads a chosen alignment as one block. For UCSC's 100-way that is a 211 kB
-list and one ~70 kB read, where the per-row `.fai` the adapter would otherwise
-read is 2M lines and 91 MB. The adapter looks for `<uri>.idx` the way the host
-looks for `<uri>.fai`; `msaIndexLocation` names one kept elsewhere.
+The file is a bgzipped FASTA with each alignment's rows together, a `.gzi`
+(`bgzip -i` writes it) and an `.idx` beside it. The `.idx` has one line per
+alignment: its name, uncompressed byte offset and length. The dialog lists the
+set from it and reads a chosen alignment as one block. For UCSC's 100-way that
+is a 211 kB list and a ~70 kB read, where the `.fai` is 91 MB. The adapter looks
+for `<uri>.idx`; `msaIndexLocation` names one kept elsewhere.
 
 The dialog offers an alignment when its name equals the transcript's id, `name`,
-`transcript_id` or `gene_name` exactly, so a set keyed by gene symbol serves
-every isoform of the gene, and finds the query row by residues.
+`transcript_id` or `gene_name`, so a set keyed by gene symbol serves every
+isoform.
 
-Without an `.idx` the adapter falls back to the `.fai` (`samtools faidx` on a
-bgzipped file writes it and the `.gzi`), and groups rows into alignments by
-name: the part before the first `_` names the alignment, so
-`ENST00000269305.9_hg38` and `ENST00000269305.9_panTro4` are two rows of one
-alignment. `msaRegex` on the adapter changes that separator, and the query row
-falls back to `<transcriptId>_<assembly>`. That suits a set of a few hundred
-alignments; at genome scale the `.fai` is the slow part.
+Without an `.idx` the adapter falls back to the `.fai` and groups rows by the
+part of the name before the first `_` (`msaRegex` changes the separator), with
+the query row defaulting to `<transcriptId>_<assembly>`. That suits a few
+hundred alignments; at genome scale the `.fai` is the slow part.
 
 ### Writing the `.idx`
 
@@ -116,9 +100,8 @@ bgzip -dc genes.fa.gz | LC_ALL=C awk '
   END { print cur "\t" start "\t" pos - start }' > genes.fa.gz.idx
 ```
 
-A row name need not carry the alignment's name at all if the `.idx` is written
-some other way: the 100-way file's rows are named by assembly alone (`hg38`,
-`panTro4`), and only its `.idx` says which gene each block is.
+Row names need not carry the alignment's name if the `.idx` says which gene each
+block is: the 100-way file names rows by assembly alone.
 
 ## An OrthoFinder run
 
@@ -149,44 +132,38 @@ dataset:
 
 Upload the `Orthogroups/`, `MultipleSequenceAlignments/` and
 `Resolved_Gene_Trees/` folders as OrthoFinder wrote them; nothing is converted
-and `WorkingDirectory/` is not read. As with any hosted file, the server must
-send `Access-Control-Allow-Origin`.
+and `WorkingDirectory/` is not read. The server must send
+`Access-Control-Allow-Origin`.
 
-OrthoFinder 3 writes the alignments by default, OrthoFinder 2 only with
-`-M msa`, and `-og` stops either before them. Run it with `-z` as well: without
-it OrthoFinder trims mostly-gap columns from a long alignment, which takes
-residues out of the rows (10 of human ADAM32's 787), and the dialog can neither
-find such a gene's row by its protein nor read a column back to its codon. Both
-releases' tree layouts are read: 3's single `Resolved_Gene_Trees.txt` and 2's
-file per orthogroup. Orthogroups of fewer than four genes open as an alignment
-without a tree, and the few OrthoFinder does not align (111 of 13,333 over five
-flies) say so in the dialog.
+- OrthoFinder 3 writes the alignments by default, 2 only with `-M msa`, and
+  `-og` stops either before them.
+- Run with `-z`: without it OrthoFinder trims mostly-gap columns, taking
+  residues out of the rows, and the dialog can no longer find the gene's row or
+  map a column to its codon.
+- Both releases' tree layouts are read. Orthogroups under four genes open
+  without a tree, and the few OrthoFinder does not align say so in the dialog.
 
-The link to the genome is the protein's name, looked up in the column of
-`Orthogroups.tsv` named after the genome view's assembly, so name each proteome
-file after its assembly (`melanogaster.fa` for the assembly `melanogaster`).
-Without such a column every species is searched, and a name two species share,
-as NCBI's gene symbols often are, can open the other species' orthogroup.
+The link to the genome is the protein's name, looked up in the `Orthogroups.tsv`
+column named after the genome view's assembly, so name each proteome file after
+its assembly (`melanogaster.fa`). Without such a column every species is
+searched, and a name two species share can open the other's orthogroup.
 
-OrthoFinder names each protein by the first word of its FASTA header, and the
-dialog offers a transcript when that name is the transcript's id, `name`,
-`transcript_id`, `locus_tag` or CDS `protein_id`, or else its gene's `ID` with
-NCBI's `gene-` or Ensembl's `gene:` dropped. It ignores a trailing `.N` version
-on the proteome's side, and matches a name OrthoFinder rewrote: OrthoFinder
-writes `_` for each whitespace, `: ; ( ) , [ ] = ' "`, so zebrafish's
-`zgc:86896` is `zgc_86896` in its results. Any of the usual proteomes lines up
-with the GFF3 it came from:
+The dialog offers a transcript when OrthoFinder's name for the protein (the
+first word of its FASTA header) is the transcript's id, `name`, `transcript_id`,
+`locus_tag` or CDS `protein_id`, or its gene's `ID` without `gene-` or `gene:`.
+It ignores a trailing `.N` version and undoes OrthoFinder's `_` rewriting of
+whitespace and `: ; ( ) , [ ] = ' "` (`zgc:86896` is `zgc_86896`). Usual
+proteomes line up with their GFF3:
 
 - `gffread -y proteins.fa -g genome.fa annotation.gff3` names each protein by
-  its transcript id.
-- NCBI's and Ensembl's downloaded protein files name it by `protein_id`.
+  its transcript id
+- NCBI's and Ensembl's protein files name it by `protein_id`
 - One protein per gene renamed to the gene id, as the
   [OrthoFinder synteny tutorial](https://jbrowse.org/jb2/docs/tutorials/orthofinder_synteny/)
-  builds them, matches through the gene.
+  builds them, matches through the gene
 
-The alignment names each row `<species>_<protein>` (`melanogaster_Dmel_CG2671`),
-and the dialog starts on the clicked protein's own row, which an identical
-paralog's would otherwise tie with.
+Rows are named `<species>_<protein>` (`melanogaster_Dmel_CG2671`), and the
+dialog starts on the clicked protein's own row.
 
 ## One file read by gene: `msaIndexedLocation`
 

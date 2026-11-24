@@ -45,7 +45,7 @@ const useStyles = makeStyles()({
 /**
  * The route to NCBI's `nr`, which no plugin version can query directly: NCBI
  * stopped sending Access-Control-Allow-Origin to third-party origins, so the
- * browser cannot read Blast.cgi at all (see docs/blast.md).
+ * browser cannot read Blast.cgi at all (see agent-docs/blast-design.md).
  *
  * That makes the round trip through NCBI's own site the whole feature rather
  * than a fallback, so the panel walks it end to end. It used to hand the user a

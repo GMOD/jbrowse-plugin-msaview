@@ -569,7 +569,7 @@ export default function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
-       * what the view resolved to, as plain JSON. See docs/reading-the-view.md
+       * what the view resolved to, as plain JSON. See docs/launching.md
        */
       get report() {
         return viewReport(self)

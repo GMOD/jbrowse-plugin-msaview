@@ -169,7 +169,7 @@ run('domains on the genome', () => {
   test('a launch with domainsOnGenome adds the domain track once the domains load', async () => {
     await waitForDomainTrack(page)
     expect(await waitReady(page)).toMatchObject({ settled: true })
-    // the example docs/reading-the-view.md shows; the annotation count is
+    // the example docs/launching.md shows; the annotation count is
     // NCBI's live CDD content, so only its presence is pinned
     const report = await readMsaReport(page)
     expect(report?.domainAnnotations).toBeGreaterThan(0)

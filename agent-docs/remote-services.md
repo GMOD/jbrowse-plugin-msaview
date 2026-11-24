@@ -10,7 +10,7 @@ sends `Access-Control-Allow-Origin` to third-party origins.
   in 2.9.0. A proxy would work only for people who stand one up, and a central
   proxy is ruled out because NCBI throttles per source IP. Reaching `nr` means
   the Manual panel, which links out to NCBI. The reasoning, the evidence and the
-  blastp-versus-phmmer comparison are in `docs/blast.md`.
+  blastp-versus-phmmer comparison are in `agent-docs/blast-design.md`.
 - The HMMER web server at `www.ebi.ac.uk/Tools/hmmer`, a separate service from
   the `hmmer3_phmmer` Job Dispatcher tool `utils/phmmer.ts` uses, serves its
   `/Tools/hmmer/api/v1/` json only to `https://www.ebi.ac.uk`, with

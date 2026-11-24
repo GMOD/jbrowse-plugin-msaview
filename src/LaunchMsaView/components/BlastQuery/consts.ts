@@ -2,7 +2,7 @@
  * Only used to build the link-out on the manual panel, which sends the user to
  * NCBI's own site to run BLAST there. Nothing fetches this url: NCBI stopped
  * sending Access-Control-Allow-Origin to third-party origins, so a browser
- * cannot read a response from it at all. See docs/blast.md.
+ * cannot read a response from it at all. See agent-docs/blast-design.md.
  */
 export const BASE_BLAST_URL = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi'
 

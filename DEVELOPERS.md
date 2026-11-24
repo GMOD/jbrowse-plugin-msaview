@@ -1,9 +1,8 @@
 # Developing jbrowse-plugin-msaview
 
 For launching views from URLs or code, see
-[docs/launching.md](docs/launching.md) and
-[docs/launch-parameters.md](docs/launch-parameters.md). This page covers
-building, testing and releasing the plugin itself.
+[docs/launching.md](docs/launching.md). This page covers building, testing and
+releasing the plugin itself.
 
 ## Running locally
 
@@ -70,19 +69,19 @@ unrelated runs don't churn git. Tune the threshold with `SCREENSHOT_DIFF_RATIO`
 (`0` always rewrites, `0.05` tolerates larger wobble). `pngquant` is optional;
 without it the raw PNG is used.
 
-### The README figure
+### The README gallery
 
-`img/1.png` is a capture of the README's demo link, not a hand-made screenshot.
-`pnpm readme-figure` loads the first `session=spec-` link in the README on the
+Each gallery figure in `img/` is a capture of the demo link it wraps in the
+README, not a hand-made screenshot. `pnpm readme-figure` loads each link on the
 hosted `main` build with the local `dist/` answering for this plugin, drops the
-ProteinView (protein3d's, and molstar gets no WebGL in headless Chrome), and
-writes the figure through the same tolerance as the test references. The
-`version` lifecycle runs it, so each release commits a figure of its own UI.
-When the capture fails there, the script prints a warning and keeps the old
-figure, so a slow gmod.org or UCSC cannot hold up a release.
+ProteinView (protein3d's, and molstar gets no WebGL in headless Chrome), hovers
+the column named in `hoverAt` and writes the figure through the same tolerance
+as the test references. The `version` lifecycle runs it, so each release commits
+figures of its own UI. When a capture fails there, the script prints a warning
+and keeps the old figures, so a slow gmod.org or UCSC cannot hold up a release.
 
-Change the demo link and the figure follows at the next release. Run
-`pnpm build && pnpm readme-figure` to see it sooner.
+Change a link and its figure follows at the next release. Run
+`pnpm build && pnpm readme-figure` to see it sooner, or `--only <name>` for one.
 
 ## Publishing
 

@@ -5,22 +5,22 @@ an MSA view. The dialog offers one tab per way of getting an alignment, and each
 connects the result to the genome view it came from, so a hover on a column
 lights its codon.
 
-1. **Orthologs**: look up a precomputed ortholog gene per species (NCBI, or
-   PANTHER for the species NCBI's sets leave out, or the query's UniRef cluster
-   for everything within 50% identity across UniProtKB) and align what comes
-   back. No search job to queue, so this returns in seconds; with the in-browser
-   aligner, no job at all.
-2. **BLAST query**: search EBI with blastp or phmmer and align the hits. The
-   route for a gene with no resolvable symbol. Its Manual option links out to
-   NCBI's own BLAST page for `nr`, which no browser can query directly
-   ([BLAST](blast.md) explains why).
-3. **Pre-loaded MSA datasets**: alignments the site's config provides
-   ([your own alignments](your-own-alignments.md#a-dataset-for-every-gene)).
-4. **Manual upload**: an MSA or tree file of your own.
+- **Orthologs**: look up a precomputed ortholog gene per species (NCBI, or
+  PANTHER for the species NCBI's sets leave out, or the query's UniRef cluster
+  for everything within 50% identity across UniProtKB) and align what comes
+  back. No search job to queue, so this returns in seconds; with the in-browser
+  aligner, no job at all.
+- **BLAST query**: search EBI with blastp or phmmer and align the hits. The
+  route for a gene with no resolvable symbol. Its Manual option links out to
+  NCBI's own BLAST page for `nr`, which no browser can query directly
+  ([BLAST](blast.md) explains why).
+- **Pre-loaded MSA datasets**: alignments the site's config provides
+  ([your own alignments](your-own-alignments.md#a-dataset-for-every-gene)).
+- **Manual upload**: an MSA or tree file of your own.
 
 The first two are reachable without the dialog, through the `orthologParams` and
-`searchParams` session-spec keys below.
-[Launch parameters](launch-parameters.md) has their field tables.
+`searchParams` session-spec keys below. [Launching](launching.md#parameters) has
+their field tables.
 
 ## Orthologs: `orthologParams`
 

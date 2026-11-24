@@ -25,7 +25,7 @@ export async function handleFetch(url: string, args?: RequestInit) {
     // level failure, including a cross-origin response the browser refused to
     // hand over. That is not a hypothetical: NCBI's Blast.cgi stopped sending
     // Access-Control-Allow-Origin to third-party origins, and the raw TypeError
-    // told users nothing at all about why. See docs/blast.md.
+    // told users nothing at all about why. See agent-docs/blast-design.md.
     if (e instanceof TypeError) {
       throw new Error(
         `Could not reach ${hostOf(url)} — the request failed at the network level. This is usually a CORS restriction (the server refused to let this site read the response), an offline connection, or a blocked request.`,
