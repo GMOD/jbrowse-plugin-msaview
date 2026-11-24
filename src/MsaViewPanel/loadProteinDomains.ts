@@ -24,9 +24,8 @@ export async function loadProteinDomains(
   self: DomainModel,
   signal?: AbortSignal,
 ) {
-  const rowAccessions = Object.entries(self.rowData).flatMap(
-    ([rowName, row]) =>
-      row?.Accession ? [{ rowName, accession: row.Accession }] : [],
+  const rowAccessions = Object.entries(self.rowData).flatMap(([rowName, row]) =>
+    row?.Accession ? [{ rowName, accession: row.Accession }] : [],
   )
   if (rowAccessions.length === 0) {
     throw new Error('No NCBI accessions found in alignment rows')

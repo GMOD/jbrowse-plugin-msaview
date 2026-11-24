@@ -36,10 +36,10 @@ const timeout = Number(values.timeout)
 const readme = fs.readFileSync('README.md', 'utf8')
 const figures = [
   ...readme.matchAll(
-    /\[!\[[^\]]*\]\((img\/[\w-]+\.png)\)\]\((https:\/\/jbrowse\.org\/code\/jb2\/[^)\s]*session=spec-[^)\s]*)\)/g,
+    /<a href="(https:\/\/jbrowse\.org\/code\/jb2\/[^"]*session=spec-[^"]*)"><img src="(docs\/gallery\/[\w-]+\.png)"/g,
   ),
 ]
-  .map(([, out, link]) => ({ out, link }))
+  .map(([, link, out]) => ({ out, link: link.replaceAll('&amp;', '&') }))
   .filter(f => !values.only || f.out.includes(values.only))
 if (figures.length === 0) {
   throw new Error('README.md has no gallery figure matching the filter')
@@ -47,7 +47,7 @@ if (figures.length === 0) {
 
 // A pointer position to hover before the capture, so the genome view shows the
 // codon under it. The viewport is fixed, so this is the R248 column.
-const hoverAt = { 'img/genome-link.png': { x: 1377, y: 433 } }
+const hoverAt = { 'docs/gallery/genome-link.png': { x: 819, y: 662 } }
 
 // The ProteinView belongs to jbrowse-plugin-protein3d, and molstar gets no
 // WebGL context in headless Chrome, so a figure is the genome view and the
@@ -71,7 +71,7 @@ function captureUrl(demo) {
 const browser = await puppeteer.launch({
   headless: true,
   args: ['--no-sandbox', '--use-gl=swiftshader'],
-  defaultViewport: { width: 1600, height: 800 },
+  defaultViewport: { width: 1180, height: 1000 },
 })
 
 async function capture({ out, link }) {

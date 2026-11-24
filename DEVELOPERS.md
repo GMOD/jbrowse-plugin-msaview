@@ -71,14 +71,15 @@ without it the raw PNG is used.
 
 ### The README gallery
 
-Each gallery figure in `img/` is a capture of the demo link it wraps in the
-README, not a hand-made screenshot. `pnpm readme-figure` loads each link on the
-hosted `main` build with the local `dist/` answering for this plugin, drops the
-ProteinView (protein3d's, and molstar gets no WebGL in headless Chrome), hovers
-the column named in `hoverAt` and writes the figure through the same tolerance
-as the test references. The `version` lifecycle runs it, so each release commits
-figures of its own UI. When a capture fails there, the script prints a warning
-and keeps the old figures, so a slow gmod.org or UCSC cannot hold up a release.
+Each gallery figure in `docs/gallery/` is a capture of the demo link it wraps in
+the README, not a hand-made screenshot. `pnpm readme-figure` loads each link on
+the hosted `main` build with the local `dist/` answering for this plugin, drops
+the ProteinView (protein3d's, and molstar gets no WebGL in headless Chrome),
+hovers the column named in `hoverAt` and writes the figure through the same
+tolerance as the test references. The `version` lifecycle runs it, so each
+release commits figures of its own UI. When a capture fails there, the script
+prints a warning and keeps the old figures, so a slow gmod.org or UCSC cannot
+hold up a release.
 
 Change a link and its figure follows at the next release. Run
 `pnpm build && pnpm readme-figure` to see it sooner, or `--only <name>` for one.

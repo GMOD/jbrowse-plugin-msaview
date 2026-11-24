@@ -42,7 +42,7 @@
     "prepack": "pnpm build",
     "check-ci": "node scripts/require-green-ci.mjs",
     "preversion": "pnpm check-ci && pnpm check-host-dep-pins && pnpm lint && pnpm lint:eslint && pnpm build && pnpm check-host-floor && pnpm host-compat",
-    "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git-cliff --tag v$npm_package_version --unreleased --prepend CHANGELOG.md && (pnpm readme-figure || echo 'WARNING: README figure not refreshed, see above') && git add src/version.ts CHANGELOG.md img",
+    "version": "node -e \"console.log('export const version = \\'' + require('./package.json').version + '\\'')\" > src/version.ts && git-cliff --tag v$npm_package_version --unreleased --prepend CHANGELOG.md && (pnpm readme-figure || echo 'WARNING: README figure not refreshed, see above') && git add src/version.ts CHANGELOG.md docs/gallery",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
