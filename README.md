@@ -28,15 +28,11 @@ It is installed by default on https://genomes.jbrowse.org.
 ## Documentation
 
 - [Alignments from a gene](docs/alignments-from-a-gene.md): the dialog's sources
-  and aligning in the browser
-- [Your own alignments](docs/your-own-alignments.md): files, links and per-gene
-  datasets
-- [BLAST](docs/blast.md): why searches run at EBI, and the manual route to NCBI
-- [Launching](docs/launching.md): session-spec links, every parameter, reading
-  what a launch resolved to
-- [Linked views](docs/linked-views.md): how a column reaches its codon and a
-  protein3d structure
-- [DEVELOPERS.md](DEVELOPERS.md): running, checking and publishing
+- [Your own alignments](docs/your-own-alignments.md): files, links, datasets
+- [BLAST](docs/blast.md): why searches run at EBI
+- [Launching](docs/launching.md): session-spec links and every parameter
+- [Linked views](docs/linked-views.md): from a column to its codon
+- [DEVELOPERS.md](DEVELOPERS.md): running, checking, publishing
 
 ## Citation
 
