@@ -32,7 +32,6 @@ It is installed by default on https://genomes.jbrowse.org.
 - [BLAST](docs/blast.md): why searches run at EBI
 - [Launching](docs/launching.md): session-spec links and every parameter
 - [Linked views](docs/linked-views.md): from a column to its codon
-- [DEVELOPERS.md](DEVELOPERS.md): running, checking, publishing
 
 ## Citation
 
