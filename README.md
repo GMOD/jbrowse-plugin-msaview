@@ -27,11 +27,12 @@ It is installed by default on https://genomes.jbrowse.org.
 
 ## Documentation
 
-- [Alignments from a gene](docs/alignments-from-a-gene.md): the dialog's sources
-- [Your own alignments](docs/your-own-alignments.md): files, links, datasets
+- [Alignments from a gene](docs/alignments-from-a-gene.md): align from a gene
+- [Your own alignments](docs/your-own-alignments.md): open FASTA, Stockholm,
+  Clustal
 - [BLAST](docs/blast.md): why searches run at EBI
-- [Launching](docs/launching.md): session-spec links and every parameter
-- [Linked views](docs/linked-views.md): from a column to its codon
+- [Launching](docs/launching.md): open a view from a URL or code
+- [Linked views](docs/linked-views.md): columns linked to the genome
 
 ## Citation
 
