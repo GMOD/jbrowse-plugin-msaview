@@ -1,6 +1,13 @@
 import { openDB } from 'idb'
 
-import type { DBSchema, IDBPDatabase, OpenDBCallbacks } from 'idb'
+import type {
+  DBSchema,
+  IDBPDatabase,
+  OpenDBCallbacks,
+  StoreKey,
+  StoreNames,
+  StoreValue,
+} from 'idb'
 
 /**
  * Memoized `openDB` for a typed schema, shared by this plugin's caches.
@@ -31,6 +38,7 @@ export function createDbOpener<T extends DBSchema>(
   return () => {
     dbPromise ??= new Promise<IDBPDatabase<T>>((resolve, reject) => {
       let gaveUp = false
+      let opened: IDBPDatabase<T> | undefined
       openDB<T>(name, version, {
         upgrade,
         blocked(currentVersion) {
@@ -41,8 +49,8 @@ export function createDbOpener<T extends DBSchema>(
             ),
           )
         },
-        blocking(_currentVersion, _blockedVersion, event) {
-          ;(event.target as IDBDatabase).close()
+        blocking() {
+          opened?.close()
           forget()
         },
         terminated: forget,
@@ -50,6 +58,7 @@ export function createDbOpener<T extends DBSchema>(
         if (gaveUp) {
           db.close()
         } else {
+          opened = db
           resolve(db)
         }
       }, reject)
@@ -77,4 +86,41 @@ export async function bestEffort<R>(
     console.warn(`[msaview] ${what} failed, continuing without it:`, e)
     return fallback
   }
+}
+
+export function getMany<T extends DBSchema, Name extends StoreNames<T>>(
+  what: string,
+  getDB: () => Promise<IDBPDatabase<T>>,
+  store: Name,
+  keys: StoreKey<T, Name>[],
+) {
+  return bestEffort(
+    `${what} read`,
+    async () => {
+      const tx = (await getDB()).transaction(store, 'readonly')
+      const results = await Promise.all(keys.map(key => tx.store.get(key)))
+      await tx.done
+      return results
+    },
+    [],
+  )
+}
+
+export function putMany<T extends DBSchema, Name extends StoreNames<T>>(
+  what: string,
+  getDB: () => Promise<IDBPDatabase<T>>,
+  store: Name,
+  values: StoreValue<T, Name>[],
+) {
+  return bestEffort(
+    `${what} write`,
+    async () => {
+      const tx = (await getDB()).transaction(store, 'readwrite')
+      for (const value of values) {
+        await tx.store.put(value)
+      }
+      await tx.done
+    },
+    undefined,
+  )
 }

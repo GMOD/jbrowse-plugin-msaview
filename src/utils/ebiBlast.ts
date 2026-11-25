@@ -94,9 +94,7 @@ export async function queryEbiBlast({
   })
   return {
     rid: job.jobId,
-    hits: normalizeEbiBlastHits(
-      JSON.parse(await job.result('json')) as EbiBlastJson,
-    ),
+    hits: normalizeEbiBlastHits(JSON.parse(await job.result('json'))),
   }
 }
 

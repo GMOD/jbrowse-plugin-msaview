@@ -1,6 +1,6 @@
 import { deleteDB } from 'idb'
 
-import { bestEffort, createDbOpener } from './idb'
+import { createDbOpener, getMany, putMany } from './idb'
 
 import type { DomainMatch } from './ncbiDomains'
 import type { DBSchema } from 'idb'
@@ -51,32 +51,9 @@ function getDB() {
 }
 
 export function getCachedDomains(accessions: string[]) {
-  return bestEffort(
-    'domain cache read',
-    async () => {
-      const db = await getDB()
-      const tx = db.transaction(STORE_NAME, 'readonly')
-      const results = await Promise.all(
-        accessions.map(accession => tx.store.get(accession)),
-      )
-      await tx.done
-      return results
-    },
-    [],
-  )
+  return getMany('domain cache', getDB, STORE_NAME, accessions)
 }
 
 export function saveDomains(entries: CachedDomain[]) {
-  return bestEffort(
-    'domain cache write',
-    async () => {
-      const db = await getDB()
-      const tx = db.transaction(STORE_NAME, 'readwrite')
-      for (const entry of entries) {
-        await tx.store.put(entry)
-      }
-      await tx.done
-    },
-    undefined,
-  )
+  return putMany('domain cache', getDB, STORE_NAME, entries)
 }
