@@ -16,11 +16,12 @@
 // GenPept records with CDD Region features, so the overlay attaches as it does
 // to a RefSeq accession.
 
-import { isAbortError, jsonfetch } from './fetch'
+import { jsonfetch } from './fetch'
 import {
   cleanGeneCandidate,
   dedupeLabels,
   defaultMaxSpecies,
+  droppedRowsWarning,
 } from './ncbiOrthologs'
 import { fetchTaxonomyInfo } from './taxonomyNames'
 
@@ -39,7 +40,7 @@ export interface PantherGenome {
   longName: string
 }
 
-interface GenomesResponse {
+export interface GenomesResponse {
   search?: {
     output?: {
       genomes?: {
@@ -58,8 +59,8 @@ interface GenomesResponse {
  * `supportedgenomes` -> the code<->taxon map every other parse needs. PANTHER
  * names organisms by code only in ortholog results.
  */
-export function parseGenomes(json: unknown): PantherGenome[] {
-  const list = (json as GenomesResponse).search?.output?.genomes?.genome ?? []
+export function parseGenomes(json: GenomesResponse): PantherGenome[] {
+  const list = json.search?.output?.genomes?.genome ?? []
   return list.flatMap(g =>
     g.short_name && g.taxon_id
       ? [
@@ -99,7 +100,7 @@ interface Mapping {
   ortholog?: string
 }
 
-interface MatchResponse {
+export interface MatchResponse {
   search?: {
     mapping?: {
       /** one object for a single (or empty) match, an array otherwise */
@@ -124,12 +125,12 @@ function parseGeneRef(ref: string | undefined): PantherGene | undefined {
  * per target gene. An unknown gene comes back under `unmapped_ids`; a gene with
  * no ortholog in the target set comes back as a bare `{ id }`.
  */
-export function parseMatches(json: unknown): {
+export function parseMatches(json: MatchResponse): {
   unmapped: boolean
   query?: PantherGene
   hits: PantherHit[]
 } {
-  const mapping = (json as MatchResponse).search?.mapping
+  const mapping = json.search?.mapping
   const mapped = mapping?.mapped
   const rows = Array.isArray(mapped) ? mapped : mapped ? [mapped] : []
   const hits: PantherHit[] = []
@@ -168,7 +169,7 @@ export function pickOnePerGenome(hits: PantherHit[]): PantherHit[] {
   return [...byCode.values()]
 }
 
-interface UniProtResponse {
+export interface UniProtResponse {
   results?: {
     primaryAccession?: string
     sequence?: { value?: string }
@@ -176,9 +177,9 @@ interface UniProtResponse {
 }
 
 /** `uniprotkb/accessions` -> accession -> sequence */
-export function parseSequences(json: unknown): Map<string, string> {
+export function parseSequences(json: UniProtResponse): Map<string, string> {
   const map = new Map<string, string>()
-  for (const r of (json as UniProtResponse).results ?? []) {
+  for (const r of json.results ?? []) {
     if (r.primaryAccession && r.sequence?.value) {
       map.set(r.primaryAccession, r.sequence.value)
     }
@@ -190,7 +191,7 @@ let genomes: Promise<PantherGenome[]> | undefined
 
 /** The proteome list, fetched once per page and forgotten on failure. */
 function fetchGenomes() {
-  genomes ??= jsonfetch(`${PANTHER}/supportedgenomes`)
+  genomes ??= jsonfetch<GenomesResponse>(`${PANTHER}/supportedgenomes`)
     .then(parseGenomes)
     .catch((e: unknown) => {
       genomes = undefined
@@ -206,7 +207,7 @@ async function fetchSequences(accessions: string[], signal?: AbortSignal) {
   const map = new Map<string, string>()
   for (let i = 0; i < accessions.length; i += UNIPROT_CHUNK) {
     const chunk = accessions.slice(i, i + UNIPROT_CHUNK)
-    const json = await jsonfetch(
+    const json = await jsonfetch<UniProtResponse>(
       `${UNIPROT}/accessions?accessions=${chunk.join(',')}&fields=accession,sequence&format=json`,
       { signal },
     )
@@ -244,9 +245,10 @@ async function matchOrthologs(
       params.set('targetOrganism', targets.map(t => t.taxId).join(','))
     }
     const parsed = parseMatches(
-      await jsonfetch(`${PANTHER}/ortholog/matchortho?${params.toString()}`, {
-        signal,
-      }),
+      await jsonfetch<MatchResponse>(
+        `${PANTHER}/ortholog/matchortho?${params.toString()}`,
+        { signal },
+      ),
     )
     if (!parsed.unmapped) {
       matched ??= query
@@ -266,6 +268,7 @@ export interface PantherOrthologs {
   /** the query gene as PANTHER knows it, with its UniProt sequence */
   query?: PantherGene & { sequence: string }
   rows: OrthologRow[]
+  warning?: string
 }
 
 /**
@@ -348,7 +351,7 @@ export async function fetchPantherOrthologs({
 
   onProgress(`Fetching ${picks.length} protein sequences from UniProt...`)
   const [names, sequences] = await Promise.all([
-    taxonomyNames(
+    fetchTaxonomyInfo(
       picks.map(p => p.genome.taxId),
       signal,
     ),
@@ -361,31 +364,27 @@ export async function fetchPantherOrthologs({
     ),
   ])
 
-  const described = picks.map(({ hit, genome }) => {
+  const described = picks.flatMap(({ hit, genome }) => {
     const info = names.get(genome.taxId)
-    return {
-      hit,
-      genome,
-      name: info?.commonName || info?.sciname || genome.name,
-      scientificName: info?.sciname || genome.longName,
-      commonName: info?.commonName,
-    }
+    const sequence = sequences.get(hit.accession)
+    return sequence
+      ? [
+          {
+            name: info?.commonName || info?.sciname || genome.name,
+            taxId: genome.taxId,
+            scientificName: info?.sciname || genome.longName,
+            commonName: info?.commonName,
+            geneId: hit.geneRef,
+            protein: hit.accession,
+            sequence,
+          },
+        ]
+      : []
   })
-  const labels = dedupeLabels(described.map(d => d.name))
-  const rows = described
-    .map(({ hit, genome, scientificName, commonName }, i) => ({
-      taxId: genome.taxId,
-      label: labels[i]!,
-      scientificName,
-      commonName,
-      geneId: hit.geneRef,
-      protein: hit.accession,
-      sequence: sequences.get(hit.accession) ?? '',
-    }))
-    .filter(r => r.sequence)
-  if (rows.length < 2) {
+  if (described.length < 2) {
     throw new Error('Could not fetch protein sequences for the orthologs')
   }
+  const labels = dedupeLabels(described.map(d => d.name))
 
   const querySequence = match.query && sequences.get(match.query.accession)
   return {
@@ -394,23 +393,10 @@ export async function fetchPantherOrthologs({
       match.query && querySequence
         ? { ...match.query, sequence: querySequence }
         : undefined,
-    rows,
-  }
-}
-
-/**
- * NCBI's names for the taxa, so PANTHER rows are labelled exactly as NCBI rows
- * are. A failed lookup only costs the labels, which fall back to PANTHER's own
- * short names, so it is logged rather than thrown.
- */
-async function taxonomyNames(taxIds: number[], signal?: AbortSignal) {
-  try {
-    return await fetchTaxonomyInfo(taxIds, signal)
-  } catch (e) {
-    if (isAbortError(e)) {
-      throw e
-    }
-    console.warn('[msaview-orthologs] taxonomy name lookup failed:', e)
-    return new Map<number, { sciname: string; commonName?: string }>()
+    rows: described.map(({ name, ...row }, i) => ({
+      ...row,
+      label: labels[i]!,
+    })),
+    warning: droppedRowsWarning(picks.length - described.length, picks.length),
   }
 }

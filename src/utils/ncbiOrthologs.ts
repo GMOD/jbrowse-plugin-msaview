@@ -75,12 +75,22 @@ export interface OrthologRow {
  * (gene:TP53) and a version suffix (NM_000546.6) stripped off. Shared with
  * pantherOrthologs, which asks PANTHER the same question with the same
  * candidates.
+ *
+ * A version follows an accession's run of digits; a C. elegans sequence name
+ * like T05G5.3 keeps its suffix, which is part of the name, and T05G5 is
+ * another gene.
  */
 export function cleanGeneCandidate(raw: string) {
   return raw
     .trim()
     .replace(/^\w+:/, '')
-    .replace(/\.\d+$/, '')
+    .replace(/(?<=\d{5})\.\d+$/, '')
+}
+
+export function droppedRowsWarning(dropped: number, total: number) {
+  return dropped
+    ? `${dropped} of the ${total} orthologs found had no protein sequence to fetch and were left out of the alignment.`
+    : undefined
 }
 
 export interface SymbolCandidate {
@@ -405,7 +415,7 @@ export async function fetchOrthologRows({
   limit?: number
   onProgress: (arg: string) => void
   signal?: AbortSignal
-}): Promise<OrthologRow[]> {
+}): Promise<{ rows: OrthologRow[]; warning?: string }> {
   onProgress('Finding orthologs across species...')
   const genes = await fetchOrthologGenes(geneId, {
     taxa,
@@ -424,7 +434,10 @@ export async function fetchOrthologRows({
     genes.map(g => g.geneId),
     signal,
   )
-  const withProtein = genes.filter(g => proteinByGene.has(g.geneId))
+  const withProtein = genes.flatMap(g => {
+    const protein = proteinByGene.get(g.geneId)
+    return protein ? [{ ...g, protein }] : []
+  })
   if (withProtein.length < 2) {
     throw new Error(
       'Could not resolve representative proteins for the orthologs',
@@ -432,34 +445,29 @@ export async function fetchOrthologRows({
   }
 
   onProgress(`Fetching ${withProtein.length} protein sequences...`)
-  const accessions = withProtein.map(g => proteinByGene.get(g.geneId)!)
   const [efetch, init] = efetchPost({
     db: 'protein',
-    id: accessions.join(','),
+    id: withProtein.map(g => g.protein).join(','),
     rettype: 'fasta',
     retmode: 'text',
   })
   const seqByAcc = parseFasta(await eutilsText(efetch, { ...init, signal }))
 
-  const labels = dedupeLabels(
-    withProtein.map(g => g.commonName ?? g.scientificName),
-  )
-  const rows = withProtein
-    .map((g, i) => {
-      const protein = proteinByGene.get(g.geneId)!
-      return {
-        taxId: g.taxId,
-        label: labels[i]!,
-        scientificName: g.scientificName,
-        commonName: g.commonName,
-        geneId: g.geneId,
-        protein,
-        sequence: seqByAcc.get(protein) ?? '',
-      }
-    })
-    .filter(r => r.sequence)
-  if (rows.length < 2) {
+  const withSequence = withProtein.flatMap(g => {
+    const sequence = seqByAcc.get(g.protein)
+    return sequence ? [{ ...g, sequence }] : []
+  })
+  if (withSequence.length < 2) {
     throw new Error('Could not fetch protein sequences for the orthologs')
   }
-  return rows
+  const labels = dedupeLabels(
+    withSequence.map(g => g.commonName ?? g.scientificName),
+  )
+  return {
+    rows: withSequence.map((g, i) => ({ ...g, label: labels[i]! })),
+    warning: droppedRowsWarning(
+      genes.length - withSequence.length,
+      genes.length,
+    ),
+  }
 }

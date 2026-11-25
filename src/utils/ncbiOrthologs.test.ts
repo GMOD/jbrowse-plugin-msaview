@@ -4,6 +4,7 @@ import {
   cleanGeneCandidate,
   dedupeLabels,
   fetchOrthologGenes,
+  fetchOrthologRows,
   fetchRepresentativeProteins,
   parseFasta,
   pickBySymbol,
@@ -57,6 +58,13 @@ describe('cleanGeneCandidate', () => {
     expect(cleanGeneCandidate(' gene:TP53 ')).toBe('TP53')
     expect(cleanGeneCandidate('NM_000546.6')).toBe('NM_000546')
     expect(cleanGeneCandidate('TP53')).toBe('TP53')
+    expect(cleanGeneCandidate('ENSG00000141510.18')).toBe('ENSG00000141510')
+    expect(cleanGeneCandidate('AT1G01010.1')).toBe('AT1G01010')
+  })
+
+  test('keeps a suffix that is part of the name: T05G5 is another worm gene', () => {
+    expect(cleanGeneCandidate('T05G5.3')).toBe('T05G5.3')
+    expect(cleanGeneCandidate('ZK1236.4')).toBe('ZK1236.4')
   })
 })
 
@@ -270,5 +278,49 @@ test('an abort stops a chunked lookup at the request in flight', async () => {
     fetchRepresentativeProteins(ids, controller.signal),
   ).rejects.toThrow(expect.objectContaining({ name: 'AbortError' }))
   expect(seen).toHaveLength(1)
+  vi.unstubAllGlobals()
+})
+
+test('fetchOrthologRows says how many orthologs it dropped and labels the rows it kept without gaps', async () => {
+  const genes = [
+    ['1', 'human'],
+    ['2', 'human'],
+    ['3', 'human'],
+    ['4', 'mouse'],
+    ['5', 'rat'],
+  ]
+  vi.stubGlobal('fetch', (url: string) => {
+    const body = url.includes('/orthologs')
+      ? {
+          reports: genes.map(([id, name]) => ({
+            gene: { gene_id: id, tax_id: id, taxname: name, common_name: name },
+          })),
+        }
+      : url.includes('product_report')
+        ? {
+            reports: ['1', '2', '3', '4'].map(id => ({
+              product: {
+                gene_id: id,
+                transcripts: [{ protein: { accession_version: `NP_${id}` } }],
+              },
+            })),
+          }
+        : undefined
+    return Promise.resolve(
+      new Response(
+        body ? JSON.stringify(body) : '>NP_1\nMK\n>NP_3\nMV\n>NP_4\nML\n',
+      ),
+    )
+  })
+  const { rows, warning } = await fetchOrthologRows({
+    geneId: '7157',
+    onProgress: () => {},
+  })
+  expect(rows.map(r => [r.label, r.protein, r.sequence])).toEqual([
+    ['human', 'NP_1', 'MK'],
+    ['human_2', 'NP_3', 'MV'],
+    ['mouse', 'NP_4', 'ML'],
+  ])
+  expect(warning).toMatch(/^2 of the 5 orthologs/)
   vi.unstubAllGlobals()
 })

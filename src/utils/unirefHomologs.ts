@@ -92,8 +92,12 @@ export function parseEntry(entry: UniProtEntry): UnirefMember | undefined {
   }
 }
 
-function parseEntries(json: unknown) {
-  return ((json as { results?: UniProtEntry[] }).results ?? []).flatMap(e => {
+interface UniProtEntries {
+  results?: UniProtEntry[]
+}
+
+function parseEntries(json: UniProtEntries) {
+  return (json.results ?? []).flatMap(e => {
     const m = parseEntry(e)
     return m ? [m] : []
   })
@@ -144,7 +148,7 @@ export async function resolveUniProtEntry(
       }
     }
     const query = `gene_exact:"${candidate.replaceAll('"', '')}" AND organism_id:${taxId}`
-    const json = await jsonfetch(
+    const json = await jsonfetch<UniProtEntries>(
       `${UNIPROT}/uniprotkb/search?query=${encodeURIComponent(query)}&fields=${ENTRY_FIELDS}&size=25`,
       { signal },
     )
@@ -163,21 +167,18 @@ async function fetchClusterId(
   signal?: AbortSignal,
 ) {
   const query = `(uniprot_id:${accession}) AND (identity:${identity / 100})`
-  const json = await jsonfetch<{
-    results?: { id?: string; memberCount?: number }[]
-  }>(
-    `${UNIPROT}/uniref/search?query=${encodeURIComponent(query)}&fields=id,count&size=1`,
+  const json = await jsonfetch<{ results?: { id?: string }[] }>(
+    `${UNIPROT}/uniref/search?query=${encodeURIComponent(query)}&fields=id&size=1`,
     { signal },
   )
-  const cluster = json.results?.[0]
-  return cluster?.id
-    ? { id: cluster.id, memberCount: cluster.memberCount }
-    : undefined
+  return json.results?.[0]?.id
 }
 
-// a page per request, followed through the Link header; the scan stops once
-// enough species have been seen, so a ten-thousand-member cluster of a kinase
-// domain does not have to be read to the end
+// a page per request, followed through the Link header, to at most
+// MAX_SCANNED members, so a ten-thousand-member cluster of a kinase domain is
+// not read to the end. A launch naming its species stops sooner, once each has
+// its reviewed entry; one naming none reads to the cap, since any later member
+// may be a new species or outrank one already seen
 const PAGE = 500
 const MAX_SCANNED = 5000
 
@@ -302,8 +303,8 @@ export async function fetchUnirefHomologs({
   }
 
   onProgress(`Finding the UniRef${identity} cluster of ${query.id}...`)
-  const cluster = await fetchClusterId(query.accession, identity, signal)
-  if (!cluster) {
+  const clusterId = await fetchClusterId(query.accession, identity, signal)
+  if (!clusterId) {
     throw new Error(`${query.accession} is in no UniRef${identity} cluster`)
   }
 
@@ -313,7 +314,7 @@ export async function fetchUnirefHomologs({
     truncated,
     rows: members,
   } = await fetchClusterMembers({
-    clusterId: cluster.id,
+    clusterId,
     identity,
     referenceProteomesOnly,
     taxa,
@@ -324,7 +325,7 @@ export async function fetchUnirefHomologs({
   })
   if (members.length < 1) {
     throw new Error(
-      `${cluster.id} has no other ${referenceProteomesOnly ? 'reference-proteome ' : ''}member to align ${query.id} against`,
+      `${clusterId} has no other ${referenceProteomesOnly ? 'reference-proteome ' : ''}member to align ${query.id} against`,
     )
   }
 
@@ -333,10 +334,10 @@ export async function fetchUnirefHomologs({
   )
   return {
     query,
-    clusterId: cluster.id,
+    clusterId,
     total,
     warning: truncated
-      ? `${cluster.id} lists ${total ?? 'more than ' + scanned} UniProtKB entries and the first ${scanned} were read, so species whose only entries come later are missing.`
+      ? `${clusterId} lists ${total ?? 'more than ' + scanned} UniProtKB entries and the first ${scanned} were read, so species whose only entries come later are missing.`
       : undefined,
     rows: members.map((m, i) => ({
       taxId: m.taxId,

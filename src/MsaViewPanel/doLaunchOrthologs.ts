@@ -180,13 +180,13 @@ async function findNcbiOrthologs({
     resolved.geneId,
     signal,
   )
-  const rows = await fetchOrthologRows({
+  const { rows, warning } = await fetchOrthologRows({
     geneId: resolved.geneId,
     onProgress,
     signal,
     ...rest,
   })
-  return { geneId: resolved.geneId, representative, rows }
+  return { geneId: resolved.geneId, representative, rows, warning }
 }
 
 const sourceNames: Record<OrthologSource, string> = {
@@ -243,6 +243,7 @@ async function findPantherOrthologs({
     geneId: found.query?.geneRef ?? found.matched,
     representative: found.query,
     rows: found.rows,
+    warning: found.warning,
   }
 }
 
@@ -256,16 +257,8 @@ async function queryRowLabel(
   rows: OrthologRow[],
   signal: AbortSignal,
 ) {
-  let name: string | undefined
-  try {
-    const info = (await fetchTaxonomyInfo([taxId], signal)).get(taxId)
-    name = info?.commonName ?? info?.sciname
-  } catch (e) {
-    if (isAbortError(e)) {
-      throw e
-    }
-    console.warn('[msaview-orthologs] taxonomy name lookup failed:', e)
-  }
+  const info = (await fetchTaxonomyInfo([taxId], signal)).get(taxId)
+  const name = info?.commonName ?? info?.sciname
   return dedupeLabels([
     ...rows.map(r => r.label),
     `${name ?? 'query'}_query`,

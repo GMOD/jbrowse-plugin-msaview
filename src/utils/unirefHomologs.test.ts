@@ -214,8 +214,20 @@ test('a gene symbol shaped like an accession still resolves by gene search', asy
 })
 
 test('a failed accession fetch is reported, not turned into a miss', async () => {
-  vi.stubGlobal('fetch', () =>
-    Promise.resolve(new Response('upstream down', { status: 503 })),
+  vi.stubGlobal('fetch', (url: string) =>
+    Promise.resolve(
+      url.includes('/uniprotkb/search')
+        ? new Response(JSON.stringify({ results: [] }))
+        : new Response('upstream down', { status: 503 }),
+    ),
   )
   await expect(resolveUniProtEntry(['P04637'], 0)).rejects.toThrow('HTTP 503')
+})
+
+test('a C. elegans sequence name is searched whole, since T05G5 is another gene', async () => {
+  const calls = stubFetch([{ body: { results: [entry('P34556', 6239)] } }])
+  expect((await resolveUniProtEntry(['T05G5.3'], 6239))?.accession).toBe(
+    'P34556',
+  )
+  expect(decodeURIComponent(calls[0]!)).toContain('gene_exact:"T05G5.3"')
 })

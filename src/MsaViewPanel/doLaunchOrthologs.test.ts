@@ -111,7 +111,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockResolveGeneId.mockResolvedValue({ geneId: GENE_ID, matched: 'NLRP1' })
   mockFetchProtein.mockResolvedValue(REPRESENTATIVE)
-  mockFetchRows.mockResolvedValue([] as OrthologRow[])
+  mockFetchRows.mockResolvedValue({ rows: [] })
   mockLaunchMSA.mockResolvedValue({ msa: '', tree: '' })
   mockFetchTaxonomy.mockResolvedValue(
     new Map([[HUMAN, { sciname: 'Homo sapiens', commonName: 'human' }]]),
@@ -140,7 +140,7 @@ describe('which species become rows', () => {
     vi.clearAllMocks()
     mockResolveGeneId.mockResolvedValue({ geneId: GENE_ID, matched: 'NLRP1' })
     mockFetchProtein.mockResolvedValue(REPRESENTATIVE)
-    mockFetchRows.mockResolvedValue([] as OrthologRow[])
+    mockFetchRows.mockResolvedValue({ rows: [] })
     mockLaunchMSA.mockResolvedValue({ msa: '', tree: '' })
     await launch({
       self: makeModel(params({ taxa: [HUMAN, 10090] })),
@@ -157,6 +157,12 @@ describe('which species become rows', () => {
 // The cap is the only thing standing between a launch and a 7 minute EBI job:
 // NCBI publishes 865 orthologs for CFTR and the aligner runs at roughly half a
 // second a row.
+test("NCBI's note of dropped rows reaches the launch's warnings", async () => {
+  mockFetchRows.mockResolvedValue({ rows: [], warning: '1 of the 4' })
+  const result = await launch({ self: makeModel(params()) })
+  expect(result.warnings).toEqual(['1 of the 4'])
+})
+
 describe('the row cap', () => {
   test('is passed through when given', async () => {
     await launch({ self: makeModel(params({ maxSpecies: 12 })) })
@@ -182,17 +188,16 @@ describe('the query row name', () => {
   })
 
   test('cannot collide with an ortholog row that sanitizes to the same token', async () => {
-    mockFetchRows.mockResolvedValue([
-      { label: 'human_query', sequence: 'MM' },
-    ] as OrthologRow[])
+    mockFetchRows.mockResolvedValue({
+      rows: [{ label: 'human_query', sequence: 'MM' }] as OrthologRow[],
+    })
     await launch({ self: makeModel(params()) })
     expect(queryRowName()).toBe('human_query_2')
     expect(setQuerySeqName).toHaveBeenCalledWith('human_query_2')
   })
 
-  test('falls back rather than throwing when NCBI cannot name the taxon', async () => {
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
-    mockFetchTaxonomy.mockRejectedValue(new Error('429'))
+  test('falls back when NCBI cannot name the taxon', async () => {
+    mockFetchTaxonomy.mockResolvedValue(new Map())
     await launch({ self: makeModel(params()) })
     expect(queryRowName()).toBe('query_query')
   })
@@ -374,6 +379,19 @@ describe('the PANTHER source', () => {
     })
     expect(queryRowSent()).toBe('MDIFFERENTISOFORM')
     expect(queryMetadata(result).Accession).toBeUndefined()
+  })
+
+  test("PANTHER's note of dropped rows reaches the launch's warnings", async () => {
+    mockFetchPanther.mockResolvedValue({ ...found, warning: '2 of the 3' })
+    const result = await launch({
+      self: makeModel({
+        taxId: YEAST,
+        source: 'panther',
+        geneCandidates: ['CDC28'],
+        msaAlgorithm: 'clustalo',
+      }),
+    })
+    expect(result.warnings).toEqual(['2 of the 3'])
   })
 
   test('names PANTHER when it has no protein for the query row', async () => {

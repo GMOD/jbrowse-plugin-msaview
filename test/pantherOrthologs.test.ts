@@ -31,7 +31,7 @@ const fixtures = join(
   dirname(fileURLToPath(import.meta.url)),
   'fixtures/panther',
 )
-function fixture(name: string): unknown {
+function fixture(name: string) {
   return JSON.parse(readFileSync(join(fixtures, `${name}.json`), 'utf8'))
 }
 
@@ -129,14 +129,17 @@ describe('fetchPantherOrthologs', () => {
     vi.unstubAllGlobals()
   })
 
-  function stubFetch(match: unknown = cdc28) {
+  function stubFetch(
+    match: unknown = cdc28,
+    sequences: unknown = fixture('uniprot-accessions'),
+  ) {
     vi.stubGlobal('fetch', (url: string) => {
       seen.push(url)
       const body = url.includes('supportedgenomes')
         ? fixture('panther-genomes')
         : url.includes('matchortho')
           ? match
-          : fixture('uniprot-accessions')
+          : sequences
       return Promise.resolve({
         ok: true,
         status: 200,
@@ -148,8 +151,8 @@ describe('fetchPantherOrthologs', () => {
 
   test('rows carry the NCBI-shaped fields, labelled by NCBI taxonomy names', async () => {
     stubFetch()
-    const { matched, query, rows } = await fetchPantherOrthologs({
-      candidates: ['gene:CDC28.1'],
+    const { matched, query, rows, warning } = await fetchPantherOrthologs({
+      candidates: ['gene:CDC28'],
       taxId: 559292,
       exclude: 559292,
       onProgress: () => {},
@@ -169,17 +172,46 @@ describe('fetchPantherOrthologs', () => {
       ['arabidopsis', 3702, 'Q8LG64', 'TAIR=locus=2037410'],
     ])
     expect(rows.every(r => r.sequence.length === 24)).toBe(true)
+    expect(warning).toBeUndefined()
   })
 
-  test('the candidate is cleaned of its GFF prefix and version before it is sent', async () => {
+  test('a row UniProt has no sequence for is dropped and counted', async () => {
+    const { results } = fixture('uniprot-accessions')
+    stubFetch(cdc28, {
+      results: results.filter(
+        (r: { primaryAccession: string }) => r.primaryAccession !== 'O61847',
+      ),
+    })
+    const { rows, warning } = await fetchPantherOrthologs({
+      candidates: ['CDC28'],
+      taxId: 559292,
+      exclude: 559292,
+      onProgress: () => {},
+    })
+    expect(rows.map(r => r.protein)).not.toContain('O61847')
+    expect(warning).toMatch(/^1 of the 5 orthologs/)
+  })
+
+  test('a C. elegans sequence name is sent whole, since T05G5 is another gene', async () => {
     stubFetch()
     await fetchPantherOrthologs({
-      candidates: ['gene:CDC28.1'],
+      candidates: ['T05G5.3'],
       taxId: 559292,
       onProgress: () => {},
     })
     const url = new URL(seen.find(u => u.includes('matchortho'))!)
-    expect(url.searchParams.get('geneInputList')).toBe('CDC28')
+    expect(url.searchParams.get('geneInputList')).toBe('T05G5.3')
+  })
+
+  test('the candidate is cleaned of its GFF prefix and accession version before it is sent', async () => {
+    stubFetch()
+    await fetchPantherOrthologs({
+      candidates: ['transcript:NM_001178263.1'],
+      taxId: 559292,
+      onProgress: () => {},
+    })
+    const url = new URL(seen.find(u => u.includes('matchortho'))!)
+    expect(url.searchParams.get('geneInputList')).toBe('NM_001178263')
     expect(url.searchParams.get('organism')).toBe('559292')
     // no target list: every genome PANTHER has, in one call
     expect(url.searchParams.get('targetOrganism')).toBeNull()
