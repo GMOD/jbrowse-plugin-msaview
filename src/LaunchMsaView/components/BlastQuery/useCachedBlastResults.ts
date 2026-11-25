@@ -17,10 +17,10 @@ export function useCachedBlastResults(feature: Feature) {
     const geneIds = getGeneIdentifiers(feature)
     const transcriptIds = getTranscriptFeatures(feature).map(t => t.id())
     const cached = await getAllCachedResults()
-    return cached.filter(
-      r =>
-        (r.geneId && geneIds.includes(r.geneId)) ||
-        (r.transcriptId && transcriptIds.includes(r.transcriptId)),
+    return cached.filter(r =>
+      r.geneId
+        ? geneIds.includes(r.geneId)
+        : !!r.transcriptId && transcriptIds.includes(r.transcriptId),
     )
   })
 
