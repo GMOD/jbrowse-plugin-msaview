@@ -1,5 +1,6 @@
 import { alignInBrowser, parseFastaRecords } from './browserAlign'
 import { runEbiJob } from './ebiJobDispatcher'
+import { isAbortError } from './fetch'
 
 import type {
   EbiMsaAlgorithm,
@@ -72,7 +73,13 @@ export async function launchMSA({
   })
   const [msa, tree] = await Promise.all([
     job.result(config.msaResult),
-    job.result(config.treeResult),
+    job.result(config.treeResult).catch((e: unknown) => {
+      if (isAbortError(e)) {
+        throw e
+      }
+      console.warn('[msaview] EBI returned no tree, building one here:', e)
+      return ''
+    }),
   ])
   return { msa, tree }
 }
