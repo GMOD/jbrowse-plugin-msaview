@@ -92,3 +92,11 @@ test('only the chosen panel is shown, and Manual mounts on first use', () => {
   ).not.toBeNull()
   expect(screen.getByLabelText('manual input').closest('[hidden]')).toBeNull()
 })
+
+test('the EBI settings gear is offered only where a job goes to EBI', () => {
+  render(<BlastPanel handleClose={() => {}} model={model} feature={feature} />)
+  expect(screen.getByLabelText('EBI settings')).toBeTruthy()
+
+  pick('Manual')
+  expect(screen.queryByLabelText('EBI settings')).toBeNull()
+})

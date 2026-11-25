@@ -17,7 +17,7 @@ import { cleanProteinSequence } from './util'
  * residues are, and they survive every rename.
  */
 
-export type MatchQuality = 'exact' | 'partial' | 'similar'
+type MatchQuality = 'exact' | 'partial' | 'similar'
 
 export interface QueryRowMatch {
   name: string
@@ -74,7 +74,7 @@ const SIMILARITY_FLOOR = 0.9
  */
 const PARTIAL_COVERAGE_FLOOR = 0.5
 
-export interface MsaQueryRow {
+interface MsaQueryRow {
   /** every row name, in file order, for the picker to offer */
   names: string[]
   /** the row whose residues are the query's, if one of them is */

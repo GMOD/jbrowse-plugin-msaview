@@ -196,7 +196,7 @@ describe('BLAST paste workflow E2E', () => {
       '',
     ].join('\n')
 
-    const msaBox = await p.$('textarea[placeholder*="aln"]')
+    const msaBox = await p.$('textarea[name="MSA"]')
     if (!msaBox) {
       throw new Error('alignment paste box not rendered')
     }

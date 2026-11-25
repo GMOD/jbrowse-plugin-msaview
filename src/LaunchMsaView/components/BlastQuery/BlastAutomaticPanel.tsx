@@ -32,6 +32,7 @@ import {
   defaultSearchFor,
   searchProgramLabels,
   searchPrograms,
+  snapBlastHitCount,
 } from './consts'
 import {
   useStoredMsaAlgorithm,
@@ -87,6 +88,7 @@ const BlastAutomaticPanel = observer(function ({
   const hitCount = Number(maxHits)
   const hitCountValid = Number.isInteger(hitCount) && hitCount >= 1
   const isPhmmer = search.program === 'phmmer'
+  const requestedHits = isPhmmer ? hitCount : snapBlastHitCount(hitCount)
 
   const cached = useCachedBlastResults(feature)
 
@@ -160,7 +162,13 @@ const BlastAutomaticPanel = observer(function ({
             setMaxHits(event.target.value)
           }}
           error={!hitCountValid}
-          helperText="best-scoring sequences to keep"
+          helperText={
+            !hitCountValid
+              ? 'a whole number, 1 or more'
+              : requestedHits === hitCount
+                ? 'best-scoring sequences to keep'
+                : `EBI takes set counts, so ${requestedHits} will be requested`
+          }
         />
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
@@ -177,7 +185,7 @@ const BlastAutomaticPanel = observer(function ({
         {cached.results.length > 0 ? (
           <Accordion className={classes.cachedResultsAccordion}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Previous BLAST Results</Typography>
+              <Typography>Previous searches</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <CachedBlastResults

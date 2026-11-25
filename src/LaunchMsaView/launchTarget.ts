@@ -3,7 +3,7 @@ import { isGeneLikeType } from '@jbrowse/core/util'
 import type { MenuItem } from '@jbrowse/core/ui'
 import type { Feature } from '@jbrowse/core/util'
 
-export interface ContextMenuInfo {
+interface ContextMenuInfo {
   item: { featureId: string; type?: string }
   // the isoform under the pointer when the click landed on a gene's child
   subfeature?: { featureId: string }

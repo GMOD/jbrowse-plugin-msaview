@@ -7,6 +7,7 @@ import { makeStyles } from 'tss-react/mui'
 import TextField2 from '../../components/TextField2'
 
 import type { QueryRowMatch } from '../detectQueryRow'
+import type { SequenceStatus } from './SequenceStatus'
 
 const useStyles = makeStyles()({
   field: {
@@ -50,12 +51,14 @@ const QueryRowSelector = observer(function QueryRowSelector({
   querySeqName,
   setQuerySeqName,
   isAutoDetected,
+  sequenceStatus,
 }: {
   names: string[]
   detected?: QueryRowMatch
   querySeqName: string
   setQuerySeqName: (arg: string) => void
   isAutoDetected: boolean
+  sequenceStatus: SequenceStatus
 }) {
   const { classes } = useStyles()
 
@@ -110,11 +113,13 @@ const QueryRowSelector = observer(function QueryRowSelector({
             Clicking the alignment will navigate the genome view.
           </Alert>
         )
-      ) : names.length > 0 && !querySeqName ? (
+      ) : names.length > 0 && !querySeqName && sequenceStatus !== 'loading' ? (
         <Alert severity="warning" className={classes.alert}>
-          No row matched your protein sequence — pick the one for your gene
-          above. Without it the alignment still renders, but clicking it will
-          not navigate the genome view.
+          {sequenceStatus === 'ready'
+            ? 'No row matched your protein sequence'
+            : 'There is no protein sequence to match a row against'}{' '}
+          — pick the one for your gene above. Without it the alignment still
+          renders, but clicking it will not navigate the genome view.
         </Alert>
       ) : null}
     </>

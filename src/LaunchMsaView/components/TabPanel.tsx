@@ -2,6 +2,13 @@ import React, { useState } from 'react'
 
 import { observer } from 'mobx-react'
 
+export function tabProps(tabsId: string, index: number | string) {
+  return {
+    id: `${tabsId}-tab-${index}`,
+    'aria-controls': `${tabsId}-tabpanel-${index}`,
+  }
+}
+
 // Once visited, a panel stays mounted and is hidden with the `hidden` attribute.
 // Unmounting it discarded whatever the user had typed and re-ran every fetch the
 // panel makes on the way back, so switching tabs to compare two of them cost an
@@ -14,10 +21,12 @@ const TabPanel = observer(function TabPanel({
   children,
   value,
   index,
+  tabsId,
 }: {
   children?: React.ReactNode
   index: number | string
   value: number | string
+  tabsId?: string
 }) {
   const active = value === index
   const [visited, setVisited] = useState(active)
@@ -25,7 +34,12 @@ const TabPanel = observer(function TabPanel({
     setVisited(true)
   }
   return (
-    <div role="tabpanel" hidden={!active}>
+    <div
+      hidden={!active}
+      role={tabsId ? 'tabpanel' : undefined}
+      id={tabsId ? `${tabsId}-tabpanel-${index}` : undefined}
+      aria-labelledby={tabsId ? `${tabsId}-tab-${index}` : undefined}
+    >
       {visited || active ? children : null}
     </div>
   )

@@ -6,15 +6,16 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import ExternalLink from '../../../components/ExternalLink'
-import TextField2 from '../../../components/TextField2'
 import { useQueryRowName } from '../../useQueryRowName'
 import {
   cleanProteinSequence,
-  getGeneDisplayName,
+  getBlastViewTitle,
   getLinearGenomeView,
 } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import PastedAlignmentFields from '../PastedAlignmentFields'
 import QueryRowSelector from '../QueryRowSelector'
+import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
 import TranscriptSelector from '../TranscriptSelector'
 import { launchConnectedView, useLaunchSubmit } from '../launchConnectedView'
@@ -26,12 +27,6 @@ import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 const useStyles = makeStyles()({
   ncbiLink: {
     wordBreak: 'break-all',
-  },
-  textAreaFont: {
-    fontFamily: 'Courier New',
-  },
-  msaInput: {
-    marginBottom: 20,
   },
   step: {
     marginTop: 20,
@@ -78,7 +73,8 @@ const BlastManualPanel = observer(function ({
     view,
     preferredTranscriptId,
   })
-  const { proteinSequence, selectedTranscript, error } = transcriptSelection
+  const { proteinSequence, selectedTranscript, error, sequenceStatus } =
+    transcriptSelection
   const queryRow = useQueryRowName(msaText, proteinSequence)
 
   const s2 = cleanProteinSequence(proteinSequence)
@@ -101,10 +97,13 @@ const BlastManualPanel = observer(function ({
               <div className={classes.ncbiLink}>
                 <ExternalLink href={link}>{link2}</ExternalLink>
               </div>
+            ) : sequenceStatus === 'loading' ? (
+              <SequenceStatusMessage status={sequenceStatus} />
             ) : (
               <Alert severity="info">
-                Pick a transcript above to get a link carrying its protein
-                sequence.
+                {sequenceStatus === 'error'
+                  ? 'The protein sequence could not be loaded, so there is no link to follow.'
+                  : 'This isoform has no coding sequence to search with. Pick another one above.'}
               </Alert>
             )}
           </div>
@@ -126,44 +125,24 @@ const BlastManualPanel = observer(function ({
             3. Paste the results back here
           </Typography>
           <div className={classes.stepBody}>
-            <TextField2
-              variant="outlined"
-              label="Alignment"
-              multiline
-              minRows={5}
-              maxRows={10}
-              fullWidth
-              className={classes.msaInput}
-              slotProps={{ input: { className: classes.textAreaFont } }}
-              placeholder="Paste the .aln contents here"
-              value={msaText}
-              onChange={event => {
-                setMsaText(event.target.value)
-              }}
-            />
-            <TextField2
-              variant="outlined"
-              label="Tree (optional)"
-              multiline
-              minRows={3}
-              maxRows={10}
-              fullWidth
-              slotProps={{ input: { className: classes.textAreaFont } }}
-              placeholder="Paste the .nh Newick tree here"
-              value={treeText}
-              onChange={event => {
-                setTreeText(event.target.value)
-              }}
+            <PastedAlignmentFields
+              msaText={msaText}
+              setMsaText={setMsaText}
+              treeText={treeText}
+              setTreeText={setTreeText}
             />
 
-            <QueryRowSelector {...queryRow} />
+            <QueryRowSelector {...queryRow} sequenceStatus={sequenceStatus} />
           </div>
         </div>
       </LaunchPanelContent>
 
       <SubmitCancelActions
         model={model}
-        submitDisabled={!selectedTranscript || !msaText.trim()}
+        hint={<SequenceStatusMessage status={sequenceStatus} />}
+        submitDisabled={
+          !selectedTranscript || sequenceStatus === 'loading' || !msaText.trim()
+        }
         onSubmit={placement => {
           if (selectedTranscript) {
             submit(() =>
@@ -171,7 +150,7 @@ const BlastManualPanel = observer(function ({
                 view,
                 feature: selectedTranscript,
                 placement,
-                displayName: getGeneDisplayName(selectedTranscript),
+                displayName: getBlastViewTitle(feature, selectedTranscript),
                 querySeqName: queryRow.querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 data: { msa: msaText, tree: treeText },

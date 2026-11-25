@@ -59,7 +59,7 @@ export function useQueryRowName(
     // taken at face value, residue 1 to residue 1
     querySeqOffset: querySeqName === match?.name ? match.offset : 0,
     setQuerySeqName: (name: string) => {
-      setOverride({ name, proteinSequence })
+      setOverride(name === match?.name ? undefined : { name, proteinSequence })
     },
     isAutoDetected: picked === undefined && !!match,
   }

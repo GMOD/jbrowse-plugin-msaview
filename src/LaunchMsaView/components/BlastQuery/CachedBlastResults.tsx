@@ -114,7 +114,7 @@ const CachedBlastResults = observer(function ({
       {operationError ? <ErrorMessage error={operationError} /> : null}
       <div className={classes.header}>
         <Typography variant="subtitle1">
-          Cached BLAST Results ({results.length})
+          Cached searches ({results.length})
         </Typography>
         <Button
           size="small"
@@ -140,6 +140,7 @@ const CachedBlastResults = observer(function ({
               <IconButton
                 edge="end"
                 size="small"
+                aria-label={`Delete ${getResultDisplayName(result)} - ${describeSearch(result)}`}
                 onClick={async e => {
                   e.stopPropagation()
                   try {

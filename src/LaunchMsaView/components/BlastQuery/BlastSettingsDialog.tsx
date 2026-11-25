@@ -23,7 +23,7 @@ const useStyles = makeStyles()({
   },
 })
 
-export interface BlastSettings {
+interface BlastSettings {
   ebiEmail: string
 }
 

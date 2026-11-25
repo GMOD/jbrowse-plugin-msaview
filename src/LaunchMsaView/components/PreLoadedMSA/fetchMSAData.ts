@@ -3,7 +3,7 @@ import { getAdapter } from '@jbrowse/core/data_adapters/dataAdapterCache'
 import type PluginManager from '@jbrowse/core/PluginManager'
 import type { AnyConfigurationModel } from '@jbrowse/core/configuration'
 
-export interface DatasetMsa {
+interface DatasetMsa {
   msa: string
   tree?: string
   /** the row the dataset names as the protein's own, preferred over a row that matches it equally */

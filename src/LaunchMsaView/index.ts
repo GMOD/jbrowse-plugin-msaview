@@ -22,14 +22,14 @@ function isDisplay(elt: { name: string }): elt is DisplayType {
   return elt.name === 'LinearBasicDisplay'
 }
 
-// Walking to the track and the session at click time, not while the menu is
-// built: contextMenuItems runs on every right-click and, on a host whose base
-// method reads `this`, is the one place a plugin can take the whole menu down.
-// Keeping it to a pure read of the display is also what lets a test call it.
 function featureName(feature: Feature) {
   return feature.get('name') ?? feature.get('id') ?? 'This feature'
 }
 
+// Walking to the track and the session at click time, not while the menu is
+// built: contextMenuItems runs on every right-click and, on a host whose base
+// method reads `this`, is the one place a plugin can take the whole menu down.
+// Keeping it to a pure read of the display is also what lets a test call it.
 function openDialog(self: DisplayModel, target: MenuTarget) {
   const track = getContainingTrack(self)
   const session = getSession(track)

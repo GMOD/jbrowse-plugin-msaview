@@ -11,9 +11,9 @@ import { useFetch } from '../../../utils/useFetch'
 import { resolveQueryRowName, useQueryRowName } from '../../useQueryRowName'
 import {
   findDatasetId,
-  getGeneDisplayName,
   getLinearGenomeView,
   getTranscriptDisplayName,
+  getViewTitle,
 } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
 import QueryRowSelector from '../QueryRowSelector'
@@ -177,7 +177,11 @@ const PreLoadedMSA = observer(function ({
                   {...transcriptSelection}
                 />
                 {msaText ? (
-                  <QueryRowSelector {...queryRow} querySeqName={querySeqName} />
+                  <QueryRowSelector
+                    {...queryRow}
+                    querySeqName={querySeqName}
+                    sequenceStatus={sequenceStatus}
+                  />
                 ) : null}
               </div>
             ) : null}
@@ -190,18 +194,27 @@ const PreLoadedMSA = observer(function ({
         hint={
           msaDataLoading ? (
             <LoadingEllipses message="Loading alignment" />
+          ) : msaList && !msaId ? (
+            <Typography color="textSecondary" variant="body2">
+              this dataset has no alignment for this gene
+            </Typography>
+          ) : sequenceStatus !== 'ready' ? (
+            <SequenceStatusMessage status={sequenceStatus} />
           ) : !!msaText && !querySeqName ? (
             <Typography color="textSecondary" variant="body2">
               no row matches this transcript
             </Typography>
-          ) : (
-            <SequenceStatusMessage status={sequenceStatus} />
-          )
+          ) : null
         }
         // launching without a query row opens a view that renders and then
         // never navigates, which reads as a broken feature rather than a
         // dataset that does not cover this gene
-        submitDisabled={!selectedTranscript || !msaText || !querySeqName}
+        submitDisabled={
+          !selectedTranscript ||
+          sequenceStatus === 'loading' ||
+          !msaText ||
+          !querySeqName
+        }
         onSubmit={placement => {
           if (selectedTranscript && msaText) {
             submit(() =>
@@ -209,7 +222,7 @@ const PreLoadedMSA = observer(function ({
                 view,
                 feature: selectedTranscript,
                 placement,
-                displayName: getGeneDisplayName(selectedTranscript),
+                displayName: getViewTitle(feature, selectedTranscript),
                 drawNodeBubbles: false,
                 labelsAlignRight: true,
                 showBranchLen: false,

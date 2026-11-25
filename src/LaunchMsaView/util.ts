@@ -124,8 +124,12 @@ export function getGeneDisplayName(val?: Feature) {
     : ''
 }
 
+export function getViewTitle(feature: Feature, transcript: Feature) {
+  return `${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(transcript)}`
+}
+
 export function getBlastViewTitle(feature: Feature, transcript: Feature) {
-  return `BLAST - ${getGeneDisplayName(feature)} - ${getTranscriptDisplayName(transcript)}`
+  return `BLAST - ${getViewTitle(feature, transcript)}`
 }
 
 export function getSortedTranscriptFeatures(feature: Feature) {

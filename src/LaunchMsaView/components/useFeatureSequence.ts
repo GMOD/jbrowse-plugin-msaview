@@ -55,7 +55,6 @@ export function useFeatureSequence({
   )
   return {
     proteinSequence,
-    sequence,
     error,
     isLoading,
   }

@@ -57,20 +57,22 @@ const BlastPanel = observer(function BlastPanel({
     <>
       {/* a bare gear said nothing about what it opened, and the address the
           job carries was invisible until you opened it */}
-      <Tooltip
-        title={`EBI settings — jobs are submitted with ${ebiEmail.trim() || DEFAULT_EBI_EMAIL}`}
-      >
-        <IconButton
-          className={classes.settingsButton}
-          aria-label="EBI settings"
-          size="small"
-          onClick={() => {
-            setSettingsOpen(true)
-          }}
+      {lookupMethod === 'automatic' ? (
+        <Tooltip
+          title={`EBI settings — jobs are submitted with ${ebiEmail.trim() || DEFAULT_EBI_EMAIL}`}
         >
-          <SettingsIcon />
-        </IconButton>
-      </Tooltip>
+          <IconButton
+            className={classes.settingsButton}
+            aria-label="EBI settings"
+            size="small"
+            onClick={() => {
+              setSettingsOpen(true)
+            }}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </Tooltip>
+      ) : null}
 
       <TabPanel value={lookupMethod} index="automatic">
         <BlastAutomaticPanel

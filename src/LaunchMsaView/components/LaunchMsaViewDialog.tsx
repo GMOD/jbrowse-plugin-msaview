@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 
 import { Dialog } from '@jbrowse/core/ui'
 import { getSession } from '@jbrowse/core/util'
@@ -11,7 +11,7 @@ import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
 import OrthologPanel from './OrthologQuery/OrthologPanel'
 import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import { readMsaDatasets } from './PreLoadedMSA/types'
-import TabPanel from './TabPanel'
+import TabPanel, { tabProps } from './TabPanel'
 import { LaunchPlacementProvider } from './launchPlacement'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
@@ -31,6 +31,7 @@ const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
   const session = getSession(model)
   const datasets = readMsaDatasets(session.jbrowse)
   const hasPreloadedDatasets = !!datasets?.length
+  const tabsId = useId()
 
   // orthologs first, and the default: it answers the same question in ~10s
   // that BLAST takes 10+ minutes to answer worse (see utils/ncbiOrthologs.ts)
@@ -50,18 +51,34 @@ const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
               setValue(newValue)
             }}
           >
-            <Tab label="Orthologs" value="orthologs" />
+            <Tab
+              label="Orthologs"
+              value="orthologs"
+              {...tabProps(tabsId, 'orthologs')}
+            />
             {/* the tab value stays 'ncbi_blast' — it is only local state, and
               renaming it buys nothing */}
-            <Tab label="BLAST query" value="ncbi_blast" />
+            <Tab
+              label="BLAST query"
+              value="ncbi_blast"
+              {...tabProps(tabsId, 'ncbi_blast')}
+            />
             {hasPreloadedDatasets ? (
-              <Tab label="Pre-loaded MSA datasets" value="preloaded_msa" />
+              <Tab
+                label="Pre-loaded MSA datasets"
+                value="preloaded_msa"
+                {...tabProps(tabsId, 'preloaded_msa')}
+              />
             ) : null}
-            <Tab label="Manual upload" value="manual_msa" />
+            <Tab
+              label="Manual upload"
+              value="manual_msa"
+              {...tabProps(tabsId, 'manual_msa')}
+            />
           </Tabs>
           <HelpButton />
         </div>
-        <TabPanel value={value} index="orthologs">
+        <TabPanel value={value} index="orthologs" tabsId={tabsId}>
           <OrthologPanel
             handleClose={handleClose}
             feature={feature}
@@ -69,7 +86,7 @@ const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
             preferredTranscriptId={preferredTranscriptId}
           />
         </TabPanel>
-        <TabPanel value={value} index="ncbi_blast">
+        <TabPanel value={value} index="ncbi_blast" tabsId={tabsId}>
           <BlastPanel
             handleClose={handleClose}
             feature={feature}
@@ -78,7 +95,7 @@ const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
           />
         </TabPanel>
         {hasPreloadedDatasets ? (
-          <TabPanel value={value} index="preloaded_msa">
+          <TabPanel value={value} index="preloaded_msa" tabsId={tabsId}>
             <PreLoadedMSA
               model={model}
               feature={feature}
@@ -87,7 +104,7 @@ const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
             />
           </TabPanel>
         ) : null}
-        <TabPanel value={value} index="manual_msa">
+        <TabPanel value={value} index="manual_msa" tabsId={tabsId}>
           <ManualMSALoader
             model={model}
             feature={feature}

@@ -6,11 +6,11 @@ import { FormControl, FormControlLabel, Radio, RadioGroup } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import TextField2 from '../../../components/TextField2'
 import { useDebounced, useFetch } from '../../../utils/useFetch'
 import { useQueryRowName } from '../../useQueryRowName'
-import { getGeneDisplayName, getLinearGenomeView } from '../../util'
+import { getLinearGenomeView, getViewTitle } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
+import PastedAlignmentFields from '../PastedAlignmentFields'
 import QueryRowSelector from '../QueryRowSelector'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
@@ -49,12 +49,9 @@ const useStyles = makeStyles()({
   fileContainer: {
     maxWidth: 500,
   },
-  msaInput: {
-    marginBottom: 20,
-  },
 })
 
-const ManualMSALoader = observer(function PreLoadedMSA2({
+const ManualMSALoader = observer(function ManualMSALoader({
   model,
   feature,
   handleClose,
@@ -131,41 +128,18 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
               />
             </div>
           ) : (
-            <>
-              <TextField2
-                variant="outlined"
-                name="MSA"
-                multiline
-                minRows={5}
-                className={classes.msaInput}
-                maxRows={10}
-                fullWidth
-                placeholder="Paste MSA here"
-                value={msaText}
-                onChange={event => {
-                  setMsaText(event.target.value)
-                }}
-              />
-              <TextField2
-                variant="outlined"
-                name="Tree"
-                multiline
-                minRows={5}
-                maxRows={10}
-                fullWidth
-                placeholder="Paste newick tree (optional)"
-                value={treeText}
-                onChange={event => {
-                  setTreeText(event.target.value)
-                }}
-              />
-            </>
+            <PastedAlignmentFields
+              msaText={msaText}
+              setMsaText={setMsaText}
+              treeText={treeText}
+              setTreeText={setTreeText}
+            />
           )}
         </div>
 
         <TranscriptSelector feature={feature} {...transcriptSelection} />
 
-        <QueryRowSelector {...queryRow} />
+        <QueryRowSelector {...queryRow} sequenceStatus={sequenceStatus} />
       </LaunchPanelContent>
 
       <SubmitCancelActions
@@ -173,6 +147,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
         hint={<SequenceStatusMessage status={sequenceStatus} />}
         submitDisabled={
           !selectedTranscript ||
+          sequenceStatus === 'loading' ||
           (inputMethod === 'file' && (!msaFileLocation || msaFile.isLoading)) ||
           (inputMethod === 'text' && !msaText.trim())
         }
@@ -183,7 +158,7 @@ const ManualMSALoader = observer(function PreLoadedMSA2({
                 view,
                 feature: selectedTranscript,
                 placement,
-                displayName: getGeneDisplayName(selectedTranscript),
+                displayName: getViewTitle(feature, selectedTranscript),
                 querySeqName: queryRow.querySeqName,
                 querySeqOffset: queryRow.querySeqOffset,
                 ...(inputMethod === 'file'
