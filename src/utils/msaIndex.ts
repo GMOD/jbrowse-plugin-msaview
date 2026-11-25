@@ -20,13 +20,14 @@ export function parseMsaIndex(text: string) {
   })
 }
 
-export async function readMsaBlock({
+export async function readMsaEntry(bgzf: BgzfFilehandle, entry: MsaIndexEntry) {
+  const bytes = await bgzf.read(entry.length, entry.offset)
+  return new TextDecoder().decode(bytes).trim()
+}
+
+export function readMsaBlock({
   entry,
   ...filehandles
 }: ConstructorParameters<typeof BgzfFilehandle>[0] & { entry: MsaIndexEntry }) {
-  const bytes = await new BgzfFilehandle(filehandles).read(
-    entry.length,
-    entry.offset,
-  )
-  return new TextDecoder().decode(bytes).trim()
+  return readMsaEntry(new BgzfFilehandle(filehandles), entry)
 }

@@ -6,12 +6,34 @@ import { BaseFeatureDataAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import AdapterType from '@jbrowse/core/pluggableElementTypes/AdapterType'
 import { SimpleFeature } from '@jbrowse/core/util'
 import { ObservableCreate } from '@jbrowse/core/util/rxjs'
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 
 import BgzipFastaMsaAdapter from '../src/BgzipFastaMsaAdapter/BgzipFastaMsaAdapter'
 import configSchemaF from '../src/BgzipFastaMsaAdapter/configSchema'
 
 import type { Region } from '@jbrowse/core/util'
+import type { openLocation } from '@jbrowse/core/util/io'
+
+const { gziReads } = vi.hoisted(() => ({ gziReads: { count: 0 } }))
+
+vi.mock('@jbrowse/core/util/io', async importOriginal => {
+  const io = await importOriginal<{ openLocation: typeof openLocation }>()
+  return {
+    ...io,
+    openLocation: (...args: Parameters<typeof openLocation>) => {
+      const filehandle = io.openLocation(...args)
+      const location = args[0]
+      if ('localPath' in location && location.localPath.endsWith('.gzi')) {
+        const read = filehandle.read.bind(filehandle)
+        filehandle.read = (...readArgs) => {
+          gziReads.count += 1
+          return read(...readArgs)
+        }
+      }
+      return filehandle
+    },
+  }
+})
 
 const fixture = (name: string) => ({
   localPath: path.join(import.meta.dirname, 'fixtures/msaIndex', name),
@@ -30,8 +52,13 @@ class FastaStub extends BaseFeatureDataAdapter {
     return Object.keys(faiRows)
   }
 
+  delayFor(_refName: string) {
+    return 0
+  }
+
   getFeatures({ refName }: Region) {
-    return ObservableCreate<SimpleFeature>(observer => {
+    return ObservableCreate<SimpleFeature>(async observer => {
+      await new Promise(resolve => setTimeout(resolve, this.delayFor(refName)))
       observer.next(
         new SimpleFeature({
           uniqueId: refName,
@@ -48,7 +75,18 @@ class FastaStub extends BaseFeatureDataAdapter {
   freeResources() {}
 }
 
-function makeAdapter(conf: Record<string, unknown>, fasta = 'genes.fa.gz') {
+// the first row of each alignment answers last, as a slow range request would
+class SlowFirstRowStub extends FastaStub {
+  delayFor(refName: string) {
+    return refName.endsWith('_hg38') ? 20 : 0
+  }
+}
+
+function makeAdapter(
+  conf: Record<string, unknown>,
+  fasta = 'genes.fa.gz',
+  Stub = FastaStub,
+) {
   const fastaSchema = ConfigurationSchema('BgzipFastaAdapter', {
     fastaLocation: { type: 'fileLocation', defaultValue: fixture(fasta) },
     gziLocation: {
@@ -62,14 +100,14 @@ function makeAdapter(conf: Record<string, unknown>, fasta = 'genes.fa.gz') {
       new AdapterType({
         name: 'BgzipFastaAdapter',
         configSchema: fastaSchema,
-        getAdapterClass: async () => FastaStub,
+        getAdapterClass: async () => Stub,
       }),
   )
   pluginManager.createPluggableElements()
   return new BgzipFastaMsaAdapter(
     configSchemaF(pluginManager).create(conf),
     async () => ({
-      dataAdapter: new FastaStub(fastaSchema.create()),
+      dataAdapter: new Stub(fastaSchema.create()),
       sessionIds: new Set<string>(),
     }),
     pluginManager,
@@ -91,8 +129,42 @@ test('an .idx beside the FASTA lists the set, and an alignment spanning bgzip bl
   expect(rows[7]).toBe(`${'WYHQ'.repeat(7500)}G`)
 })
 
-test('an id missing from the .idx reads as no alignment', async () => {
-  expect(await makeAdapter({}).getMSA('NOPE')).toEqual({ msa: '' })
+test('an id missing from the .idx is named in an error, not an empty alignment', async () => {
+  await expect(makeAdapter({}).getMSA('NOPE')).rejects.toThrow(
+    'NOPE is not an alignment in this dataset',
+  )
+})
+
+test('an id missing from the .fai names is an error too', async () => {
+  await expect(
+    makeAdapter({}, 'no-index.fa.gz').getMSA('NOPE'),
+  ).rejects.toThrow('NOPE is not an alignment in this dataset')
+})
+
+test('reading several alignments reads the .gzi once', async () => {
+  const adapter = makeAdapter({})
+  gziReads.count = 0
+  await adapter.getMSA('GENEA')
+  const afterFirst = gziReads.count
+  await adapter.getMSA('GENEB.2')
+  await adapter.getMSA('GENEC')
+  expect(afterFirst).toBeGreaterThan(0)
+  expect(gziReads.count).toBe(afterFirst)
+})
+
+test('an .idx beside the FASTA that failed to load, rather than being absent, is asked for again', async () => {
+  const adapter = makeAdapter({})
+  const read = adapter.readMsaIndex.bind(adapter)
+  let failures = 1
+  adapter.readMsaIndex = async location => {
+    if (failures > 0) {
+      failures -= 1
+      throw new Error('HTTP 503 fetching genes.fa.gz.idx')
+    }
+    return read(location)
+  }
+  expect(await adapter.getMSAList()).toEqual(['GENEA', 'GENEC'])
+  expect(await adapter.getMSAList()).toEqual(['GENEA', 'GENEB.2', 'GENEC'])
 })
 
 test('a configured .idx is used in place of the one beside the FASTA', async () => {
@@ -110,6 +182,13 @@ test('a configured .idx that is missing is an error, not a silent .fai read', as
 test('without an .idx beside the FASTA, the rows are grouped from the .fai names', async () => {
   const adapter = makeAdapter({}, 'no-index.fa.gz')
   expect(await adapter.getMSAList()).toEqual(['GENEA', 'GENEC'])
+  expect(await adapter.getMSA('GENEA')).toEqual({
+    msa: '>GENEA_hg38\nMKVL\n>GENEA_mm10\nMKIL',
+  })
+})
+
+test('rows read from the .fai keep its order, however the reads finish', async () => {
+  const adapter = makeAdapter({}, 'no-index.fa.gz', SlowFirstRowStub)
   expect(await adapter.getMSA('GENEA')).toEqual({
     msa: '>GENEA_hg38\nMKVL\n>GENEA_mm10\nMKIL',
   })

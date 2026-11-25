@@ -1,9 +1,11 @@
+import { BgzfFilehandle } from '@gmod/bgzf-filehandle'
 import { readConfObject } from '@jbrowse/core/configuration'
 import { BaseAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { openLocation } from '@jbrowse/core/util/io'
 import { firstValueFrom, toArray } from 'rxjs'
 
-import { parseMsaIndex, readMsaBlock } from '../utils/msaIndex'
+import { isMissingFile } from '../OrthoFinderMsaAdapter/parseResults'
+import { parseMsaIndex, readMsaEntry } from '../utils/msaIndex'
 
 import type { MsaIndexEntry } from '../utils/msaIndex'
 import type { BaseFeatureDataAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
@@ -15,6 +17,8 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
   msaRowsP: Promise<Map<string, string[]>> | undefined
 
   msaIndexP: Promise<Map<string, MsaIndexEntry> | undefined> | undefined
+
+  bgzf: BgzfFilehandle | undefined
 
   async configurePre() {
     const getSubAdapter = this.getSubAdapter
@@ -45,14 +49,20 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
   }
 
   // an `.idx` beside the FASTA is used when present, as the host finds the
-  // `.fai` and `.gzi`; only one named in the config is required to exist
+  // `.fai` and `.gzi`; only one named in the config is required to exist. One
+  // that failed to load for another reason is asked for again next time
   async loadMsaIndex() {
     const configured: FileLocation = this.getConf('msaIndexLocation')
     const adapter = await this.configure()
     const beside = withSuffix(adapter.getConf('fastaLocation'), '.idx')
     return 'uri' in configured && !configured.uri
       ? beside
-        ? this.readMsaIndex(beside).catch(() => undefined)
+        ? this.readMsaIndex(beside).catch((e: unknown) => {
+            if (!isMissingFile(e)) {
+              this.msaIndexP = undefined
+            }
+            return undefined
+          })
         : undefined
       : this.readMsaIndex(configured)
   }
@@ -93,48 +103,53 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
     return [...((await this.getMsaIndex()) ?? (await this.getMSARows())).keys()]
   }
 
-  async readIndexedMSA(index: Map<string, MsaIndexEntry>, id: string) {
+  async getBgzf() {
     const adapter = await this.configure()
-    const entry = index.get(id)
-    return entry
-      ? readMsaBlock({
-          filehandle: openLocation(
-            adapter.getConf('fastaLocation'),
-            this.pluginManager,
-          ),
-          gziFilehandle: openLocation(
-            adapter.getConf('gziLocation'),
-            this.pluginManager,
-          ),
-          entry,
-        })
-      : ''
+    this.bgzf ??= new BgzfFilehandle({
+      filehandle: openLocation(
+        adapter.getConf('fastaLocation'),
+        this.pluginManager,
+      ),
+      gziFilehandle: openLocation(
+        adapter.getConf('gziLocation'),
+        this.pluginManager,
+      ),
+    })
+    return this.bgzf
   }
 
-  async readRowsMSA(id: string) {
+  async readRowsMSA(rows: string[]) {
     const adapter = await this.configure()
-    const rows = (await this.getMSARows()).get(id) ?? []
-    const features = await firstValueFrom(
-      adapter
-        .getFeaturesInMultipleRegions(
-          rows.map(refName => ({
-            refName,
-            start: 0,
-            end: 1_000_000_000,
-            assemblyName: '',
-          })),
-        )
-        .pipe(toArray()),
+    const features = await Promise.all(
+      rows.map(refName =>
+        firstValueFrom(
+          adapter
+            .getFeatures({
+              refName,
+              start: 0,
+              end: 1_000_000_000,
+              assemblyName: '',
+            })
+            .pipe(toArray()),
+        ),
+      ),
     )
-    return features.map(f => `>${f.get('refName')}\n${f.get('seq')}`).join('\n')
+    return features
+      .flat()
+      .map(f => `>${f.get('refName')}\n${f.get('seq')}`)
+      .join('\n')
   }
 
   async getMSA(id: string) {
     const index = await this.getMsaIndex()
-    return {
-      msa: await (index
-        ? this.readIndexedMSA(index, id)
-        : this.readRowsMSA(id)),
+    const entry = index?.get(id)
+    const rows = index ? undefined : (await this.getMSARows()).get(id)
+    if (entry) {
+      return { msa: await readMsaEntry(await this.getBgzf(), entry) }
+    } else if (rows) {
+      return { msa: await this.readRowsMSA(rows) }
+    } else {
+      throw new Error(`${id} is not an alignment in this dataset`)
     }
   }
 }
