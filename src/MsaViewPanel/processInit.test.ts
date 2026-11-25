@@ -4,8 +4,13 @@ import { processInit } from './afterCreateAutoruns'
 import { fetchIndexedMsa } from './fetchIndexedMsa'
 
 import type { JBrowsePluginMsaViewModel } from './model'
+import type * as MobxStateTree from '@jbrowse/mobx-state-tree'
 
 vi.mock('./fetchIndexedMsa', () => ({ fetchIndexedMsa: vi.fn() }))
+vi.mock('@jbrowse/mobx-state-tree', async importOriginal => ({
+  ...(await importOriginal<typeof MobxStateTree>()),
+  isAlive: () => true,
+}))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(),
   generateDataStoreId: vi.fn(() => 'generated'),
@@ -74,4 +79,22 @@ test('a url init is still resolved once and cleared', async () => {
   await settle()
   expect(model.setMSAFilehandle).toHaveBeenCalled()
   expect(model.setInit).toHaveBeenCalledWith(undefined)
+})
+
+test('an init dropped while its block is fetched applies nothing', async () => {
+  vi.mocked(fetchIndexedMsa).mockResolvedValue('>a\nMK')
+  const model = makeModel()
+  processInit(model)
+  model.init = undefined
+  await settle()
+  expect(model.data.msa).toBeUndefined()
+})
+
+test('a fetch that fails after its init was dropped is not the view error', async () => {
+  vi.mocked(fetchIndexedMsa).mockRejectedValue(new Error('offline'))
+  const model = makeModel()
+  processInit(model)
+  model.init = undefined
+  await settle()
+  expect(model.setError).not.toHaveBeenCalledWith(expect.any(Error))
 })

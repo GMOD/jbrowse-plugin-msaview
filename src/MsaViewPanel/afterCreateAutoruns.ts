@@ -50,7 +50,7 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
     try {
       self.setLoadingStoredData(true)
       const stored = await retrieveMsaData(dataStoreId)
-      if (self.dataStoreId !== dataStoreId) {
+      if (!isAlive(self) || self.dataStoreId !== dataStoreId) {
         return
       }
       transaction(() => {
@@ -96,7 +96,9 @@ export function loadStoredData(self: JBrowsePluginMsaViewModel) {
         )
       }
     } finally {
-      self.setLoadingStoredData(false)
+      if (isAlive(self)) {
+        self.setLoadingStoredData(false)
+      }
     }
   })()
 }
@@ -310,6 +312,7 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
     if (indexed && self.data.msa) {
       return
     }
+    const current = () => isAlive(self) && self.init === init
     void (async () => {
       try {
         self.setError(undefined)
@@ -332,20 +335,25 @@ export function processInit(self: JBrowsePluginMsaViewModel) {
             location: msaIndexedLocation,
             name: msaName,
           })
-          if (!fasta) {
-            throw new Error(
-              `No alignment named ${msaName} in ${msaIndexedLocation.uri}`,
-            )
+          if (current()) {
+            if (fasta) {
+              self.setMSA(fasta)
+            } else {
+              throw new Error(
+                `No alignment named ${msaName} in ${msaIndexedLocation.uri}`,
+              )
+            }
           }
-          self.setMSA(fasta)
         }
 
         if (!indexed) {
           self.setInit(undefined)
         }
       } catch (e) {
-        self.setError(e)
         console.error(e)
+        if (current()) {
+          self.setError(e)
+        }
       }
     })()
   }
