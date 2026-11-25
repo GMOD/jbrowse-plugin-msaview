@@ -1,4 +1,4 @@
-import { isAbortError, textfetch } from './fetch'
+import { HttpError, isAbortError, textfetch, timeout } from './fetch'
 import { pollLoop } from './poll'
 import { readLocalStorage } from './useLocalStorage'
 
@@ -10,7 +10,7 @@ import { readLocalStorage } from './useLocalStorage'
  * Unlike NCBI's Blast.cgi these endpoints send `Access-Control-Allow-Origin: *`,
  * which is why the BLAST backend moved here — see agent-docs/blast-design.md.
  */
-export const EBI_BASE = 'https://www.ebi.ac.uk/Tools/services/rest'
+const EBI_BASE = 'https://www.ebi.ac.uk/Tools/services/rest'
 
 /**
  * EBI asks for a contact address on every submission so they can reach whoever
@@ -116,6 +116,28 @@ export async function waitForEbiJob({
   })
 }
 
+const RESULT_ATTEMPTS = 4
+const RESULT_RETRY_DELAY_MS = 3000
+
+function isTransient(e: unknown) {
+  return !isAbortError(e) && !(e instanceof HttpError && e.status < 500)
+}
+
+async function fetchResult(url: string, signal?: AbortSignal) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await textfetch(url, { signal })
+    } catch (e) {
+      if (attempt < RESULT_ATTEMPTS && isTransient(e)) {
+        console.warn('[msaview] EBI result download failed, retrying:', e)
+        await timeout(RESULT_RETRY_DELAY_MS * attempt, signal)
+      } else {
+        throw e
+      }
+    }
+  }
+}
+
 export async function runEbiJob({
   tool,
   label,
@@ -145,6 +167,6 @@ export async function runEbiJob({
   return {
     jobId,
     result: (type: string) =>
-      textfetch(`${EBI_BASE}/${tool}/result/${jobId}/${type}`, { signal }),
+      fetchResult(`${EBI_BASE}/${tool}/result/${jobId}/${type}`, signal),
   }
 }

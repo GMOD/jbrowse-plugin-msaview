@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
-import { STATUS_FAILURE_BUDGET_MS, waitForEbiJob } from './ebiJobDispatcher'
+import {
+  STATUS_FAILURE_BUDGET_MS,
+  runEbiJob,
+  waitForEbiJob,
+} from './ebiJobDispatcher'
 
 // A long alignment is polled every ten seconds for minutes, so the chance of one
 // failed status check somewhere in that window is not small -- and the job is
@@ -74,5 +78,84 @@ describe('waitForEbiJob', () => {
   test('a job EBI reports as failed still ends the poll immediately', async () => {
     statuses(['ERROR'])
     await expect(wait()).rejects.toThrow(/returned status ERROR/)
+  })
+})
+
+// a job that waited out the queue is lost to a single failed download
+// otherwise, and EBI's cluster answers 502s in runs (agent-docs/blast-design.md)
+describe('the result download after FINISHED', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  const resultResponses = (seq: (Response | Error)[]) => {
+    vi.useFakeTimers()
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const results: string[] = []
+    vi.stubGlobal('fetch', (url: string) => {
+      const next = url.includes('/result/')
+        ? seq[results.push(url) - 1]!
+        : new Response(url.endsWith('/run') ? 'job1' : 'FINISHED')
+      return next instanceof Error
+        ? Promise.reject(next)
+        : Promise.resolve(next)
+    })
+    return results
+  }
+
+  const download = async (signal?: AbortSignal) => {
+    const job = await runEbiJob({
+      tool: 'clustalo',
+      label: 'test',
+      params: {},
+      onProgress: () => {},
+      signal,
+    })
+    return job.result('aln-clustal_num')
+  }
+
+  test('a 502 or a dropped connection is retried', async () => {
+    const results = resultResponses([
+      new Response('Bad Gateway', { status: 502 }),
+      new TypeError('Failed to fetch'),
+      new Response('CLUSTAL'),
+    ])
+    const result = download()
+    await vi.runAllTimersAsync()
+    expect(await result).toBe('CLUSTAL')
+    expect(results).toHaveLength(3)
+  })
+
+  test('a 4xx is not retried', async () => {
+    const results = resultResponses([new Response('nope', { status: 400 })])
+    await expect(download()).rejects.toThrow('HTTP 400')
+    expect(results).toHaveLength(1)
+  })
+
+  test('the retries are bounded', async () => {
+    const results = resultResponses(
+      Array.from({ length: 10 }, () => new Response('', { status: 503 })),
+    )
+    const caught = download().catch((e: unknown) => e)
+    await vi.runAllTimersAsync()
+    expect(await caught).toMatchObject({
+      message: expect.stringContaining('HTTP 503'),
+    })
+    expect(results.length).toBeLessThan(10)
+  })
+
+  test('a cancel during the wait between attempts ends it', async () => {
+    const controller = new AbortController()
+    const results = resultResponses([
+      new Response('', { status: 502 }),
+      new Response('CLUSTAL'),
+    ])
+    const caught = download(controller.signal).catch((e: unknown) => e)
+    await vi.advanceTimersByTimeAsync(0)
+    controller.abort()
+    expect(await caught).toMatchObject({ name: 'AbortError' })
+    expect(results).toHaveLength(1)
   })
 })
