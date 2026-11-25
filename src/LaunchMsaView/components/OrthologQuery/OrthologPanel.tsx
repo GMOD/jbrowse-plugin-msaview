@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 
+import { LoadingEllipses } from '@jbrowse/core/ui'
 import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
@@ -27,7 +28,7 @@ import { useTranscriptSelection } from '../useTranscriptSelection'
 import OrthologSourceSelect, {
   useStoredOrthologSource,
 } from './OrthologSourceSelect'
-import QuerySpeciesSelect from './QuerySpeciesSelect'
+import QuerySpeciesSelect, { useQuerySpecies } from './QuerySpeciesSelect'
 
 import type { OrthologSource } from '../../../MsaViewPanel/model'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
@@ -61,11 +62,12 @@ const OrthologPanel = observer(function ({
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
   const { launchError, submit } = useLaunchSubmit(handleClose)
-  const [taxId, setTaxId] = useState(9606)
   const [source, setSource] = useStoredOrthologSource()
   const [msaAlgorithm, setMsaAlgorithm] = useStoredMsaAlgorithm()
   const [maxSpecies, setMaxSpecies] = useState(String(defaultMaxSpecies))
 
+  const species = useQuerySpecies(view.assemblyNames[0])
+  const { taxId } = species
   const geneCandidates = useMemo(() => getGeneIdentifiers(feature), [feature])
   const transcriptSelection = useTranscriptSelection({
     feature,
@@ -105,9 +107,7 @@ const OrthologPanel = observer(function ({
 
           <QuerySpeciesSelect
             className={classes.selectField}
-            value={taxId}
-            assemblyName={view.assemblyNames[0]}
-            onChange={setTaxId}
+            species={species}
           />
 
           <MsaAlgorithmSelect
@@ -138,10 +138,22 @@ const OrthologPanel = observer(function ({
       </LaunchPanelContent>
       <SubmitCancelActions
         model={model}
-        hint={<SequenceStatusMessage status={sequenceStatus} />}
-        submitDisabled={!proteinSequence || !rowCountValid}
+        hint={
+          sequenceStatus !== 'ready' ? (
+            <SequenceStatusMessage status={sequenceStatus} />
+          ) : taxId !== undefined ? null : species.resolving ? (
+            <LoadingEllipses message="Looking up the query species" />
+          ) : (
+            <Typography color="textSecondary" variant="body2">
+              name a query species NCBI knows
+            </Typography>
+          )
+        }
+        submitDisabled={
+          !proteinSequence || !rowCountValid || taxId === undefined
+        }
         onSubmit={placement => {
-          if (selectedTranscript) {
+          if (selectedTranscript && taxId !== undefined) {
             submit(() =>
               launchConnectedView({
                 view,
