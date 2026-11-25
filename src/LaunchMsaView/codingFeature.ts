@@ -1,6 +1,6 @@
 import type { Feature } from '@jbrowse/core/util'
 
-function isCDS(feature: Feature) {
+export function isCDS(feature: Feature) {
   return feature.get('type')?.toLowerCase() === 'cds'
 }
 
