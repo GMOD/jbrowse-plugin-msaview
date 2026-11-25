@@ -1,6 +1,10 @@
 import type { SearchHit } from './homologSearch'
 import type { TaxonomyInfo } from './taxonomyNames'
 
+function sanitize(name: string) {
+  return name.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+}
+
 function makeId(
   h: { accession: string; sciname: string; taxid?: number },
   taxonomyInfo?: Map<number, TaxonomyInfo>,
@@ -15,7 +19,7 @@ function makeId(
         .join('_')
     }
   }
-  return `${h.accession}-${speciesName.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '')}`
+  return `${h.accession.replace(/[\s()[\]:;,'"]+/g, '_')}-${sanitize(speciesName)}`
 }
 
 /**
