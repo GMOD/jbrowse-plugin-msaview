@@ -145,6 +145,10 @@ async function translate(
 /** the latest lookup per view; a newer one aborts it, so it writes nothing */
 const latestLookup = new WeakMap<object, AbortController>()
 
+export function abortTranscriptLookup(self: object) {
+  latestLookup.get(self)?.abort()
+}
+
 async function lookUp({
   self,
   transcriptId,

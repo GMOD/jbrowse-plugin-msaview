@@ -34,7 +34,10 @@ import {
   msaCoordToGenomeCoord,
   msaCoordToGenomeRegions,
 } from './msaCoordToGenomeCoord'
-import { resolveConnectedTranscriptIfNeeded } from './resolveConnectedTranscript'
+import {
+  abortTranscriptLookup,
+  resolveConnectedTranscriptIfNeeded,
+} from './resolveConnectedTranscript'
 import { syncSessionHighlights } from './sessionHighlights'
 import { transcriptMapping } from './transcriptMap'
 import { errorMessage, hasQueryRow } from './util'
@@ -932,6 +935,7 @@ export default function stateModelFactory() {
         // destroyed node, which surfaced as an unhandled rejection
         addDisposer(self, () => {
           self.launchController?.abort()
+          abortTranscriptLookup(self)
         })
         loadStoredData(self)
         for (const fn of [
