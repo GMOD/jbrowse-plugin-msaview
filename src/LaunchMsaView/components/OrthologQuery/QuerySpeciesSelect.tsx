@@ -74,7 +74,7 @@ export function useQuerySpecies(assemblyName?: string) {
 
   const taxId =
     typed === undefined
-      ? fromAssembly.isLoading
+      ? fromAssembly.isLoading || fromAssembly.error
         ? undefined
         : (fromAssembly.data?.taxId ?? defaultTaxId)
       : typed === debounced
@@ -90,12 +90,15 @@ export function useQuerySpecies(assemblyName?: string) {
     // derived, not seeded through an effect: whatever the user typed wins, and
     // until they type anything the assembly's species does, so a lookup that
     // lands while they are mid-word cannot overwrite the field
-    text: typed ?? fromAssembly.data?.speciesName ?? 'human',
+    text:
+      typed ??
+      fromAssembly.data?.speciesName ??
+      (fromAssembly.error ? '' : 'human'),
     resolved:
       typed === undefined
         ? fromAssembly.data?.speciesName
         : fromText.data?.label,
-    error: fromText.error,
+    error: typed === undefined ? fromAssembly.error : fromText.error,
     setTyped,
   }
 }

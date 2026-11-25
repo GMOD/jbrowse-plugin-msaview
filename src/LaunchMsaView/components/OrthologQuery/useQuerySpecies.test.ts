@@ -56,6 +56,17 @@ describe('useQuerySpecies', () => {
     })
   })
 
+  test('has no taxon when the assembly lookup fails', async () => {
+    mockAssembly.mockRejectedValue(new Error('blocked by CORS policy'))
+    const { result } = renderHook(() => useQuerySpecies('mm39'))
+    await waitFor(() => {
+      expect(result.current.error).toBeDefined()
+    })
+    expect(result.current.taxId).toBeUndefined()
+    expect(result.current.resolving).toBe(false)
+    expect(result.current.text).toBe('')
+  })
+
   test('falls back to human without an assembly to look up', () => {
     const { result } = renderHook(() => useQuerySpecies(undefined))
     expect(result.current.taxId).toBe(9606)
