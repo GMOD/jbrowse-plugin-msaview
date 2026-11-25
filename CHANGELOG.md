@@ -1,3 +1,63 @@
+## [5.20.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.19.0...v5.20.0) (2026-11-25)
+
+### Bug Fixes
+
+- Declare @emotion/styled, which the dependency bump dropped from the lockfile and the build needs ([bddb2a6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bddb2a6d00d6fceffaf9eb4228e73c8cb87f404f))
+- An alignment column lights the genome when the view's regions use an alias of the feature's refName ([d78abf3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d78abf3c9d721196efc123a6bf89da4ecaf447b9))
+- A session highlight spanning megabases no longer stalls the alignment ([21c549f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/21c549fc061b332ce3baeb37ae81eb30a3bdab1b))
+- An indexed alignment cancelled or closed mid-load no longer appears afterwards ([b96a830](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b96a830b6b5f446d942ac51a6e4c1075dc94643e))
+- A UniProt outage is reported as one, not as a missing entry ([15f9a00](https://github.com/GMOD/jbrowse-plugin-msaview/commit/15f9a00e4efc35af599ac58f0492e3911f7a0bd7))
+- Search hit rows are named without the punctuation a Newick tree reads as structure ([5a4b70e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/5a4b70e436e65420c28a00676fded56993cd1472))
+- An EBI alignment is kept when only its tree fails to download ([c1eb71f](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c1eb71f0b6c7cb4d987f9c187cc35cd5e9b7bb2d))
+- The launch dialog offers every child that carries a CDS as a transcript, whatever its type ([d938822](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d938822f13127311fb8b96726ac5798274e0c42c))
+- An ortholog launch waits for the query species instead of submitting as human ([fb9a591](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fb9a591952bc6796df8c8e98f7a9b94f3bf50f21))
+- Switching between automatic and manual BLAST keeps what was entered ([8153a5c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/8153a5caf45d7d983f6b6c3fd5d510c987362658))
+- A hand-picked query row is dropped when the isoform changes ([42b39e1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/42b39e158f51f4d8b334eb75214cd7e6faecca0b))
+- A cached BLAST result launches once per click, and runs from a transcript with no parent gene are listed ([f052a4e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/f052a4eb0cac2e928fa661fb61316071687ee863))
+- A failed species lookup leaves the ortholog launch waiting for a species instead of submitting as human ([adf2200](https://github.com/GMOD/jbrowse-plugin-msaview/commit/adf2200e4ea5a48e75a0463b9813770239cf9b5c))
+- BLAST history matches a run by transcript only when it recorded no gene ([19d05d7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/19d05d759761b9fab0bdcd3c12b00a0ad49cfac7))
+- The launch dialog waits for the translation before Submit, says why a tab cannot launch, and labels its fields and tabs ([5a594c6](https://github.com/GMOD/jbrowse-plugin-msaview/commit/5a594c61db98ed85e3c54abffb96e6640bde5390))
+- A BgzipFasta dataset names an unknown alignment, keeps .fai row order, and retries an index that failed to load ([9fddf51](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9fddf511ed4b6a633052b8fd7af282c9fbe21468))
+- An OrthoFinder results folder given as a relative path resolves against the page ([b26b3a7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b26b3a721fb702ceb9d171ae1c2119c93a272548))
+- An EBI result download is retried on a server or network failure ([d1664a9](https://github.com/GMOD/jbrowse-plugin-msaview/commit/d1664a98c79e2f0a6b14a8cc2016c5a4015e861e))
+- An HTTP error names the host and path, not the whole query string ([e683d77](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e683d77dd2f885b97ced43ad0e1a269861d0bac4))
+- Search hit accessions are named without Newick punctuation too ([fb7c4e0](https://github.com/GMOD/jbrowse-plugin-msaview/commit/fb7c4e0f17485455cef2169032833fd7fe0f6455))
+- A gene name ending in .N is looked up whole, and orthologs left out for lack of a sequence are reported ([b458cdc](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b458cdc60517cbc960b8ca4ff82c84417204b897))
+- A view warns when its alignment could not be saved to browser storage ([9b43196](https://github.com/GMOD/jbrowse-plugin-msaview/commit/9b43196d1df675f5116ebbdef8f6acb95435b103))
+- Closing a view aborts its transcript lookup in the genome view ([b4adb52](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b4adb52800c8c14d1b7023bbb2dfd88bd3d366a3))
+- Returning to the import form abandons a domain load still in flight for the old file ([094d7e3](https://github.com/GMOD/jbrowse-plugin-msaview/commit/094d7e3f9c219c86256eb8c9b2d831b18c794e7a))
+- An .idx that failed to load stays unused for the session, so a dataset's list and its reads agree ([65ab772](https://github.com/GMOD/jbrowse-plugin-msaview/commit/65ab772b97fcdbc9165da4cdb26a0122158f4886))
+- A versioned UniProt accession loses its version before a gene lookup ([b5c066d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b5c066d8f3fbf83dd150c8c943d29d8ca85cff5f))
+- The optional EBI tree download is tried once, so it cannot hold up the alignment ([1d9d233](https://github.com/GMOD/jbrowse-plugin-msaview/commit/1d9d233c96cd269a37ff3552260413f075a95ca5))
+
+### Features
+
+- The isoform picked in one tab of the launch dialog is the choice in every tab, and is translated once ([af03bc1](https://github.com/GMOD/jbrowse-plugin-msaview/commit/af03bc1d3c6c4ab168f6608d8a0f646722e441a8))
+- A phmmer search is cached like a BLAST one, so a relaunch does not repeat the job ([acacf2d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/acacf2d3616e75e9217e92ad25c83e777ddf0c95))
+
+### Other Changes
+
+- Typecheck with tsrs; bump oxlint and tsgolint ([08e457c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/08e457ce984794f01c22c473a5ee354e1d743051))
+- Consolidations ([c1eec1a](https://github.com/GMOD/jbrowse-plugin-msaview/commit/c1eec1a8665838a24dc5b433f2c09accce1fff18))
+- Bump deps ([476c3da](https://github.com/GMOD/jbrowse-plugin-msaview/commit/476c3da3818888348b0017740f5a8315b2408496))
+- Updates ([30ce2bb](https://github.com/GMOD/jbrowse-plugin-msaview/commit/30ce2bb0fc5865b0951f81063eb376a0d726c684))
+- Documentation list as one-line 'Short term: description' entries ([3646ad0](https://github.com/GMOD/jbrowse-plugin-msaview/commit/3646ad0030f152f50490851232ac6ede0f708019))
+- Leave DEVELOPERS.md out of the documentation list ([012ccff](https://github.com/GMOD/jbrowse-plugin-msaview/commit/012ccfff391e3aaa8750f66e91703e00c84f5611))
+- Clearer one-line descriptions in the documentation list ([769522d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/769522d5636cdbc6a7618c62ff1e313bfe1c9a89))
+- Keep every documentation entry on one line ([a96aa3d](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a96aa3dbd769929f0970e157d99a3c9afeac9960))
+
+### Refactoring
+
+- DoLaunchBlast hands its params down rather than re-reading them off the view ([a2d9a3e](https://github.com/GMOD/jbrowse-plugin-msaview/commit/a2d9a3e80fd0de0837166d7455829a2ab3edfc41))
+- The domain and taxonomy caches share their batch reads and writes ([b5c6174](https://github.com/GMOD/jbrowse-plugin-msaview/commit/b5c61740dd2744f58f10c8ecc9e52990759beb0a))
+- Type guards replace the casts in transcriptFields and isProteinView ([656b59c](https://github.com/GMOD/jbrowse-plugin-msaview/commit/656b59c5b7196862736bcbd83e5fce9dd9d87cec))
+
+### Tests
+
+- ReadinessConformance narrows view types with instanceof, which the eslint bump requires ([e501fd7](https://github.com/GMOD/jbrowse-plugin-msaview/commit/e501fd7078e606835def424602e15933f82f01c9))
+- BLAST history does not list another gene's run that shares a transcript id ([333231b](https://github.com/GMOD/jbrowse-plugin-msaview/commit/333231b343da6245da0f916b345f17b4183ad5d6))
+- The test folder typechecks, pnpm typecheck covers it, and the test server's whole process group is stopped ([bf91aa8](https://github.com/GMOD/jbrowse-plugin-msaview/commit/bf91aa82758b87b2b5288bcdfda79444042efe15))
+
 ## [5.19.0](https://github.com/GMOD/jbrowse-plugin-msaview/compare/v5.18.0...v5.19.0) (2026-11-20)
 
 ### Other Changes
