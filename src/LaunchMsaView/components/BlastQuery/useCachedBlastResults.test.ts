@@ -32,6 +32,10 @@ vi.mocked(getAllCachedResults).mockResolvedValue([
   row('orphan-transcript', { transcriptId: 'tx1' }),
   row('isoform', { geneId: undefined, transcriptId: 'tx2' }),
   row('elsewhere', { geneId: 'gene9', transcriptId: 'tx9' }),
+  row('other-gene-same-transcript-id', {
+    geneId: 'gene9',
+    transcriptId: 'tx1',
+  }),
 ])
 
 function cds(id: string) {
