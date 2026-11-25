@@ -32,7 +32,10 @@ export function useQueryRowName(
   proteinSequence: string,
   preferredName?: string,
 ) {
-  const [override, setOverride] = useState<string>()
+  const [override, setOverride] = useState<{
+    name: string
+    proteinSequence: string
+  }>()
 
   // parsing runs on every keystroke in the paste box otherwise, and an
   // alignment of a few hundred rows is not free
@@ -43,8 +46,9 @@ export function useQueryRowName(
 
   // a row picked from one alignment says nothing about the next one pasted
   const picked =
-    override !== undefined && (names.length === 0 || names.includes(override))
-      ? override
+    override?.proteinSequence === proteinSequence &&
+    (names.length === 0 || names.includes(override.name))
+      ? override.name
       : undefined
   const querySeqName = picked ?? match?.name ?? ''
   return {
@@ -54,7 +58,9 @@ export function useQueryRowName(
     // only the detected row's offset is known; a row the user picked instead is
     // taken at face value, residue 1 to residue 1
     querySeqOffset: querySeqName === match?.name ? match.offset : 0,
-    setQuerySeqName: setOverride,
+    setQuerySeqName: (name: string) => {
+      setOverride({ name, proteinSequence })
+    },
     isAutoDetected: picked === undefined && !!match,
   }
 }

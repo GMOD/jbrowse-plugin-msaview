@@ -39,6 +39,20 @@ describe('useQueryRowName', () => {
     expect(result.current.querySeqName).toBe('aligned_query')
     expect(result.current.isAutoDetected).toBe(true)
   })
+
+  test('a picked row is dropped once the query is another isoform', () => {
+    const isoform = protein.slice(0, 50)
+    const { result, rerender } = renderHook(
+      ({ query }) => useQueryRowName(trimmed, query),
+      { initialProps: { query: protein } },
+    )
+    act(() => {
+      result.current.setQuerySeqName('other')
+    })
+    rerender({ query: isoform })
+    expect(result.current.querySeqName).toBe('aligned_query')
+    expect(result.current.isAutoDetected).toBe(true)
+  })
 })
 
 // a pre-loaded dataset names its rows by a convention of its own, and the
