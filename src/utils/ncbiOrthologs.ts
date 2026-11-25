@@ -80,11 +80,11 @@ export interface OrthologRow {
  * like T05G5.3 keeps its suffix, which is part of the name, and T05G5 is
  * another gene.
  */
+const VERSIONED_ACCESSION =
+  /^(.*\d{5}|[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2})\.\d+$/
+
 export function cleanGeneCandidate(raw: string) {
-  return raw
-    .trim()
-    .replace(/^\w+:/, '')
-    .replace(/(?<=\d{5})\.\d+$/, '')
+  return raw.trim().replace(/^\w+:/, '').replace(VERSIONED_ACCESSION, '$1')
 }
 
 export function droppedRowsWarning(dropped: number, total: number) {

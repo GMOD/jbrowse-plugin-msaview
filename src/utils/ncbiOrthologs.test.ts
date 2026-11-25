@@ -60,6 +60,8 @@ describe('cleanGeneCandidate', () => {
     expect(cleanGeneCandidate('TP53')).toBe('TP53')
     expect(cleanGeneCandidate('ENSG00000141510.18')).toBe('ENSG00000141510')
     expect(cleanGeneCandidate('AT1G01010.1')).toBe('AT1G01010')
+    expect(cleanGeneCandidate('Q9Y6K9.2')).toBe('Q9Y6K9')
+    expect(cleanGeneCandidate('A0A024R161.1')).toBe('A0A024R161')
   })
 
   test('keeps a suffix that is part of the name: T05G5 is another worm gene', () => {
