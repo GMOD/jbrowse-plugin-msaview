@@ -274,6 +274,49 @@ test('a relaunch with saved hits aligns them without searching again', async () 
   expect(result.msa).toBe('aligned')
 })
 
+const PHMMER = {
+  searchProgram: 'phmmer',
+  blastDatabase: 'rp15',
+  proteinSequence: 'MKWVTF',
+}
+
+test('a search that aligned its own hits is saved as aligned', async () => {
+  phmmer.mockResolvedValue({
+    rid: 'job',
+    queryRow: 'MKWV-TF',
+    hits: [{ ...HIT, sequence: 'MKWVSTF' }],
+  })
+
+  await launch(makeModel(PHMMER))
+
+  expect(saveSearch).toHaveBeenCalledWith(
+    expect.objectContaining({
+      fasta: '>QUERY\nMKWV-TF\n>P1-Mus_musculus\nMKWVSTF',
+      aligned: true,
+    }),
+  )
+})
+
+test('a relaunch with a saved alignment neither searches nor aligns again', async () => {
+  vi.mocked(getCachedSearch).mockResolvedValue({
+    id: 'k',
+    fasta: '>QUERY\nMKWV-TF\n>P1\nMKWVSTF',
+    treeMetadata: {},
+    rid: 'job',
+    aligned: true,
+    timestamp: 0,
+  })
+
+  const result = await launch(makeModel(PHMMER))
+
+  expect(phmmer).not.toHaveBeenCalled()
+  expect(mockLaunchMSA).not.toHaveBeenCalled()
+  expect(result).toMatchObject({
+    msa: '>QUERY\nMKWV-TF\n>P1\nMKWVSTF',
+    tree: '',
+  })
+})
+
 test('a query too long for the in-browser aligner is refused before the search', async () => {
   const side = Math.ceil(Math.sqrt(MAX_PAIR_CELLS)) + 1
   await expect(

@@ -52,7 +52,7 @@ interface SearchOutcome {
   fasta: string
   treeMetadata: Record<string, Record<string, string>>
   rid?: string
-  queryRow?: string
+  aligned?: boolean
   warnings?: string[]
 }
 
@@ -104,14 +104,15 @@ async function search({
   })
   // rows named without NCBI's answer are not worth reusing for a week
   const namesFailed = nameFailures.length > 0
-  if (!queryRow && !namesFailed) {
-    await saveSearch({ id: key, fasta, treeMetadata, rid })
+  const aligned = queryRow !== undefined
+  if (!namesFailed) {
+    await saveSearch({ id: key, fasta, treeMetadata, rid, aligned })
   }
   return {
     fasta,
     treeMetadata,
     rid,
-    queryRow,
+    aligned,
     warnings: namesFailed
       ? [
           'NCBI did not answer for some species names, so those rows are named by scientific name alone.',
@@ -164,10 +165,10 @@ export async function doLaunchBlast({
       `Reusing the ${searchProgram} search from ${new Date(found.timestamp).toLocaleString()}...`,
     )
   }
-  const { fasta, treeMetadata, rid, queryRow, warnings }: SearchOutcome =
+  const { fasta, treeMetadata, rid, aligned, warnings }: SearchOutcome =
     found ??
     (await search({ params, scope, query, querySeqName, maxHits, key }))
-  const { msa, tree } = queryRow
+  const { msa, tree } = aligned
     ? { msa: fasta, tree: '' }
     : await launchMSA({
         algorithm: msaAlgorithm,
@@ -181,7 +182,7 @@ export async function doLaunchBlast({
   await saveBlastResult({
     proteinSequence: query,
     blastDatabase: params.blastDatabase,
-    msaAlgorithm: queryRow ? undefined : msaAlgorithm,
+    msaAlgorithm: aligned ? undefined : msaAlgorithm,
     searchProgram: params.searchProgram,
     maxHits,
     msa,

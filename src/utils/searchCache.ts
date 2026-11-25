@@ -12,6 +12,7 @@ export interface CachedSearch {
   fasta: string
   treeMetadata: Record<string, Record<string, string>>
   rid?: string
+  aligned?: boolean
   timestamp: number
 }
 
