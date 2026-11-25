@@ -4,7 +4,6 @@ import { BaseAdapter } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { openLocation } from '@jbrowse/core/util/io'
 import { firstValueFrom, toArray } from 'rxjs'
 
-import { isMissingFile } from '../OrthoFinderMsaAdapter/parseResults'
 import { parseMsaIndex, readMsaEntry } from '../utils/msaIndex'
 
 import type { MsaIndexEntry } from '../utils/msaIndex'
@@ -49,20 +48,14 @@ export default class BgzipFastaMsaAdapter extends BaseAdapter {
   }
 
   // an `.idx` beside the FASTA is used when present, as the host finds the
-  // `.fai` and `.gzi`; only one named in the config is required to exist. One
-  // that failed to load for another reason is asked for again next time
+  // `.fai` and `.gzi`; only one named in the config is required to exist
   async loadMsaIndex() {
     const configured: FileLocation = this.getConf('msaIndexLocation')
     const adapter = await this.configure()
     const beside = withSuffix(adapter.getConf('fastaLocation'), '.idx')
     return 'uri' in configured && !configured.uri
       ? beside
-        ? this.readMsaIndex(beside).catch((e: unknown) => {
-            if (!isMissingFile(e)) {
-              this.msaIndexP = undefined
-            }
-            return undefined
-          })
+        ? this.readMsaIndex(beside).catch(() => undefined)
         : undefined
       : this.readMsaIndex(configured)
   }

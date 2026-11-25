@@ -152,19 +152,19 @@ test('reading several alignments reads the .gzi once', async () => {
   expect(gziReads.count).toBe(afterFirst)
 })
 
-test('an .idx beside the FASTA that failed to load, rather than being absent, is asked for again', async () => {
+test('an .idx beside the FASTA that failed to load is not asked for again, so the list and the reads agree', async () => {
   const adapter = makeAdapter({})
   const read = adapter.readMsaIndex.bind(adapter)
   let failures = 1
   adapter.readMsaIndex = async location => {
     if (failures > 0) {
       failures -= 1
-      throw new Error('HTTP 503 fetching genes.fa.gz.idx')
+      throw new Error('Failed to fetch fetching genes.fa.gz.idx')
     }
     return read(location)
   }
   expect(await adapter.getMSAList()).toEqual(['GENEA', 'GENEC'])
-  expect(await adapter.getMSAList()).toEqual(['GENEA', 'GENEB.2', 'GENEC'])
+  expect(await adapter.getMSAList()).toEqual(['GENEA', 'GENEC'])
 })
 
 test('a configured .idx is used in place of the one beside the FASTA', async () => {
