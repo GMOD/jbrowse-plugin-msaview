@@ -14,6 +14,7 @@ import { MSAModelF } from 'react-msaview'
 export type { MSAFormat } from 'msa-parsers'
 
 import {
+  abortDomainLoad,
   autoLoadProteinDomains,
   launchAwaitsTranscript,
   launchBlastIfNeeded,
@@ -862,6 +863,7 @@ export default function stateModelFactory() {
          */
         reset() {
           const { displayName, minimized, zoomToBaseLevel } = self
+          abortDomainLoad(self)
           superReset()
           if (displayName !== undefined) {
             self.setDisplayName(displayName)
@@ -869,6 +871,7 @@ export default function stateModelFactory() {
           self.setMinimized(minimized)
           self.setZoomToBaseLevel(zoomToBaseLevel)
           self.setDomainsRequested(false)
+          self.setLoadingDomains(false)
           self.setLastStoredData(undefined)
           self.setOwnsDataStoreRow(false)
           self.clearConnectionFailure()

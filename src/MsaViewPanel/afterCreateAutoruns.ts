@@ -42,7 +42,7 @@ const EXPIRED_EXTRAS_WARNING =
   'Part of this view is no longer in browser storage: annotations, a tree or row metadata too large for the session. Stored documents are kept for 7 days after they were last used, and are lost when site data is cleared.'
 
 const UNSAVED_WARNING =
-  'This alignment could not be saved to browser storage, so reloading the page will lose it.'
+  'Part of this view could not be saved to browser storage, so reloading the page will lose it.'
 
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   const { dataStoreId } = self
@@ -251,6 +251,13 @@ export function launchBlastIfNeeded(self: JBrowsePluginMsaViewModel) {
  * domains for them and overlay them. `domainsRequested` makes this once per
  * view, so NCBI returning no domains does not refire it.
  */
+const domainLoads = new WeakMap<object, AbortController>()
+
+export function abortDomainLoad(self: object) {
+  domainLoads.get(self)?.abort()
+  domainLoads.delete(self)
+}
+
 export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
   const { rows, domainsRequested, annotations, rowData } = self
   if (
@@ -264,29 +271,32 @@ export function autoLoadProteinDomains(self: JBrowsePluginMsaViewModel) {
       controller.abort()
     }
     addDisposer(self, abort)
+    domainLoads.set(self, controller)
     self.setDomainsRequested(true)
     self.setLoadingDomains(true)
     self.setStatus({
       msg: 'Fetching protein domains from NCBI',
       onCancel: abort,
     })
+    const current = () => isAlive(self) && domainLoads.get(self) === controller
     void (async () => {
       try {
         const notice = await loadProteinDomains(self, controller.signal)
-        if (notice && isAlive(self)) {
+        if (notice && current()) {
           self.addWarning(notice)
         }
       } catch (e) {
         if (!isAbortError(e)) {
           console.error('[msaview-domains] auto-load failed:', e)
-          if (isAlive(self)) {
+          if (current()) {
             self.addWarning(
               `Protein domains did not load from NCBI: ${errorMessage(e)}`,
             )
           }
         }
       } finally {
-        if (isAlive(self)) {
+        if (current()) {
+          domainLoads.delete(self)
           self.setStatus(undefined)
           self.setLoadingDomains(false)
         }

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { doLaunchBlast } from './doLaunchBlast'
+import { loadProteinDomains } from './loadProteinDomains'
 import stateModelFactory from './model'
 
 // the launch autoruns are live on a real model, and a blastParams write is what
@@ -12,6 +13,7 @@ vi.mock('@jbrowse/core/util', async importOriginal => ({
   getSession: () => ({ views: [], hovered: undefined }),
 }))
 vi.mock('./doLaunchBlast', () => ({ doLaunchBlast: vi.fn() }))
+vi.mock('./loadProteinDomains', () => ({ loadProteinDomains: vi.fn() }))
 vi.mock('./msaDataStore', () => ({
   cleanupOldData: vi.fn(async () => {}),
   generateDataStoreId: vi.fn(),
@@ -191,6 +193,26 @@ describe('returning to the import form', () => {
     expect(model.lastStoredData).toBeUndefined()
     expect(model.ownsDataStoreRow).toBe(false)
     expect(model.dataStoreId).toBeUndefined()
+  })
+
+  test('abandons a domain load still in flight for the old file', async () => {
+    let signal: AbortSignal | undefined
+    vi.mocked(loadProteinDomains).mockImplementation((_self, s) => {
+      signal = s
+      return new Promise(() => {})
+    })
+    const model = view()
+    model.setData({
+      msa: '>a\nMK',
+      treeMetadata: JSON.stringify({ a: { Accession: 'NP_1' } }),
+    })
+    await new Promise(res => setTimeout(res, 0))
+    expect(model.loadingDomains).toBe(true)
+
+    model.reset()
+
+    expect(signal?.aborted).toBe(true)
+    expect(model.loadingDomains).toBe(false)
   })
 })
 
