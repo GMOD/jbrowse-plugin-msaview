@@ -1,6 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 
-import { featureMatchesId, getId, getSortedTranscriptFeatures } from '../util'
+import { getId, getSortedTranscriptFeatures } from '../util'
+import {
+  TranscriptChoiceContext,
+  defaultTranscriptId,
+} from './transcriptChoice'
 import { useFeatureSequence } from './useFeatureSequence'
 
 import type { SequenceStatus } from './SequenceStatus'
@@ -67,20 +71,24 @@ export function useTranscriptSelection({
   preferredTranscriptId?: string
 }) {
   const options = useMemo(() => getSortedTranscriptFeatures(feature), [feature])
-  const [selectedId, setSelectedId] = useState(() =>
-    getId(
-      options.find(opt => featureMatchesId(opt, preferredTranscriptId ?? '')) ??
-        options[0],
-    ),
+  const choice = useContext(TranscriptChoiceContext)
+  const ownPick = useState<string>()
+  const [pickedId, setSelectedId] = choice?.pick ?? ownPick
+  const validatedSelectedId = pickSelectedId(
+    pickedId ?? defaultTranscriptId(options, preferredTranscriptId),
+    options,
+    hasData,
   )
-  const validatedSelectedId = pickSelectedId(selectedId, options, hasData)
   const selectedTranscript = options.find(
     val => getId(val) === validatedSelectedId,
   )
-  const { proteinSequence, error, isLoading } = useFeatureSequence({
+  const sharedSequence =
+    choice?.sequenceFor === validatedSelectedId ? choice.sequence : undefined
+  const ownSequence = useFeatureSequence({
     view,
-    feature: selectedTranscript,
+    feature: sharedSequence ? undefined : selectedTranscript,
   })
+  const { proteinSequence, error, isLoading } = sharedSequence ?? ownSequence
 
   return {
     options,

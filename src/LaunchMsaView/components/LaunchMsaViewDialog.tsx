@@ -5,6 +5,7 @@ import { getSession } from '@jbrowse/core/util'
 import { Tab, Tabs } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { getLinearGenomeView } from '../util'
 import BlastPanel from './BlastQuery/BlastPanel'
 import HelpButton from './HelpButton'
 import ManualMSALoader from './ManualMSALoader/ManualMSALoader'
@@ -13,6 +14,7 @@ import PreLoadedMSA from './PreLoadedMSA/PreLoadedMSADataPanel'
 import { readMsaDatasets } from './PreLoadedMSA/types'
 import TabPanel, { tabProps } from './TabPanel'
 import { LaunchPlacementProvider } from './launchPlacement'
+import { TranscriptChoiceProvider } from './transcriptChoice'
 
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
@@ -44,74 +46,80 @@ const LaunchMsaViewDialog = observer(function LaunchMsaViewDialog({
       {/* one placement answer for every tab: they all stay mounted once
           visited, so a per-panel one is a per-tab one */}
       <LaunchPlacementProvider>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Tabs
-            value={value}
-            onChange={(_event, newValue) => {
-              setValue(newValue)
-            }}
-          >
-            <Tab
-              label="Orthologs"
-              value="orthologs"
-              {...tabProps(tabsId, 'orthologs')}
-            />
-            {/* the tab value stays 'ncbi_blast' — it is only local state, and
-              renaming it buys nothing */}
-            <Tab
-              label="BLAST query"
-              value="ncbi_blast"
-              {...tabProps(tabsId, 'ncbi_blast')}
-            />
-            {hasPreloadedDatasets ? (
+        <TranscriptChoiceProvider
+          feature={feature}
+          view={getLinearGenomeView(model)}
+          preferredTranscriptId={preferredTranscriptId}
+        >
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Tabs
+              value={value}
+              onChange={(_event, newValue) => {
+                setValue(newValue)
+              }}
+            >
               <Tab
-                label="Pre-loaded MSA datasets"
-                value="preloaded_msa"
-                {...tabProps(tabsId, 'preloaded_msa')}
+                label="Orthologs"
+                value="orthologs"
+                {...tabProps(tabsId, 'orthologs')}
               />
-            ) : null}
-            <Tab
-              label="Manual upload"
-              value="manual_msa"
-              {...tabProps(tabsId, 'manual_msa')}
+              {/* the tab value stays 'ncbi_blast' — it is only local state, and
+              renaming it buys nothing */}
+              <Tab
+                label="BLAST query"
+                value="ncbi_blast"
+                {...tabProps(tabsId, 'ncbi_blast')}
+              />
+              {hasPreloadedDatasets ? (
+                <Tab
+                  label="Pre-loaded MSA datasets"
+                  value="preloaded_msa"
+                  {...tabProps(tabsId, 'preloaded_msa')}
+                />
+              ) : null}
+              <Tab
+                label="Manual upload"
+                value="manual_msa"
+                {...tabProps(tabsId, 'manual_msa')}
+              />
+            </Tabs>
+            <HelpButton />
+          </div>
+          <TabPanel value={value} index="orthologs" tabsId={tabsId}>
+            <OrthologPanel
+              handleClose={handleClose}
+              feature={feature}
+              model={model}
+              preferredTranscriptId={preferredTranscriptId}
             />
-          </Tabs>
-          <HelpButton />
-        </div>
-        <TabPanel value={value} index="orthologs" tabsId={tabsId}>
-          <OrthologPanel
-            handleClose={handleClose}
-            feature={feature}
-            model={model}
-            preferredTranscriptId={preferredTranscriptId}
-          />
-        </TabPanel>
-        <TabPanel value={value} index="ncbi_blast" tabsId={tabsId}>
-          <BlastPanel
-            handleClose={handleClose}
-            feature={feature}
-            model={model}
-            preferredTranscriptId={preferredTranscriptId}
-          />
-        </TabPanel>
-        {hasPreloadedDatasets ? (
-          <TabPanel value={value} index="preloaded_msa" tabsId={tabsId}>
-            <PreLoadedMSA
+          </TabPanel>
+          <TabPanel value={value} index="ncbi_blast" tabsId={tabsId}>
+            <BlastPanel
+              handleClose={handleClose}
+              feature={feature}
+              model={model}
+              preferredTranscriptId={preferredTranscriptId}
+            />
+          </TabPanel>
+          {hasPreloadedDatasets ? (
+            <TabPanel value={value} index="preloaded_msa" tabsId={tabsId}>
+              <PreLoadedMSA
+                model={model}
+                feature={feature}
+                handleClose={handleClose}
+                preferredTranscriptId={preferredTranscriptId}
+              />
+            </TabPanel>
+          ) : null}
+          <TabPanel value={value} index="manual_msa" tabsId={tabsId}>
+            <ManualMSALoader
               model={model}
               feature={feature}
               handleClose={handleClose}
               preferredTranscriptId={preferredTranscriptId}
             />
           </TabPanel>
-        ) : null}
-        <TabPanel value={value} index="manual_msa" tabsId={tabsId}>
-          <ManualMSALoader
-            model={model}
-            feature={feature}
-            handleClose={handleClose}
-            preferredTranscriptId={preferredTranscriptId}
-          />
-        </TabPanel>
+        </TranscriptChoiceProvider>
       </LaunchPlacementProvider>
     </Dialog>
   )
