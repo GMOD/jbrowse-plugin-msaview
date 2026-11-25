@@ -7,6 +7,13 @@ function hostOf(url: string) {
   }
 }
 
+function shortUrl(url: string) {
+  const withoutQuery = url.replace(/[?#].*$/, '')
+  return withoutQuery.length > 120
+    ? `${withoutQuery.slice(0, 120)}...`
+    : withoutQuery
+}
+
 export class HttpError extends Error {
   constructor(
     message: string,
@@ -37,7 +44,7 @@ export async function handleFetch(url: string, args?: RequestInit) {
 
   if (!response.ok) {
     throw new HttpError(
-      `HTTP ${response.status} fetching ${url} ${(await response.text()).slice(0, 500)}`,
+      `HTTP ${response.status} fetching ${shortUrl(url)} ${(await response.text()).slice(0, 500)}`,
       response.status,
     )
   }
