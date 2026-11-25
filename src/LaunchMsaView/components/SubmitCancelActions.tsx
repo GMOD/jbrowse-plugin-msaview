@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { getSession } from '@jbrowse/core/util'
 import {
   Button,
   Checkbox,
@@ -9,12 +8,7 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import {
-  readLaunchPlacement,
-  sessionSupportsPlacement,
-  writeLaunchPlacement,
-} from '../../utils/workspaces'
-import { useLaunchPlacement } from './launchPlacement'
+import { useSubmitPlacement } from './launchPlacement'
 
 import type { MsaViewPlacement } from '../../utils/workspaces'
 import type { AbstractTrackModel } from '@jbrowse/core/util'
@@ -70,11 +64,11 @@ const SubmitCancelActions = observer(function SubmitCancelActions({
   /** omitted by a panel that submits something other than a view launch */
   model?: AbstractTrackModel
 }) {
-  const [sideBySide, setSideBySide] = useLaunchPlacement()
   // The stored value is what the next dialog opens on, so it is written on
   // submit rather than on the click: a dialog the user backed out of must not
   // move where every future launch lands.
-  const offerPlacement = !!model && sessionSupportsPlacement(getSession(model))
+  const { offerPlacement, sideBySide, setSideBySide, commitPlacement } =
+    useSubmitPlacement(model)
   return (
     // The buttons are one child rather than two, so a dialog too narrow for
     // the whole row wraps them together underneath the option instead of
@@ -98,13 +92,7 @@ const SubmitCancelActions = observer(function SubmitCancelActions({
           variant="contained"
           disabled={submitDisabled}
           onClick={() => {
-            if (offerPlacement) {
-              const placement = sideBySide ? 'splitRight' : 'stack'
-              writeLaunchPlacement(placement)
-              onSubmit(placement)
-            } else {
-              onSubmit(readLaunchPlacement())
-            }
+            onSubmit(commitPlacement())
           }}
         >
           {submitLabel}

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -12,11 +12,7 @@ import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
 import TextField2 from '../../../components/TextField2'
-import {
-  getBlastViewTitle,
-  getGeneIdentifiers,
-  getLinearGenomeView,
-} from '../../util'
+import { getBlastViewTitle, getLinearGenomeView } from '../../util'
 import LaunchPanelContent from '../LaunchPanelContent'
 import SequenceStatusMessage from '../SequenceStatus'
 import SubmitCancelActions from '../SubmitCancelActions'
@@ -92,8 +88,7 @@ const BlastAutomaticPanel = observer(function ({
   const hitCountValid = Number.isInteger(hitCount) && hitCount >= 1
   const isPhmmer = search.program === 'phmmer'
 
-  const geneIds = useMemo(() => getGeneIdentifiers(feature), [feature])
-  const cached = useCachedBlastResults(geneIds)
+  const cached = useCachedBlastResults(feature)
 
   const transcriptSelection = useTranscriptSelection({
     feature,
@@ -187,7 +182,7 @@ const BlastAutomaticPanel = observer(function ({
             <AccordionDetails>
               <CachedBlastResults
                 model={model}
-                handleClose={handleClose}
+                submit={submit}
                 feature={feature}
                 cached={cached}
               />

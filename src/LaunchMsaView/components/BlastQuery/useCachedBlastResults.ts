@@ -3,16 +3,25 @@ import {
   getAllCachedResults,
 } from '../../../utils/blastCache'
 import { useFetch } from '../../../utils/useFetch'
+import { getGeneIdentifiers, getTranscriptFeatures } from '../../util'
 
-export function useCachedBlastResults(geneIds: string[]) {
+import type { Feature } from '@jbrowse/core/util'
+
+export function useCachedBlastResults(feature: Feature) {
   const {
     data: results,
     error,
     isLoading,
     mutate,
-  } = useFetch(`cached-blast-${geneIds.join(',')}`, async () => {
+  } = useFetch(['cached-blast', feature.id()], async () => {
+    const geneIds = getGeneIdentifiers(feature)
+    const transcriptIds = getTranscriptFeatures(feature).map(t => t.id())
     const cached = await getAllCachedResults()
-    return cached.filter(r => r.geneId && geneIds.includes(r.geneId))
+    return cached.filter(
+      r =>
+        (r.geneId && geneIds.includes(r.geneId)) ||
+        (r.transcriptId && transcriptIds.includes(r.transcriptId)),
+    )
   })
 
   return {
@@ -23,7 +32,7 @@ export function useCachedBlastResults(geneIds: string[]) {
       await deleteCachedResult(id)
       mutate()
     },
-    // deletes only what this hook listed, i.e. the results for these gene ids.
+    // deletes only what this hook listed, i.e. the results for this feature.
     // The list the user is looking at is gene-scoped, so a store-wide clear here
     // would silently throw away every other gene's cached alignments too
     handleClearAll: async () => {

@@ -1,8 +1,15 @@
 import React, { createContext, useContext, useState } from 'react'
 
+import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
-import { readLaunchPlacement } from '../../utils/workspaces'
+import {
+  readLaunchPlacement,
+  sessionSupportsPlacement,
+  writeLaunchPlacement,
+} from '../../utils/workspaces'
+
+import type { AbstractTrackModel } from '@jbrowse/core/util'
 
 type PlacementState = [boolean, React.Dispatch<React.SetStateAction<boolean>>]
 
@@ -42,4 +49,25 @@ export function useLaunchPlacement(): PlacementState {
   const shared = useContext(LaunchPlacementContext)
   const own = useState(() => readLaunchPlacement() === 'splitRight')
   return shared ?? own
+}
+
+export function useSubmitPlacement(model?: AbstractTrackModel) {
+  const [sideBySide, setSideBySide] = useLaunchPlacement()
+  const offerPlacement = !!model && sessionSupportsPlacement(getSession(model))
+  return {
+    offerPlacement,
+    sideBySide,
+    setSideBySide,
+    commitPlacement: () => {
+      const placement = offerPlacement
+        ? sideBySide
+          ? 'splitRight'
+          : 'stack'
+        : readLaunchPlacement()
+      if (offerPlacement) {
+        writeLaunchPlacement(placement)
+      }
+      return placement
+    },
+  }
 }

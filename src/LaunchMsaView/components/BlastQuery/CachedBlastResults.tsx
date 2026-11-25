@@ -20,9 +20,10 @@ import {
   getSortedTranscriptFeatures,
 } from '../../util'
 import { builtAlignmentLook, launchConnectedView } from '../launchConnectedView'
-import { useLaunchPlacement } from '../launchPlacement'
+import { useSubmitPlacement } from '../launchPlacement'
 
 import type { CachedBlastResult } from '../../../utils/blastCache'
+import type { useLaunchSubmit } from '../launchConnectedView'
 import type { useCachedBlastResults } from './useCachedBlastResults'
 import type { AbstractTrackModel, Feature } from '@jbrowse/core/util'
 
@@ -73,12 +74,12 @@ export function describeSearch(result: CachedBlastResult) {
 
 const CachedBlastResults = observer(function ({
   model,
-  handleClose,
+  submit,
   feature,
   cached: { results, handleDelete, handleClearAll },
 }: {
   model: AbstractTrackModel
-  handleClose: () => void
+  submit: ReturnType<typeof useLaunchSubmit>['submit']
   feature: Feature
   /** the panel's own listing, so clearing it here empties it there too */
   cached: ReturnType<typeof useCachedBlastResults>
@@ -86,27 +87,26 @@ const CachedBlastResults = observer(function ({
   const { classes } = useStyles()
   const view = getLinearGenomeView(model)
   const [operationError, setOperationError] = useState<unknown>()
-  const [sideBySide] = useLaunchPlacement()
+  const { commitPlacement } = useSubmitPlacement(model)
 
   const handleUseCached = (cached: CachedBlastResult) => {
     // the cached query row is the plugin's default `QUERY`, translated from
     // the transcript stored as transcriptId, so that transcript relinks it
     const { transcriptId, msa, tree, treeMetadata } = cached
-    launchConnectedView({
-      view,
-      feature: transcriptId
-        ? getSortedTranscriptFeatures(feature).find(t =>
-            featureMatchesId(t, transcriptId),
-          )
-        : undefined,
-      placement: sideBySide ? 'splitRight' : 'stack',
-      displayName: `BLAST - ${getResultDisplayName(cached)}`,
-      ...builtAlignmentLook,
-      data: { msa, tree, treeMetadata },
-    }).then(handleClose, (e: unknown) => {
-      console.error(e)
-      setOperationError(e)
-    })
+    submit(() =>
+      launchConnectedView({
+        view,
+        feature: transcriptId
+          ? getSortedTranscriptFeatures(feature).find(t =>
+              featureMatchesId(t, transcriptId),
+            )
+          : undefined,
+        placement: commitPlacement(),
+        displayName: `BLAST - ${getResultDisplayName(cached)}`,
+        ...builtAlignmentLook,
+        data: { msa, tree, treeMetadata },
+      }),
+    )
   }
 
   return (
