@@ -84,11 +84,10 @@ export function resultsFile(results: FileLocation, path: string): FileLocation {
       localPath: `${results.localPath.replace(/\/+$/, '')}/${path}`,
     }
   } else if (isUriLocation(results)) {
-    const folder = new URL(results.uri, results.baseUri).href
-    return {
-      ...results,
-      uri: new URL(path, folder.endsWith('/') ? folder : `${folder}/`).href,
-    }
+    const folder = results.baseUri
+      ? new URL(results.uri, results.baseUri).href
+      : results.uri
+    return { ...results, uri: `${folder.replace(/\/+$/, '')}/${path}` }
   } else {
     throw new Error(
       'An OrthoFinder results folder must be given as a URL or a local path',

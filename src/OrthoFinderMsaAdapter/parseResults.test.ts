@@ -86,3 +86,12 @@ test('a results file resolves inside the folder however the folder is written', 
     ),
   ).toMatchObject({ localPath: `/data/Results_Nov05/${file}` })
 })
+
+test('a relative results folder with no baseUri stays relative, for the host to resolve against the page', () => {
+  expect(
+    resultsFile(
+      { uri: 'data/Results_Nov05/', locationType: 'UriLocation' },
+      'Orthogroups/Orthogroups.tsv',
+    ),
+  ).toMatchObject({ uri: 'data/Results_Nov05/Orthogroups/Orthogroups.tsv' })
+})
