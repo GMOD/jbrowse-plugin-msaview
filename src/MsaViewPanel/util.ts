@@ -33,12 +33,15 @@ interface LiveFeature {
  * the session may still hand over a live Feature.
  */
 export function transcriptFields(transcript?: TranscriptRef) {
-  if (!transcript) {
-    return {}
-  }
-  return typeof (transcript as LiveFeature).toJSON === 'function'
-    ? (transcript as LiveFeature).toJSON()
-    : (transcript as Record<string, unknown>)
+  return transcript
+    ? isLiveFeature(transcript)
+      ? transcript.toJSON()
+      : transcript
+    : {}
+}
+
+function isLiveFeature(transcript: TranscriptRef): transcript is LiveFeature {
+  return typeof transcript.toJSON === 'function'
 }
 
 export function isRecord(val: unknown): val is Record<string, unknown> {

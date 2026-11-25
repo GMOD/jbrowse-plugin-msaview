@@ -1,3 +1,5 @@
+import { isRecord } from './util'
+
 // Structurally typed against jbrowse-plugin-protein3d rather than imported from
 // it: the two plugins ship independently, so a field the installed protein3d
 // lacks reads as undefined instead of failing to resolve. Both highlight
@@ -21,13 +23,16 @@ export interface ProteinView {
 }
 
 export function isProteinView(view: unknown): view is ProteinView {
-  const v = view as Record<string, unknown>
-  return v.type === 'ProteinView' && Array.isArray(v.structures)
+  return (
+    isRecord(view) &&
+    view.type === 'ProteinView' &&
+    Array.isArray(view.structures)
+  )
 }
 
 /**
  * Extract all ProteinView instances from a session's views array.
  */
 export function getProteinViews(views: { type: string }[]): ProteinView[] {
-  return (views as unknown[]).filter(isProteinView)
+  return views.filter(isProteinView)
 }
