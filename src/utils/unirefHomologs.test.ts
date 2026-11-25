@@ -212,3 +212,10 @@ test('a gene symbol shaped like an accession still resolves by gene search', asy
   expect(found?.accession).toBe('Q9H244')
   expect(calls).toHaveLength(2)
 })
+
+test('a failed accession fetch is reported, not turned into a miss', async () => {
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve(new Response('upstream down', { status: 503 })),
+  )
+  await expect(resolveUniProtEntry(['P04637'], 0)).rejects.toThrow('HTTP 503')
+})

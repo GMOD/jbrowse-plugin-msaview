@@ -21,7 +21,7 @@
 // CDD overlay reads through efetch (Swiss-Prot rows only; see the PANTHER note
 // in docs/alignments-from-a-gene.md).
 
-import { handleFetch, isAbortError, jsonfetch } from './fetch'
+import { HttpError, handleFetch, jsonfetch } from './fetch'
 import {
   cleanGeneCandidate,
   dedupeLabels,
@@ -136,7 +136,9 @@ export async function resolveUniProtEntry(
           return entry
         }
       } catch (e) {
-        if (isAbortError(e)) {
+        if (
+          !(e instanceof HttpError && (e.status === 400 || e.status === 404))
+        ) {
           throw e
         }
       }
