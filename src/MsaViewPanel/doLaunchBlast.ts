@@ -10,7 +10,7 @@ import { fetchTaxonomyInfo } from '../utils/taxonomyNames'
 import { resolveUniProtEntry } from '../utils/unirefHomologs'
 import { str, transcriptFields, transcriptName } from './util'
 
-import type { JBrowsePluginMsaViewModel } from './model'
+import type { BlastParams, JBrowsePluginMsaViewModel } from './model'
 import type { LaunchScope, LaunchedData } from './runLaunch'
 
 /**
@@ -22,9 +22,9 @@ import type { LaunchScope, LaunchedData } from './runLaunch'
  */
 async function resolveQuery(
   self: JBrowsePluginMsaViewModel,
+  params: BlastParams,
   scope: LaunchScope,
 ) {
-  const params = self.blastParams!
   if (params.proteinSequence) {
     return {
       sequence: cleanProteinSequence(params.proteinSequence),
@@ -57,21 +57,20 @@ interface SearchOutcome {
 }
 
 async function search({
-  self,
+  params,
   scope,
   query,
   querySeqName,
   maxHits,
   key,
 }: {
-  self: JBrowsePluginMsaViewModel
+  params: BlastParams
   scope: LaunchScope
   query: string
   querySeqName: string
   maxHits: number
   key: string
 }): Promise<SearchOutcome> {
-  const params = self.blastParams!
   const { onProgress, onRid, signal } = scope
   const { hits, queryRow, rid } = await searchBackends[
     params.searchProgram ?? 'blastp'
@@ -145,6 +144,7 @@ export async function doLaunchBlast({
   const msaAlgorithm = params.msaAlgorithm ?? 'browser'
   const { sequence: query, name: querySeqName } = await resolveQuery(
     self,
+    params,
     scope,
   )
   if (searchProgram === 'blastp' && msaAlgorithm === 'browser') {
@@ -165,7 +165,8 @@ export async function doLaunchBlast({
     )
   }
   const { fasta, treeMetadata, rid, queryRow, warnings }: SearchOutcome =
-    found ?? (await search({ self, scope, query, querySeqName, maxHits, key }))
+    found ??
+    (await search({ params, scope, query, querySeqName, maxHits, key }))
   const { msa, tree } = queryRow
     ? { msa: fasta, tree: '' }
     : await launchMSA({
