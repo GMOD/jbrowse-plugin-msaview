@@ -123,12 +123,16 @@ function isTransient(e: unknown) {
   return !isAbortError(e) && !(e instanceof HttpError && e.status < 500)
 }
 
-async function fetchResult(url: string, signal?: AbortSignal) {
+async function fetchResult(
+  url: string,
+  attempts: number,
+  signal?: AbortSignal,
+) {
   for (let attempt = 1; ; attempt++) {
     try {
       return await textfetch(url, { signal })
     } catch (e) {
-      if (attempt < RESULT_ATTEMPTS && isTransient(e)) {
+      if (attempt < attempts && isTransient(e)) {
         console.warn('[msaview] EBI result download failed, retrying:', e)
         await timeout(RESULT_RETRY_DELAY_MS * attempt, signal)
       } else {
@@ -166,7 +170,11 @@ export async function runEbiJob({
   })
   return {
     jobId,
-    result: (type: string) =>
-      fetchResult(`${EBI_BASE}/${tool}/result/${jobId}/${type}`, signal),
+    result: (type: string, { retry = true } = {}) =>
+      fetchResult(
+        `${EBI_BASE}/${tool}/result/${jobId}/${type}`,
+        retry ? RESULT_ATTEMPTS : 1,
+        signal,
+      ),
   }
 }

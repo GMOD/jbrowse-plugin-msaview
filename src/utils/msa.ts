@@ -73,7 +73,7 @@ export async function launchMSA({
   })
   const [msa, tree] = await Promise.all([
     job.result(config.msaResult),
-    job.result(config.treeResult).catch((e: unknown) => {
+    job.result(config.treeResult, { retry: false }).catch((e: unknown) => {
       if (isAbortError(e)) {
         throw e
       }
