@@ -41,6 +41,9 @@ const UNREADABLE_MESSAGE =
 const EXPIRED_EXTRAS_WARNING =
   'Part of this view is no longer in browser storage: annotations, a tree or row metadata too large for the session. Stored documents are kept for 7 days after they were last used, and are lost when site data is cleared.'
 
+const UNSAVED_WARNING =
+  'This alignment could not be saved to browser storage, so reloading the page will lose it.'
+
 export function loadStoredData(self: JBrowsePluginMsaViewModel) {
   const { dataStoreId } = self
   if (!dataStoreId) {
@@ -165,6 +168,8 @@ export function storeDataToIndexedDB(self: JBrowsePluginMsaViewModel) {
           self.setDataStoreId(id)
           self.setOwnsDataStoreRow(true)
         })
+      } else {
+        self.addWarning(UNSAVED_WARNING)
       }
     } catch (e) {
       console.error('Failed to store MSA data to IndexedDB:', e)

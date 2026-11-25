@@ -366,4 +366,15 @@ describe('keeping IndexedDB up to date', () => {
     expect(model.dataStoreId).toBeUndefined()
     expect(mockStore).toHaveBeenCalledTimes(1)
   })
+
+  test('a write that fails warns that a reload loses the alignment', async () => {
+    mockStore.mockResolvedValue(false)
+    const model = view()
+    model.setMSA(BIG_MSA)
+    await settle()
+
+    expect(model.warnings).toEqual([
+      expect.stringContaining('could not be saved to browser storage'),
+    ])
+  })
 })
