@@ -1,5 +1,6 @@
 import { getSession } from '@jbrowse/core/util'
 
+import { proteinPositionsInRange } from './transcriptMap'
 import { hasQueryRow } from './util'
 
 import type { JBrowsePluginMsaViewModel } from './model'
@@ -32,7 +33,10 @@ export interface RowHighlight {
  * base mapping to its residue, or as the bases of a MAF block
  */
 export type QueryOnGenome =
-  | { kind: 'transcript'; map: Pick<TranscriptMap, 'g2p' | 'refName'> }
+  | {
+      kind: 'transcript'
+      map: Pick<TranscriptMap, 'g2p' | 'refName' | 'codingPositions'>
+    }
   | { kind: 'maf'; refName: string; start: number; end: number }
 
 /**
@@ -55,11 +59,8 @@ function rowPositions(
       positions.add(base - onGenome.start)
     }
   } else {
-    for (let base = start; base < end; base++) {
-      const residue = onGenome.map.g2p[base]
-      if (residue !== undefined) {
-        positions.add(residue - querySeqOffset)
-      }
+    for (const residue of proteinPositionsInRange(onGenome.map, start, end)) {
+      positions.add(residue - querySeqOffset)
     }
   }
   return [...positions].filter(p => p >= 0).sort((a, b) => a - b)

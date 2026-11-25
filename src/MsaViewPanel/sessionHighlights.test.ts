@@ -12,7 +12,11 @@ for (let base = 101; base < 110; base++) {
 }
 const transcript: QueryOnGenome = {
   kind: 'transcript',
-  map: { g2p, refName: 'chr12' },
+  map: {
+    g2p,
+    refName: 'chr12',
+    codingPositions: Object.keys(g2p).map(Number),
+  },
 }
 
 function onRow(
@@ -78,4 +82,14 @@ test('labels turned off in the session keep the span and drop its text', () => {
   expect(onRow([codon(104, 'G12')], { labels: false })).toEqual([
     { row: 'human_query', start: 2, end: 2 },
   ])
+})
+
+test('a chromosome-wide highlight is read through the coding positions', () => {
+  const started = performance.now()
+  expect(
+    onRow([
+      { assemblyName: 'hg38', refName: 'chr12', start: 0, end: 2_000_000_000 },
+    ]),
+  ).toEqual([{ row: 'human_query', start: 1, end: 3 }])
+  expect(performance.now() - started).toBeLessThan(1000)
 })
