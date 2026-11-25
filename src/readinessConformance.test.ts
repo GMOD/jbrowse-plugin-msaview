@@ -2,11 +2,10 @@ import Plugin from '@jbrowse/core/Plugin'
 import PluginManager from '@jbrowse/core/PluginManager'
 import { ConfigurationSchema } from '@jbrowse/core/configuration'
 import AdapterType from '@jbrowse/core/pluggableElementTypes/AdapterType'
+import ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
 import { expect, test, vi } from 'vitest'
 
 import MsaViewPlugin from './index'
-
-import type ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
 
 // the view's autoruns reach for a session on every change, and there is none
 // around a bare model
@@ -43,7 +42,9 @@ test('every view type this plugin registers publishes showLoading', async () => 
     new MsaViewPlugin(),
   ])
   pluginManager.createPluggableElements()
-  const views = pluginManager.getElementTypesInGroup('view') as ViewType[]
+  const views = pluginManager
+    .getElementTypesInGroup('view')
+    .filter(t => t instanceof ViewType)
   expect(views.length).toBeGreaterThan(0)
   await Promise.all(views.map(t => t.loadStateModel()))
   const gaps = views.flatMap(t => {
