@@ -3,6 +3,7 @@ import React from 'react'
 import { getSession } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
+import { displayedRefName } from '../MsaViewPanel/displayedRefName'
 import { connectedHighlights } from './connectedHighlights'
 import { hasHoverPosition, useStyles } from './util'
 
@@ -35,15 +36,19 @@ const MsaToGenomeHighlightRenderer = observer(function ({
   highlights: { refName: string; start: number; end: number }[]
 }) {
   const { classes } = useStyles()
-  const { offsetPx } = model
+  const { offsetPx, displayedRegions, assemblyNames } = model
+  const assembly = getSession(model).assemblyManager.get(assemblyNames[0] ?? '')
 
   return (
     <>
       {highlights.map(r => {
-        // bpToPx matches refNames exactly, so canonicalizing "chr17" to "17"
-        // would miss a view whose regions say "chr17"
-        const s = model.bpToPx({ refName: r.refName, coord: r.start })
-        const e = model.bpToPx({ refName: r.refName, coord: r.end })
+        const refName = displayedRefName({
+          displayedRegions,
+          assembly,
+          refName: r.refName,
+        })
+        const s = model.bpToPx({ refName, coord: r.start })
+        const e = model.bpToPx({ refName, coord: r.end })
         if (s && e) {
           const width = Math.max(Math.abs(e.offsetPx - s.offsetPx), 4)
           const left = Math.min(s.offsetPx, e.offsetPx) - offsetPx
