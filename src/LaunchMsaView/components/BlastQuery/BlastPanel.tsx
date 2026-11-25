@@ -10,6 +10,7 @@ import {
   EBI_EMAIL_STORAGE_KEY,
 } from '../../../utils/ebiJobDispatcher'
 import { useLocalStorage } from '../../../utils/useLocalStorage'
+import TabPanel from '../TabPanel'
 import BlastAutomaticPanel from './BlastAutomaticPanel'
 import BlastManualPanel from './BlastManualPanel'
 import BlastMethodSelector from './BlastMethodSelector'
@@ -23,12 +24,7 @@ const useStyles = makeStyles()({
   },
 })
 
-const panelMap = {
-  automatic: BlastAutomaticPanel,
-  manual: BlastManualPanel,
-} as const
-
-export type BlastLookupMethod = keyof typeof panelMap
+export type BlastLookupMethod = 'automatic' | 'manual'
 
 const BlastPanel = observer(function BlastPanel({
   handleClose,
@@ -50,8 +46,12 @@ const BlastPanel = observer(function BlastPanel({
   )
   const [settingsOpen, setSettingsOpen] = useState(false)
   const { classes } = useStyles()
-
-  const Panel = panelMap[lookupMethod]
+  const methodSelector = (
+    <BlastMethodSelector
+      lookupMethod={lookupMethod}
+      setLookupMethod={setLookupMethod}
+    />
+  )
 
   return (
     <>
@@ -72,17 +72,26 @@ const BlastPanel = observer(function BlastPanel({
         </IconButton>
       </Tooltip>
 
-      <Panel
-        model={model}
-        feature={feature}
-        handleClose={handleClose}
-        preferredTranscriptId={preferredTranscriptId}
-      >
-        <BlastMethodSelector
-          lookupMethod={lookupMethod}
-          setLookupMethod={setLookupMethod}
-        />
-      </Panel>
+      <TabPanel value={lookupMethod} index="automatic">
+        <BlastAutomaticPanel
+          model={model}
+          feature={feature}
+          handleClose={handleClose}
+          preferredTranscriptId={preferredTranscriptId}
+        >
+          {methodSelector}
+        </BlastAutomaticPanel>
+      </TabPanel>
+      <TabPanel value={lookupMethod} index="manual">
+        <BlastManualPanel
+          model={model}
+          feature={feature}
+          handleClose={handleClose}
+          preferredTranscriptId={preferredTranscriptId}
+        >
+          {methodSelector}
+        </BlastManualPanel>
+      </TabPanel>
 
       {settingsOpen ? (
         <BlastSettingsDialog
