@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   clickLaunchMsaView,
   createJBrowsePage,
+  findByText,
   getJBrowseVersion,
   launchBrowser,
   saveScreenshot,
@@ -37,14 +38,11 @@ async function openMsaDialog(p: Page) {
   await p.waitForSelector('[role="option"]', { timeout: 5000 })
 
   // SPATA6L also matches the search, and picking it lands on a different gene
-  const spata6 = await p.evaluateHandle(
-    () =>
-      Array.from(document.querySelectorAll('[role="option"]')).find(opt => {
-        const t = opt.textContent ?? ''
-        return t.includes('(SPATA6)') && !t.includes('(SPATA6L)')
-      }) ?? null,
+  const spata6El = await findByText(
+    p,
+    '[role="option"]',
+    t => t.includes('(SPATA6)') && !t.includes('(SPATA6L)'),
   )
-  const spata6El = spata6.asElement()
   if (spata6El) {
     await spata6El.click()
   } else {
@@ -116,15 +114,7 @@ async function openMsaDialog(p: Page) {
 }
 
 async function clickByText(p: Page, selector: string, text: string) {
-  const handle = await p.evaluateHandle(
-    (sel, t) =>
-      Array.from(document.querySelectorAll(sel)).find(el =>
-        el.textContent?.includes(t),
-      ) ?? null,
-    selector,
-    text,
-  )
-  const el = handle.asElement()
+  const el = await findByText(p, selector, t => t.includes(text))
   if (!el) {
     throw new Error(`no ${selector} containing "${text}"`)
   }

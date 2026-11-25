@@ -230,7 +230,10 @@ run('the connectedDomains contract with protein3d', () => {
     page = await browser.newPage()
     await page.setViewport({ width: 1400, height: 1500 })
     page.on('pageerror', err => {
-      console.log(`[browser page error] ${err.message}`)
+      console.log(
+        '[browser page error]',
+        err instanceof Error ? err.message : err,
+      )
     })
     page.on('request', req => {
       if (req.url().includes('jbrowse-plugin-protein3d')) {

@@ -7,6 +7,7 @@ import {
   JBROWSE_PORT,
   clickLaunchMsaView,
   createJBrowsePage,
+  findByText,
   getTestJBrowseDir,
   launchBrowser,
   saveScreenshot,
@@ -135,18 +136,11 @@ run('phmmer screenshots', () => {
     await search!.type('SPATA6')
     await new Promise(r => setTimeout(r, 2500))
     await page.waitForSelector('[role="option"]', { timeout: 10_000 })
-    const option = (
-      await page.evaluateHandle(() => {
-        const opts = [...document.querySelectorAll('[role="option"]')]
-        return (
-          opts.find(
-            o =>
-              (o.textContent ?? '').includes('(SPATA6)') &&
-              !(o.textContent ?? '').includes('(SPATA6L)'),
-          ) ?? null
-        )
-      })
-    ).asElement()
+    const option = await findByText(
+      page,
+      '[role="option"]',
+      t => t.includes('(SPATA6)') && !t.includes('(SPATA6L)'),
+    )
     await option!.click()
     await new Promise(r => setTimeout(r, 3000))
 

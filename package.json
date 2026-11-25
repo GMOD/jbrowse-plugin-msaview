@@ -21,7 +21,7 @@
     "format": "oxfmt",
     "check-format": "oxfmt --check",
     "build": "tsc && NODE_ENV=production node esbuild.mjs && cp distconfig.json dist/config.json",
-    "typecheck": "tsrs --noEmit",
+    "typecheck": "tsrs --noEmit && tsrs --noEmit -p test/tsconfig.json",
     "prebuild": "pnpm clean",
     "lint": "oxlint --type-aware --deny-warnings",
     "lint:fast": "oxlint --deny-warnings",

@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   clickLaunchMsaView,
   createJBrowsePage,
+  findByText,
   getJBrowseVersion,
   launchBrowser,
   saveScreenshot,
@@ -76,16 +77,11 @@ describe('TranscriptSelector E2E', () => {
     await p.waitForSelector('[role="option"]', { timeout: 5000 })
 
     // Select SPATA6 specifically (not SPATA6L, which also matches)
-    const spata6Option = await p.evaluateHandle(() => {
-      const options = Array.from(document.querySelectorAll('[role="option"]'))
-      return (
-        options.find(opt => {
-          const t = opt.textContent ?? ''
-          return t.includes('(SPATA6)') && !t.includes('(SPATA6L)')
-        }) ?? null
-      )
-    })
-    const optionEl = spata6Option.asElement()
+    const optionEl = await findByText(
+      p,
+      '[role="option"]',
+      t => t.includes('(SPATA6)') && !t.includes('(SPATA6L)'),
+    )
     if (optionEl) {
       await optionEl.click()
     } else {
@@ -188,20 +184,20 @@ describe('TranscriptSelector E2E', () => {
 
     await saveScreenshot(p, getScreenshotPath('07-msa-dialog-content'))
 
-    const isoformSelect = await p.evaluateHandle(() => {
-      const comboboxes = Array.from(
-        document.querySelectorAll('[role="combobox"]'),
-      )
-      return (
-        comboboxes.find(el => {
-          const label = el
-            .closest('.MuiFormControl-root')
-            ?.querySelector('.MuiInputLabel-root, label')
-          return label?.textContent?.toLowerCase().includes('isoform')
-        }) ?? null
-      )
-    })
-    const isoformEl = isoformSelect.asElement()
+    const comboboxes = await p.$$('[role="combobox"]')
+    const comboboxLabels = await Promise.all(
+      comboboxes.map(el =>
+        el.evaluate(
+          e =>
+            e
+              .closest('.MuiFormControl-root')
+              ?.querySelector('.MuiInputLabel-root, label')?.textContent,
+        ),
+      ),
+    )
+    const isoformEl = comboboxes.find((_, i) =>
+      comboboxLabels[i]?.toLowerCase().includes('isoform'),
+    )
     if (!isoformEl) {
       throw new Error('Isoform combobox not found in MSA dialog')
     }
@@ -267,7 +263,7 @@ describe('TranscriptSelector E2E', () => {
         labels.find(l => l.textContent?.toLowerCase().includes('paste')) ?? null
       )
     })
-    const pasteLabelEl = pasteLabel.asElement()
+    const pasteLabelEl = await pasteLabel.asElement()?.toElement('label')
     if (!pasteLabelEl) {
       throw new Error('Paste text radio not found on manual upload tab')
     }
@@ -294,7 +290,7 @@ describe('TranscriptSelector E2E', () => {
       const buttons = [...(panel ?? document).querySelectorAll('button')]
       return buttons.find(b => b.textContent?.trim() === 'Submit') ?? null
     })
-    const submitEl = submitHandle.asElement()
+    const submitEl = await submitHandle.asElement()?.toElement('button')
     if (!submitEl) {
       throw new Error('Submit button not found')
     }

@@ -76,6 +76,17 @@ function killProcessOnPort(port: number): void {
   }
 }
 
+// npx runs serve as a child of its own, so the signal goes to the group
+function signalServer(proc: ChildProcess, signal: NodeJS.Signals) {
+  if (proc.pid !== undefined) {
+    try {
+      process.kill(-proc.pid, signal)
+    } catch {
+      // the group has already exited
+    }
+  }
+}
+
 export async function startJBrowseServer(): Promise<ChildProcess> {
   killProcessOnPort(JBROWSE_PORT)
 
@@ -83,23 +94,23 @@ export async function startJBrowseServer(): Promise<ChildProcess> {
     const proc = spawn(
       'npx',
       ['serve', '-p', String(JBROWSE_PORT), '-s', TEST_JBROWSE_DIR],
-      { stdio: ['ignore', 'pipe', 'pipe'] },
+      { stdio: ['ignore', 'pipe', 'pipe'], detached: true },
     )
 
     const timeout = setTimeout(() => {
-      proc.kill()
+      signalServer(proc, 'SIGTERM')
       reject(new Error('Server did not start within 30000ms'))
     }, 30_000)
 
     const onData = (data: Buffer) => {
-      const match = /Accepting connections at http:\/\/localhost:(\d+)/.exec(
+      const portText = /Accepting connections at http:\/\/localhost:(\d+)/.exec(
         data.toString(),
-      )
-      if (match) {
-        const actualPort = Number.parseInt(match[1], 10)
+      )?.[1]
+      if (portText) {
+        const actualPort = Number.parseInt(portText, 10)
         clearTimeout(timeout)
         if (actualPort !== JBROWSE_PORT) {
-          proc.kill()
+          signalServer(proc, 'SIGTERM')
           reject(
             new Error(
               `Server started on wrong port ${actualPort}, expected ${JBROWSE_PORT}`,
@@ -132,20 +143,18 @@ export async function startJBrowseServer(): Promise<ChildProcess> {
 
 export async function stopServer(proc: ChildProcess): Promise<void> {
   return new Promise(resolve => {
-    if (proc.killed) {
+    if (proc.exitCode === null && proc.signalCode === null) {
+      proc.on('close', () => {
+        resolve()
+      })
+      signalServer(proc, 'SIGTERM')
+      setTimeout(() => {
+        signalServer(proc, 'SIGKILL')
+        resolve()
+      }, 5000)
+    } else {
       resolve()
-      return
     }
-    proc.on('close', () => {
-      resolve()
-    })
-    proc.kill('SIGTERM')
-    setTimeout(() => {
-      if (!proc.killed) {
-        proc.kill('SIGKILL')
-      }
-      resolve()
-    }, 5000)
   })
 }
 
@@ -162,12 +171,15 @@ export async function createJBrowsePage(browser: Browser): Promise<Page> {
 
   page.on('console', msg => {
     const type = msg.type()
-    if (type === 'error' || type === 'warning') {
+    if (type === 'error' || type === 'warn') {
       console.log(`[browser ${type}] ${msg.text()}`)
     }
   })
   page.on('pageerror', err => {
-    console.log(`[browser page error] ${err.message}`)
+    console.log(
+      '[browser page error]',
+      err instanceof Error ? err.message : err,
+    )
   })
   page.on('requestfailed', request => {
     console.log(
@@ -249,6 +261,18 @@ export async function waitForJBrowseLoad(page: Page): Promise<void> {
   }
 
   await new Promise(r => setTimeout(r, 3000))
+}
+
+export async function findByText(
+  page: Page,
+  selector: string,
+  matches: (text: string) => boolean,
+) {
+  const elements = await page.$$(selector)
+  const texts = await Promise.all(
+    elements.map(el => el.evaluate(e => e.textContent)),
+  )
+  return elements.find((_, i) => matches(texts[i] ?? ''))
 }
 
 /**

@@ -9,6 +9,10 @@ const PACKAGE_PATH = '/jbrowse-plugin-msaview/'
 const PUBLISHED_ESM =
   'https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/jbrowse-plugin-msaview.esm.js'
 
+/**
+ * @param {string} entryPath
+ * @param {{ latest?: string[] }} [options]
+ */
 export function candidateServer(entryPath, { latest = [] } = {}) {
   const dist = path.dirname(entryPath)
   const entryName = path.basename(entryPath)
